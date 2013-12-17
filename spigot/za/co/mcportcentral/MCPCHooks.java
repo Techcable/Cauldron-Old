@@ -155,7 +155,7 @@ public class MCPCHooks
     public static boolean checkBoundingBoxSize(Entity entity, AxisAlignedBB aabb)
     {
         int logSize = MCPCConfig.Setting.largeBoundingBoxLogSize.getValue();
-        if (logSize <= 0) return false;
+        if (logSize <= 0 || !MCPCConfig.Setting.checkEntityBoundingBoxes.getValue()) return false;
         int x = MathHelper.floor_double(aabb.minX);
         int x1 = MathHelper.floor_double(aabb.maxX + 1.0D);
         int y = MathHelper.floor_double(aabb.minY);
@@ -185,7 +185,7 @@ public class MCPCHooks
     public static boolean checkEntitySpeed(Entity entity, double x, double y, double z)
     {
         int maxSpeed = MCPCConfig.Setting.entityMaxSpeed.getValue();
-        if (maxSpeed > 0)
+        if (maxSpeed > 0 && MCPCConfig.Setting.checkEntityMaxSpeeds.getValue())
         {
             double distance = x * x + y * y + z * z;
             if (distance > maxSpeed)
@@ -286,7 +286,9 @@ public class MCPCHooks
     public static boolean canUpdate(TileEntity tileEntity)
     {
         if (tileEntity == null || !tileEntity.canUpdate() || MinecraftServer.bannedTileEntityUpdates.contains(tileEntity.getClass())) return false; // quick exit
-        return MCPCHooks.getTileTickInterval(tileEntity) != 0;
+        if (MCPCConfig.Setting.overrideTileTicks.getValue())
+            return MCPCHooks.getTileTickInterval(tileEntity) != 0;
+        return true;
     }
 
     public static void writeChunks(File file, boolean logAll)
