@@ -93,7 +93,7 @@ public class MCPCHooks
         if (MCPCConfig.Setting.entityDespawnLogging.getValue())
         {
             logInfo("Dim: {0} Despawning ({1}): {2}", entity.worldObj.provider.dimensionId, reason, entity);
-            logInfo("Chunk Is Active: {0}", entity.worldObj.inActiveChunk(entity));
+            //logInfo("Chunk Is Active: {0}", entity.worldObj.inActiveChunk(entity));
             logStack();
         }
     }
@@ -105,7 +105,7 @@ public class MCPCHooks
             logInfo("Dim: {0} Spawning ({1}): {2}", world.provider.dimensionId, spawnReason, entity);
             logInfo("Dim: {0} Entities Last Tick: {1}", world.provider.dimensionId, world.entitiesTicked);
             logInfo("Dim: {0} Tiles Last Tick: {1}", world.provider.dimensionId, world.tilesTicked);
-            logInfo("Chunk Is Active: {0}", world.inActiveChunk(entity));
+            //logInfo("Chunk Is Active: {0}", world.inActiveChunk(entity));
             logStack();
         }
     }
