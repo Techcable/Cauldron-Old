@@ -100,7 +100,7 @@
      {
 -        if (this.worldObj.provider.canRespawnHere())
 +        if (this.worldObj.getPersistentChunks().containsKey(new ChunkCoordIntPair(par1, par2))) return; // MCPC+ don't unload persistent chunks (keeps from saving chunks that don't need it yet)
-+        if ((this.worldObj.provider.canRespawnHere() && DimensionManager.shouldLoadSpawn(this.worldObj.provider.dimensionId)) || !(this.worldObj.keepSpawnInMemory)) // MCPC+ Moved 'this.world.keepSpawnInMemory'
++        if (this.worldObj.provider.canRespawnHere() && DimensionManager.shouldLoadSpawn(this.worldObj.provider.dimensionId))
          {
              ChunkCoordinates chunkcoordinates = this.worldObj.getSpawnPoint();
              int k = par1 * 16 + 8 - chunkcoordinates.posX;

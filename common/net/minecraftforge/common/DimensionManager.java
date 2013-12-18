@@ -439,8 +439,18 @@ public class DimensionManager
 
     public static boolean shouldLoadSpawn(int dim)
     {
+        // MCPC+ start - handle keepSpawnInMemory logic for Bukkit here
+        // check bukkit side
+        if (getWorld(dim) != null && !getWorld(dim).keepSpawnInMemory)
+        {
+            return false;
+        }
+        else // check forge
+        {
         int id = getProviderType(dim);
         return spawnSettings.containsKey(id) && spawnSettings.get(id);
+    }
+        // MCPC+ end
     }
 
     static

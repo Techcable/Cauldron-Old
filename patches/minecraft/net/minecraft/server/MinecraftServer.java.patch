@@ -401,73 +401,31 @@
      }
  
      protected void initialWorldChunkLoad()
-@@ -292,28 +460,44 @@
+@@ -292,9 +460,12 @@
          int i = 0;
          this.setUserMessage("menu.generatingTerrain");
          byte b0 = 0;
 -        this.getLogAgent().logInfo("Preparing start region for level " + b0);
--        WorldServer worldserver = this.worldServers[b0];
--        ChunkCoordinates chunkcoordinates = worldserver.getSpawnPoint();
--        long j = getSystemTimeMillis();
++        // MCPC+ start - we now handle CraftBukkit's keepSpawnInMemory logic in DimensionManager. Prevents crashes with mods such as DivineRPG and speeds up server startup time by a ton.
+         WorldServer worldserver = this.worldServers[b0];
++        this.getLogAgent().logInfo("Preparing start region for level " + b0 + " (Dimension: " + worldserver.provider.dimensionId + ", Seed: " + worldserver.getSeed() + ")"); // MCPC+
+         ChunkCoordinates chunkcoordinates = worldserver.getSpawnPoint();
++        boolean before = worldserver.theChunkProviderServer.loadChunkOnProvideRequest;
++        worldserver.theChunkProviderServer.loadChunkOnProvideRequest = true;
+         long j = getSystemTimeMillis();
+ 
+         for (int k = -192; k <= 192 && this.isServerRunning(); k += 16)
+@@ -313,7 +484,8 @@
+                 worldserver.theChunkProviderServer.loadChunk(chunkcoordinates.posX + k >> 4, chunkcoordinates.posZ + l >> 4);
+             }
+         }
 -
--        for (int k = -192; k <= 192 && this.isServerRunning(); k += 16)
--        {
--            for (int l = -192; l <= 192 && this.isServerRunning(); l += 16)
--            {
--                long i1 = getSystemTimeMillis();
--
--                if (i1 - j > 1000L)
-+
-+        // CraftBukkit start
-+        for (int m = 0; m < this.worlds.size(); ++m)
-+        {
-+            WorldServer worldserver = this.worlds.get(m);
-+            this.getLogAgent().logInfo("Preparing start region for level " + m + " (Dimension: " + worldserver.provider.dimensionId + ", Seed: " + worldserver.getSeed() + ")");
-+
-+            if (!worldserver.getWorld().getKeepSpawnInMemory())
-+            {
-+                continue;
-+            }
-+
-+            ChunkCoordinates chunkcoordinates = worldserver.getSpawnPoint();
-+            boolean before = worldserver.theChunkProviderServer.loadChunkOnProvideRequest; // MCPC+ remember previous value
-+            worldserver.theChunkProviderServer.loadChunkOnProvideRequest = true; // MCPC+ force chunks to load
-+            long j = getSystemTimeMillis();
-+            i = 0;
-+
-+            for (int k = -192; k <= 192 && this.isServerRunning(); k += 16)
-+            {
-+                for (int l = -192; l <= 192 && this.isServerRunning(); l += 16)
-                 {
--                    this.outputPercentRemaining("Preparing spawn area", i * 100 / 625);
--                    j = i1;
--                }
--
--                ++i;
--                worldserver.theChunkProviderServer.loadChunk(chunkcoordinates.posX + k >> 4, chunkcoordinates.posZ + l >> 4);
--            }
--        }
--
-+                    long i1 = getSystemTimeMillis();
-+
-+                    if (i1 - j > 1000L)
-+                    {
-+                        this.outputPercentRemaining("Preparing spawn area", i * 100 / 625);
-+                        j = i1;
-+                    }
-+
-+                    ++i;
-+                    worldserver.theChunkProviderServer.loadChunk(chunkcoordinates.posX + k >> 4, chunkcoordinates.posZ + l >> 4);
-+                }
-+            }
-+            worldserver.theChunkProviderServer.loadChunkOnProvideRequest = before; // MCPC+ force chunks to load
-+        }
-+
-+        // CraftBukkit end
++        worldserver.theChunkProviderServer.loadChunkOnProvideRequest = before;
++        // MCPC+ end
          this.clearCurrentTask();
      }
  
-@@ -350,21 +534,20 @@
+@@ -350,21 +522,20 @@
      {
          this.currentTask = null;
          this.percentDone = 0;
@@ -495,7 +453,7 @@
  
                  if (worldserver != null)
                  {
-@@ -373,27 +556,33 @@
+@@ -373,27 +544,33 @@
                          this.getLogAgent().logInfo("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/" + worldserver.provider.getDimensionName());
                      }
  
@@ -540,7 +498,7 @@
  
              if (this.getNetworkThread() != null)
              {
-@@ -410,10 +599,11 @@
+@@ -410,10 +587,11 @@
              this.getLogAgent().logInfo("Saving worlds");
              this.saveAllWorlds(false);
  
@@ -556,7 +514,7 @@
              }
  
              if (this.usageSnooper != null && this.usageSnooper.isSnooperRunning())
-@@ -459,45 +649,36 @@
+@@ -459,45 +637,36 @@
  
                  long i = getSystemTimeMillis();
  
@@ -625,7 +583,7 @@
                  FMLCommonHandler.instance().handleServerStopping();
              }
              else
-@@ -539,6 +720,8 @@
+@@ -539,6 +708,8 @@
          }
          finally
          {
@@ -634,7 +592,7 @@
              try
              {
                  if (FMLCommonHandler.instance().shouldServerBeKilledQuietly())
-@@ -554,6 +737,16 @@
+@@ -554,6 +725,16 @@
              }
              finally
              {
@@ -651,7 +609,7 @@
                  FMLCommonHandler.instance().handleServerStopped();
                  this.serverStopped = true;
                  this.systemExitNow();
-@@ -579,12 +772,14 @@
+@@ -579,12 +760,14 @@
      /**
       * Main function called by run() every loop.
       */
@@ -670,7 +628,7 @@
          ++this.tickCounter;
  
          if (this.startProfiling)
-@@ -597,7 +792,7 @@
+@@ -597,7 +780,7 @@
          this.theProfiler.startSection("root");
          this.updateTimeLightAndEntities();
  
@@ -679,7 +637,7 @@
          {
              this.theProfiler.startSection("save");
              this.serverConfigManager.saveAllPlayerData();
-@@ -618,93 +813,131 @@
+@@ -618,93 +801,131 @@
          this.theProfiler.endSection();
          this.theProfiler.startSection("snooper");
  
@@ -867,7 +825,7 @@
          this.theProfiler.endSection();
      }
  
-@@ -747,7 +980,22 @@
+@@ -747,7 +968,22 @@
       */
      public WorldServer worldServerForDimension(int par1)
      {
@@ -891,7 +849,7 @@
      }
  
      @SideOnly(Side.SERVER)
-@@ -817,14 +1065,70 @@
+@@ -817,14 +1053,70 @@
       */
      public String getPlugins()
      {
@@ -970,7 +928,7 @@
      }
  
      /**
-@@ -832,7 +1136,7 @@
+@@ -832,7 +1124,7 @@
       */
      public boolean isDebuggingEnabled()
      {
@@ -979,7 +937,7 @@
      }
  
      /**
-@@ -866,7 +1170,7 @@
+@@ -866,7 +1158,7 @@
      {
          par1CrashReport.getCategory().addCrashSectionCallable("Profiler Position", new CallableIsServerModded(this));
  
@@ -988,7 +946,7 @@
          {
              par1CrashReport.getCategory().addCrashSectionCallable("Vec3 Pool Size", new CallableServerProfiler(this));
          }
-@@ -884,6 +1188,8 @@
+@@ -884,6 +1176,8 @@
       */
      public List getPossibleCompletions(ICommandSender par1ICommandSender, String par2Str)
      {
@@ -997,7 +955,7 @@
          ArrayList arraylist = new ArrayList();
  
          if (par2Str.startsWith("/"))
-@@ -932,6 +1238,48 @@
+@@ -932,6 +1226,48 @@
  
              return arraylist;
          }
@@ -1046,7 +1004,7 @@
      }
  
      /**
-@@ -1039,9 +1387,11 @@
+@@ -1039,9 +1375,11 @@
  
      public void setDifficultyForAllWorlds(int par1)
      {
@@ -1061,7 +1019,7 @@
  
              if (worldserver != null)
              {
-@@ -1104,17 +1454,18 @@
+@@ -1104,17 +1442,18 @@
          this.worldIsBeingDeleted = true;
          this.getActiveAnvilConverter().flushCache();
  
@@ -1084,7 +1042,7 @@
          this.initiateShutdown();
      }
  
-@@ -1145,22 +1496,23 @@
+@@ -1145,22 +1484,23 @@
          par1PlayerUsageSnooper.addData("avg_rec_packet_size", Integer.valueOf((int)MathHelper.average(this.receivedPacketSizeArray)));
          int i = 0;
  
@@ -1124,7 +1082,7 @@
          }
  
          par1PlayerUsageSnooper.addData("worlds", Integer.valueOf(i));
-@@ -1194,7 +1546,7 @@
+@@ -1194,7 +1534,7 @@
  
      public boolean isServerInOnlineMode()
      {
@@ -1133,7 +1091,7 @@
      }
  
      public void setOnlineMode(boolean par1)
-@@ -1287,9 +1639,11 @@
+@@ -1287,9 +1627,11 @@
       */
      public void setGameType(EnumGameType par1EnumGameType)
      {
@@ -1148,7 +1106,7 @@
          }
      }
  
-@@ -1337,7 +1691,7 @@
+@@ -1337,7 +1679,7 @@
  
      public World getEntityWorld()
      {
@@ -1157,7 +1115,7 @@
      }
  
      /**
-@@ -1403,121 +1757,197 @@
+@@ -1403,121 +1745,197 @@
      @SideOnly(Side.SERVER)
      public static void main(String[] par0ArrayOfStr)
      {
