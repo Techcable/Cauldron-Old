@@ -94,12 +94,11 @@
      }
  
      /**
-@@ -66,21 +99,40 @@
+@@ -66,21 +99,39 @@
       */
      public void unloadChunksIfNotNearSpawn(int par1, int par2)
      {
 -        if (this.worldObj.provider.canRespawnHere())
-+        if (this.worldObj.getPersistentChunks().containsKey(new ChunkCoordIntPair(par1, par2))) return; // MCPC+ don't unload persistent chunks (keeps from saving chunks that don't need it yet)
 +        if (this.worldObj.provider.canRespawnHere() && DimensionManager.shouldLoadSpawn(this.worldObj.provider.dimensionId))
          {
              ChunkCoordinates chunkcoordinates = this.worldObj.getSpawnPoint();
@@ -139,7 +138,7 @@
          }
      }
  
-@@ -89,7 +141,7 @@
+@@ -89,7 +140,7 @@
       */
      public void unloadAllChunks()
      {
@@ -148,7 +147,7 @@
  
          while (iterator.hasNext())
          {
-@@ -98,18 +150,48 @@
+@@ -98,18 +149,48 @@
          }
      }
  
@@ -201,7 +200,7 @@
  
              if (chunk == null)
              {
-@@ -121,31 +203,55 @@
+@@ -121,31 +202,55 @@
                  {
                      try
                      {
@@ -267,7 +266,7 @@
          return chunk;
      }
  
-@@ -155,14 +261,32 @@
+@@ -155,14 +260,32 @@
       */
      public Chunk provideChunk(int par1, int par2)
      {
@@ -303,7 +302,7 @@
      {
          if (this.currentChunkLoader == null)
          {
-@@ -172,6 +296,8 @@
+@@ -172,6 +295,8 @@
          {
              try
              {
@@ -312,7 +311,7 @@
                  Chunk chunk = this.currentChunkLoader.loadChunk(this.worldObj, par1, par2);
  
                  if (chunk != null)
-@@ -182,6 +308,7 @@
+@@ -182,6 +307,7 @@
                      {
                          this.currentChunkProvider.recreateStructures(par1, par2);
                      }
@@ -320,7 +319,7 @@
                  }
  
                  return chunk;
-@@ -197,7 +324,7 @@
+@@ -197,7 +323,7 @@
      /**
       * used by saveChunks, but catches any exceptions if the save fails.
       */
@@ -329,7 +328,7 @@
      {
          if (this.currentChunkLoader != null)
          {
-@@ -215,7 +342,7 @@
+@@ -215,7 +341,7 @@
      /**
       * used by saveChunks, but catches any exceptions if the save fails.
       */
@@ -338,7 +337,7 @@
      {
          if (this.currentChunkLoader != null)
          {
-@@ -224,14 +351,16 @@
+@@ -224,14 +350,16 @@
                  par1Chunk.lastSaveTime = this.worldObj.getTotalWorldTime();
                  this.currentChunkLoader.saveChunk(this.worldObj, par1Chunk);
              }
@@ -361,7 +360,7 @@
          }
      }
  
-@@ -249,7 +378,27 @@
+@@ -249,7 +377,27 @@
              if (this.currentChunkProvider != null)
              {
                  this.currentChunkProvider.populate(par1IChunkProvider, par2, par3);
@@ -390,7 +389,7 @@
                  chunk.setChunkModified();
              }
          }
-@@ -262,10 +411,13 @@
+@@ -262,10 +410,13 @@
      public boolean saveChunks(boolean par1, IProgressUpdate par2IProgressUpdate)
      {
          int i = 0;
@@ -408,7 +407,7 @@
  
              if (par1)
              {
-@@ -307,20 +459,61 @@
+@@ -307,20 +458,61 @@
      {
          if (!this.worldObj.canNotSave)
          {
@@ -440,8 +439,8 @@
 +                    continue;
 +                }
 +
-+                // MCPC+ static - check if the chunk was accessed recently and keep it loaded
-+                if (!shouldUnloadChunk(chunk))
++                // MCPC+ static - check if the chunk was accessed recently and keep it loaded if there are players in world
++                if (!shouldUnloadChunk(chunk) && this.worldObj.playerEntities.size() > 0)
 +                {
 +                    MCPCHooks.logChunkUnload(this, chunk.xPosition, chunk.zPosition, "** Chunk kept from unloading due to recent activity");
 +                    continue;
@@ -471,8 +470,8 @@
 +
 +                    if (this.loadedChunkHashMap.size() == 0 && ForgeChunkManager.getPersistentChunksFor(this.worldObj).size() == 0 && !DimensionManager.shouldLoadSpawn(this.worldObj.provider.dimensionId))
 +                    {
-+                            DimensionManager.unloadWorld(this.worldObj.provider.dimensionId); // MCPC+ - unload the dimension
-+                            return this.currentChunkProvider.unloadQueuedChunks();
++                        DimensionManager.unloadWorld(this.worldObj.provider.dimensionId); // MCPC+ - unload the dimension
++                        return this.currentChunkProvider.unloadQueuedChunks();
 +                    }
 +                }
 +            }
@@ -481,7 +480,7 @@
  
              if (this.currentChunkLoader != null)
              {
-@@ -344,7 +537,7 @@
+@@ -344,7 +536,7 @@
       */
      public String makeString()
      {
@@ -490,7 +489,7 @@
      }
  
      /**
-@@ -365,8 +558,31 @@
+@@ -365,8 +557,31 @@
  
      public int getLoadedChunkCount()
      {
