@@ -31,11 +31,11 @@ def main():
         
     src_dir = os.path.join(mcp_dir, 'src')
     
-    print 'Purging maven local cache repository'
-    PURGE = ['mvn', 'dependency:purge-local-repository', '-DactTransitively=false']
-    if sys.platform.startswith('win'):
-        PURGE = ['cmd', '/C'] + PURGE
-    run_command(PURGE, cwd=mcpc_dir)
+    #print 'Purging maven local cache repository'
+    #PURGE = ['mvn', 'dependency:purge-local-repository', '-DactTransitively=false']
+    #if sys.platform.startswith('win'):
+    #    PURGE = ['cmd', '/C'] + PURGE
+    #run_command(PURGE, cwd=mcpc_dir)
 
     if not os.path.isfile(os.path.join(mcp_dir, 'runtime', 'commands.py')) and os.path.isdir(mcp_dir):
         print 'Deleting invalid mcp directory'
