@@ -18,8 +18,8 @@ import org.bukkit.util.Vector;
 
 // MCPC+ start
 import java.util.Map;
-import cpw.mods.fml.common.FMLLog;
 import net.minecraft.entity.Entity;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.EnumHelper;
 import za.co.mcportcentral.entity.*;
 // MCPC+ end
@@ -393,6 +393,12 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
     }
 
     public World getWorld() {
+        // MCPC+ start - fixes MFR proxy worlds used with grinder/slaughterhouse
+        if (entity.worldObj.getWorld() == null)
+        {
+            return DimensionManager.getWorld(0).getWorld();
+        }
+        // MCPC+ end
         return entity.worldObj.getWorld();
     }
 

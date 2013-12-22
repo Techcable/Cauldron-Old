@@ -1,5 +1,43 @@
 Changelog:
 
+Build 1.6.4-9.11.1.964
+	LexManos
+		Bump build for gradle fixes:
+		  Now Builds for java 1.6
+		  Include version,json in universal
+		  Fixed classpath issues in eclipse task.
+
+Build 1.6.4-9.11.1.963
+	luacs1998
+		Update readme for ForgeGradle
+		Let me know if there's anything else to add or change.
+	luacs1998: Updated
+	luacs1998: Another update for eclipse users
+	luacs1998: Update README.txt
+
+Build 1.6.4-9.11.1.961
+	LexManos: Updated FML: MinecraftForge/FML@c2b919d339e5f63271cfb67a77235c21c5c3b80e Don't validate signatures in dev env.
+
+Build 960
+	AbrarSyed: Step 1: The Purge
+	AbrarSyed: update FML for gradle changes
+	AbrarSyed: Step 2: The Reformation
+	AbrarSyed: Step 3: The Rebirth
+	AbrarSyed: fixed versioning and stuff
+	AbrarSyed: added buildSrc to the gitIgnore
+	LexManos: Fix for new FML, and publish to maven local
+	LexManos: Update run configs.
+	LexManos
+		Updated FML:
+		MinecraftForge/FML@e9a7660cb8961660186c7c23e61ab35f9c2dfb81 updated samples
+		MinecraftForge/FML@30894f7afadf5d3f3c3d5a54c3f904413d5f2309 Merge pull request #307 from AbrarSyed/master
+		MinecraftForge/FML@c4b8a393f90b00ad7ee4992ea4341ffb6d676abb Make the working directory the root of the eclipse workspace.
+	LexManos: Regenerate all patches, No functional change as added this is a formatting change only.
+	AbrarSyed: update build.gradle
+	porcariadagata: Make the gradle wrapper executable.
+	LexManos: Proper configuratuion name for jenkins.
+	LexManos: Fix build file pom closures.
+
 Build 1.6.4-9.11.1.953
 	LexManos: Fix NPE on specific tile entities when the block break event is canceled. Closes #863
 	LexManos: Fix NPE in FakePlayers when they are created in a purely client side environment. To remove in 1.7 as FakePlayers should be used for server side interaction with the world on a player's behalf, not for client rendering.
