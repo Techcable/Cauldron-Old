@@ -68,6 +68,7 @@ public class MCPCConfig
         public static final IntSetting largeEntityCountLogSize = new IntSetting("logging.entity-count-warn-size", 0, "Number of entities in one dimension logging a warning. Set to 0 to disable");
 
         // General settings
+        public static final BoolSetting loadChunkAsync = new BoolSetting("settings.load-chunk-async", true, "Allow chunks to be loaded async (note: this does not force chunks to load async!)");
         public static final BoolSetting loadChunkOnRequest = new BoolSetting("settings.load-chunk-on-request", true, "Forces Chunk Loading on 'Provide' requests (speedup for mods that don't check if a chunk is loaded");
         public static final BoolSetting loadChunkOnForgeTick = new BoolSetting("settings.load-chunk-on-forge-tick", false, "Forces Chunk Loading during Forge Server Tick events");
         public static final BoolSetting overrideTileTicks = new BoolSetting("settings.override-tile-ticks", false, "Global setting to override tile entity tick intervals");

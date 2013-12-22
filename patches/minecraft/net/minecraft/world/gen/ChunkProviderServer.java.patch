@@ -179,7 +179,7 @@
 +        MCPCHooks.logChunkLoad(this, "Get", i, j, true);
 +
 +        // If the chunk exists but isn't loaded do it async
-+        if (chunk == null && runnable != null && loader != null && loader.chunkExists(this.worldObj, i, j))
++        if (chunk == null && runnable != null && loader != null && loader.chunkExists(this.worldObj, i, j) && MCPCConfig.Setting.loadChunkAsync.getValue()) // MCPC+ added config setting to disallow async chunk loading
 +        {
 +            org.bukkit.craftbukkit.chunkio.ChunkIOExecutor.queueChunkLoad(this.worldObj, loader, this, i, j, runnable);
 +            return null;
@@ -389,7 +389,7 @@
                  chunk.setChunkModified();
              }
          }
-@@ -262,10 +410,13 @@
+@@ -262,11 +410,13 @@
      public boolean saveChunks(boolean par1, IProgressUpdate par2IProgressUpdate)
      {
          int i = 0;
@@ -397,17 +397,18 @@
 -        for (int j = 0; j < this.loadedChunks.size(); ++j)
 -        {
 -            Chunk chunk = (Chunk)this.loadedChunks.get(j);
-+        // CraftBukkit start
-+        Iterator iterator = this.loadedChunkHashMap.values().iterator();
+-
++        // MCPC+ start -- use thread-safe method for iterating loaded chunks
++        Object[] chunks = this.loadedChunks.toArray();
 +
-+        while (iterator.hasNext())
++        for (int j = 0; j < chunks.length; ++j)
 +        {
-+            Chunk chunk = (Chunk)iterator.next();
-+            // CraftBukkit end
- 
++            Chunk chunk = (Chunk)chunks[j];
++            //MCPC+ end
              if (par1)
              {
-@@ -307,20 +458,61 @@
+                 this.safeSaveExtraChunkData(chunk);
+@@ -307,20 +457,61 @@
      {
          if (!this.worldObj.canNotSave)
          {
@@ -480,7 +481,7 @@
  
              if (this.currentChunkLoader != null)
              {
-@@ -344,7 +536,7 @@
+@@ -344,7 +535,7 @@
       */
      public String makeString()
      {
@@ -489,7 +490,7 @@
      }
  
      /**
-@@ -365,8 +557,31 @@
+@@ -365,8 +556,31 @@
  
      public int getLoadedChunkCount()
      {
