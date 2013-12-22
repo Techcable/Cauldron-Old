@@ -203,7 +203,7 @@
 +        {
 +            FMLLogJLineBreakProxy.reader = this.reader;
 +        }*/
-+
++        za.co.mcportcentral.MCPCHooks.enableThreadContentionMonitoring();
 +        Runtime.getRuntime().addShutdownHook(new org.bukkit.craftbukkit.util.ServerShutdownThread(this));
 +        primaryThread = new ThreadMinecraftServer(this, "Server thread"); // Moved from main
 +    }
