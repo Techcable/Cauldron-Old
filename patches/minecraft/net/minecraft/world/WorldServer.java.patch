@@ -1186,7 +1186,7 @@
          }
      }
  
-@@ -1073,4 +1519,123 @@
+@@ -1073,4 +1519,124 @@
      {
          return this.worldTeleporter;
      }
@@ -1221,6 +1221,7 @@
 +    private void addNextTickIfNeeded(NextTickListEntry ent)
 +    {
 +        long coord = LongHash.toLong(ent.xCoord >> 4, ent.zCoord >> 4);
++        if (!isActiveBlockCoord(ent.xCoord,  ent.zCoord)) return; // MCPC+ only update blocks in active chunks
 +        Set<NextTickListEntry> chunkset = this.tickEntriesByChunk.get(coord);
 +
 +        if (chunkset == null)

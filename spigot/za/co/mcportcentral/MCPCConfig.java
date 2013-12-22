@@ -117,6 +117,7 @@ public class MCPCConfig
                 if (value != null) return value;
                 config.addDefault(path, def);
                 this.value = config.getInt(path);
+                if (value == null) this.value = def;
                 return value;
             }
 

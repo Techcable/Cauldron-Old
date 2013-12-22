@@ -268,6 +268,7 @@ public class ActivationRange
     public static boolean checkIfActive(Entity entity)
     {
         SpigotTimings.checkIfActiveTimer.startTiming();
+        if (entity instanceof EntityPlayer && !(entity instanceof FakePlayer)) return true;
         
         // MCPC+ start - check if entity is in forced chunk and if so, set to active
         int i = MathHelper.floor_double(entity.posX);
@@ -296,11 +297,13 @@ public class ActivationRange
         }
         // MCPC+ start - disabled, this breaks moving chunkloaders such as AnchorCarts when entering new chunks that are not yet loaded
         // Make sure not on edge of unloaded chunk
-        /*int x = MathHelper.floor_double( entity.posX );
+
+        int x = MathHelper.floor_double( entity.posX );
         int z = MathHelper.floor_double( entity.posZ );
         if (isActive && !entity.worldObj.doChunksNearChunkExist(x, 0, z, 16)) {
             isActive = false;
-        }*/
+        }
+
         // MCPC+ end
         SpigotTimings.checkIfActiveTimer.stopTiming();
         return isActive;

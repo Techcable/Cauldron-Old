@@ -1258,10 +1258,10 @@
 +            // Spigot end
 +            // CraftBukkit start - Don't tick entities in chunks queued for unload
 +            ChunkProviderServer chunkProviderServer = ((WorldServer) this).theChunkProviderServer;
-+            long chunkHash = org.bukkit.craftbukkit.util.LongHash.toLong(MathHelper.floor_double(tileentity.xCoord) >> 4, MathHelper.floor_double(tileentity.zCoord) >> 4);
-+            if (chunkProviderServer.chunksToUnload.contains(chunkHash))
++            if (!isActiveBlockCoord(tileentity.xCoord, tileentity.zCoord)) continue; // MCPC+ don't tick inactive chunks
++            if (chunkProviderServer.chunksToUnload.contains(chunkToKey(tileentity.xCoord >> 4, tileentity.zCoord >> 4)))
 +            {
-+            	continue;
++                continue;
 +            }
 +            // CraftBukkit end
 +
@@ -2254,7 +2254,7 @@
                      }
                  }
              }
-@@ -4363,4 +5313,119 @@
+@@ -4363,4 +5313,141 @@
  
          return MathHelper.clamp_float(f, 0.0F, flag ? 1.5F : 1.0F);
      }
@@ -2373,4 +2373,26 @@
 +        }
 +        return count;
 +    }
++    
++    // MCPC+ start
++    public boolean isActiveChunk(int x, int z)
++    {
++        return getPersistentChunks().containsKey(new ChunkCoordIntPair(x, z)) || activeChunkSet_CB.containsKey(chunkToKey(x, z));
++    }
++
++    public boolean isActiveChunk(long key)
++    {
++        return isActiveChunk(keyToX(key), keyToZ(key));
++    }
++
++    public boolean isActiveBlockCoord(int x, int z)
++    {
++        return isActiveChunk(x >> 4, z >> 4);
++    }
++    
++    public boolean inActiveChunk(Entity entity)
++    {
++        return isActiveBlockCoord(MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posZ));
++    }
++    // MCPC+ end
  }

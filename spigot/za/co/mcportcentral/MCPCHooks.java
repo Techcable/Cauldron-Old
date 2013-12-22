@@ -187,7 +187,7 @@ public class MCPCHooks
         int maxSpeed = MCPCConfig.Setting.entityMaxSpeed.getValue();
         if (maxSpeed > 0 && MCPCConfig.Setting.checkEntityMaxSpeeds.getValue())
         {
-            double distance = x * x + y * y + z * z;
+            double distance = x * x + z * z;
             if (distance > maxSpeed)
             {
                 if (MCPCConfig.Setting.logEntitySpeedRemoval.getValue())
