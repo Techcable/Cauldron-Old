@@ -73,10 +73,13 @@ public class MCPCConfig
         public static final BoolSetting overrideTileTicks = new BoolSetting("settings.override-tile-ticks", false, "Global setting to override tile entity tick intervals");
         public static final BoolSetting checkEntityBoundingBoxes = new BoolSetting("settings.check-entity-bounding-boxes", false, "Removes an entity that exceeds the max bounding box size.");
         public static final BoolSetting checkEntityMaxSpeeds = new BoolSetting("settings.check-entity-max-speeds", false, "Removes any entity that exceeds max speed.");
-        public static final IntSetting chunkGCGracePeriod = new IntSetting("settings.chunk-gc-grace-period", 700, "Grace period on a loaded chunk before we try to unload it");
+        public static final IntSetting chunkGCGracePeriod = new IntSetting("settings.chunk-gc-grace-period", 0, "Grace period on a loaded chunk before we try to unload it");
         public static final IntSetting largeBoundingBoxLogSize = new IntSetting("settings.entity-bounding-box-max-size", 1000, "Max size of an entity's bounding box before removing it (either being too large or bugged and 'moving' too fast)");
         public static final IntSetting entityMaxSpeed = new IntSetting("settings.entity-max-speed", 100, "Square of the max speed of an entity before removing it");
 
+        // Debug settings
+        public static final BoolSetting enableThreadContentionMonitoring = new BoolSetting("debug.thread-contention-monitoring", false, "Set true to enable Java's thread contention monitoring for thread dumps");
+        
         // Server options
         public static final BoolSetting infiniteWaterSource = new BoolSetting("world-settings.default.infinite-water-source", true, "Vanilla water source behavior - is infinite");
         public static final BoolSetting flowingLavaDecay = new BoolSetting("world-settings.default.flowing-lava-decay", false, "Lava behaves like vanilla water when source block is removed");

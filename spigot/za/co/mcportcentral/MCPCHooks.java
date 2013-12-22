@@ -446,4 +446,11 @@ public class MCPCHooks
             logSevereException(t, "Could not write heap to {0}", file);
         }
     }
+
+    public static void enableThreadContentionMonitoring()
+    {
+        if (!MCPCConfig.Setting.enableThreadContentionMonitoring.getValue()) return;
+        java.lang.management.ThreadMXBean mbean = java.lang.management.ManagementFactory.getThreadMXBean();
+        mbean.setThreadContentionMonitoringEnabled(true);
+    }
 }
