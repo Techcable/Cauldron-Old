@@ -215,16 +215,16 @@ public class SpigotWorldConfig
         log( "Random Lighting Updates: " + randomLightUpdates );
     }
 
-    public boolean saveStructureInfo;
-    private void structureInfo()
+    public boolean saveMineshaftStructureInfo;
+    private void mineshaftStructureInfo()
     {
-        saveStructureInfo = getBoolean( "save-structure-info", true );
-        log( "Structure Info Saving: " + saveStructureInfo );
-        if ( !saveStructureInfo )
+        saveMineshaftStructureInfo = getBoolean( "save-mineshaft-structure-info", false );
+        log( "Mineshaft Structure Info Saving: " + saveMineshaftStructureInfo );
+        /*if ( !saveStructureInfo )
         {
             log( "*** WARNING *** You have selected to NOT save structure info. This may cause structures such as fortresses to not spawn mobs when updating to 1.7!" );
             log( "*** WARNING *** Please use this option with caution, SpigotMC is not responsible for any issues this option may cause in the future!" );
-        }
+        }*/
     }
 
     public int itemDespawnRate;
