@@ -1048,6 +1048,15 @@
      }
  
      @SideOnly(Side.CLIENT)
+@@ -2245,7 +2696,7 @@
+      */
+     public String getTranslatedEntityName()
+     {
+-        return ScorePlayerTeam.formatPlayerName(this.getTeam(), this.username);
++        return ScorePlayerTeam.formatPlayerName(this.getTeam(), this.getDisplayName());
+     }
+ 
+     public void setAbsorptionAmount(float par1)
 @@ -2267,4 +2718,39 @@
      {
          FMLNetworkHandler.openGui(this, mod, modGuiId, world, x, y, z);
