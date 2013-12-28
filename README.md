@@ -74,7 +74,15 @@ Making sure you follow the above conventions is important, but just the beginnin
 * Provide a test plugin/mod binary and source for us to test your code with.
 * Your pull request should link to accompanying pull requests.
 * The description of your pull request should provide detailed information on the pull along with justification of the changes where applicable.
-* 
+
+Credits
+-------
+
+* [MCP](http://mcp.ocean-labs.de) - permission to use data to make MCPC+.
+* [Forge](http://www.minecraftforge.net) - mod support.
+* [CraftBukkit](http://bukkit.org) - plugin support.
+* [Spigot](http://www.spigotmc.org) - performance optimizations.
+
 
 Donating
 --------
