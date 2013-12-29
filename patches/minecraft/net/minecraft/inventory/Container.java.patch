@@ -88,7 +88,18 @@
          return par1Slot;
      }
  
-@@ -192,6 +244,7 @@
+@@ -130,6 +182,10 @@
+ 
+     public Slot getSlot(int par1)
+     {
++        // MCPC+ start - vanilla compatibility. fixes NPE with ProjectRed's Item Stock Keeper
++        if (par1 < 0 || par1 >= this.inventorySlots.size())
++            return null;
++        // MCPC+ end
+         return (Slot)this.inventorySlots.get(par1);
+     }
+ 
+@@ -192,6 +248,7 @@
                      itemstack1 = inventoryplayer.getItemStack().copy();
                      l = inventoryplayer.getItemStack().stackSize;
                      Iterator iterator = this.field_94537_h.iterator();
@@ -96,7 +107,7 @@
  
                      while (iterator.hasNext())
                      {
-@@ -214,18 +267,55 @@
+@@ -214,18 +271,55 @@
                              }
  
                              l -= itemstack2.stackSize - j1;
@@ -164,7 +175,7 @@
                  }
  
                  this.func_94533_d();
-@@ -259,10 +349,17 @@
+@@ -259,10 +353,17 @@
  
                          if (par2 == 1)
                          {
@@ -186,17 +197,3 @@
                                  inventoryplayer.setItemStack((ItemStack)null);
                              }
                          }
-@@ -323,10 +420,13 @@
-                                     k1 = slot2.getSlotStackLimit();
-                                 }
- 
-+                                // CraftBukkit start
-                                 if (itemstack4.stackSize >= k1)
-                                 {
-                                     slot2.putStack(itemstack4.splitStack(k1));
-                                 }
-+
-+                                // CraftBukkit end
- 
-                                 if (itemstack4.stackSize == 0)
-                                 {
