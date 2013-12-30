@@ -160,7 +160,7 @@
 -        worldserver.spawnEntityInWorld(par1EntityPlayerMP);
 -        this.func_72375_a(par1EntityPlayerMP, (WorldServer)null);
 +        // CraftBukkit start
-+        PlayerJoinEvent playerJoinEvent = new PlayerJoinEvent(this.cserver.getPlayer(par1EntityPlayerMP), "\u00A7e" + par1EntityPlayerMP.username + " joined the game.");
++        PlayerJoinEvent playerJoinEvent = new PlayerJoinEvent(this.cserver.getPlayer(par1EntityPlayerMP), "\u00A7e" + par1EntityPlayerMP.getTranslatedEntityName() + " joined the game.");
 +        this.cserver.getPluginManager().callEvent(playerJoinEvent);
 +        String joinMessage = playerJoinEvent.getJoinMessage();
 +
@@ -204,7 +204,7 @@
 +            // CraftBukkit start - .name -> .listName
 +            if (par1EntityPlayerMP.getBukkitEntity().canSee(entityplayermp1.getBukkitEntity()))
 +            {
-+                par1EntityPlayerMP.playerNetServerHandler.sendPacketToPlayer(new Packet201PlayerInfo(entityplayermp1.listName, true, entityplayermp1.ping));
++                par1EntityPlayerMP.playerNetServerHandler.sendPacketToPlayer(new Packet201PlayerInfo(entityplayermp1.getCommandSenderName(), true, entityplayermp1.ping));
 +            }
 +
 +            // CraftBukkit end
