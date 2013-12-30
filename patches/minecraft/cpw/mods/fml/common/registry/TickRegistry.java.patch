@@ -9,7 +9,7 @@
  
  import com.google.common.collect.Queues;
  
-@@ -84,7 +86,12 @@
+@@ -84,7 +86,16 @@
      }
      public static void registerTickHandler(ITickHandler handler, Side side)
      {
@@ -19,6 +19,10 @@
 +        if (handlerInterval > 1)
 +        {
 +            registerScheduledTickHandler(new SkipIntervalHandler(handler), side);
++        }
++        else
++        {
++            registerScheduledTickHandler(new SingleIntervalHandler(handler), side);
 +        }
      }
  
