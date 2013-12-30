@@ -9,21 +9,17 @@
  
  import com.google.common.collect.Queues;
  
-@@ -84,7 +86,16 @@
+@@ -84,7 +86,12 @@
      }
      public static void registerTickHandler(ITickHandler handler, Side side)
      {
 -        registerScheduledTickHandler(new SingleIntervalHandler(handler), side);
 +        Class clazz = handler.getClass();
-+        //int handlerInterval = za.co.mcportcentral.MCPCConfig.getInt("tick-intervals." + clazz.getName(), 1, true);
-+        //if (handlerInterval > 1)
-+        //{
++        int handlerInterval = za.co.mcportcentral.MCPCConfig.getInt("tick-intervals." + clazz.getName(), 1, true);
++        if (handlerInterval > 1)
++        {
 +            registerScheduledTickHandler(new SkipIntervalHandler(handler), side);
-+        //}
-+        //else
-+        //{
-+            //registerScheduledTickHandler(new SingleIntervalHandler(handler), side);
-+        //}
++        }
      }
  
      public static void updateTickQueue(List<IScheduledTickHandler> ticks, Side side)
