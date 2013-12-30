@@ -93,11 +93,6 @@ public class WatchdogThread extends Thread
                                     + " Entities: " + world.loadedEntityList.size() + " Tile Entities: " + world.loadedTileEntityList.size());
                     log.log(Level.SEVERE, "  Entities Last Tick: " + world.entitiesTicked);
                     log.log(Level.SEVERE, "  Tiles Last Tick: " + world.tilesTicked);
-                    log.log(Level.SEVERE, "Last Bounding Box Entity: " + world.lastBoundingBoxEntity);
-                    log.log(Level.SEVERE, "Last Bounding Box Coords: " + world.lastBoundingBoxCoords);
-                    log.log(Level.SEVERE, "Last Bounding Box Count:  " + world.lastBoundingBoxEntityCount);
-                    log.log(Level.SEVERE, "Last Bounding Box Time:   " + world.lastBoundingBoxTime);
-                    log.log(Level.SEVERE, "Avg Bounding Box Time:    " + String.format("%.2f", (1d * world.totalBoundingBoxTime)/world.totalBoundingBoxCalls));
                 }
 
                 log.log(Level.SEVERE, "------------------------------");
