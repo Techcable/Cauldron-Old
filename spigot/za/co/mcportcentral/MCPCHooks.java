@@ -311,8 +311,6 @@ public class MCPCHooks
                 writer.name("name").value(world.getWorld().getName());
                 writer.name("dimensionId").value(world.provider.dimensionId);
                 writer.name("players").value(world.playerEntities.size());
-                writer.name("lastBBTime").value(world.lastBoundingBoxTime);
-                writer.name("avgBBTime").value(String.format("%.2f", (1d * world.totalBoundingBoxTime) / world.totalBoundingBoxCalls));
                 writer.name("loadedChunks").value(world.theChunkProviderServer.loadedChunkHashMap.size());
                 writer.name("activeChunks").value(world.activeChunkSet.size());
                 writer.name("entities").value(world.loadedEntityList.size());
