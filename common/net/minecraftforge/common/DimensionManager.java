@@ -440,7 +440,7 @@ public class DimensionManager
     public static boolean shouldLoadSpawn(int dim)
     {
         int id = getProviderType(dim);
-        return ((spawnSettings.containsKey(id) && spawnSettings.get(id)) || getWorld(dim).keepSpawnInMemory); // MCPC+ added bukkit check
+        return ((spawnSettings.containsKey(id) && spawnSettings.get(id)) || (getWorld(dim) != null && getWorld(dim).keepSpawnInMemory)); // MCPC+ added bukkit check
     }
 
     static
