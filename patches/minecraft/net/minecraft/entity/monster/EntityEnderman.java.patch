@@ -22,7 +22,7 @@
 -                        this.setCarryingData(this.worldObj.getBlockMetadata(i, j, k));
 -                        this.worldObj.setBlock(i, j, k, 0);
 +                        // CraftBukkit start - Pickup event
-+                        if (!CraftEventFactory.callEntityChangeBlockEvent(this, this.worldObj.getWorld().getBlockAt(i, j, k), org.bukkit.Material.AIR).isCancelled())
++                        if (this.worldObj.getWorld() == null || !CraftEventFactory.callEntityChangeBlockEvent(this, this.worldObj.getWorld().getBlockAt(i, j, k), org.bukkit.Material.AIR).isCancelled()) // MCPC+ - fix NPE
 +                        {
 +                            this.setCarried(this.worldObj.getBlockId(i, j, k));
 +                            this.setCarryingData(this.worldObj.getBlockMetadata(i, j, k));
