@@ -1362,37 +1362,39 @@
      /**
       * Will update the entity in the world if the chunk the entity is in is currently loaded or its forced to update.
       * Args: entity, forceUpdate
-@@ -2188,10 +2885,30 @@
+@@ -2187,11 +2884,31 @@
+     public void updateEntityWithOptionalForce(Entity par1Entity, boolean par2)
      {
          int i = MathHelper.floor_double(par1Entity.posX);
-         int j = MathHelper.floor_double(par1Entity.posZ);
+-        int j = MathHelper.floor_double(par1Entity.posZ);
 -        byte b0 = 32;
 -
 -        if (!par2 || this.checkChunksExist(i - b0, 0, j - b0, i + b0, 0, j + b0))
 -        {
-+
-+        // Spigot start
-+        if (!org.spigotmc.ActivationRange.checkIfActive(par1Entity))
-+        {
-+            par1Entity.ticksExisted++;
-+            par1Entity.inactiveTick();
-+            return;
-+        }
-+        par1Entity.tickTimer.startTiming();
-+        // Spigot end        
++        int j = MathHelper.floor_double(par1Entity.posZ); 
 +
 +        boolean isForced = getPersistentChunks().containsKey(new ChunkCoordIntPair(i >> 4, j >> 4));
 +        byte b0 = isForced ? (byte)0 : 32;
 +        boolean canUpdate = !par2 || this.checkChunksExist(i - b0, 0, j - b0, i + b0, 0, j + b0);
++        boolean forceUpdate = false; // MCPC+
 +        if (!canUpdate)
 +        {
 +            EntityEvent.CanUpdate event = new EntityEvent.CanUpdate(par1Entity);
 +            MinecraftForge.EVENT_BUS.post(event);
 +            canUpdate = event.canUpdate;
++            forceUpdate = canUpdate; // MCPC+
 +        }
-+
++        // Spigot start
++        if (!isForced && !forceUpdate && !org.spigotmc.ActivationRange.checkIfActive(par1Entity)) // MCPC+ - ignore if forge event forced update or entity is in forced chunk
++        {
++            par1Entity.ticksExisted++;
++            par1Entity.inactiveTick();
++            return;
++        }
++        // Spigot end       
 +        if (canUpdate)
 +        {
++            par1Entity.tickTimer.startTiming();
 +            entitiesTicked++;
              par1Entity.lastTickPosX = par1Entity.posX;
              par1Entity.lastTickPosY = par1Entity.posY;

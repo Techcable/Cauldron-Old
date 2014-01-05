@@ -42,7 +42,18 @@
  
      /**
       * Given a chunk, find a random position in it.
-@@ -62,16 +72,19 @@
+@@ -56,22 +66,30 @@
+                 int k = MathHelper.floor_double(entityplayer.posX / 16.0D);
+                 j = MathHelper.floor_double(entityplayer.posZ / 16.0D);
+                 byte b0 = 8;
++                // Spigot Start
++                b0 = par1WorldServer.spigotConfig.mobSpawnRange;
++                b0 = (b0 > par1WorldServer.spigotConfig.viewDistance) ? (byte) par1WorldServer.spigotConfig.viewDistance : b0;
++                b0 = (b0 > 8) ? 8 : b0;
++                // Spigot End
+ 
+                 for (int l = -b0; l <= b0; ++l)
+                 {
                      for (int i1 = -b0; i1 <= b0; ++i1)
                      {
                          boolean flag3 = l == -b0 || l == b0 || i1 == -b0 || i1 == b0;
@@ -69,7 +80,7 @@
                      }
                  }
              }
-@@ -84,19 +97,49 @@
+@@ -84,19 +102,49 @@
              for (int j1 = 0; j1 < j; ++j1)
              {
                  EnumCreatureType enumcreaturetype = aenumcreaturetype[j1];
@@ -126,7 +137,7 @@
                              int k1 = chunkposition.x;
                              int l1 = chunkposition.y;
                              int i2 = chunkposition.z;
-@@ -165,13 +208,17 @@
+@@ -165,13 +213,17 @@
  
                                                              entityliving.setLocationAndAngles((double)f, (double)f1, (double)f2, par1WorldServer.rand.nextFloat() * 360.0F, 0.0F);
  
@@ -149,7 +160,7 @@
                                                                  {
                                                                      continue label110;
                                                                  }
-@@ -217,7 +264,8 @@
+@@ -217,7 +269,8 @@
          else
          {
              int l = par1World.getBlockId(par2, par3 - 1, par4);
@@ -159,7 +170,7 @@
          }
      }
  
-@@ -266,7 +314,7 @@
+@@ -266,7 +319,7 @@
                              }
  
                              entityliving.setLocationAndAngles((double)f, (double)f1, (double)f2, par6Random.nextFloat() * 360.0F, 0.0F);
