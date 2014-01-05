@@ -38,11 +38,47 @@
  {
 -    /** The 17x17 area around the player where mobs can spawn */
 -    private HashMap eligibleChunksForSpawning = new HashMap();
-+    private LongObjectHashMap<Boolean> eligibleChunksForSpawning = new LongObjectHashMap<Boolean>(); // CraftBukkit - HashMap -> LongObjectHashMap
++    private static LongObjectHashMap<Boolean> eligibleChunksForSpawning = new LongObjectHashMap<Boolean>(); // CraftBukkit - HashMap -> LongObjectHashMap
  
      /**
       * Given a chunk, find a random position in it.
-@@ -56,22 +66,30 @@
+@@ -33,6 +43,35 @@
+         int i1 = par0World.rand.nextInt(chunk == null ? par0World.getActualHeight() : chunk.getTopFilledSegment() + 16 - 1);
+         return new ChunkPosition(k, i1, l);
+     }
++
++    // Spigot start - get entity count only from chunks being processed in b
++    public static final int getEntityCount(WorldServer server, Class oClass)
++    {
++        int i = 0;
++
++        for (Long coord : eligibleChunksForSpawning.keySet())
++        {
++            int x = LongHash.msw(coord);
++            int z = LongHash.lsw(coord);
++
++            if (!server.theChunkProviderServer.chunksToUnload.contains(x, z) && server.chunkExists(x, z))
++            {
++                for (List<Entity> entitySlice : server.getChunkFromChunkCoords(x, z).entityLists)
++                {
++                    for (Entity entity : entitySlice)
++                    {
++                        if (oClass.isAssignableFrom(entity.getClass()))
++                        {
++                            ++i;
++                        }
++                    }
++                }
++            }
++        }
++
++        return i;
++    }
++    // Spigot end
+ 
+     /**
+      * adds all chunks within the spawn radius of the players to eligibleChunksForSpawning. pars: the world,
+@@ -56,22 +95,30 @@
                  int k = MathHelper.floor_double(entityplayer.posX / 16.0D);
                  j = MathHelper.floor_double(entityplayer.posZ / 16.0D);
                  byte b0 = 8;
@@ -80,7 +116,7 @@
                      }
                  }
              }
-@@ -84,19 +102,49 @@
+@@ -84,19 +131,48 @@
              for (int j1 = 0; j1 < j; ++j1)
              {
                  EnumCreatureType enumcreaturetype = aenumcreaturetype[j1];
@@ -111,8 +147,7 @@
 +                }
 +
 +                // CraftBukkit end
-+
-+                if ((!enumcreaturetype.getPeacefulCreature() || par3) && (enumcreaturetype.getPeacefulCreature() || par2) && (!enumcreaturetype.getAnimal() || par4) && par1WorldServer.countEntities(enumcreaturetype, true) <= enumcreaturetype.getMaxNumberOfCreature() * this.eligibleChunksForSpawning.size() / 256)
++                if ((!enumcreaturetype.getPeacefulCreature() || par3) && (enumcreaturetype.getPeacefulCreature() || par2) && (!enumcreaturetype.getAnimal() || par4) && getEntityCount(par1WorldServer, enumcreaturetype.getCreatureClass()) <= limit * eligibleChunksForSpawning.size() / 256)   // CraftBukkit - use per-world limits and use all loaded chunks
                  {
                      Iterator iterator = this.eligibleChunksForSpawning.keySet().iterator();
 +                    ArrayList<ChunkCoordIntPair> tmp = new ArrayList(eligibleChunksForSpawning.keySet());
@@ -137,7 +172,7 @@
                              int k1 = chunkposition.x;
                              int l1 = chunkposition.y;
                              int i2 = chunkposition.z;
-@@ -165,13 +213,17 @@
+@@ -165,13 +241,17 @@
  
                                                              entityliving.setLocationAndAngles((double)f, (double)f1, (double)f2, par1WorldServer.rand.nextFloat() * 360.0F, 0.0F);
  
@@ -160,7 +195,7 @@
                                                                  {
                                                                      continue label110;
                                                                  }
-@@ -217,7 +269,8 @@
+@@ -217,7 +297,8 @@
          else
          {
              int l = par1World.getBlockId(par2, par3 - 1, par4);
@@ -170,7 +205,7 @@
          }
      }
  
-@@ -266,7 +319,7 @@
+@@ -266,7 +347,7 @@
                              }
  
                              entityliving.setLocationAndAngles((double)f, (double)f1, (double)f2, par6Random.nextFloat() * 360.0F, 0.0F);
