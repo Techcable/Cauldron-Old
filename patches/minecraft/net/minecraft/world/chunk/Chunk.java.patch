@@ -216,32 +216,16 @@
                      {
                          if (par2 >= k1)
                          {
-@@ -654,24 +774,33 @@
- 
-                 if (par4 != 0)
-                 {
--                    if (!this.worldObj.isRemote)
-+                    // CraftBukkit - Don't place while processing the BlockPlaceEvent, unless it's a BlockContainer
-+                    if (!this.worldObj.isRemote && (!this.worldObj.callingPlaceEvent || (Block.blocksList[par4] instanceof BlockContainer)))
-                     {
+@@ -659,19 +779,20 @@
                          Block.blocksList[par4].onBlockAdded(this.worldObj, j2, par2, k2);
                      }
  
 -                    if (Block.blocksList[par4] instanceof ITileEntityProvider)
--                    {
 +                    if (Block.blocksList[par4] != null && Block.blocksList[par4].hasTileEntity(par5))
-+                    {
-+                        // CraftBukkit start - Don't create tile entity if placement failed
-+                        if (this.getBlockID(par1, par2, par3) != par4)
-+                        {
-+                            return false;
-+                        }
-+                        // CraftBukkit end
-+
+                     {
                          tileentity = this.getChunkBlockTileEntity(par1, par2, par3);
  
--                        if (tileentity == null)
-+                        if (tileentity == null && !this.worldObj.callingPlaceEvent) // MCPC+ - Don't create a tile entity while processing the BlockPlaceEvent
+                         if (tileentity == null)
                          {
 -                            tileentity = ((ITileEntityProvider)Block.blocksList[par4]).createNewTileEntity(this.worldObj);
 +                            tileentity = Block.blocksList[par4].createTileEntity(this.worldObj, par5);
@@ -255,7 +239,7 @@
                          }
                      }
                  }
-@@ -716,7 +845,7 @@
+@@ -716,7 +837,7 @@
                  extendedblockstorage.setExtBlockMetadata(par1, par2 & 15, par3, par4);
                  int j1 = extendedblockstorage.getExtBlockID(par1, par2 & 15, par3);
  
@@ -264,7 +248,7 @@
                  {
                      TileEntity tileentity = this.getChunkBlockTileEntity(par1, par2, par3);
  
-@@ -813,8 +942,11 @@
+@@ -813,8 +934,11 @@
  
          if (i != this.xPosition || j != this.zPosition)
          {
@@ -278,7 +262,7 @@
          }
  
          int k = MathHelper.floor_double(par1Entity.posY / 16.0D);
-@@ -829,11 +961,28 @@
+@@ -829,11 +953,28 @@
              k = this.entityLists.length - 1;
          }
  
@@ -307,7 +291,7 @@
      }
  
      /**
-@@ -860,6 +1009,22 @@
+@@ -860,6 +1001,22 @@
          }
  
          this.entityLists[par2].remove(par1Entity);
@@ -330,7 +314,7 @@
      }
  
      /**
-@@ -878,33 +1043,32 @@
+@@ -878,33 +1035,32 @@
          ChunkPosition chunkposition = new ChunkPosition(par1, par2, par3);
          TileEntity tileentity = (TileEntity)this.chunkTileEntityMap.get(chunkposition);
  
@@ -375,7 +359,7 @@
      }
  
      /**
-@@ -919,7 +1083,7 @@
+@@ -919,7 +1075,7 @@
  
          if (this.isChunkLoaded)
          {
@@ -384,7 +368,7 @@
          }
      }
  
-@@ -934,7 +1098,8 @@
+@@ -934,7 +1090,8 @@
          par4TileEntity.yCoord = par2;
          par4TileEntity.zCoord = this.zPosition * 16 + par3;
  
@@ -394,7 +378,7 @@
          {
              if (this.chunkTileEntityMap.containsKey(chunkposition))
              {
-@@ -943,6 +1108,17 @@
+@@ -943,6 +1100,17 @@
  
              par4TileEntity.validate();
              this.chunkTileEntityMap.put(chunkposition, par4TileEntity);
@@ -412,7 +396,7 @@
          }
      }
  
-@@ -984,6 +1160,7 @@
+@@ -984,6 +1152,7 @@
  
              this.worldObj.addLoadedEntities(this.entityLists[i]);
          }
@@ -420,7 +404,7 @@
      }
  
      /**
-@@ -1002,8 +1179,25 @@
+@@ -1002,8 +1171,25 @@
  
          for (int i = 0; i < this.entityLists.length; ++i)
          {
@@ -446,7 +430,7 @@
      }
  
      /**
-@@ -1020,8 +1214,8 @@
+@@ -1020,8 +1206,8 @@
       */
      public void getEntitiesWithinAABBForEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB, List par3List, IEntitySelector par4IEntitySelector)
      {
@@ -457,7 +441,7 @@
  
          if (i < 0)
          {
-@@ -1070,8 +1264,8 @@
+@@ -1070,8 +1256,8 @@
       */
      public void getEntitiesOfTypeWithinAAAB(Class par1Class, AxisAlignedBB par2AxisAlignedBB, List par3List, IEntitySelector par4IEntitySelector)
      {
@@ -468,7 +452,7 @@
  
          if (i < 0)
          {
-@@ -1176,7 +1370,7 @@
+@@ -1176,7 +1362,7 @@
              while (i1 > 0 && l == -1)
              {
                  int j1 = this.getBlockID(par1, i1, par2);
@@ -477,7 +461,7 @@
  
                  if (!material.blocksMovement() && !material.isLiquid())
                  {
-@@ -1254,6 +1448,15 @@
+@@ -1254,6 +1440,15 @@
       */
      public void fillChunk(byte[] par1ArrayOfByte, int par2, int par3, boolean par4)
      {
@@ -493,7 +477,7 @@
          int k = 0;
          boolean flag1 = !this.worldObj.provider.hasNoSky;
          int l;
-@@ -1354,12 +1557,26 @@
+@@ -1354,12 +1549,26 @@
          }
  
          this.generateHeightMap();
@@ -524,10 +508,11 @@
          }
      }
  
-@@ -1468,4 +1685,44 @@
+@@ -1468,4 +1677,44 @@
              }
          }
      }
+-}
 +
 +    /** FORGE: Used to remove only invalid TileEntities */
 +    public void cleanChunkBlockTileEntity(int x, int y, int z)
@@ -568,4 +553,4 @@
 +
 +        return tileentity;
 +    }
- }
++}

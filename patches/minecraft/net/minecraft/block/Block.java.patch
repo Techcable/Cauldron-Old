@@ -142,7 +142,7 @@
 -            int j1 = this.quantityDroppedWithBonus(par7, par1World.rand);
 -
 -            for (int k1 = 0; k1 < j1; ++k1)
-+        if (!par1World.isRemote && !par1World.callingPlaceEvent) // MCPC+ do not drop items during a place event, prevents item dupe
++        if (!par1World.isRemote && !par1World.restoringBlockStates) // MCPC+ do not drop items while restoring blockstates, prevents item dupe
 +        {
 +            ArrayList<ItemStack> items = getBlockDropped(par1World, par2, par3, par4, par5, par7);
 +            par6 = ForgeEventFactory.fireBlockHarvesting(items, par1World, this, par2, par3, par4, par5, par7, par6, false, harvesters.get());
@@ -168,7 +168,7 @@
      protected void dropBlockAsItem_do(World par1World, int par2, int par3, int par4, ItemStack par5ItemStack)
      {
 -        if (!par1World.isRemote && par1World.getGameRules().getGameRuleBooleanValue("doTileDrops"))
-+        if (!par1World.isRemote && par1World.getGameRules().getGameRuleBooleanValue("doTileDrops") && !par1World.callingPlaceEvent) // MCPC+ do not drop items during a place event, prevents item dupe
++        if (!par1World.isRemote && par1World.getGameRules().getGameRuleBooleanValue("doTileDrops") && !par1World.restoringBlockStates) // MCPC+ do not drop items while restoring blockstates, prevents item dupe
          {
              float f = 0.7F;
              double d0 = (double)(par1World.rand.nextFloat() * f) + (double)(1.0F - f) * 0.5D;

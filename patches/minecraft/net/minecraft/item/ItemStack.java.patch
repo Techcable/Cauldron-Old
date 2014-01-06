@@ -8,7 +8,15 @@
  import net.minecraft.nbt.NBTBase;
  import net.minecraft.nbt.NBTTagCompound;
  import net.minecraft.nbt.NBTTagList;
-@@ -53,8 +54,12 @@
+@@ -29,6 +30,7 @@
+ import net.minecraft.util.Icon;
+ import net.minecraft.util.StatCollector;
+ import net.minecraft.world.World;
++import net.minecraftforge.event.ForgeEventFactory;
+ 
+ public final class ItemStack
+ {
+@@ -53,8 +55,12 @@
      /** Damage dealt to the item or number of use. Raise when using items. */
      int itemDamage;
  
@@ -22,7 +30,7 @@
  
      public ItemStack(Block par1Block)
      {
-@@ -128,6 +133,7 @@
+@@ -128,6 +134,7 @@
       */
      public Item getItem()
      {
@@ -30,7 +38,59 @@
          return Item.itemsList[this.itemID];
      }
  
-@@ -192,7 +198,7 @@
+@@ -149,12 +156,48 @@
+ 
+     public boolean tryPlaceItemIntoWorld(EntityPlayer par1EntityPlayer, World par2World, int par3, int par4, int par5, int par6, float par7, float par8, float par9)
+     {
+-        boolean flag = this.getItem().onItemUse(this, par1EntityPlayer, par2World, par3, par4, par5, par6, par7, par8, par9);
++        // MCPC+ start - handle all placement events here
++        boolean flag = false;
++        int meta = this.getItemDamage();
++        int size = this.stackSize;
++        par2World.captureBlocks = true;
++        flag = this.getItem().onItemUse(this, par1EntityPlayer, par2World, par3, par4, par5, par6, par7, par8, par9);
++        par2World.captureBlocks = false;
+ 
+         if (flag)
+         {
+-            par1EntityPlayer.addStat(StatList.objectUseStats[this.itemID], 1);
+-        }
++            boolean isCancelled = false;
++            for (int i = 0; i < par2World.capturedBlocks.size(); i++)
++            {
++                org.bukkit.event.block.BlockPlaceEvent placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(par2World, par1EntityPlayer, par2World.capturedBlocks.get(i), par3, par4, par5);
++
++                if (placeEvent.isCancelled() || !placeEvent.canBuild())
++                {
++                    isCancelled = true;
++                    break;
++                }
++            }
++            if (isCancelled)
++            {
++                flag = false; // cancel placement
++                // revert back all captured blocks
++                for (int i = 0; i < par2World.capturedBlocks.size(); i++)
++                {
++                    par2World.restoringBlockStates = true;
++                    par2World.capturedBlocks.get(i).update(true, false); // restore blockstate
++                    par2World.restoringBlockStates = false;
++                }
++                // make sure to restore stack after cancel
++                this.setItemDamage(meta);
++                this.stackSize = size;
++            }
++            else
++            {
++                par1EntityPlayer.addStat(StatList.objectUseStats[this.itemID], 1);
++            }
++        }
++        par2World.capturedBlocks.clear();
++        // MCPC+ end
+ 
+         return flag;
+     }
+@@ -192,7 +235,7 @@
  
          if (this.stackTagCompound != null)
          {
@@ -39,7 +99,7 @@
          }
  
          return par1NBTTagCompound;
-@@ -214,7 +220,8 @@
+@@ -214,7 +257,8 @@
  
          if (par1NBTTagCompound.hasKey("tag"))
          {
@@ -49,7 +109,25 @@
          }
      }
  
-@@ -252,7 +259,9 @@
+@@ -223,7 +267,7 @@
+      */
+     public int getMaxStackSize()
+     {
+-        return this.getItem().getItemStackLimit();
++        return this.getItem().getItemStackLimit(this);
+     }
+ 
+     /**
+@@ -239,7 +283,7 @@
+      */
+     public boolean isItemStackDamageable()
+     {
+-        return Item.itemsList[this.itemID].getMaxDamage() > 0;
++        return Item.itemsList[this.itemID].getMaxDamage(this) > 0;
+     }
+ 
+     public boolean getHasSubtypes()
+@@ -252,7 +296,9 @@
       */
      public boolean isItemDamaged()
      {
@@ -60,7 +138,7 @@
      }
  
      /**
-@@ -260,6 +269,10 @@
+@@ -260,6 +306,10 @@
       */
      public int getItemDamageForDisplay()
      {
@@ -71,7 +149,7 @@
          return this.itemDamage;
      }
  
-@@ -268,6 +281,10 @@
+@@ -268,6 +318,10 @@
       */
      public int getItemDamage()
      {
@@ -82,7 +160,7 @@
          return this.itemDamage;
      }
  
-@@ -276,6 +293,12 @@
+@@ -276,6 +330,12 @@
       */
      public void setItemDamage(int par1)
      {
@@ -95,7 +173,7 @@
          this.itemDamage = par1;
  
          if (this.itemDamage < 0)
-@@ -289,7 +312,7 @@
+@@ -289,7 +349,7 @@
       */
      public int getMaxDamage()
      {
@@ -104,7 +182,7 @@
      }
  
      /**
-@@ -298,8 +321,15 @@
+@@ -298,8 +358,15 @@
       * getMaxDamage(). Returns false otherwise or if the ItemStack can't be damaged or if all points of damage are
       * negated.
       */
@@ -120,7 +198,7 @@
          if (!this.isItemStackDamageable())
          {
              return false;
-@@ -321,14 +351,29 @@
+@@ -321,14 +388,29 @@
  
                  par1 -= k;
  
@@ -152,7 +230,7 @@
          }
      }
  
-@@ -362,6 +407,13 @@
+@@ -362,6 +444,13 @@
                          this.stackSize = 0;
                      }
  
@@ -166,7 +244,7 @@
                      this.itemDamage = 0;
                  }
              }
-@@ -396,7 +448,7 @@
+@@ -396,7 +485,7 @@
       */
      public boolean canHarvestBlock(Block par1Block)
      {
@@ -175,7 +253,7 @@
      }
  
      public boolean func_111282_a(EntityPlayer par1EntityPlayer, EntityLivingBase par2EntityLivingBase)
-@@ -478,7 +530,15 @@
+@@ -478,7 +567,15 @@
              --this.animationsToGo;
          }
  
@@ -192,7 +270,7 @@
      }
  
      public void onCrafting(World par1World, EntityPlayer par2EntityPlayer, int par3)
-@@ -531,6 +591,13 @@
+@@ -531,6 +628,13 @@
       */
      public void setTagCompound(NBTTagCompound par1NBTTagCompound)
      {
@@ -206,7 +284,12 @@
          this.stackTagCompound = par1NBTTagCompound;
      }
  
-@@ -737,10 +804,16 @@
+@@ -733,14 +837,21 @@
+         {
+             arraylist.add("Durability: " + (this.getMaxDamage() - this.getItemDamageForDisplay()) + " / " + this.getMaxDamage());
+         }
++        ForgeEventFactory.onItemTooltip(this, par1EntityPlayer, arraylist, par2);
+ 
          return arraylist;
      }
  
