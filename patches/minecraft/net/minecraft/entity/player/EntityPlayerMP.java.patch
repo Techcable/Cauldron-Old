@@ -43,7 +43,7 @@
       */
      public boolean playerConqueredTheEnd;
 +    // CraftBukkit start
-+    public String displayName;
++    public String cb_displayName;
 +    public String listName;
 +    public org.bukkit.Location compassTarget;
 +    public int newExp = 0;
@@ -94,7 +94,7 @@
              this.setPosition(this.posX, this.posY + 1.0D, this.posZ);
          }
 +        // CraftBukkit start
-+        this.displayName = this.username;
++        this.cb_displayName = this.getDisplayName();
 +        this.listName = this.username;
 +        // this.canPickUpLoot = true; TODO
 +        this.maxHealthCache = this.getMaxHealth();
