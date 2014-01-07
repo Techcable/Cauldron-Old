@@ -236,7 +236,7 @@
              this.connectionClosed = true;
          }
      }
-@@ -192,11 +323,89 @@
+@@ -192,8 +323,85 @@
                  }
              }
  
@@ -324,49 +324,25 @@
                  double d1;
                  double d2;
                  double d3;
-+                double d4;
- 
-                 if (this.playerEntity.ridingEntity != null)
-                 {
-@@ -206,6 +415,8 @@
-                     d1 = this.playerEntity.posX;
-                     d2 = this.playerEntity.posY;
-                     d3 = this.playerEntity.posZ;
-+                    double d5 = 0.0D;
-+                    d4 = 0.0D;
- 
-                     if (par1Packet10Flying.rotating)
-                     {
-@@ -213,10 +424,18 @@
-                         f1 = par1Packet10Flying.pitch;
-                     }
- 
-+
-                     this.playerEntity.onGround = par1Packet10Flying.onGround;
-                     this.playerEntity.onUpdateEntity();
--                    this.playerEntity.ySize = 0.0F;
-+                    this.playerEntity.moveEntity(d5, 0.0D, d4);
-                     this.playerEntity.setPositionAndRotation(d1, d2, d3, f, f1);
-+                    this.playerEntity.motionX = d5;
-+                    this.playerEntity.motionZ = d4;
-+
-+                    if (this.playerEntity.ridingEntity != null)
-+                    {
-+                        worldserver.uncheckedUpdateEntity(this.playerEntity.ridingEntity, true);  // MCPC+ - required for vehicle AI
-+                    }
+@@ -220,7 +428,17 @@
  
                      if (this.playerEntity.ridingEntity != null)
                      {
-@@ -259,8 +478,6 @@
-                     par1Packet10Flying.moving = false;
-                 }
++                        worldserver.uncheckedUpdateEntity(this.playerEntity.ridingEntity, true);  // MCPC+ - required for vehicle AI
++                    }
++
++                    if (this.playerEntity.ridingEntity != null)
++                    {
+                         this.playerEntity.ridingEntity.updateRiderPosition();
++                    }
++
++                    if (!this.hasMoved) //Fixes teleportation kick while riding entities
++                    {
++                        return;
+                     }
  
--                double d4;
--
-                 if (par1Packet10Flying.moving)
-                 {
-                     d1 = par1Packet10Flying.xPosition;
-@@ -277,7 +494,8 @@
+                     this.mcServer.getConfigurationManager().serverUpdateMountedMovingPlayer(this.playerEntity);
+@@ -277,7 +495,8 @@
  
                      if (Math.abs(par1Packet10Flying.xPosition) > 3.2E7D || Math.abs(par1Packet10Flying.zPosition) > 3.2E7D)
                      {
@@ -376,7 +352,7 @@
                          return;
                      }
                  }
-@@ -300,12 +518,13 @@
+@@ -300,12 +519,13 @@
                  d4 = d1 - this.playerEntity.posX;
                  double d5 = d2 - this.playerEntity.posY;
                  double d6 = d3 - this.playerEntity.posZ;
@@ -390,11 +366,31 @@
                  double d10 = d7 * d7 + d8 * d8 + d9 * d9;
  
 -                if (d10 > 100.0D && (!this.mcServer.isSinglePlayer() || !this.mcServer.getServerOwner().equals(this.playerEntity.getCommandSenderName())))
-+                if (d10 > 100.0D && this.hasMoved && (!this.mcServer.isSinglePlayer() || !this.mcServer.getKeyPair().equals(this.playerEntity.getCommandSenderName())))   // CraftBukkit - Added this.checkMovement condition to solve this check being triggered by teleports
++                if (d10 > 100.0D && this.hasMoved && (!this.mcServer.isSinglePlayer() || !this.mcServer.getServerOwner().equals(this.playerEntity.getCommandSenderName())))   // CraftBukkit - Added this.checkMovement condition to solve this check being triggered by teleports
                  {
                      this.mcServer.getLogAgent().logWarning(this.playerEntity.getCommandSenderName() + " moved too quickly! " + d4 + "," + d5 + "," + d6 + " (" + d7 + ", " + d8 + ", " + d9 + ")");
                      this.setPlayerLocation(this.lastPosX, this.lastPosY, this.lastPosZ, this.playerEntity.rotationYaw, this.playerEntity.rotationPitch);
-@@ -345,7 +564,7 @@
+@@ -318,6 +538,11 @@
+                 if (this.playerEntity.onGround && !par1Packet10Flying.onGround && d5 > 0.0D)
+                 {
+                     this.playerEntity.addExhaustion(0.2F);
++                }
++
++                if (!this.hasMoved) //Fixes "Moved Too Fast" kick when being teleported while moving
++                {
++                    return;
+                 }
+ 
+                 this.playerEntity.moveEntity(d4, d5, d6);
+@@ -342,10 +567,15 @@
+                     this.mcServer.getLogAgent().logWarning(this.playerEntity.getCommandSenderName() + " moved wrongly!");
+                 }
+ 
++                if (!this.hasMoved) //Fixes "Moved Too Fast" kick when being teleported while moving
++                {
++                    return;
++                }
++
                  this.playerEntity.setPositionAndRotation(d1, d2, d3, f2, f3);
                  boolean flag2 = worldserver.getCollidingBoundingBoxes(this.playerEntity, this.playerEntity.boundingBox.copy().contract((double)f4, (double)f4, (double)f4)).isEmpty();
  
@@ -403,7 +399,7 @@
                  {
                      this.setPlayerLocation(this.lastPosX, this.lastPosY, this.lastPosZ, f2, f3);
                      return;
-@@ -353,7 +572,7 @@
+@@ -353,7 +583,7 @@
  
                  AxisAlignedBB axisalignedbb = this.playerEntity.boundingBox.copy().expand((double)f4, (double)f4, (double)f4).addCoord(0.0D, -0.55D, 0.0D);
  
@@ -412,8 +408,15 @@
                  {
                      if (d11 >= -0.03125D)
                      {
-@@ -374,6 +593,12 @@
+@@ -372,8 +602,19 @@
+                     this.ticksForFloatKick = 0;
+                 }
  
++                if (!this.hasMoved) //Fixes "Moved Too Fast" kick when being teleported while moving
++                {
++                    return;
++                }
++
                  this.playerEntity.onGround = par1Packet10Flying.onGround;
                  this.mcServer.getConfigurationManager().serverUpdateMountedMovingPlayer(this.playerEntity);
 +
@@ -425,7 +428,7 @@
                  this.playerEntity.updateFlyingState(this.playerEntity.posY - d0, par1Packet10Flying.onGround);
              }
              else if (this.currentTicks % 20 == 0)
-@@ -388,21 +613,86 @@
+@@ -388,21 +629,86 @@
       */
      public void setPlayerLocation(double par1, double par3, double par5, float par7, float par8)
      {
@@ -517,7 +520,7 @@
              this.playerEntity.dropOneItem(false);
          }
          else if (par1Packet14BlockDig.status == 3)
-@@ -443,7 +733,10 @@
+@@ -443,7 +749,10 @@
                  double d2 = this.playerEntity.posZ - ((double)k + 0.5D);
                  double d3 = d0 * d0 + d1 * d1 + d2 * d2;
  
@@ -529,7 +532,7 @@
                  {
                      return;
                  }
-@@ -456,13 +749,24 @@
+@@ -456,13 +765,24 @@
  
              if (par1Packet14BlockDig.status == 0)
              {
@@ -554,7 +557,7 @@
                  }
              }
              else if (par1Packet14BlockDig.status == 2)
-@@ -489,6 +793,41 @@
+@@ -489,6 +809,41 @@
      public void handlePlace(Packet15Place par1Packet15Place)
      {
          WorldServer worldserver = this.mcServer.worldServerForDimension(this.playerEntity.dimension);
@@ -596,7 +599,7 @@
          ItemStack itemstack = this.playerEntity.inventory.getCurrentItem();
          boolean flag = false;
          int i = par1Packet15Place.getXPosition();
-@@ -504,7 +843,23 @@
+@@ -504,7 +859,23 @@
                  return;
              }
  
@@ -621,7 +624,7 @@
          }
          else if (par1Packet15Place.getYPosition() >= this.mcServer.getBuildLimit() - 1 && (par1Packet15Place.getDirection() == 1 || par1Packet15Place.getYPosition() >= this.mcServer.getBuildLimit()))
          {
-@@ -513,11 +868,21 @@
+@@ -513,11 +884,21 @@
          }
          else
          {
@@ -648,7 +651,7 @@
              flag = true;
          }
  
-@@ -570,11 +935,19 @@
+@@ -570,11 +951,19 @@
          {
              this.playerEntity.playerInventoryBeingManipulated = true;
              this.playerEntity.inventory.mainInventory[this.playerEntity.inventory.currentItem] = ItemStack.copyItemStack(this.playerEntity.inventory.mainInventory[this.playerEntity.inventory.currentItem]);
@@ -670,7 +673,7 @@
              {
                  this.sendPacketToPlayer(new Packet103SetSlot(this.playerEntity.openContainer.windowId, slot.slotNumber, this.playerEntity.inventory.getCurrentItem()));
              }
-@@ -583,9 +956,21 @@
+@@ -583,9 +972,21 @@
  
      public void handleErrorMessage(String par1Str, Object[] par2ArrayOfObj)
      {
@@ -694,7 +697,7 @@
          this.connectionClosed = true;
  
          if (this.mcServer.isSinglePlayer() && this.playerEntity.getCommandSenderName().equals(this.mcServer.getServerOwner()))
-@@ -601,6 +986,11 @@
+@@ -601,6 +1002,11 @@
       */
      public void unexpectedPacket(Packet par1Packet)
      {
@@ -706,7 +709,7 @@
          this.mcServer.getLogAgent().logWarning(this.getClass() + " wasn\'t prepared to deal with a " + par1Packet.getClass());
          this.kickPlayerFromServer("Protocol error, unexpected packet");
      }
-@@ -625,6 +1015,19 @@
+@@ -625,6 +1031,19 @@
                  return;
              }
          }
@@ -726,7 +729,7 @@
  
          try
          {
-@@ -642,14 +1045,32 @@
+@@ -642,14 +1061,32 @@
  
      public void handleBlockItemSwitch(Packet16BlockItemSwitch par1Packet16BlockItemSwitch)
      {
@@ -759,7 +762,7 @@
          }
      }
  
-@@ -672,7 +1093,39 @@
+@@ -672,7 +1109,39 @@
  
              if (s.length() > 100)
              {
@@ -800,7 +803,7 @@
              }
              else
              {
-@@ -680,51 +1133,328 @@
+@@ -680,51 +1149,328 @@
                  {
                      if (!ChatAllowedCharacters.isAllowedCharacter(s.charAt(i)))
                      {
@@ -1150,7 +1153,7 @@
              this.playerEntity.swingItem();
          }
      }
-@@ -734,7 +1464,37 @@
+@@ -734,7 +1480,37 @@
       */
      public void handleEntityAction(Packet19EntityAction par1Packet19EntityAction)
      {
@@ -1188,7 +1191,7 @@
  
          if (par1Packet19EntityAction.action == 1)
          {
-@@ -785,36 +1545,94 @@
+@@ -785,36 +1561,94 @@
  
      public void handleUseEntity(Packet7UseEntity par1Packet7UseEntity)
      {
@@ -1309,7 +1312,7 @@
                  }
              }
          }
-@@ -828,7 +1646,7 @@
+@@ -828,7 +1662,7 @@
          {
              if (this.playerEntity.playerConqueredTheEnd)
              {
@@ -1318,7 +1321,7 @@
              }
              else if (this.playerEntity.getServerForPlayer().getWorldInfo().isHardcoreModeEnabled())
              {
-@@ -852,7 +1670,7 @@
+@@ -852,7 +1686,7 @@
                      return;
                  }
  
@@ -1327,7 +1330,7 @@
              }
          }
      }
-@@ -874,16 +1692,449 @@
+@@ -874,16 +1708,449 @@
  
      public void handleCloseWindow(Packet101CloseWindow par1Packet101CloseWindow)
      {
@@ -1778,7 +1781,7 @@
  
              if (ItemStack.areItemStacksEqual(par1Packet102WindowClick.itemStack, itemstack))
              {
-@@ -906,6 +2157,14 @@
+@@ -906,6 +2173,14 @@
                  }
  
                  this.playerEntity.sendContainerAndContentsToPlayer(this.playerEntity.openContainer, arraylist);
@@ -1793,7 +1796,7 @@
              }
          }
      }
-@@ -931,8 +2190,59 @@
+@@ -931,8 +2206,59 @@
              boolean flag = par1Packet107CreativeSetSlot.slot < 0;
              ItemStack itemstack = par1Packet107CreativeSetSlot.itemStack;
              boolean flag1 = par1Packet107CreativeSetSlot.slot >= 1 && par1Packet107CreativeSetSlot.slot < 36 + InventoryPlayer.getHotbarSize();
@@ -1854,7 +1857,7 @@
  
              if (flag1 && flag2 && flag3)
              {
-@@ -962,6 +2272,11 @@
+@@ -962,6 +2288,11 @@
  
      public void handleTransaction(Packet106Transaction par1Packet106Transaction)
      {
@@ -1866,7 +1869,7 @@
          Short oshort = (Short)this.field_72586_s.lookup(this.playerEntity.openContainer.windowId);
  
          if (oshort != null && par1Packet106Transaction.shortWindowId == oshort.shortValue() && this.playerEntity.openContainer.windowId == par1Packet106Transaction.windowId && !this.playerEntity.openContainer.isPlayerNotUsingContainer(this.playerEntity))
-@@ -975,6 +2290,11 @@
+@@ -975,6 +2306,11 @@
       */
      public void handleUpdateSign(Packet130UpdateSign par1Packet130UpdateSign)
      {
@@ -1878,7 +1881,7 @@
          this.playerEntity.func_143004_u();
          WorldServer worldserver = this.mcServer.worldServerForDimension(this.playerEntity.dimension);
  
-@@ -989,6 +2309,7 @@
+@@ -989,6 +2325,7 @@
                  if (!tileentitysign.isEditable() || tileentitysign.func_142009_b() != this.playerEntity)
                  {
                      this.mcServer.logWarning("Player " + this.playerEntity.getCommandSenderName() + " just tried to change non-editable sign");
@@ -1886,7 +1889,7 @@
                      return;
                  }
              }
-@@ -1008,7 +2329,7 @@
+@@ -1008,7 +2345,7 @@
                  {
                      for (i = 0; i < par1Packet130UpdateSign.signLines[j].length(); ++i)
                      {
@@ -1895,7 +1898,7 @@
                          {
                              flag = false;
                          }
-@@ -1027,7 +2348,27 @@
+@@ -1027,7 +2364,27 @@
                  int k = par1Packet130UpdateSign.yPosition;
                  i = par1Packet130UpdateSign.zPosition;
                  TileEntitySign tileentitysign1 = (TileEntitySign)tileentity;
@@ -1924,7 +1927,7 @@
                  tileentitysign1.onInventoryChanged();
                  worldserver.markBlockForUpdate(j, k, i);
              }
-@@ -1059,7 +2400,23 @@
+@@ -1059,7 +2416,23 @@
       */
      public void handlePlayerAbilities(Packet202PlayerAbilities par1Packet202PlayerAbilities)
      {
@@ -1949,7 +1952,7 @@
      }
  
      public void handleAutoComplete(Packet203AutoComplete par1Packet203AutoComplete)
-@@ -1073,7 +2430,7 @@
+@@ -1073,7 +2446,7 @@
  
              if (stringbuilder.length() > 0)
              {
@@ -1958,7 +1961,7 @@
              }
          }
  
-@@ -1096,6 +2453,14 @@
+@@ -1096,6 +2469,14 @@
          ItemStack itemstack;
          ItemStack itemstack1;
  
@@ -1973,7 +1976,7 @@
          if ("MC|BEdit".equals(par1Packet250CustomPayload.channel))
          {
              try
-@@ -1112,12 +2477,16 @@
+@@ -1112,12 +2493,16 @@
  
                  if (itemstack != null && itemstack.itemID == Item.writableBook.itemID && itemstack.itemID == itemstack1.itemID)
                  {
@@ -1996,7 +1999,7 @@
              }
          }
          else if ("MC|BSign".equals(par1Packet250CustomPayload.channel))
-@@ -1136,15 +2505,16 @@
+@@ -1136,15 +2521,16 @@
  
                  if (itemstack != null && itemstack.itemID == Item.writtenBook.itemID && itemstack1.itemID == Item.writableBook.itemID)
                  {
@@ -2022,7 +2025,7 @@
              }
          }
          else
-@@ -1166,7 +2536,10 @@
+@@ -1166,7 +2552,10 @@
                  }
                  catch (Exception exception2)
                  {
@@ -2034,7 +2037,7 @@
                  }
              }
              else
-@@ -1199,7 +2572,10 @@
+@@ -1199,7 +2588,10 @@
                          }
                          catch (Exception exception3)
                          {
@@ -2046,7 +2049,7 @@
                          }
                      }
                      else
-@@ -1230,7 +2606,10 @@
+@@ -1230,7 +2622,10 @@
                          }
                          catch (Exception exception4)
                          {
@@ -2058,7 +2061,7 @@
                          }
                      }
                  }
-@@ -1252,6 +2631,13 @@
+@@ -1252,6 +2647,13 @@
                          containerrepair.updateItemName("");
                      }
                  }
