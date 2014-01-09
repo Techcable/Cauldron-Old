@@ -1,0 +1,99 @@
+--- ../src-base/minecraft/net/minecraft/server/dedicated/PropertyManager.java
++++ ../src-work/minecraft/net/minecraft/server/dedicated/PropertyManager.java
+@@ -10,11 +10,13 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++import joptsimple.OptionSet; // CraftBukkit
++
+ @SideOnly(Side.SERVER)
+ public class PropertyManager
+ {
+     private static final Logger field_164440_a = LogManager.getLogger();
+-    private final Properties properties = new Properties();
++    public final Properties properties = new Properties(); // CraftBukkit - private -> public
+     private final File associatedFile;
+     private static final String __OBFID = "CL_00001782";
+ 
+@@ -58,6 +60,26 @@
+         }
+     }
+ 
++    // CraftBukkit start
++    private OptionSet options = null;
++
++    public PropertyManager(final OptionSet options)
++    {
++        this((File) options.valueOf("config"));
++        this.options = options;
++    }
++
++    private <T> T getOverride(String name, T value)
++    {
++        if ((this.options != null) && (this.options.has(name)))
++        {
++            return (T) this.options.valueOf(name);
++        }
++
++        return value;
++    }
++    // CraftBukkit end
++
+     // JAVADOC METHOD $$ func_73666_a
+     public void logMessageAndSave()
+     {
+@@ -72,6 +94,13 @@
+ 
+         try
+         {
++            // CraftBukkit start - Don't attempt writing to file if it's read only
++            if (this.associatedFile.exists() && !this.associatedFile.canWrite())
++            {
++                return;
++            }
++
++            // CraftBukkit end
+             fileoutputstream = new FileOutputStream(this.associatedFile);
+             this.properties.store(fileoutputstream, "Minecraft server properties");
+         }
+@@ -112,7 +141,7 @@
+             this.saveProperties();
+         }
+ 
+-        return this.properties.getProperty(par1Str, par2Str);
++        return this.getOverride(par1Str, this.properties.getProperty(par1Str, par2Str)); // CraftBukkit
+     }
+ 
+     // JAVADOC METHOD $$ func_73669_a
+@@ -120,13 +149,13 @@
+     {
+         try
+         {
+-            return Integer.parseInt(this.getProperty(par1Str, "" + par2));
++            return this.getOverride(par1Str, Integer.parseInt(this.getProperty(par1Str, "" + par2))); // CraftBukkit
+         }
+         catch (Exception exception)
+         {
+             this.properties.setProperty(par1Str, "" + par2);
+             this.saveProperties();
+-            return par2;
++            return this.getOverride(par1Str, par2); // CraftBukkit
+         }
+     }
+ 
+@@ -135,13 +164,13 @@
+     {
+         try
+         {
+-            return Boolean.parseBoolean(this.getProperty(par1Str, "" + par2));
++            return this.getOverride(par1Str, Boolean.parseBoolean(this.getProperty(par1Str, "" + par2))); // CraftBukkit
+         }
+         catch (Exception exception)
+         {
+             this.properties.setProperty(par1Str, "" + par2);
+             this.saveProperties();
+-            return par2;
++            return this.getOverride(par1Str, par2); // CraftBukkit
+         }
+     }
+ 

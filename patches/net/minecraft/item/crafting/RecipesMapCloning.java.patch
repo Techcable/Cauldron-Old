@@ -1,0 +1,22 @@
+--- ../src-base/minecraft/net/minecraft/item/crafting/RecipesMapCloning.java
++++ ../src-work/minecraft/net/minecraft/item/crafting/RecipesMapCloning.java
+@@ -4,11 +4,17 @@
+ import net.minecraft.inventory.InventoryCrafting;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.world.World;
+-
+-public class RecipesMapCloning implements IRecipe
++public class RecipesMapCloning extends ShapelessRecipes implements IRecipe   // CraftBukkit - added extends
+ {
+     private static final String __OBFID = "CL_00000087";
+ 
++    // CraftBukkit start - Delegate to new parent class
++    public RecipesMapCloning()
++    {
++        super(new ItemStack(Items.filled_map, 0, -1), java.util.Arrays.asList(new ItemStack(Items.map, 0, 0)));
++    }
++    // CraftBukkit end
++
+     // JAVADOC METHOD $$ func_77569_a
+     public boolean matches(InventoryCrafting par1InventoryCrafting, World par2World)
+     {

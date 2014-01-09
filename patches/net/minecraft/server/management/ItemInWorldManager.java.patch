@@ -1,0 +1,347 @@
+--- ../src-base/minecraft/net/minecraft/server/management/ItemInWorldManager.java
++++ ../src-work/minecraft/net/minecraft/server/management/ItemInWorldManager.java
+@@ -4,6 +4,7 @@
+ import net.minecraft.block.material.Material;
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.entity.player.EntityPlayerMP;
++import net.minecraft.item.Item;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.item.ItemSword;
+ import net.minecraft.network.play.server.S23PacketBlockChange;
+@@ -13,13 +14,28 @@
+ import net.minecraft.world.WorldSettings;
+ import net.minecraftforge.common.ForgeHooks;
+ import net.minecraftforge.common.MinecraftForge;
+-import cpw.mods.fml.common.eventhandler.Event;
+ import net.minecraftforge.event.ForgeEventFactory;
+ import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
+-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+-import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
+ import net.minecraftforge.event.world.BlockEvent;
+ 
++// CraftBukkit start
++import net.minecraft.init.Blocks;
++
++import org.bukkit.event.block.BlockBreakEvent;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.craftbukkit.inventory.CraftInventory;
++import org.bukkit.event.Event;
++import org.bukkit.event.block.Action;
++import org.bukkit.event.player.PlayerInteractEvent;
++// CraftBukkit end
++// MCPC+ start
++import net.minecraft.inventory.ContainerPlayer;
++import net.minecraft.inventory.IInventory;
++import net.minecraft.server.MinecraftServer;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
++import org.bukkit.event.inventory.InventoryType;
++// MCPC+ end
++
+ public class ItemInWorldManager
+ {
+     /** Forge reach distance */
+@@ -142,52 +158,93 @@
+     // JAVADOC METHOD $$ func_73074_a
+     public void onBlockClicked(int par1, int par2, int par3, int par4)
+     {
++        // CraftBukkit start
++        org.bukkit.event.player.PlayerInteractEvent cbEvent = CraftEventFactory.callPlayerInteractEvent(this.thisPlayerMP, Action.LEFT_CLICK_BLOCK, par1, par2, par3, par4, this.thisPlayerMP.inventory.getCurrentItem());
++
+         if (!this.gameType.isAdventure() || this.thisPlayerMP.isCurrentToolAdventureModeExempt(par1, par2, par3))
+         {
+-            PlayerInteractEvent event = ForgeEventFactory.onPlayerInteract(thisPlayerMP, Action.LEFT_CLICK_BLOCK, par1, par2, par3, par4);
+-            if (event.isCanceled())
++            net.minecraftforge.event.entity.player.PlayerInteractEvent event = ForgeEventFactory.onPlayerInteract(this.thisPlayerMP, net.minecraftforge.event.entity.player.PlayerInteractEvent.Action.LEFT_CLICK_BLOCK, par1, par2, par3, par4); // Forge
++
++           if (cbEvent.isCancelled() || event.isCanceled())
+             {
+-                thisPlayerMP.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, theWorld));
++                // Let the client know the block still exists
++                ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
++                // Update any tile entity data for this block
++                TileEntity tileentity = this.theWorld.func_147438_o(par1, par2, par3);
++
++                if (tileentity != null)
++                {
++                    this.thisPlayerMP.playerNetServerHandler.func_147359_a(tileentity.func_145844_m());
++                }
++
+                 return;
+             }
+ 
++            // CraftBukkit end
+             if (this.isCreative())
+             {
+-                if (!this.theWorld.extinguishFire((EntityPlayer)null, par1, par2, par3, par4))
++                if (!this.theWorld.extinguishFire((EntityPlayer) null, par1, par2, par3, par4))
+                 {
+                     this.tryHarvestBlock(par1, par2, par3);
+                 }
+             }
+             else
+             {
++                // this.world.douseFire((EntityHuman) null, i, j, k, l); // CraftBukkit - Moved down
+                 this.initialDamage = this.curblockDamage;
+                 float f = 1.0F;
+                 Block block = this.theWorld.func_147439_a(par1, par2, par3);
+ 
+-                
+-                if (!block.isAir(theWorld, par1, par2, par3))
++                // CraftBukkit start - Swings at air do *NOT* exist.
++                if (cbEvent.useInteractedBlock() == org.bukkit.event.Event.Result.DENY || event.useBlock == cpw.mods.fml.common.eventhandler.Event.Result.DENY)   // MCPC
+                 {
+-                    if (event.useBlock != Event.Result.DENY)
++                    // If we denied a door from opening, we need to send a correcting update to the client, as it already opened the door.
++                    if (block == Blocks.wooden_door)
+                     {
+-                        block.func_149699_a(theWorld, par1, par2, par3, thisPlayerMP);
+-                        theWorld.extinguishFire(thisPlayerMP, par1, par2, par3, par4);
++                        // For some reason *BOTH* the bottom/top part have to be marked updated.
++                        boolean bottom = (this.theWorld.getBlockMetadata(par1, par2, par3) & 8) == 0;
++                        ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
++                        ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2 + (bottom ? 1 : -1), par3, this.theWorld));
+                     }
+-                    else
++                    else if (block == Blocks.trapdoor)
+                     {
+-                        thisPlayerMP.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, theWorld));
++                        ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
+                     }
+-                    f = block.func_149737_a(thisPlayerMP, thisPlayerMP.worldObj, par1, par2, par3);
+                 }
+-
+-                if (event.useItem == Event.Result.DENY)
++                else if (!block.isAir(theWorld, par1, par2, par3))
+                 {
+-                    if (f >= 1.0f)
++                    block.func_149699_a(this.theWorld, par1, par2, par3, this.thisPlayerMP);
++                    f = block.func_149737_a(this.thisPlayerMP, this.thisPlayerMP.worldObj, par1, par2, par3);
++                    // Allow fire punching to be blocked
++                    this.theWorld.extinguishFire((EntityPlayer) null, par1, par2, par3, par4);
++                }
++                if (cbEvent.useItemInHand() == org.bukkit.event.Event.Result.DENY || event.useItem == cpw.mods.fml.common.eventhandler.Event.Result.DENY)   // Forge
++                {
++                    // If we 'insta destroyed' then the client needs to be informed.
++                    if (f > 1.0f)
+                     {
+-                        thisPlayerMP.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, theWorld));
++                        ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
+                     }
++
+                     return;
+                 }
+ 
++                org.bukkit.event.block.BlockDamageEvent blockEvent = CraftEventFactory.callBlockDamageEvent(this.thisPlayerMP, par1, par2, par3, this.thisPlayerMP.inventory.getCurrentItem(), f >= 1.0f);
++
++                if (blockEvent.isCancelled())
++                {
++                    // Let the client know the block still exists
++                    ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
++                    return;
++                }
++
++                if (blockEvent.getInstaBreak())
++                {
++                    f = 2.0f;
++                }
++
++                // CraftBukkit end
++
+                 if (!block.isAir(theWorld, par1, par2, par3) && f >= 1.0F)
+                 {
+                     this.tryHarvestBlock(par1, par2, par3);
+@@ -203,6 +260,8 @@
+                     this.durabilityRemainingOnBlock = i1;
+                 }
+             }
++
++            theWorld.spigotConfig.antiXrayInstance.updateNearbyBlocks(theWorld, par1, par2, par3); // Spigot
+         }
+     }
+ 
+@@ -264,18 +323,34 @@
+     {
+         BlockEvent.BreakEvent event = ForgeHooks.onBlockBreakEvent(theWorld, gameType, thisPlayerMP, par1, par2, par3);
+         if (event.isCanceled())
++                {
++                return false;
++            }
++        else
+         {
++        ItemStack stack = thisPlayerMP.getCurrentEquippedItem();
++        if (stack != null && stack.getItem().onBlockStartBreak(stack, par1, par2, par3, thisPlayerMP))
++        {
+             return false;
+         }
+-        else
+-        {
+-            ItemStack stack = thisPlayerMP.getCurrentEquippedItem();
+-            if (stack != null && stack.getItem().onBlockStartBreak(stack, par1, par2, par3, thisPlayerMP))
++
++            Block block = this.theWorld.func_147439_a(par1, par2, par3);
++
++            if (block == Blocks.air)
+             {
+-                return false;
++                return false;    // CraftBukkit - A plugin set block to air without cancelling
+             }
+-            Block block = this.theWorld.func_147439_a(par1, par2, par3);
++
+             int l = this.theWorld.getBlockMetadata(par1, par2, par3);
++
++            // CraftBukkit start - Special case skulls, their item data comes from a tile entity
++            if (block == Blocks.skull && !this.isCreative())
++            {
++                block.func_149690_a(theWorld, par1, par2, par3, l, 1.0F, 0);
++                return this.removeBlock(par1, par2, par3);
++            }
++
++            // CraftBukkit end
+             this.theWorld.playAuxSFXAtEntity(this.thisPlayerMP, 2001, par1, par2, par3, Block.func_149682_b(block) + (this.theWorld.getBlockMetadata(par1, par2, par3) << 12));
+             boolean flag = false;
+ 
+@@ -356,59 +431,107 @@
+     }
+ 
+     // JAVADOC METHOD $$ func_73078_a
+-    public boolean activateBlockOrUseItem(EntityPlayer par1EntityPlayer, World par2World, ItemStack par3ItemStack, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
++    public boolean activateBlockOrUseItem(EntityPlayer par1EntityPlayer, World par2World, ItemStack par3ItemStack, int par4, int par5, int par6, int par7, float par8, float par9, float par10) // MCPC+ - manually merge whole method by hand
+     {
+-        PlayerInteractEvent event = ForgeEventFactory.onPlayerInteract(par1EntityPlayer, Action.RIGHT_CLICK_BLOCK, par4, par5, par6, par7);
+-        if (event.isCanceled())
+-        {
+-            thisPlayerMP.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par4, par5, par6, theWorld));
+-            return false;
+-        }
+-
+-        if (par3ItemStack != null && par3ItemStack.getItem().onItemUseFirst(par3ItemStack, par1EntityPlayer, par2World, par4, par5, par6, par7, par8, par9, par10))
+-        {
+-            if (par3ItemStack.stackSize <= 0) ForgeEventFactory.onPlayerDestroyItem(thisPlayerMP, par3ItemStack);
+-            return true;
+-        }
+-
++        // CraftBukkit start - Interact
+         Block block = par2World.func_147439_a(par4, par5, par6);
+-        boolean isAir = block.isAir(par2World, par4, par5, par6);
+-        boolean useBlock = !par1EntityPlayer.isSneaking() || par1EntityPlayer.getHeldItem() == null;
+-        if (!useBlock) useBlock = par1EntityPlayer.getHeldItem().getItem().doesSneakBypassUse(par2World, par4, par5, par6, par1EntityPlayer);
++        boolean isAir = block.isAir(par2World, par4, par5, par6); // MCPC+
+         boolean result = false;
+ 
+-        if (useBlock)
++        if (!isAir)
+         {
+-            if (event.useBlock != Event.Result.DENY)
++            org.bukkit.event.player.PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(par1EntityPlayer, org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK, par4, par5, par6, par7, par3ItemStack);
++            net.minecraftforge.event.entity.player.PlayerInteractEvent forgeEvent = ForgeEventFactory.onPlayerInteract(par1EntityPlayer, net.minecraftforge.event.entity.player.PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK, par4, par5, par6, par7);
++            // MCPC+ start
++            // if forge event is explicitly cancelled, return
++            if (forgeEvent.isCanceled())
+             {
++                thisPlayerMP.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par4, par5, par6, theWorld));
++                return false;
++            }
++            // if we have no explicit deny, check if item can be used
++            if (event.useItemInHand() != org.bukkit.event.Event.Result.DENY && forgeEvent.useItem != cpw.mods.fml.common.eventhandler.Event.Result.DENY)
++            {
++                Item item = (par3ItemStack != null ? par3ItemStack.getItem() : null);
++                // try to use an item in hand before activating a block. Used for items such as IC2's wrench.
++                if (item != null && item.onItemUseFirst(par3ItemStack, par1EntityPlayer, par2World, par4, par5, par6, par7, par8, par9, par10))
++                {
++                    if (par3ItemStack.stackSize <= 0) ForgeEventFactory.onPlayerDestroyItem(thisPlayerMP, par3ItemStack);
++                        return true;
++                }
++            }
++            // MCPC+ end
++            if (event.useInteractedBlock() == org.bukkit.event.Event.Result.DENY || forgeEvent.useBlock == cpw.mods.fml.common.eventhandler.Event.Result.DENY)
++            {
++                // If we denied a door from opening, we need to send a correcting update to the client, as it already opened the door.
++                if (block == Blocks.wooden_door)
++                {
++                    boolean bottom = (par2World.getBlockMetadata(par4, par5, par6) & 8) == 0;
++                    ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par4, par5 + (bottom ? 1 : -1), par6, par2World));
++                }
++
++                result = (event.useItemInHand() != org.bukkit.event.Event.Result.ALLOW);
++            }
++            else if (!par1EntityPlayer.isSneaking() || par3ItemStack == null || par1EntityPlayer.getHeldItem().getItem().doesSneakBypassUse(par2World, par4, par5, par6, par1EntityPlayer))
++            {
+                 result = block.func_149727_a(par2World, par4, par5, par6, par1EntityPlayer, par7, par8, par9, par10);
++                // MCPC+ start - if bukkitView is null, create one. Required for Ender Chests since they do not use NetworkRegistry.openRemoteGUI
++                if (thisPlayerMP != null && !(thisPlayerMP.openContainer instanceof ContainerPlayer))
++                {
++                    if (thisPlayerMP.openContainer.getBukkitView() == null)
++                    {
++                        TileEntity te = thisPlayerMP.worldObj.func_147438_o(par4, par5, par6);
++                        if (te != null && te instanceof IInventory)
++                        {
++                            IInventory teInv = (IInventory)te;
++                            CraftInventory inventory = new CraftInventory(teInv);
++                            thisPlayerMP.openContainer.bukkitView = new CraftInventoryView(thisPlayerMP.getBukkitEntity(), inventory, thisPlayerMP.openContainer);
++                        }
++                        else
++                        {
++                            thisPlayerMP.openContainer.bukkitView = new CraftInventoryView(thisPlayerMP.getBukkitEntity(), MinecraftServer.getServer().server.createInventory(thisPlayerMP.getBukkitEntity(), InventoryType.CHEST), thisPlayerMP.openContainer);
++                        }
++
++                        thisPlayerMP.openContainer = CraftEventFactory.callInventoryOpenEvent(thisPlayerMP, thisPlayerMP.openContainer, false);
++                        if (thisPlayerMP.openContainer == null)
++                        {
++                            thisPlayerMP.openContainer = thisPlayerMP.inventoryContainer;
++                            return false;
++                        }
++                    }
++                }
++                // MCPC+ end
+             }
+-            else
++
++            if (par3ItemStack != null && !result)
+             {
+-                thisPlayerMP.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par4, par5, par6, theWorld));
+-                result = event.useItem != Event.Result.ALLOW;
++                int meta = par3ItemStack.getItemDamage();
++                int size = par3ItemStack.stackSize;
++                result = par3ItemStack.tryPlaceItemIntoWorld(par1EntityPlayer, par2World, par4, par5, par6, par7, par8, par9, par10);
++
++                // The item count should not decrement in Creative mode.
++                if (this.isCreative())
++                {
++                    par3ItemStack.setItemDamage(meta);
++                    par3ItemStack.stackSize = size;
++                }
++
++                if (par3ItemStack.stackSize <= 0)
++                {
++                    ForgeEventFactory.onPlayerDestroyItem(this.thisPlayerMP, par3ItemStack);
++                }
+             }
+-        }
+ 
+-        if (par3ItemStack != null && !result && event.useItem != Event.Result.DENY)
+-        {
+-            int meta = par3ItemStack.getItemDamage();
+-            int size = par3ItemStack.stackSize;
+-            result = par3ItemStack.tryPlaceItemIntoWorld(par1EntityPlayer, par2World, par4, par5, par6, par7, par8, par9, par10);
+-            if (isCreative())
++            // If we have 'true' and no explicit deny *or* an explicit allow -- run the item part of the hook
++            if (/*!noTryItem(par2World, par4, par5, par6) && */// MCPC+
++                    par3ItemStack != null && ((!result && event.useItemInHand() != org.bukkit.event.Event.Result.DENY) || event.useItemInHand() == org.bukkit.event.Event.Result.ALLOW))
+             {
+-                par3ItemStack.setItemDamage(meta);
+-                par3ItemStack.stackSize = size;
++                this.tryUseItem(par1EntityPlayer, par2World, par3ItemStack);
+             }
+-            if (par3ItemStack.stackSize <= 0) ForgeEventFactory.onPlayerDestroyItem(thisPlayerMP, par3ItemStack);
+         }
+ 
+-        /* Re-enable if this causes bukkit incompatibility, or re-write client side to only send a single packet per right click.
+-        if (par3ItemStack != null && ((!result && event.useItem != Event.Result.DENY) || event.useItem == Event.Result.ALLOW))
+-        {
+-            this.tryUseItem(thisPlayerMP, par2World, par3ItemStack);
+-        }*/
+         return result;
++        // CraftBukkit end
+     }
+ 
+     // JAVADOC METHOD $$ func_73080_a

@@ -1,0 +1,28 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemBed.java
++++ ../src-work/minecraft/net/minecraft/item/ItemBed.java
+@@ -19,6 +19,8 @@
+     // JAVADOC METHOD $$ func_77648_a
+     public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
+     {
++        final int clickedX = par4, clickedY = par5, clickedZ = par6; // CraftBukkit
++
+         if (par3World.isRemote)
+         {
+             return true;
+@@ -59,8 +61,15 @@
+             {
+                 if (par3World.func_147437_c(par4, par5, par6) && par3World.func_147437_c(par4 + b0, par5, par6 + b1) && World.func_147466_a(par3World, par4, par5 - 1, par6) && World.func_147466_a(par3World, par4 + b0, par5 - 1, par6 + b1))
+                 {
+-                    par3World.func_147465_d(par4, par5, par6, blockbed, i1, 3);
++                    // CraftBukkit start
++                    // world.setTypeAndData(i, j, k, blockbed, i1, 3);
++                    if (!ItemBlock.processBlockPlace(par3World, par2EntityPlayer, null, par4, par5, par6, blockbed, i1, clickedX, clickedY, clickedZ))
++                    {
++                        return false;
++                    }
+ 
++                    // CraftBukkit end
++
+                     if (par3World.func_147439_a(par4, par5, par6) == blockbed)
+                     {
+                         par3World.func_147465_d(par4 + b0, par5, par6 + b1, blockbed, i1 + 8, 3);

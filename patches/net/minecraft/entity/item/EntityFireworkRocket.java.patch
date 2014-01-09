@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/entity/item/EntityFireworkRocket.java
++++ ../src-work/minecraft/net/minecraft/entity/item/EntityFireworkRocket.java
+@@ -13,7 +13,7 @@
+     // JAVADOC FIELD $$ field_92056_a
+     private int fireworkAge;
+     // JAVADOC FIELD $$ field_92055_b
+-    private int lifetime;
++    public int lifetime; // CraftBukkit - private -> public
+     private static final String __OBFID = "CL_00001718";
+ 
+     public EntityFireworkRocket(World par1World)

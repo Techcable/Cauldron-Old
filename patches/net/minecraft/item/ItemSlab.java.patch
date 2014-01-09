@@ -1,0 +1,26 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemSlab.java
++++ ../src-work/minecraft/net/minecraft/item/ItemSlab.java
+@@ -47,6 +47,8 @@
+     // JAVADOC METHOD $$ func_77648_a
+     public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
+     {
++        final int clickedX = par4, clickedY = par5, clickedZ = par6; // CraftBukkit
++
+         if (this.field_150948_b)
+         {
+             return super.onItemUse(par1ItemStack, par2EntityPlayer, par3World, par4, par5, par6, par7, par8, par9, par10);
+@@ -68,9 +70,12 @@
+ 
+             if ((par7 == 1 && !flag || par7 == 0 && flag) && block == this.field_150949_c && j1 == par1ItemStack.getItemDamage())
+             {
+-                if (par3World.checkNoEntityCollision(this.field_150947_d.func_149668_a(par3World, par4, par5, par6)) && par3World.func_147465_d(par4, par5, par6, this.field_150947_d, j1, 3))
++                // CraftBukkit start - world.setTypeIdAndData -> processBlockPlace()
++                // if (par3World.checkNoEntityCollision(this.field_150947_d.func_149668_a(par3World, par4, par5, par6)) && par3World.func_147465_d(par4, par5, par6, this.field_150947_d, j1, 3)) {
++                if (par3World.checkNoEntityCollision(this.field_150947_d.func_149668_a(par3World, par4, par5, par6)) && processBlockPlace(par3World, par2EntityPlayer, null, par4, par5, par6, this.field_150947_d, j1, clickedX, clickedY, clickedZ))
+                 {
+-                    par3World.playSoundEffect((double)((float)par4 + 0.5F), (double)((float)par5 + 0.5F), (double)((float)par6 + 0.5F), this.field_150947_d.field_149762_H.func_150496_b(), (this.field_150947_d.field_149762_H.func_150497_c() + 1.0F) / 2.0F, this.field_150947_d.field_149762_H.func_150494_d() * 0.8F);
++                    // par3World.playSoundEffect((double)((float)par4 + 0.5F), (double)((float)par5 + 0.5F), (double)((float)par6 + 0.5F), this.field_150947_d.field_149762_H.func_150496_b(), (this.field_150947_d.field_149762_H.func_150497_c() + 1.0F) / 2.0F, this.field_150947_d.field_149762_H.func_150494_d() * 0.8F);
++                    // CraftBukkit end
+                     --par1ItemStack.stackSize;
+                 }
+ 

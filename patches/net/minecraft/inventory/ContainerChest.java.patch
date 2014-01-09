@@ -1,0 +1,75 @@
+--- ../src-base/minecraft/net/minecraft/inventory/ContainerChest.java
++++ ../src-work/minecraft/net/minecraft/inventory/ContainerChest.java
+@@ -3,10 +3,46 @@
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.item.ItemStack;
+ 
++// CraftBukkit start
++import net.minecraft.entity.player.InventoryPlayer;
++import org.bukkit.craftbukkit.inventory.CraftInventory;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
++// CraftBukkit end
++
+ public class ContainerChest extends Container
+ {
+-    private IInventory lowerChestInventory;
++    public IInventory lowerChestInventory; // CraftBukkit - private->public
+     private int numRows;
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private InventoryPlayer player;
++
++    public CraftInventoryView getBukkitView()
++    {
++        if (bukkitEntity != null)
++        {
++            return bukkitEntity;
++        }
++
++        CraftInventory inventory;
++
++        if (this.lowerChestInventory instanceof InventoryPlayer)
++        {
++            inventory = new org.bukkit.craftbukkit.inventory.CraftInventoryPlayer((InventoryPlayer) this.lowerChestInventory);
++        }
++        else if (this.lowerChestInventory instanceof InventoryLargeChest)
++        {
++            inventory = new org.bukkit.craftbukkit.inventory.CraftInventoryDoubleChest((InventoryLargeChest) this.lowerChestInventory);
++        }
++        else
++        {
++            inventory = new CraftInventory(this.lowerChestInventory);
++        }
++
++        bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+     private static final String __OBFID = "CL_00001742";
+ 
+     public ContainerChest(IInventory par1IInventory, IInventory par2IInventory)
+@@ -15,6 +51,10 @@
+         this.numRows = par2IInventory.getSizeInventory() / 9;
+         par2IInventory.openChest();
+         int i = (this.numRows - 4) * 18;
++        // CraftBukkit start - Save player
++        // TODO: Should we check to make sure it really is an InventoryPlayer?
++        this.player = (InventoryPlayer) par1IInventory;
++        // CraftBukkit end
+         int j;
+         int k;
+ 
+@@ -42,6 +82,13 @@
+ 
+     public boolean canInteractWith(EntityPlayer par1EntityPlayer)
+     {
++        // CraftBukkit start
++        if (!this.checkReachable)
++        {
++            return true;
++        }
++        // CraftBukkit end
++
+         return this.lowerChestInventory.isUseableByPlayer(par1EntityPlayer);
+     }
+ 

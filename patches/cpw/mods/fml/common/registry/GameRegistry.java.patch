@@ -1,0 +1,118 @@
+--- ../src-base/minecraft/cpw/mods/fml/common/registry/GameRegistry.java
++++ ../src-work/minecraft/cpw/mods/fml/common/registry/GameRegistry.java
+@@ -38,7 +38,6 @@
+ import com.google.common.collect.ImmutableList;
+ import com.google.common.collect.Lists;
+ import com.google.common.collect.Maps;
+-import com.google.common.collect.ObjectArrays;
+ import com.google.common.collect.Sets;
+ import com.google.common.primitives.Ints;
+ 
+@@ -49,6 +48,7 @@
+ import cpw.mods.fml.common.LoaderException;
+ import cpw.mods.fml.common.LoaderState;
+ import cpw.mods.fml.common.ObfuscationReflectionHelper;
++import java.util.HashMap; // MCPC+
+ 
+ public class GameRegistry
+ {
+@@ -56,6 +56,10 @@
+     private static Map<IWorldGenerator, Integer> worldGeneratorIndex = Maps.newHashMap();
+     private static List<IFuelHandler> fuelHandlers = Lists.newArrayList();
+     private static List<IWorldGenerator> sortedGeneratorList;
++    // MCPC+ start
++    private static Map<String, Boolean> configWorldGenCache = new HashMap<String, Boolean>();
++    private static Map<String, String> worldGenMap = new HashMap<String, String>();
++    // MCPC+ end
+ 
+     /**
+      * Register a world generator - something that inserts new block types into the world
+@@ -66,12 +70,18 @@
+      */
+     public static void registerWorldGenerator(IWorldGenerator generator, int modGenerationWeight)
+     {
++        // MCPC+ start - mod id's are not available during generateWorld so we must capture them here
++        String modId = Loader.instance().activeModContainer().getModId();
++        modId = modId.replaceAll("[^A-Za-z0-9]", ""); // remove all non-digits/alphanumeric
++        modId.replace(" ", "_");
+         worldGenerators.add(generator);
+         worldGeneratorIndex.put(generator, modGenerationWeight);
+         if (sortedGeneratorList != null)
+         {
+             sortedGeneratorList = null;
+         }
++        worldGenMap.put(generator.getClass().getName(), modId);
++        // MCPC+ end
+     }
+ 
+     /**
+@@ -96,11 +106,28 @@
+         long zSeed = fmlRandom.nextLong() >> 2 + 1L;
+         long chunkSeed = (xSeed * chunkX + zSeed * chunkZ) ^ worldSeed;
+ 
+-        for (IWorldGenerator generator : sortedGeneratorList)
++        boolean before = ((net.minecraft.world.WorldServer)world).theChunkProviderServer.loadChunkOnProvideRequest; // MCPC+ store value
++        ((net.minecraft.world.WorldServer)world).theChunkProviderServer.loadChunkOnProvideRequest = true; // MCPC+ load chunks on provide requests
++        for (IWorldGenerator generator : worldGenerators)
+         {
+-            fmlRandom.setSeed(chunkSeed);
+-            generator.generate(fmlRandom, chunkX, chunkZ, world, chunkGenerator, chunkProvider);
++        // MCPC+ start
++            if (!configWorldGenCache.containsKey(generator.getClass().getName()))
++            {
++                String modId = worldGenMap.get(generator.getClass().getName());
++                String generatorName = "";
++                generatorName = modId + "-" + generator.getClass().getSimpleName();
++                boolean generatorEnabled = world.mcpcConfig.getBoolean("worldgen-" + generatorName, true);
++                configWorldGenCache.put(generator.getClass().getName(), generatorEnabled);
++            }
++            if (configWorldGenCache.get(generator.getClass().getName()))
++            {
++                fmlRandom.setSeed(chunkSeed);
++                generator.generate(fmlRandom, chunkX, chunkZ, world, chunkGenerator, chunkProvider);
++            }
+         }
++        world.mcpcConfig.save();
++        ((net.minecraft.world.WorldServer)world).theChunkProviderServer.loadChunkOnProvideRequest = before; // reset
++        // MCPC+ end
+     }
+ 
+     private static void computeSortedGeneratorList()
+@@ -166,7 +193,7 @@
+      * @param name The mod-unique name to register it with
+      * @param modId The modId that will own the block name. null defaults to the active modId
+      */
+-    public static Block registerBlock(Block block, Class<? extends ItemBlock> itemclass, String name, String modId, Object... itemCtorArgs)
++    public static Block registerBlock(Block block, Class<? extends ItemBlock> itemclass, String name, String modId)
+     {
+         if (Loader.instance().isInState(LoaderState.CONSTRUCTING))
+         {
+@@ -178,14 +205,8 @@
+             ItemBlock i = null;
+             if (itemclass != null)
+             {
+-                Class<?>[] ctorArgClasses = new Class<?>[itemCtorArgs.length + 1];
+-                ctorArgClasses[0] = Block.class;
+-                for (int idx = 1; idx < ctorArgClasses.length; idx++)
+-                {
+-                    ctorArgClasses[idx] = itemCtorArgs[idx-1].getClass();
+-                }
+-                Constructor<? extends ItemBlock> itemCtor = itemclass.getConstructor(ctorArgClasses);
+-                i = itemCtor.newInstance(ObjectArrays.concat(block, itemCtorArgs));
++                Constructor<? extends ItemBlock> itemCtor = itemclass.getConstructor(Block.class);
++                i = itemCtor.newInstance(block);
+             }
+             if (i != null)
+             {
+@@ -235,11 +256,6 @@
+         FurnaceRecipes.smelting().func_151396_a(input, output, xp);
+     }
+ 
+-    public static void addSmelting(ItemStack input, ItemStack output, float xp)
+-    {
+-        FurnaceRecipes.smelting().func_151394_a(input, output, xp);
+-    }
+-
+     public static void registerTileEntity(Class<? extends TileEntity> tileEntityClass, String id)
+     {
+         TileEntity.func_145826_a(tileEntityClass, id);

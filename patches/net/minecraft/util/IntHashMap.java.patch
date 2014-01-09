@@ -1,0 +1,29 @@
+--- ../src-base/minecraft/net/minecraft/util/IntHashMap.java
++++ ../src-work/minecraft/net/minecraft/util/IntHashMap.java
+@@ -16,7 +16,7 @@
+     // JAVADOC FIELD $$ field_76052_e
+     private transient volatile int versionStamp;
+     // JAVADOC FIELD $$ field_76050_f
+-    private Set keySet = new HashSet();
++    // private Set keySet = new HashSet(); // CraftBukkit - expensive and unused
+     private static final String __OBFID = "CL_00001490";
+ 
+     // JAVADOC METHOD $$ func_76044_g
+@@ -73,7 +73,7 @@
+     // JAVADOC METHOD $$ func_76038_a
+     public void addKey(int par1, Object par2Obj)
+     {
+-        this.keySet.add(Integer.valueOf(par1));
++        // this.keySet.add(Integer.valueOf(par1)); // CraftBukkit
+         int j = computeHash(par1);
+         int k = getSlotIndex(j, this.slots.length);
+ 
+@@ -140,7 +140,7 @@
+     // JAVADOC METHOD $$ func_76049_d
+     public Object removeObject(int par1)
+     {
+-        this.keySet.remove(Integer.valueOf(par1));
++        // this.keySet.remove(Integer.valueOf(par1)); // CraftBukkit
+         IntHashMap.Entry entry = this.removeEntry(par1);
+         return entry == null ? null : entry.valueEntry;
+     }

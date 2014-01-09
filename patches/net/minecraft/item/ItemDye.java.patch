@@ -1,0 +1,87 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemDye.java
++++ ../src-work/minecraft/net/minecraft/item/ItemDye.java
+@@ -23,6 +23,14 @@
+ import net.minecraftforge.common.util.FakePlayerFactory;
+ import net.minecraftforge.event.entity.player.BonemealEvent;
+ 
++// CraftBukkit start
++import net.minecraft.block.BlockMushroom;
++import net.minecraft.block.BlockSapling;
++import net.minecraft.entity.player.EntityPlayerMP;
++import org.bukkit.entity.Player;
++import org.bukkit.event.entity.SheepDyeWoolEvent;
++// CraftBukkit end
++
+ public class ItemDye extends Item
+ {
+     public static final String[] field_150923_a = new String[] {"black", "red", "green", "brown", "blue", "purple", "cyan", "silver", "gray", "pink", "lime", "yellow", "lightBlue", "magenta", "orange", "white"};
+@@ -57,6 +65,8 @@
+     // JAVADOC METHOD $$ func_77648_a
+     public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
+     {
++        final int clickedX = par4, clickedY = par5, clickedZ = par6; // CraftBukkit
++
+         if (!par2EntityPlayer.canPlayerEdit(par4, par5, par6, par7, par1ItemStack))
+         {
+             return false;
+@@ -115,8 +125,15 @@
+                     if (par3World.func_147437_c(par4, par5, par6))
+                     {
+                         int j1 = Blocks.cocoa.func_149660_a(par3World, par4, par5, par6, par7, par8, par9, par10, 0);
+-                        par3World.func_147465_d(par4, par5, par6, Blocks.cocoa, j1, 2);
+ 
++                        // CraftBukkit start
++                        // par3World.func_147465_d(par4, par5, par6, Blocks.cocoa, j1, 2);
++                        if (!ItemBlock.processBlockPlace(par3World, par2EntityPlayer, par1ItemStack, par4, par5, par6, Blocks.cocoa, j1, clickedX, clickedY, clickedZ))
++                        {
++                            return false;
++                        }
++
++                        // CraftBukkit end
+                         if (!par2EntityPlayer.capabilities.isCreativeMode)
+                         {
+                             --par1ItemStack.stackSize;
+@@ -167,7 +184,23 @@
+                 {
+                     if (igrowable.func_149852_a(p_150919_1_, p_150919_1_.rand, p_150919_2_, p_150919_3_, p_150919_4_))
+                     {
+-                        igrowable.func_149853_b(p_150919_1_, p_150919_1_.rand, p_150919_2_, p_150919_3_, p_150919_4_);
++                        // CraftBukkit start - Special case BlockSapling and BlockMushroom to use our methods
++                        if (block instanceof BlockSapling)
++                        {
++                            Player entityplayer = (player instanceof EntityPlayerMP) ? (Player) player.getBukkitEntity() : null;
++                            ((BlockSapling) block).grow(p_150919_1_, p_150919_2_, p_150919_3_, p_150919_4_, p_150919_1_.rand, true, entityplayer, null);
++                        }
++                        else if (block instanceof BlockMushroom)
++                        {
++                            Player entityplayer = (player instanceof EntityPlayerMP) ? (Player) player.getBukkitEntity() : null;
++                            ((BlockMushroom) block).fertilizeMushroom(p_150919_1_, p_150919_2_, p_150919_3_, p_150919_4_, p_150919_1_.rand, true, entityplayer, null);
++                        }
++                        else
++                        {
++                            igrowable.func_149853_b(p_150919_1_, p_150919_1_.rand, p_150919_2_, p_150919_3_, p_150919_4_);
++                        }
++
++                        // CraftBukkit end
+                     }
+ 
+                     --p_150919_0_.stackSize;
+@@ -224,6 +257,18 @@
+ 
+             if (!entitysheep.getSheared() && entitysheep.getFleeceColor() != i)
+             {
++                // CraftBukkit start
++                byte bColor = (byte) i;
++                SheepDyeWoolEvent event = new SheepDyeWoolEvent((org.bukkit.entity.Sheep) entitysheep.getBukkitEntity(), org.bukkit.DyeColor.getByData(bColor));
++                entitysheep.worldObj.getServer().getPluginManager().callEvent(event);
++
++                if (event.isCancelled())
++                {
++                    return false;
++                }
++
++                i = (byte) event.getColor().getWoolData();
++                // CraftBukkit end
+                 entitysheep.setFleeceColor(i);
+                 --par1ItemStack.stackSize;
+             }

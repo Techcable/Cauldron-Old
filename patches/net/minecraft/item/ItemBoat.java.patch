@@ -1,0 +1,19 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemBoat.java
++++ ../src-work/minecraft/net/minecraft/item/ItemBoat.java
+@@ -81,7 +81,16 @@
+                     i = movingobjectposition.blockX;
+                     int j = movingobjectposition.blockY;
+                     int k = movingobjectposition.blockZ;
++                    // CraftBukkit start - Boat placement
++                    org.bukkit.event.player.PlayerInteractEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerInteractEvent(par3EntityPlayer, org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK, i, j, k, movingobjectposition.sideHit, par1ItemStack);
+ 
++                    if (event.isCancelled())
++                    {
++                        return par1ItemStack;
++                    }
++
++                    // CraftBukkit end
++
+                     if (par2World.func_147439_a(i, j, k) == Blocks.snow_layer)
+                     {
+                         --j;

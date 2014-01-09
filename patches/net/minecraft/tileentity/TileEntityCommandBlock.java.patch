@@ -1,0 +1,46 @@
+--- ../src-base/minecraft/net/minecraft/tileentity/TileEntityCommandBlock.java
++++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityCommandBlock.java
+@@ -12,40 +12,9 @@
+ 
+ public class TileEntityCommandBlock extends TileEntity
+ {
+-    private final CommandBlockLogic field_145994_a = new CommandBlockLogic()
+-    {
+-        private static final String __OBFID = "CL_00000348";
+-        // JAVADOC METHOD $$ func_82114_b
+-        public ChunkCoordinates getPlayerCoordinates()
+-        {
+-            return new ChunkCoordinates(TileEntityCommandBlock.this.field_145851_c, TileEntityCommandBlock.this.field_145848_d, TileEntityCommandBlock.this.field_145849_e);
+-        }
+-        public World getEntityWorld()
+-        {
+-            return TileEntityCommandBlock.this.func_145831_w();
+-        }
+-        public void func_145752_a(String p_145752_1_)
+-        {
+-            super.func_145752_a(p_145752_1_);
+-            TileEntityCommandBlock.this.onInventoryChanged();
+-        }
+-        public void func_145756_e()
+-        {
+-            TileEntityCommandBlock.this.func_145831_w().func_147471_g(TileEntityCommandBlock.this.field_145851_c, TileEntityCommandBlock.this.field_145848_d, TileEntityCommandBlock.this.field_145849_e);
+-        }
+-        @SideOnly(Side.CLIENT)
+-        public int func_145751_f()
+-        {
+-            return 0;
+-        }
+-        @SideOnly(Side.CLIENT)
+-        public void func_145757_a(ByteBuf p_145757_1_)
+-        {
+-            p_145757_1_.writeInt(TileEntityCommandBlock.this.field_145851_c);
+-            p_145757_1_.writeInt(TileEntityCommandBlock.this.field_145848_d);
+-            p_145757_1_.writeInt(TileEntityCommandBlock.this.field_145849_e);
+-        }
+-    };
++    private final TileEntityCommandBlockListener field_145994_a_CB = new TileEntityCommandBlockListener(this); // CraftBukkit
++    private final CommandBlockLogic field_145994_a = field_145994_a_CB; // MCPC+
++
+     private static final String __OBFID = "CL_00000347";
+ 
+     public void func_145841_b(NBTTagCompound p_145841_1_)

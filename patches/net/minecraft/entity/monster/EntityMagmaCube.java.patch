@@ -1,0 +1,28 @@
+--- ../src-base/minecraft/net/minecraft/entity/monster/EntityMagmaCube.java
++++ ../src-work/minecraft/net/minecraft/entity/monster/EntityMagmaCube.java
+@@ -67,6 +67,8 @@
+     // JAVADOC METHOD $$ func_70628_a
+     protected void dropFewItems(boolean par1, int par2)
+     {
++        // CraftBukkit start - Whole method
++        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
+         Item item = this.func_146068_u();
+ 
+         if (item != null && this.getSlimeSize() > 1)
+@@ -78,11 +80,14 @@
+                 j += this.rand.nextInt(par2 + 1);
+             }
+ 
+-            for (int k = 0; k < j; ++k)
++            if (j > 0)
+             {
+-                this.func_145779_a(item, 1);
++                loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(item), j));
+             }
+         }
++
++        org.bukkit.craftbukkit.event.CraftEventFactory.callEntityDeathEvent(this, loot);
++        // CraftBukkit end
+     }
+ 
+     // JAVADOC METHOD $$ func_70027_ad

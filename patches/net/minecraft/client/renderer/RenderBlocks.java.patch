@@ -1,0 +1,378 @@
+--- ../src-base/minecraft/net/minecraft/client/renderer/RenderBlocks.java
++++ ../src-work/minecraft/net/minecraft/client/renderer/RenderBlocks.java
+@@ -58,84 +58,84 @@
+ public class RenderBlocks
+ {
+     public IBlockAccess field_147845_a;
+-    public IIcon field_147840_d;
+-    public boolean field_147842_e;
+-    public boolean field_147837_f;
++    private IIcon field_147840_d;
++    private boolean field_147842_e;
++    private boolean field_147837_f;
+     public static boolean field_147843_b = true;
+     public boolean field_147844_c = true;
+-    public boolean field_147838_g = false;
+-    public double field_147859_h;
+-    public double field_147861_i;
+-    public double field_147855_j;
+-    public double field_147857_k;
+-    public double field_147851_l;
+-    public double field_147853_m;
+-    public boolean field_147847_n;
+-    public boolean field_147849_o;
+-    public final Minecraft field_147877_p;
+-    public int field_147875_q;
+-    public int field_147873_r;
+-    public int field_147871_s;
+-    public int field_147869_t;
+-    public int field_147867_u;
+-    public int field_147865_v;
+-    public boolean field_147863_w;
+-    public float field_147888_x;
+-    public float field_147886_y;
+-    public float field_147884_z;
+-    public float field_147814_A;
+-    public float field_147815_B;
+-    public float field_147816_C;
+-    public float field_147810_D;
+-    public float field_147811_E;
+-    public float field_147812_F;
+-    public float field_147813_G;
+-    public float field_147821_H;
+-    public float field_147822_I;
+-    public float field_147823_J;
+-    public float field_147824_K;
+-    public float field_147817_L;
+-    public float field_147818_M;
+-    public float field_147819_N;
+-    public float field_147820_O;
+-    public float field_147830_P;
+-    public float field_147829_Q;
+-    public int field_147832_R;
+-    public int field_147831_S;
+-    public int field_147826_T;
+-    public int field_147825_U;
+-    public int field_147828_V;
+-    public int field_147827_W;
+-    public int field_147835_X;
+-    public int field_147834_Y;
+-    public int field_147836_Z;
+-    public int field_147880_aa;
+-    public int field_147881_ab;
+-    public int field_147878_ac;
+-    public int field_147879_ad;
+-    public int field_147885_ae;
+-    public int field_147887_af;
+-    public int field_147882_ag;
+-    public int field_147883_ah;
+-    public int field_147866_ai;
+-    public int field_147868_aj;
+-    public int field_147862_ak;
+-    public int field_147864_al;
+-    public int field_147874_am;
+-    public int field_147876_an;
+-    public int field_147870_ao;
+-    public float field_147872_ap;
+-    public float field_147852_aq;
+-    public float field_147850_ar;
+-    public float field_147848_as;
+-    public float field_147846_at;
+-    public float field_147860_au;
+-    public float field_147858_av;
+-    public float field_147856_aw;
+-    public float field_147854_ax;
+-    public float field_147841_ay;
+-    public float field_147839_az;
+-    public float field_147833_aA;
++    private boolean field_147838_g = false;
++    private double field_147859_h;
++    private double field_147861_i;
++    private double field_147855_j;
++    private double field_147857_k;
++    private double field_147851_l;
++    private double field_147853_m;
++    private boolean field_147847_n;
++    private boolean field_147849_o;
++    private final Minecraft field_147877_p;
++    private int field_147875_q;
++    private int field_147873_r;
++    private int field_147871_s;
++    private int field_147869_t;
++    private int field_147867_u;
++    private int field_147865_v;
++    private boolean field_147863_w;
++    private float field_147888_x;
++    private float field_147886_y;
++    private float field_147884_z;
++    private float field_147814_A;
++    private float field_147815_B;
++    private float field_147816_C;
++    private float field_147810_D;
++    private float field_147811_E;
++    private float field_147812_F;
++    private float field_147813_G;
++    private float field_147821_H;
++    private float field_147822_I;
++    private float field_147823_J;
++    private float field_147824_K;
++    private float field_147817_L;
++    private float field_147818_M;
++    private float field_147819_N;
++    private float field_147820_O;
++    private float field_147830_P;
++    private float field_147829_Q;
++    private int field_147832_R;
++    private int field_147831_S;
++    private int field_147826_T;
++    private int field_147825_U;
++    private int field_147828_V;
++    private int field_147827_W;
++    private int field_147835_X;
++    private int field_147834_Y;
++    private int field_147836_Z;
++    private int field_147880_aa;
++    private int field_147881_ab;
++    private int field_147878_ac;
++    private int field_147879_ad;
++    private int field_147885_ae;
++    private int field_147887_af;
++    private int field_147882_ag;
++    private int field_147883_ah;
++    private int field_147866_ai;
++    private int field_147868_aj;
++    private int field_147862_ak;
++    private int field_147864_al;
++    private int field_147874_am;
++    private int field_147876_an;
++    private int field_147870_ao;
++    private float field_147872_ap;
++    private float field_147852_aq;
++    private float field_147850_ar;
++    private float field_147848_as;
++    private float field_147846_at;
++    private float field_147860_au;
++    private float field_147858_av;
++    private float field_147856_aw;
++    private float field_147854_ax;
++    private float field_147841_ay;
++    private float field_147839_az;
++    private float field_147833_aA;
+     private static final String __OBFID = "CL_00000940";
+ 
+     public RenderBlocks(IBlockAccess par1IBlockAccess)
+@@ -295,7 +295,7 @@
+         }
+     }
+ 
+-    public boolean func_147743_a(BlockEndPortalFrame p_147743_1_, int p_147743_2_, int p_147743_3_, int p_147743_4_)
++    private boolean func_147743_a(BlockEndPortalFrame p_147743_1_, int p_147743_2_, int p_147743_3_, int p_147743_4_)
+     {
+         int l = this.field_147845_a.getBlockMetadata(p_147743_2_, p_147743_3_, p_147743_4_);
+         int i1 = l & 3;
+@@ -335,7 +335,7 @@
+         }
+     }
+ 
+-    public boolean func_147773_v(Block p_147773_1_, int p_147773_2_, int p_147773_3_, int p_147773_4_)
++    private boolean func_147773_v(Block p_147773_1_, int p_147773_2_, int p_147773_3_, int p_147773_4_)
+     {
+         Tessellator tessellator = Tessellator.instance;
+         Block bed = this.field_147845_a.func_147439_a(p_147773_2_, p_147773_3_, p_147773_4_);
+@@ -474,7 +474,7 @@
+         return true;
+     }
+ 
+-    public boolean func_147741_a(BlockBrewingStand p_147741_1_, int p_147741_2_, int p_147741_3_, int p_147741_4_)
++    private boolean func_147741_a(BlockBrewingStand p_147741_1_, int p_147741_2_, int p_147741_3_, int p_147741_4_)
+     {
+         this.func_147782_a(0.4375D, 0.0D, 0.4375D, 0.5625D, 0.875D, 0.5625D);
+         this.func_147784_q(p_147741_1_, p_147741_2_, p_147741_3_, p_147741_4_);
+@@ -546,7 +546,7 @@
+         return true;
+     }
+ 
+-    public boolean func_147785_a(BlockCauldron p_147785_1_, int p_147785_2_, int p_147785_3_, int p_147785_4_)
++    private boolean func_147785_a(BlockCauldron p_147785_1_, int p_147785_2_, int p_147785_3_, int p_147785_4_)
+     {
+         this.func_147784_q(p_147785_1_, p_147785_2_, p_147785_3_, p_147785_4_);
+         Tessellator tessellator = Tessellator.instance;
+@@ -588,7 +588,7 @@
+         return true;
+     }
+ 
+-    public boolean func_147752_a(BlockFlowerPot p_147752_1_, int p_147752_2_, int p_147752_3_, int p_147752_4_)
++    private boolean func_147752_a(BlockFlowerPot p_147752_1_, int p_147752_2_, int p_147752_3_, int p_147752_4_)
+     {
+         this.func_147784_q(p_147752_1_, p_147752_2_, p_147752_3_, p_147752_4_);
+         Tessellator tessellator = Tessellator.instance;
+@@ -667,7 +667,7 @@
+         return true;
+     }
+ 
+-    public boolean func_147725_a(BlockAnvil p_147725_1_, int p_147725_2_, int p_147725_3_, int p_147725_4_)
++    private boolean func_147725_a(BlockAnvil p_147725_1_, int p_147725_2_, int p_147725_3_, int p_147725_4_)
+     {
+         return this.func_147780_a(p_147725_1_, p_147725_2_, p_147725_3_, p_147725_4_, this.field_147845_a.getBlockMetadata(p_147725_2_, p_147725_3_, p_147725_4_));
+     }
+@@ -695,7 +695,7 @@
+         return this.func_147728_a(p_147780_1_, p_147780_2_, p_147780_3_, p_147780_4_, p_147780_5_, false);
+     }
+ 
+-    public boolean func_147728_a(BlockAnvil p_147728_1_, int p_147728_2_, int p_147728_3_, int p_147728_4_, int p_147728_5_, boolean p_147728_6_)
++    private boolean func_147728_a(BlockAnvil p_147728_1_, int p_147728_2_, int p_147728_3_, int p_147728_4_, int p_147728_5_, boolean p_147728_6_)
+     {
+         int i1 = p_147728_6_ ? 0 : p_147728_5_ & 3;
+         boolean flag1 = false;
+@@ -742,7 +742,7 @@
+         return true;
+     }
+ 
+-    public float func_147737_a(BlockAnvil p_147737_1_, int p_147737_2_, int p_147737_3_, int p_147737_4_, int p_147737_5_, float p_147737_6_, float p_147737_7_, float p_147737_8_, float p_147737_9_, boolean p_147737_10_, boolean p_147737_11_, int p_147737_12_)
++    private float func_147737_a(BlockAnvil p_147737_1_, int p_147737_2_, int p_147737_3_, int p_147737_4_, int p_147737_5_, float p_147737_6_, float p_147737_7_, float p_147737_8_, float p_147737_9_, boolean p_147737_10_, boolean p_147737_11_, int p_147737_12_)
+     {
+         if (p_147737_10_)
+         {
+@@ -826,7 +826,7 @@
+         return true;
+     }
+ 
+-    public boolean func_147759_a(BlockRedstoneRepeater p_147759_1_, int p_147759_2_, int p_147759_3_, int p_147759_4_)
++    private boolean func_147759_a(BlockRedstoneRepeater p_147759_1_, int p_147759_2_, int p_147759_3_, int p_147759_4_)
+     {
+         int l = this.field_147845_a.getBlockMetadata(p_147759_2_, p_147759_3_, p_147759_4_);
+         int i1 = l & 3;
+@@ -906,7 +906,7 @@
+         return true;
+     }
+ 
+-    public boolean func_147781_a(BlockRedstoneComparator p_147781_1_, int p_147781_2_, int p_147781_3_, int p_147781_4_)
++    private boolean func_147781_a(BlockRedstoneComparator p_147781_1_, int p_147781_2_, int p_147781_3_, int p_147781_4_)
+     {
+         Tessellator tessellator = Tessellator.instance;
+         tessellator.setBrightness(p_147781_1_.func_149677_c(this.field_147845_a, p_147781_2_, p_147781_3_, p_147781_4_));
+@@ -958,14 +958,14 @@
+         return true;
+     }
+ 
+-    public boolean func_147748_a(BlockRedstoneDiode p_147748_1_, int p_147748_2_, int p_147748_3_, int p_147748_4_)
++    private boolean func_147748_a(BlockRedstoneDiode p_147748_1_, int p_147748_2_, int p_147748_3_, int p_147748_4_)
+     {
+         Tessellator tessellator = Tessellator.instance;
+         this.func_147732_a(p_147748_1_, p_147748_2_, p_147748_3_, p_147748_4_, this.field_147845_a.getBlockMetadata(p_147748_2_, p_147748_3_, p_147748_4_) & 3);
+         return true;
+     }
+ 
+-    public void func_147732_a(BlockRedstoneDiode p_147732_1_, int p_147732_2_, int p_147732_3_, int p_147732_4_, int p_147732_5_)
++    private void func_147732_a(BlockRedstoneDiode p_147732_1_, int p_147732_2_, int p_147732_3_, int p_147732_4_, int p_147732_5_)
+     {
+         this.func_147784_q(p_147732_1_, p_147732_2_, p_147732_3_, p_147732_4_);
+         Tessellator tessellator = Tessellator.instance;
+@@ -1023,7 +1023,7 @@
+         this.field_147837_f = false;
+     }
+ 
+-    public boolean func_147731_b(Block p_147731_1_, int p_147731_2_, int p_147731_3_, int p_147731_4_, boolean p_147731_5_)
++    private boolean func_147731_b(Block p_147731_1_, int p_147731_2_, int p_147731_3_, int p_147731_4_, boolean p_147731_5_)
+     {
+         int l = this.field_147845_a.getBlockMetadata(p_147731_2_, p_147731_3_, p_147731_4_);
+         boolean flag1 = p_147731_5_ || (l & 8) != 0;
+@@ -1129,7 +1129,7 @@
+         return true;
+     }
+ 
+-    public void func_147763_a(double p_147763_1_, double p_147763_3_, double p_147763_5_, double p_147763_7_, double p_147763_9_, double p_147763_11_, float p_147763_13_, double p_147763_14_)
++    private void func_147763_a(double p_147763_1_, double p_147763_3_, double p_147763_5_, double p_147763_7_, double p_147763_9_, double p_147763_11_, float p_147763_13_, double p_147763_14_)
+     {
+         IIcon iicon = BlockPistonBase.func_150074_e("piston_side");
+ 
+@@ -1150,7 +1150,7 @@
+         tessellator.addVertexWithUV(p_147763_3_, p_147763_7_, p_147763_11_, d9, d10);
+     }
+ 
+-    public void func_147789_b(double p_147789_1_, double p_147789_3_, double p_147789_5_, double p_147789_7_, double p_147789_9_, double p_147789_11_, float p_147789_13_, double p_147789_14_)
++    private void func_147789_b(double p_147789_1_, double p_147789_3_, double p_147789_5_, double p_147789_7_, double p_147789_9_, double p_147789_11_, float p_147789_13_, double p_147789_14_)
+     {
+         IIcon iicon = BlockPistonBase.func_150074_e("piston_side");
+ 
+@@ -1171,7 +1171,7 @@
+         tessellator.addVertexWithUV(p_147789_3_, p_147789_7_, p_147789_11_, d9, d10);
+     }
+ 
+-    public void func_147738_c(double p_147738_1_, double p_147738_3_, double p_147738_5_, double p_147738_7_, double p_147738_9_, double p_147738_11_, float p_147738_13_, double p_147738_14_)
++    private void func_147738_c(double p_147738_1_, double p_147738_3_, double p_147738_5_, double p_147738_7_, double p_147738_9_, double p_147738_11_, float p_147738_13_, double p_147738_14_)
+     {
+         IIcon iicon = BlockPistonBase.func_150074_e("piston_side");
+ 
+@@ -1199,7 +1199,7 @@
+         this.field_147837_f = false;
+     }
+ 
+-    public boolean func_147809_c(Block p_147809_1_, int p_147809_2_, int p_147809_3_, int p_147809_4_, boolean p_147809_5_)
++    private boolean func_147809_c(Block p_147809_1_, int p_147809_2_, int p_147809_3_, int p_147809_4_, boolean p_147809_5_)
+     {
+         int l = this.field_147845_a.getBlockMetadata(p_147809_2_, p_147809_3_, p_147809_4_);
+         int i1 = BlockPistonExtension.func_150085_b(l);
+@@ -4152,7 +4152,7 @@
+         }
+     }
+ 
+-    public float func_147729_a(int p_147729_1_, int p_147729_2_, int p_147729_3_, Material p_147729_4_)
++    private float func_147729_a(int p_147729_1_, int p_147729_2_, int p_147729_3_, Material p_147729_4_)
+     {
+         int l = 0;
+         float f = 0.0F;
+@@ -5911,7 +5911,7 @@
+         return flag;
+     }
+ 
+-    public int func_147778_a(int p_147778_1_, int p_147778_2_, int p_147778_3_, int p_147778_4_)
++    private int func_147778_a(int p_147778_1_, int p_147778_2_, int p_147778_3_, int p_147778_4_)
+     {
+         if (p_147778_1_ == 0)
+         {
+@@ -5931,7 +5931,7 @@
+         return p_147778_1_ + p_147778_2_ + p_147778_3_ + p_147778_4_ >> 2 & 16711935;
+     }
+ 
+-    public int func_147727_a(int p_147727_1_, int p_147727_2_, int p_147727_3_, int p_147727_4_, double p_147727_5_, double p_147727_7_, double p_147727_9_, double p_147727_11_)
++    private int func_147727_a(int p_147727_1_, int p_147727_2_, int p_147727_3_, int p_147727_4_, double p_147727_5_, double p_147727_7_, double p_147727_9_, double p_147727_11_)
+     {
+         int i1 = (int)((double)(p_147727_1_ >> 16 & 255) * p_147727_5_ + (double)(p_147727_2_ >> 16 & 255) * p_147727_7_ + (double)(p_147727_3_ >> 16 & 255) * p_147727_9_ + (double)(p_147727_4_ >> 16 & 255) * p_147727_11_) & 255;
+         int j1 = (int)((double)(p_147727_1_ & 255) * p_147727_5_ + (double)(p_147727_2_ & 255) * p_147727_7_ + (double)(p_147727_3_ & 255) * p_147727_9_ + (double)(p_147727_4_ & 255) * p_147727_11_) & 255;
+@@ -6060,7 +6060,7 @@
+         return flag;
+     }
+ 
+-    public boolean func_147772_a(BlockCocoa p_147772_1_, int p_147772_2_, int p_147772_3_, int p_147772_4_)
++    private boolean func_147772_a(BlockCocoa p_147772_1_, int p_147772_2_, int p_147772_3_, int p_147772_4_)
+     {
+         Tessellator tessellator = Tessellator.instance;
+         tessellator.setBrightness(p_147772_1_.func_149677_c(this.field_147845_a, p_147772_2_, p_147772_3_, p_147772_4_));
+@@ -6211,7 +6211,7 @@
+         return true;
+     }
+ 
+-    public boolean func_147797_a(BlockBeacon p_147797_1_, int p_147797_2_, int p_147797_3_, int p_147797_4_)
++    private boolean func_147797_a(BlockBeacon p_147797_1_, int p_147797_2_, int p_147797_3_, int p_147797_4_)
+     {
+         float f = 0.1875F;
+         this.func_147757_a(this.func_147745_b(Blocks.glass));
+@@ -6719,7 +6719,7 @@
+         return flag;
+     }
+ 
+-    public boolean func_147803_a(BlockHopper p_147803_1_, int p_147803_2_, int p_147803_3_, int p_147803_4_)
++    private boolean func_147803_a(BlockHopper p_147803_1_, int p_147803_2_, int p_147803_3_, int p_147803_4_)
+     {
+         Tessellator tessellator = Tessellator.instance;
+         tessellator.setBrightness(p_147803_1_.func_149677_c(this.field_147845_a, p_147803_2_, p_147803_3_, p_147803_4_));
+@@ -6742,7 +6742,7 @@
+         return this.func_147799_a(p_147803_1_, p_147803_2_, p_147803_3_, p_147803_4_, this.field_147845_a.getBlockMetadata(p_147803_2_, p_147803_3_, p_147803_4_), false);
+     }
+ 
+-    public boolean func_147799_a(BlockHopper p_147799_1_, int p_147799_2_, int p_147799_3_, int p_147799_4_, int p_147799_5_, boolean p_147799_6_)
++    private boolean func_147799_a(BlockHopper p_147799_1_, int p_147799_2_, int p_147799_3_, int p_147799_4_, int p_147799_5_, boolean p_147799_6_)
+     {
+         Tessellator tessellator = Tessellator.instance;
+         int i1 = BlockHopper.func_149918_b(p_147799_5_);

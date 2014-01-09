@@ -1,0 +1,27 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemSeeds.java
++++ ../src-work/minecraft/net/minecraft/item/ItemSeeds.java
+@@ -27,6 +27,8 @@
+     // JAVADOC METHOD $$ func_77648_a
+     public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
+     {
++        final int clickedX = par4, clickedY = par5, clickedZ = par6; // CraftBukkit
++
+         if (par7 != 1)
+         {
+             return false;
+@@ -35,7 +37,14 @@
+         {
+             if (par3World.func_147439_a(par4, par5, par6).canSustainPlant(par3World, par4, par5, par6, ForgeDirection.UP, this) && par3World.func_147437_c(par4, par5 + 1, par6))
+             {
+-                par3World.func_147449_b(par4, par5 + 1, par6, this.field_150925_a);
++                // CraftBukkit start - Seeds
++                // par3World.func_147449_b(par4, par5 + 1, par6, this.field_150925_a);
++                if (!ItemBlock.processBlockPlace(par3World, par2EntityPlayer, null, par4, par5 + 1, par6, this.field_150925_a, 0, clickedX, clickedY, clickedZ))
++                {
++                    return false;
++                }
++
++                // CraftBukkit end
+                 --par1ItemStack.stackSize;
+                 return true;
+             }

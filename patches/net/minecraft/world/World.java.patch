@@ -1,0 +1,1390 @@
+--- ../src-base/minecraft/net/minecraft/world/World.java
++++ ../src-work/minecraft/net/minecraft/world/World.java
+@@ -22,9 +22,11 @@
+ import net.minecraft.crash.CrashReport;
+ import net.minecraft.crash.CrashReportCategory;
+ import net.minecraft.entity.Entity;
++import net.minecraft.entity.EntityList;
+ import net.minecraft.entity.EntityLiving;
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.init.Blocks;
++import net.minecraft.item.ItemBlock;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.nbt.NBTTagCompound;
+ import net.minecraft.pathfinding.PathEntity;
+@@ -70,6 +72,44 @@
+ import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
+ import net.minecraft.entity.EnumCreatureType;
+ 
++// CraftBukkit start
++import net.minecraft.entity.EntityLivingBase;
++import net.minecraft.entity.item.EntityItem;
++import net.minecraft.entity.monster.EntityGhast;
++import net.minecraft.entity.monster.EntityGolem;
++import net.minecraft.entity.monster.EntityMob;
++import net.minecraft.entity.monster.EntitySlime;
++import net.minecraft.entity.passive.EntityAnimal;
++import net.minecraft.entity.passive.EntityWaterMob;
++import net.minecraft.entity.player.EntityPlayerMP;
++import net.minecraft.world.gen.ChunkProviderServer;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.util.CraftMagicNumbers;
++import org.bukkit.craftbukkit.util.LongHashSet;
++import org.bukkit.craftbukkit.util.UnsafeList;
++import org.bukkit.generator.ChunkGenerator;
++import org.bukkit.craftbukkit.CraftServer;
++import org.bukkit.craftbukkit.CraftWorld;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.block.BlockCanBuildEvent;
++import org.bukkit.event.block.BlockPhysicsEvent;
++import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
++import org.bukkit.event.weather.WeatherChangeEvent;
++import org.bukkit.event.weather.ThunderChangeEvent;
++// CraftBukkit end
++// Spigot Start
++import net.minecraft.entity.item.EntityXPOrb;
++import org.bukkit.craftbukkit.SpigotTimings;
++// Spigot end
++//MCPC+ start
++import net.minecraft.nbt.NBTTagCompound;
++import net.minecraftforge.common.DimensionManager;
++import za.co.mcportcentral.MCPCConfig;
++import za.co.mcportcentral.MCPCHooks;
++import za.co.mcportcentral.MCPCWorldConfig;
++import za.co.mcportcentral.entity.CraftFakePlayer;
++//MCPC+ end
++
+ public abstract class World implements IBlockAccess
+ {
+    /**
+@@ -84,11 +124,33 @@
+     // JAVADOC FIELD $$ field_72999_e
+     public boolean scheduledUpdatesAreImmediate;
+     // JAVADOC FIELD $$ field_72996_f
+-    public List loadedEntityList = new ArrayList();
+-    protected List unloadedEntityList = new ArrayList();
+-    public List field_147482_g = new ArrayList();
++    /** A list of all Entities in all currently-loaded chunks */
++    public List loadedEntityList = new ArrayList()   // Spigot start - guard entity list from removals
++    {
++        @Override
++        public Object remove(int index)
++        {
++            guard();
++            return super.remove(index);
++        }
++        @Override
++        public boolean remove(Object o)
++        {
++            guard();
++            return super.remove(o);
++        }
++        private void guard()
++        {
++            if (guardEntityList)
++            {
++                throw new java.util.ConcurrentModificationException();
++            }
++        }
++    }; // Spigot end
++    public List unloadedEntityList = new ArrayList(); // MCPC+
++    public List field_147482_g = new ArrayList(); // MCPC+ - vanilla compatibility
+     private List field_147484_a = new ArrayList();
+-    private List field_147483_b = new ArrayList();
++    public List field_147483_b = new ArrayList(); // MCPC+
+     // JAVADOC FIELD $$ field_73010_i
+     public List playerEntities = new ArrayList();
+     // JAVADOC FIELD $$ field_73007_j
+@@ -111,13 +173,13 @@
+     // JAVADOC FIELD $$ field_73012_v
+     public Random rand = new Random();
+     // JAVADOC FIELD $$ field_73011_w
+-    public final WorldProvider provider;
++    public WorldProvider provider; // CraftBukkit - remove final
+     protected List worldAccesses = new ArrayList();
+     // JAVADOC FIELD $$ field_73020_y
+-    protected IChunkProvider chunkProvider;
++    public IChunkProvider chunkProvider; // CraftBukkit - public
+     protected final ISaveHandler saveHandler;
+     // JAVADOC FIELD $$ field_72986_A
+-    protected WorldInfo worldInfo;
++    public WorldInfo worldInfo; // CraftBukkit - public
+     // JAVADOC FIELD $$ field_72987_B
+     public boolean findingSpawnPoint;
+     public MapStorage mapStorage;
+@@ -127,21 +189,87 @@
+     // JAVADOC FIELD $$ field_82741_K
+     private final Vec3Pool vecPool = new Vec3Pool(300, 2000);
+     private final Calendar theCalendar = Calendar.getInstance();
+-    protected Scoreboard worldScoreboard = new Scoreboard();
++    public Scoreboard worldScoreboard = new Scoreboard(); // CraftBukkit - protected -> public
+     // JAVADOC FIELD $$ field_72995_K
+     public boolean isRemote;
++    // CraftBukkit start - public, longhashset
++    // JAVADOC FIELD $$ field_72985_G
++    public boolean spawnHostileMobs;
++    // JAVADOC FIELD $$ field_72992_H
++    public boolean spawnPeacefulMobs;
++    // Added the following
++    public boolean callingPlaceEvent = false;
++    public long ticksPerAnimalSpawns;
++    public long ticksPerMonsterSpawns;
++    public boolean populating;
++    // CraftBukkit end
+     // JAVADOC FIELD $$ field_72993_I
+-    protected Set activeChunkSet = new HashSet();
++    public Set activeChunkSet = new HashSet();
+     // JAVADOC FIELD $$ field_72990_M
+     private int ambientTickCountdown;
+-    // JAVADOC FIELD $$ field_72985_G
+-    protected boolean spawnHostileMobs;
+-    // JAVADOC FIELD $$ field_72992_H
+-    protected boolean spawnPeacefulMobs;
+     private ArrayList collidingBoundingBoxes;
+     private boolean field_147481_N;
+     // JAVADOC FIELD $$ field_72994_J
+     int[] lightUpdateBlockList;
++    // MCPC+ start
++    /** These hit coords are set by ItemBlock.onItemUse and are only used during a forge block place event in canPlaceEntityOnSide */
++    public float curPlacedItemHitX = 0;
++    public float curPlacedItemHitY = 0;
++    public float curPlacedItemHitZ = 0;
++    public int entitiesTicked;
++    public int tilesTicked;
++    public za.co.mcportcentral.MCPCWorldConfig mcpcConfig;
++    // preload world crash report classes to fix NCDFE masking StackOverflow/memory error, see #721
++    private static boolean preloadedCrashClasses = false;
++    {
++        if (!preloadedCrashClasses)
++        {
++            // generate a temporary crash report
++            Throwable throwable = new Throwable();
++            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
++            CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
++
++            // loads all the required classes - including net.minecraft.crash.CallableBlockType (package private)
++            crashreportcategory.addCrashSectionCallable("Source block type", new Callable()
++            {
++                public String call()
++                {
++                    return "";
++                }
++            });
++            CrashReportCategory.func_147153_a(crashreportcategory, 0, 0, 0, Blocks.air, -1);
++
++            preloadedCrashClasses = true;
++        }
++    }
++    // MCPC+ end
++    // Spigot start
++    private boolean guardEntityList = false;
++
++    /** Positions to update */
++    protected gnu.trove.map.hash.TLongShortHashMap activeChunkSet_CB; // Spigot
++    public float growthOdds = 100;
++    protected float modifiedOdds = 100;
++    private byte chunkTickRadius;
++
++    public static long chunkToKey(int x, int z)
++    {
++        long k = ((((long) x) & 0xFFFF0000L) << 16) | ((((long) x) & 0x0000FFFFL) << 0);
++        k     |= ((((long) z) & 0xFFFF0000L) << 32) | ((((long) z) & 0x0000FFFFL) << 16);
++        return k;
++    }
++
++    public static int keyToX(long k)
++    {
++        return (int)(((k >> 16) & 0xFFFF0000) | (k & 0x0000FFFF));
++    }
++
++    public static int keyToZ(long k)
++    {
++        return (int)(((k >> 32) & 0xFFFF0000L) | ((k >> 16) & 0x0000FFFF));
++    }
++    // Spigot end
++
+     private static final String __OBFID = "CL_00000140";
+ 
+     // JAVADOC METHOD $$ func_72807_a
+@@ -186,6 +314,29 @@
+         return this.provider.worldChunkMgr;
+     }
+ 
++    // CraftBukkit start
++    private final CraftWorld world;
++    public boolean pvpMode;
++    public boolean keepSpawnInMemory = false; // MCPC+ - default to false to give forge's keepLoaded higher priority
++    public ChunkGenerator generator;
++    Chunk lastChunkAccessed;
++    int lastXAccessed = Integer.MIN_VALUE;
++    int lastZAccessed = Integer.MIN_VALUE;
++    final Object chunkLock = new Object();
++    public final org.spigotmc.SpigotWorldConfig spigotConfig; // Spigot
++
++    public final SpigotTimings.WorldTimingsHandler timings; // Spigot
++
++    public CraftWorld getWorld()
++    {
++        return this.world;
++    }
++
++    public CraftServer getServer()
++    {
++        return (CraftServer) Bukkit.getServer();
++    }
++
+     @SideOnly(Side.CLIENT)
+     public World(ISaveHandler p_i45368_1_, String p_i45368_2_, WorldProvider p_i45368_3_, WorldSettings p_i45368_4_, Profiler p_i45368_5_)
+     {
+@@ -199,6 +350,12 @@
+         this.worldInfo = new WorldInfo(p_i45368_4_, p_i45368_2_);
+         this.provider = p_i45368_3_;
+         perWorldStorage = new MapStorage((ISaveHandler)null);
++        // MCPC+ start
++        this.world = null;
++        this.timings = null;
++        this.spigotConfig = null;
++        this.chunkTickRadius = 0;
++        // MCPC+ end
+     }
+ 
+     // Broken up so that the WorldClient gets the chance to set the mapstorage object before the dimension initializes
+@@ -227,8 +384,137 @@
+         this.calculateInitialWeather();
+     }
+ 
++    // Changed signature - added gen and env
++    public World(ISaveHandler p_i45369_1_, String p_i45369_2_, WorldSettings p_i45369_3_, WorldProvider p_i45369_4_, Profiler p_i45369_5_, ChunkGenerator gen, org.bukkit.World.Environment env)
++    {
++        this.spigotConfig = new org.spigotmc.SpigotWorldConfig(p_i45369_2_); // Spigot
++        this.mcpcConfig = new za.co.mcportcentral.MCPCWorldConfig( p_i45369_2_ ); // MCPC+;
++        this.generator = gen;
++        this.world = new CraftWorld((WorldServer) this, gen, env);
++        this.ticksPerAnimalSpawns = this.getServer().getTicksPerAnimalSpawns(); // CraftBukkit
++        this.ticksPerMonsterSpawns = this.getServer().getTicksPerMonsterSpawns(); // CraftBukkit
++        // CraftBukkit end
++        // Spigot start
++        this.chunkTickRadius = (byte)((this.getServer().getViewDistance() < 7) ? this.getServer().getViewDistance() : 7);
++        this.activeChunkSet_CB = new gnu.trove.map.hash.TLongShortHashMap(spigotConfig.chunksPerTick * 5, 0.7f, Long.MIN_VALUE, Short.MIN_VALUE);
++        this.activeChunkSet_CB.setAutoCompactionFactor(0);
++        // Spigot end
++        this.ambientTickCountdown = this.rand.nextInt(12000);
++        this.spawnHostileMobs = true;
++        this.spawnPeacefulMobs = true;
++        this.collidingBoundingBoxes = new ArrayList();
++        this.lightUpdateBlockList = new int[32768];
++        this.saveHandler = p_i45369_1_;
++        this.theProfiler = p_i45369_5_;
++        // MCPC+ start
++        // Provides a solution for different worlds getting different copies of the same data, potentially rewriting the data or causing race conditions/stale data
++        // Buildcraft has suffered from the issue this fixes.  If you load the same data from two different worlds they can get two different copies of the same object, thus the last saved gets final say.
++        if (DimensionManager.getWorld(0) != null) // if overworld has loaded, use its mapstorage
++        {
++            this.mapStorage = DimensionManager.getWorld(0).mapStorage;
++        }
++        else // if we are loading overworld, create a new mapstorage
++        {
++            this.mapStorage = new MapStorage(p_i45369_1_);
++        }
++        // MCPC+ end
++        this.worldInfo = p_i45369_1_.loadWorldInfo();
++
++        if (p_i45369_4_ != null)
++        {
++            this.provider = p_i45369_4_;
++        }
++        else if (this.worldInfo != null && this.worldInfo.getVanillaDimension() != 0)
++        {
++            this.provider = WorldProvider.getProviderForDimension(this.worldInfo.getVanillaDimension());
++        }
++        else
++        {
++            this.provider = WorldProvider.getProviderForDimension(0);
++        }
++
++        if (this.worldInfo == null)
++        {
++            this.worldInfo = new WorldInfo(p_i45369_3_, p_i45369_2_);
++            this.worldInfo.setDimension(this.provider.dimensionId); // MCPC+ - Save dimension to level.dat
++        }
++        else
++        {
++            this.worldInfo.setWorldName(p_i45369_2_);
++            // MCPC+ start - Use saved dimension from level.dat. Fixes issues with MultiVerse
++            if (this.worldInfo.getDimension() != 0)
++                this.provider.dimensionId = this.worldInfo.getDimension();
++            else
++            {
++                this.worldInfo.setDimension(this.provider.dimensionId);
++            }
++            // MCPC+ end
++        }
++
++        // MCPC+ start - Guarantee provider dimension is not reset. This is required for mods that rely on the provider ID to match the client dimension. Without this, IC2 will send the wrong ID to clients.
++        int providerId = this.provider.dimensionId;
++        this.provider.registerWorld(this);
++        this.provider.dimensionId = providerId;
++        this.chunkProvider = this.createChunkProvider();
++
++        if (this instanceof WorldServer)
++        {
++            this.perWorldStorage = new MapStorage(new WorldSpecificSaveHandler((WorldServer)this, p_i45369_1_));
++        }
++        else
++        {
++            this.perWorldStorage = new MapStorage((ISaveHandler)null);
++        }
++
++        if (!this.worldInfo.isInitialized())
++        {
++            try
++            {
++                this.initialize(p_i45369_3_);
++            }
++            catch (Throwable throwable1)
++            {
++                CrashReport crashreport = CrashReport.makeCrashReport(throwable1, "Exception initializing level");
++
++                try
++                {
++                    this.addWorldInfoToCrashReport(crashreport);
++                }
++                catch (Throwable throwable)
++                {
++                    ;
++                }
++
++                throw new ReportedException(crashreport);
++            }
++
++            this.worldInfo.setServerInitialized(true);
++        }
++
++        VillageCollection villagecollection = (VillageCollection)this.perWorldStorage.loadData(VillageCollection.class, "villages");
++
++        if (villagecollection == null)
++        {
++            this.villageCollectionObj = new VillageCollection(this);
++            this.perWorldStorage.setData("villages", this.villageCollectionObj);
++        }
++        else
++        {
++            this.villageCollectionObj = villagecollection;
++            this.villageCollectionObj.func_82566_a(this);
++        }
++
++        this.calculateInitialSkylight();
++        this.calculateInitialWeather();
++        this.getServer().addWorld(this.world); // CraftBukkit
++        timings = new SpigotTimings.WorldTimingsHandler(this); // Spigot
++    }
++
+     public World(ISaveHandler p_i45369_1_, String p_i45369_2_, WorldSettings p_i45369_3_, WorldProvider p_i45369_4_, Profiler p_i45369_5_)
+     {
++        this.spigotConfig = new org.spigotmc.SpigotWorldConfig(p_i45369_2_); // Spigot
++        this.mcpcConfig = new za.co.mcportcentral.MCPCWorldConfig( p_i45369_2_ ); // MCPC+;
++        this.world = null;
+         this.ambientTickCountdown = this.rand.nextInt(12000);
+         this.spawnHostileMobs = true;
+         this.spawnPeacefulMobs = true;
+@@ -236,7 +522,18 @@
+         this.lightUpdateBlockList = new int[32768];
+         this.saveHandler = p_i45369_1_;
+         this.theProfiler = p_i45369_5_;
+-        this.mapStorage = getMapStorage(p_i45369_1_);
++        // MCPC+ start
++        // Provides a solution for different worlds getting different copies of the same data, potentially rewriting the data or causing race conditions/stale data
++        // Buildcraft has suffered from the issue this fixes.  If you load the same data from two different worlds they can get two different copies of the same object, thus the last saved gets final say.
++        if (DimensionManager.getWorld(0) != null) // if overworld has loaded, use its mapstorage
++        {
++            this.mapStorage = DimensionManager.getWorld(0).mapStorage;
++        }
++        else // if we are loading overworld, create a new mapstorage
++        {
++            this.mapStorage = new MapStorage(p_i45369_1_);
++        }
++        // MCPC+ end
+         this.worldInfo = p_i45369_1_.loadWorldInfo();
+ 
+         if (p_i45369_4_ != null)
+@@ -255,13 +552,25 @@
+         if (this.worldInfo == null)
+         {
+             this.worldInfo = new WorldInfo(p_i45369_3_, p_i45369_2_);
++            this.worldInfo.setDimension(this.provider.dimensionId); // MCPC+ - Save dimension to level.dat
+         }
+         else
+         {
+             this.worldInfo.setWorldName(p_i45369_2_);
++            // MCPC+ start - Use saved dimension from level.dat. Fixes issues with MultiVerse
++            if (this.worldInfo.getDimension() != 0)
++                this.provider.dimensionId = this.worldInfo.getDimension();
++            else
++            {
++                this.worldInfo.setDimension(this.provider.dimensionId);
++            }
++            // MCPC+ end
+         }
+ 
++        // MCPC+ start - Guarantee provider dimension is not reset. This is required for mods that rely on the provider ID to match the client dimension. Without this, IC2 will send the wrong ID to clients.
++        int providerId = this.provider.dimensionId;
+         this.provider.registerWorld(this);
++        this.provider.dimensionId = providerId;
+         this.chunkProvider = this.createChunkProvider();
+ 
+         if (this instanceof WorldServer)
+@@ -313,6 +622,8 @@
+ 
+         this.calculateInitialSkylight();
+         this.calculateInitialWeather();
++        this.getServer().addWorld(this.world); // CraftBukkit
++        timings = new SpigotTimings.WorldTimingsHandler(this); // Spigot
+     }
+ 
+     private static MapStorage s_mapStorage;
+@@ -388,6 +699,13 @@
+         return block.isAir(this, p_147437_1_, p_147437_2_, p_147437_3_);
+     }
+ 
++    // MCPC+ start - add CB method for block change delegate
++    public boolean isEmpty(int arg0, int arg1, int arg2)
++    {
++        return func_147437_c(arg0, arg1, arg2);
++    }
++    // MCPC+ end
++
+     // JAVADOC METHOD $$ func_72899_e
+     public boolean blockExists(int par1, int par2, int par3)
+     {
+@@ -414,7 +732,8 @@
+             {
+                 for (int l1 = par3; l1 <= par6; ++l1)
+                 {
+-                    if (!this.chunkExists(k1, l1))
++                    // CraftBukkit - check unload queue too so we don't leak a chunk
++                    if (!this.chunkExists(k1, l1) || ((WorldServer) this).theChunkProviderServer.chunksToUnload.contains(k1, l1))
+                     {
+                         return false;
+                     }
+@@ -430,7 +749,7 @@
+     }
+ 
+     // JAVADOC METHOD $$ func_72916_c
+-    protected boolean chunkExists(int par1, int par2)
++    public boolean chunkExists(int par1, int par2) // MCPC+ - protected -> public for repackaging
+     {
+         return this.chunkProvider.chunkExists(par1, par2);
+     }
+@@ -442,10 +761,26 @@
+     }
+ 
+     // JAVADOC METHOD $$ func_72964_e
++    // Spigot start
++
++    /**
++     * Returns back a chunk looked up by chunk coordinates Args: x, y
++     */
+     public Chunk getChunkFromChunkCoords(int par1, int par2)
+     {
+-        return this.chunkProvider.provideChunk(par1, par2);
++        //synchronized (this.chunkLock) {
++        Chunk result = this.lastChunkAccessed; // Exploit fact that read is atomic
++
++        if (result == null || result.xPosition != par1 || result.zPosition != par2)
++        {
++            result = this.chunkProvider.provideChunk(par1, par2);
++            this.lastChunkAccessed = result; // Exploit fact that write is atomic
++        }
++
++        //}
++        return result;
+     }
++    // Spigot end
+ 
+     public boolean func_147465_d(int p_147465_1_, int p_147465_2_, int p_147465_3_, Block p_147465_4_, int p_147465_5_, int p_147465_6_)
+     {
+@@ -619,6 +954,13 @@
+ 
+     public void func_147444_c(int p_147444_1_, int p_147444_2_, int p_147444_3_, Block p_147444_4_)
+     {
++        // CraftBukkit start
++        if (this.populating)
++        {
++            return;
++        }
++
++        // CraftBukkit end
+         this.func_147459_d(p_147444_1_, p_147444_2_, p_147444_3_, p_147444_4_);
+     }
+ 
+@@ -704,6 +1046,21 @@
+ 
+             try
+             {
++                // CraftBukkit start
++                CraftWorld world = ((WorldServer) this).getWorld();
++
++                if (world != null)
++                {
++                    BlockPhysicsEvent event = new BlockPhysicsEvent(world.getBlockAt(p_147460_1_, p_147460_2_, p_147460_3_), CraftMagicNumbers.getId(p_147460_4_));
++                    this.getServer().getPluginManager().callEvent(event);
++
++                    if (event.isCancelled())
++                    {
++                        return;
++                    }
++                }
++
++                // CraftBukkit end
+                 block.func_149695_a(this, p_147460_1_, p_147460_2_, p_147460_3_, p_147460_4_);
+             }
+             catch (Throwable throwable1)
+@@ -1246,6 +1603,7 @@
+ 
+                             if (movingobjectposition1 != null)
+                             {
++                                vec32.myVec3LocalPool.release(vec32); // CraftBukkit
+                                 return movingobjectposition1;
+                             }
+                         }
+@@ -1254,6 +1612,8 @@
+                             movingobjectposition2 = new MovingObjectPosition(l, i1, j1, b0, p_147447_1_, false);
+                         }
+                     }
++
++                    vec32.myVec3LocalPool.release(vec32); // CraftBukkit
+                 }
+ 
+                 return p_147447_5_ ? movingobjectposition2 : null;
+@@ -1339,32 +1699,113 @@
+     // JAVADOC METHOD $$ func_72838_d
+     public boolean spawnEntityInWorld(Entity par1Entity)
+     {
+-        int i = MathHelper.floor_double(par1Entity.posX / 16.0D);
+-        int j = MathHelper.floor_double(par1Entity.posZ / 16.0D);
+-        boolean flag = par1Entity.forceSpawn;
++        // CraftBukkit start - Used for entities other than creatures
++        return this.addEntity(par1Entity, SpawnReason.DEFAULT); // Set reason as DEFAULT
++    }
+ 
+-        if (par1Entity instanceof EntityPlayer)
++    public boolean addEntity(Entity entity, SpawnReason spawnReason)   // Changed signature, added SpawnReason
++    {
++        if (Thread.currentThread() != MinecraftServer.getServer().primaryThread)
+         {
++            throw new IllegalStateException("Asynchronous entity add!");    // Spigot
++        }
++        // MCPC+ start - do not drop any items during a place event. Fixes dupes in mods such as Flans
++        if (entity == null || (entity instanceof EntityItem && this.callingPlaceEvent))
++        {
++            return false;
++        }
++        // MCPC+ end
++
++        // CraftBukkit end
++        int i = MathHelper.floor_double(entity.posX / 16.0D);
++        int j = MathHelper.floor_double(entity.posZ / 16.0D);
++        boolean flag = entity.forceSpawn;
++
++        if (entity instanceof EntityPlayer)
++        {
+             flag = true;
+         }
+ 
++        // CraftBukkit start
++        org.bukkit.event.Cancellable event = null;
++
++        if (entity instanceof EntityLivingBase && !(entity instanceof EntityPlayerMP))
++        {
++            boolean isAnimal = entity instanceof EntityAnimal || entity instanceof EntityWaterMob || entity instanceof EntityGolem;
++            boolean isMonster = entity instanceof EntityMob || entity instanceof EntityGhast || entity instanceof EntitySlime;
++
++            if (spawnReason != SpawnReason.CUSTOM)
++            {
++                if (isAnimal && !spawnPeacefulMobs || isMonster && !spawnHostileMobs)
++                {
++                    entity.isDead = true;
++                    return false;
++                }
++            }
++
++            event = CraftEventFactory.callCreatureSpawnEvent((EntityLivingBase) entity, spawnReason);
++        }
++        else if (entity instanceof EntityItem)
++        {
++            event = CraftEventFactory.callItemSpawnEvent((EntityItem) entity);
++        }
++        else if (entity.getBukkitEntity() instanceof org.bukkit.entity.Projectile)
++        {
++            // Not all projectiles extend EntityProjectile, so check for Bukkit interface instead
++            event = CraftEventFactory.callProjectileLaunchEvent(entity);
++        }
++        // Spigot start
++        else if (entity instanceof EntityXPOrb)
++        {
++            EntityXPOrb xp = (EntityXPOrb) entity;
++            double radius = spigotConfig.expMerge;
++
++            if (radius > 0)
++            {
++                List<Entity> entities = this.getEntitiesWithinAABBExcludingEntity(entity, entity.boundingBox.expand(radius, radius, radius));
++
++                for (Entity e : entities)
++                {
++                    if (e instanceof EntityXPOrb)
++                    {
++                        EntityXPOrb loopItem = (EntityXPOrb) e;
++
++                        if (!loopItem.isDead)
++                        {
++                            xp.xpValue += loopItem.xpValue;
++                            loopItem.setDead();
++                        }
++                    }
++                }
++            }
++        } // Spigot end
++
++        if (event != null && (event.isCancelled() || entity.isDead))
++        {
++            entity.isDead = true;
++            return false;
++        }
++
++        // CraftBukkit end
++
+         if (!flag && !this.chunkExists(i, j))
+         {
++            entity.isDead = true; // CraftBukkit
+             return false;
+         }
+         else
+         {
+-            if (par1Entity instanceof EntityPlayer)
++            if (entity instanceof EntityPlayer)
+             {
+-                EntityPlayer entityplayer = (EntityPlayer)par1Entity;
++                EntityPlayer entityplayer = (EntityPlayer)entity;
+                 this.playerEntities.add(entityplayer);
+                 this.updateAllPlayersSleepingFlag();
+             }
+-            if (MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(par1Entity, this)) && !flag) return false;
++            if (MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(entity, this)) && !flag) return false;
+ 
+-            this.getChunkFromChunkCoords(i, j).addEntity(par1Entity);
+-            this.loadedEntityList.add(par1Entity);
+-            this.onEntityAdded(par1Entity);
++            this.getChunkFromChunkCoords(i, j).addEntity(entity);
++            this.loadedEntityList.add(entity);
++            this.onEntityAdded(entity);
+             return true;
+         }
+     }
+@@ -1375,6 +1816,8 @@
+         {
+             ((IWorldAccess)this.worldAccesses.get(i)).onEntityCreate(par1Entity);
+         }
++
++        par1Entity.valid = true; // CraftBukkit
+     }
+ 
+     protected void onEntityRemoved(Entity par1Entity)
+@@ -1383,6 +1826,8 @@
+         {
+             ((IWorldAccess)this.worldAccesses.get(i)).onEntityDestroy(par1Entity);
+         }
++
++        par1Entity.valid = false; // CraftBukkit
+     }
+ 
+     // JAVADOC METHOD $$ func_72900_e
+@@ -1410,6 +1855,11 @@
+     // JAVADOC METHOD $$ func_72973_f
+     public void removePlayerEntityDangerously(Entity par1Entity)
+     {
++        if (Thread.currentThread() != MinecraftServer.getServer().primaryThread)
++        {
++            throw new IllegalStateException("Asynchronous entity remove!");    // Spigot
++        }
++
+         par1Entity.setDead();
+ 
+         if (par1Entity instanceof EntityPlayer)
+@@ -1446,35 +1896,53 @@
+         int l = MathHelper.floor_double(par2AxisAlignedBB.maxY + 1.0D);
+         int i1 = MathHelper.floor_double(par2AxisAlignedBB.minZ);
+         int j1 = MathHelper.floor_double(par2AxisAlignedBB.maxZ + 1.0D);
++        // Spigot start
++        int ystart = ((k - 1) < 0) ? 0 : (k - 1);
+ 
+-        for (int k1 = i; k1 < j; ++k1)
++        for (int chunkx = (i >> 4); chunkx <= ((j - 1) >> 4); chunkx++)
+         {
+-            for (int l1 = i1; l1 < j1; ++l1)
++            int cx = chunkx << 4;
++
++            for (int chunkz = (i1 >> 4); chunkz <= ((j1 - 1) >> 4); chunkz++)
+             {
+-                if (this.blockExists(k1, 64, l1))
++                if (!this.chunkExists(chunkx, chunkz))
+                 {
+-                    for (int i2 = k - 1; i2 < l; ++i2)
+-                    {
+-                        Block block;
++                    continue;
++                }
+ 
+-                        if (k1 >= -30000000 && k1 < 30000000 && l1 >= -30000000 && l1 < 30000000)
++                int cz = chunkz << 4;
++                Chunk chunk = this.getChunkFromChunkCoords(chunkx, chunkz);
++                // Compute ranges within chunk
++                int xstart = (i < cx) ? cx : i;
++                int xend = (j < (cx + 16)) ? j : (cx + 16);
++                int zstart = (i1 < cz) ? cz : i1;
++                int zend = (j1 < (cz + 16)) ? j1 : (cz + 16);
++
++                // Loop through blocks within chunk
++                for (int x = xstart; x < xend; x++)
++                {
++                    for (int z = zstart; z < zend; z++)
++                    {
++                        for (int y = ystart; y < l; y++)
+                         {
+-                            block = this.func_147439_a(k1, i2, l1);
+-                        }
+-                        else
+-                        {
+-                            block = Blocks.stone;
+-                        }
++                            Block block = chunk.func_150810_a(x - cx, y, z - cz);
+ 
+-                        block.func_149743_a(this, k1, i2, l1, par2AxisAlignedBB, this.collidingBoundingBoxes, par1Entity);
++                            if (block != null)
++                            {
++                                block.func_149743_a(this, x, y, z, par2AxisAlignedBB, this.collidingBoundingBoxes, par1Entity);
++                            }
++                        }
+                     }
+                 }
+             }
+         }
+ 
++        // Spigot end
+         double d0 = 0.25D;
+         List list = this.getEntitiesWithinAABBExcludingEntity(par1Entity, par2AxisAlignedBB.expand(d0, d0, d0));
+ 
++        za.co.mcportcentral.MCPCHooks.logEntitySize(this, par1Entity, list); // MCPC+ add logging for entity collisions
++
+         for (int j2 = 0; j2 < list.size(); ++j2)
+         {
+             AxisAlignedBB axisalignedbb1 = ((Entity)list.get(j2)).getBoundingBox();
+@@ -1817,11 +2285,37 @@
+         Entity entity;
+         CrashReport crashreport;
+         CrashReportCategory crashreportcategory;
++        // MCPC+ start
++        entitiesTicked = 0;
++        tilesTicked = 0;
++        // MCPC+ end
++        long lastChunk = Long.MIN_VALUE; // Spigot - cache chunk x, z cords for unload queue
+ 
+         for (i = 0; i < this.weatherEffects.size(); ++i)
+         {
+-            entity = (Entity)this.weatherEffects.get(i);
++            entity = (Entity) this.weatherEffects.get(i);
+ 
++            // CraftBukkit start - Fixed an NPE, don't process entities in chunks queued for unload
++            if (entity == null)
++            {
++                continue;
++            }
++
++            ChunkProviderServer chunkProviderServer = ((WorldServer) this).theChunkProviderServer;
++            // Spigot start - check last chunk to see if this loaded (fast cache)
++            long chunk = org.bukkit.craftbukkit.util.LongHash.toLong(MathHelper.floor_double(entity.posX) >> 4, MathHelper.floor_double(entity.posZ) >> 4);
++
++            if (lastChunk != chunk)
++            {
++                if (chunkProviderServer.chunksToUnload.contains(chunk))   // Spigot end
++                {
++                    continue;
++                }
++            }
++
++            // CraftBukkit end
++            lastChunk = chunk; // Spigot
++
+             try
+             {
+                 ++entity.ticksExisted;
+@@ -1858,6 +2352,7 @@
+             }
+         }
+ 
++        lastChunk = Long.MIN_VALUE; // Spigot
+         this.theProfiler.endStartSection("remove");
+         this.loadedEntityList.removeAll(this.unloadedEntityList);
+         int j;
+@@ -1882,11 +2377,29 @@
+ 
+         this.unloadedEntityList.clear();
+         this.theProfiler.endStartSection("regular");
++        org.spigotmc.ActivationRange.activateEntities(this); // Spigot
++        timings.entityTick.startTiming(); // Spigot
++        guardEntityList = true; // Spigot
+ 
+         for (i = 0; i < this.loadedEntityList.size(); ++i)
+         {
+-            entity = (Entity)this.loadedEntityList.get(i);
++            entity = (Entity) this.loadedEntityList.get(i);
++            // CraftBukkit start - Don't tick entities in chunks queued for unload
++            ChunkProviderServer chunkProviderServer = ((WorldServer) this).theChunkProviderServer;
++            // Spigot start - check last chunk to see if this loaded (fast cache)
++            long chunk = org.bukkit.craftbukkit.util.LongHash.toLong(MathHelper.floor_double(entity.posX) >> 4, MathHelper.floor_double(entity.posZ) >> 4);
+ 
++            if (lastChunk != chunk)
++            {
++                if (chunkProviderServer.chunksToUnload.contains(chunk))   // Spigot end
++                {
++                    continue;
++                }
++            }
++
++            // CraftBukkit end
++            lastChunk = Long.MIN_VALUE; // Spigot
++
+             if (entity.ridingEntity != null)
+             {
+                 if (!entity.ridingEntity.isDead && entity.ridingEntity.riddenByEntity == entity)
+@@ -1904,7 +2417,9 @@
+             {
+                 try
+                 {
++                    SpigotTimings.tickEntityTimer.startTiming(); // Spigot
+                     this.updateEntity(entity);
++                    SpigotTimings.tickEntityTimer.stopTiming(); // Spigot
+                 }
+                 catch (Throwable throwable1)
+                 {
+@@ -1937,29 +2452,62 @@
+                     this.getChunkFromChunkCoords(j, l).removeEntity(entity);
+                 }
+ 
++                guardEntityList = false; // Spigot
+                 this.loadedEntityList.remove(i--);
++                guardEntityList = true; // Spigot
+                 this.onEntityRemoved(entity);
+             }
+ 
+             this.theProfiler.endSection();
+         }
+ 
++        guardEntityList = false; // Spigot
++        timings.entityTick.stopTiming(); // Spigot
+         this.theProfiler.endStartSection("blockEntities");
++        timings.tileEntityTick.startTiming(); // Spigot
+         this.field_147481_N = true;
+         Iterator iterator = this.field_147482_g.iterator();
+ 
+         while (iterator.hasNext())
+         {
+-            TileEntity tileentity = (TileEntity)iterator.next();
++            TileEntity tileentity = (TileEntity) iterator.next();
+ 
++            // Spigot start
++            if (tileentity == null)
++            {
++                getServer().getLogger().severe("Spigot has detected a null entity and has removed it, preventing a crash");
++                iterator.remove();
++                continue;
++            }
++
++            // Spigot end
++            // CraftBukkit start - Don't tick entities in chunks queued for unload
++            ChunkProviderServer chunkProviderServer = ((WorldServer) this).theChunkProviderServer;
++            if (!isActiveBlockCoord(tileentity.field_145851_c, tileentity.field_145849_e)) continue; // MCPC+ don't tick inactive chunks
++            if (chunkProviderServer.chunksToUnload.contains(tileentity.field_145851_c >> 4, tileentity.field_145849_e >> 4))
++            {
++                continue;
++            }
++
++            // CraftBukkit end
++
+             if (!tileentity.func_145837_r() && tileentity.func_145830_o() && this.blockExists(tileentity.field_145851_c, tileentity.field_145848_d, tileentity.field_145849_e))
+             {
+                 try
+                 {
+-                    tileentity.func_145845_h();
++                    tileentity.tickTimer.startTiming(); // Spigot
++                    // MCPC+ start - selectively tick entities
++                    if (!MCPCHooks.overrideTileTicks || MinecraftServer.getServer().getTickCounter() % MCPCHooks.getTileTickInterval(tileentity) == 0)
++                    {
++                        tilesTicked++;
++                        tileentity.func_145845_h();
++                    }
++                    // MCPC+ stop
++                    tileentity.tickTimer.stopTiming(); // Spigot
+                 }
+                 catch (Throwable throwable)
+                 {
++                    tileentity.tickTimer.stopTiming(); // Spigot
+                     crashreport = CrashReport.makeCrashReport(throwable, "Ticking block entity");
+                     crashreportcategory = crashreport.makeCategory("Block entity being ticked");
+                     tileentity.func_145828_a(crashreportcategory);
+@@ -1992,6 +2540,10 @@
+             }
+         }
+ 
++        timings.tileEntityTick.stopTiming(); // Spigot
++        timings.tileEntityPending.startTiming(); // Spigot
++        this.field_147481_N = false;
++
+         if (!this.field_147483_b.isEmpty())
+         {
+             for (Object tile : field_147483_b)
+@@ -2014,20 +2566,27 @@
+ 
+                 if (!tileentity1.func_145837_r())
+                 {
++                    /* CraftBukkit start - Order matters, moved down
+                     if (!this.field_147482_g.contains(tileentity1))
+                     {
+                         this.field_147482_g.add(tileentity1);
+                     }
+-                }
+-                else
+-                {
++                    // CraftBukkit end */
+                     if (this.chunkExists(tileentity1.field_145851_c >> 4, tileentity1.field_145849_e >> 4))
+                     {
+                         Chunk chunk1 = this.getChunkFromChunkCoords(tileentity1.field_145851_c >> 4, tileentity1.field_145849_e >> 4);
+ 
+                         if (chunk1 != null)
+                         {
+-                            chunk1.removeInvalidTileEntity(tileentity1.field_145851_c & 15, tileentity1.field_145848_d, tileentity1.field_145849_e & 15);
++                            chunk1.func_150812_a(tileentity1.field_145851_c & 15, tileentity1.field_145848_d, tileentity1.field_145849_e & 15, tileentity1);
++
++                            // CraftBukkit start - Moved down from above
++                            if (!this.field_147482_g.contains(tileentity1))
++                            {
++                                this.field_147482_g.add(tileentity1);
++                            }
++
++                            // CraftBukkit end
+                         }
+                     }
+                 }
+@@ -2036,16 +2595,20 @@
+             this.field_147484_a.clear();
+         }
+ 
++        timings.tileEntityPending.stopTiming(); // Spigot
+         this.theProfiler.endSection();
+         this.theProfiler.endSection();
+     }
+ 
+     public void func_147448_a(Collection p_147448_1_)
+     {
+-        List dest = field_147481_N ? field_147484_a : field_147482_g;
+-        for(TileEntity entity : (Collection<TileEntity>)p_147448_1_)
++        Collection dest = field_147481_N ? field_147484_a : field_147482_g; // MCPC+ - List -> Collection for CB loadedTileEntityList type change
++        for(Object entity : p_147448_1_)
+         {
+-            if(entity.canUpdate()) dest.add(entity);
++            if(MCPCHooks.canUpdate((TileEntity)entity))
++            {
++                dest.add(entity);
++            }
+         }
+     }
+ 
+@@ -2060,12 +2623,16 @@
+     {
+         int i = MathHelper.floor_double(par1Entity.posX);
+         int j = MathHelper.floor_double(par1Entity.posZ);
++
+         boolean isForced = getPersistentChunks().containsKey(new ChunkCoordIntPair(i >> 4, j >> 4));
+         byte b0 = isForced ? (byte)0 : 32;
+         boolean canUpdate = !par2 || this.checkChunksExist(i - b0, 0, j - b0, i + b0, 0, j + b0);
+-
+-        if (!canUpdate)
++        // Spigot start
++        if (!canUpdate || !org.spigotmc.ActivationRange.checkIfActive(par1Entity))
+         {
++            par1Entity.ticksExisted++;
++            par1Entity.inactiveTick();
++        // Spigot end
+             EntityEvent.CanUpdate event = new EntityEvent.CanUpdate(par1Entity);
+             MinecraftForge.EVENT_BUS.post(event);
+             canUpdate = event.canUpdate;
+@@ -2073,6 +2640,8 @@
+ 
+         if (canUpdate)
+         {
++            entitiesTicked++;
++            par1Entity.tickTimer.startTiming(); // Spigot
+             par1Entity.lastTickPosX = par1Entity.posX;
+             par1Entity.lastTickPosY = par1Entity.posY;
+             par1Entity.lastTickPosZ = par1Entity.posZ;
+@@ -2156,6 +2725,8 @@
+                     par1Entity.riddenByEntity = null;
+                 }
+             }
++
++            par1Entity.tickTimer.stopTiming(); // Spigot
+         }
+     }
+ 
+@@ -2356,6 +2927,7 @@
+                 par3Entity.motionZ += vec3.zCoord * d1;
+             }
+ 
++            vec3.myVec3LocalPool.release(vec3); // CraftBukkit - pop it - we're done
+             return flag;
+         }
+     }
+@@ -2452,6 +3024,7 @@
+         double d2 = 1.0D / ((par2AxisAlignedBB.maxZ - par2AxisAlignedBB.minZ) * 2.0D + 1.0D);
+         int i = 0;
+         int j = 0;
++        Vec3 vec32 = par1Vec3.myVec3LocalPool.getVecFromPool(0, 0, 0); // CraftBukkit
+ 
+         for (float f = 0.0F; f <= 1.0F; f = (float)((double)f + d0))
+         {
+@@ -2463,7 +3036,7 @@
+                     double d4 = par2AxisAlignedBB.minY + (par2AxisAlignedBB.maxY - par2AxisAlignedBB.minY) * (double)f1;
+                     double d5 = par2AxisAlignedBB.minZ + (par2AxisAlignedBB.maxZ - par2AxisAlignedBB.minZ) * (double)f2;
+ 
+-                    if (this.clip(this.getWorldVec3Pool().getVecFromPool(d3, d4, d5), par1Vec3) == null)
++                    if (this.clip(vec32.setComponents(d3, d4, d5), par1Vec3) == null)   // CraftBukkit
+                     {
+                         ++i;
+                     }
+@@ -2473,7 +3046,8 @@
+             }
+         }
+ 
+-        return (float)i / (float)j;
++        vec32.myVec3LocalPool.release(vec32); // CraftBukkit
++        return (float) i / (float) j;
+     }
+ 
+     // JAVADOC METHOD $$ func_72886_a
+@@ -2749,7 +3323,16 @@
+ 
+                     if (i <= 0)
+                     {
+-                        this.worldInfo.setThundering(!this.worldInfo.isThundering());
++                        // CraftBukkit start
++                        ThunderChangeEvent thunder = new ThunderChangeEvent(this.getWorld(), !this.worldInfo.isThundering());
++                        this.getServer().getPluginManager().callEvent(thunder);
++
++                        if (!thunder.isCancelled())
++                        {
++                            this.worldInfo.setThundering(!this.worldInfo.isThundering());
++                        }
++
++                        // CraftBukkit end
+                     }
+                 }
+ 
+@@ -2785,7 +3368,16 @@
+ 
+                     if (j <= 0)
+                     {
+-                        this.worldInfo.setRaining(!this.worldInfo.isRaining());
++                        // CraftBukkit start
++                        WeatherChangeEvent weather = new WeatherChangeEvent(this.getWorld(), !this.worldInfo.isRaining());
++                        this.getServer().getPluginManager().callEvent(weather);
++
++                        if (!weather.isCancelled())
++                        {
++                            this.worldInfo.setRaining(!this.worldInfo.isRaining());
++                        }
++
++                        // CraftBukkit end
+                     }
+                 }
+ 
+@@ -2807,28 +3399,75 @@
+ 
+     protected void setActivePlayerChunksAndCheckLight()
+     {
+-        this.activeChunkSet.clear();
++        // MCPC+ start - add persistent chunks to be ticked for growth
++        activeChunkSet.clear();
++        activeChunkSet_CB.clear();
++        for(ChunkCoordIntPair chunk : getPersistentChunks().keySet()) {
++            this.activeChunkSet.add(chunk);
++            long key = chunkToKey(chunk.chunkXPos, chunk.chunkZPos);
++            activeChunkSet_CB.put(key, (short) 0);
++            if (!this.chunkExists(chunk.chunkXPos, chunk.chunkZPos)) {
++                ((WorldServer)this).theChunkProviderServer.loadChunk(chunk.chunkXPos, chunk.chunkZPos);
++            }
++        }
++        // MCPC+ end
++        // this.activeChunkSet.clear(); // CraftBukkit - removed
+         this.theProfiler.startSection("buildList");
+-        this.activeChunkSet.addAll(getPersistentChunks().keySet());
+         int i;
+         EntityPlayer entityplayer;
+         int j;
+         int k;
++        // Spigot start
++        int optimalChunks = spigotConfig.chunksPerTick;
+ 
++        // Quick conditions to allow us to exist early
++        if (optimalChunks <= 0) // MCPC+ tick chunks even if no players are logged in
++        {
++            return;
++        }
++
++        // Keep chunks with growth inside of the optimal chunk range
++        int chunksPerPlayer = Math.min(200, Math.max(1, (int)(((optimalChunks - playerEntities.size()) / (double) playerEntities.size()) + 0.5)));
++        int randRange = 3 + chunksPerPlayer / 30;
++        // Limit to normal tick radius - including view distance
++        randRange = (randRange > chunkTickRadius) ? chunkTickRadius : randRange;
++        // MCPC+ start - validate view radius
++        if (randRange < 1)
++        {
++            throw new IllegalArgumentException("Too small view radius! edit server.properties and change view-distance to a value > 0.");
++        }
++        // MCPC+ end
++        // odds of growth happening vs growth happening in vanilla
++        this.growthOdds = this.modifiedOdds = Math.max(35, Math.min(100, ((chunksPerPlayer + 1) * 100F) / 15F));
++
++        // Spigot end
+         for (i = 0; i < this.playerEntities.size(); ++i)
+         {
+             entityplayer = (EntityPlayer)this.playerEntities.get(i);
+             j = MathHelper.floor_double(entityplayer.posX / 16.0D);
+             k = MathHelper.floor_double(entityplayer.posZ / 16.0D);
+             byte b0 = 7;
++            // Spigot start - Always update the chunk the player is on
++            long key = chunkToKey(j, k);
++            int existingPlayers = Math.max(0, activeChunkSet_CB.get(key));     // filter out -1
++            activeChunkSet_CB.put(key, (short)(existingPlayers + 1));
++            activeChunkSet.add(new ChunkCoordIntPair(j, k)); // MCPC+ - vanilla compatibility
+ 
+-            for (int l = -b0; l <= b0; ++l)
++            // Check and see if we update the chunks surrounding the player this tick
++            for (int chunk = 0; chunk < chunksPerPlayer; chunk++)
+             {
+-                for (int i1 = -b0; i1 <= b0; ++i1)
++                int dx = (rand.nextBoolean() ? 1 : -1) * rand.nextInt(randRange);
++                int dz = (rand.nextBoolean() ? 1 : -1) * rand.nextInt(randRange);
++                long hash = chunkToKey(dx + j, dz + k);
++
++                if (!activeChunkSet_CB.contains(hash) && this.chunkExists(dx + j, dz + k))
+                 {
+-                    this.activeChunkSet.add(new ChunkCoordIntPair(l + j, i1 + k));
++                    activeChunkSet_CB.put(hash, (short) - 1);  // no players
++                    activeChunkSet.add(new ChunkCoordIntPair(dx + j, dz + k)); // MCPC+ - vanilla compatibility
+                 }
+             }
++
++            // Spigot End
+         }
+ 
+         this.theProfiler.endSection();
+@@ -2840,7 +3479,7 @@
+ 
+         this.theProfiler.startSection("playerCheckLight");
+ 
+-        if (!this.playerEntities.isEmpty())
++        if (spigotConfig.randomLightUpdates && !this.playerEntities.isEmpty())   // Spigot
+         {
+             i = this.rand.nextInt(this.playerEntities.size());
+             entityplayer = (EntityPlayer)this.playerEntities.get(i);
+@@ -3321,8 +3960,21 @@
+         {
+             Entity entity = (Entity)this.loadedEntityList.get(j);
+ 
+-            if ((!(entity instanceof EntityLiving) || !((EntityLiving)entity).isNoDespawnRequired()) && par1Class.isAssignableFrom(entity.getClass()))
++            // CraftBukkit start - Split out persistent check, don't apply it to special persistent mobs
++            if (entity instanceof EntityLiving)
+             {
++                EntityLiving entityliving = (EntityLiving) entity;
++
++                if (entityliving.canDespawn_CB() && entityliving.isNoDespawnRequired())
++                {
++                    continue;
++                }
++            }
++
++            if (par1Class.isAssignableFrom(entity.getClass()))
++            {
++                // if ((!(entity instanceof EntityLiving) || !((EntityLiving)entity).isNoDespawnRequired()) && par1Class.isAssignableFrom(entity.getClass())) {
++                // CraftBukkit end
+                 ++i;
+             }
+         }
+@@ -3333,6 +3985,11 @@
+     // JAVADOC METHOD $$ func_72868_a
+     public void addLoadedEntities(List par1List)
+     {
++        if (Thread.currentThread() != MinecraftServer.getServer().primaryThread)
++        {
++            throw new IllegalStateException("Asynchronous entity world add!");    // Spigot
++        }
++
+         for (int i = 0; i < par1List.size(); ++i)
+         {
+             Entity entity = (Entity)par1List.get(i);
+@@ -3354,7 +4011,63 @@
+     {
+         Block block1 = this.func_147439_a(p_147472_2_, p_147472_3_, p_147472_4_);
+         AxisAlignedBB axisalignedbb = p_147472_5_ ? null : p_147472_1_.func_149668_a(this, p_147472_2_, p_147472_3_, p_147472_4_);
+-        return axisalignedbb != null && !this.checkNoEntityCollision(axisalignedbb, p_147472_7_) ? false : (block1.func_149688_o() == Material.field_151594_q && p_147472_1_ == Blocks.anvil ? true : block1.isReplaceable(this, p_147472_2_, p_147472_3_, p_147472_4_) && p_147472_1_.func_149705_a(this, p_147472_2_, p_147472_3_, p_147472_4_, p_147472_6_, p_147472_8_));
++        // CraftBukkit start - store default return
++        boolean defaultReturn = axisalignedbb != null && !this.checkNoEntityCollision(axisalignedbb, p_147472_7_) ? false : (block1.func_149688_o() == Material.field_151594_q && p_147472_1_ == Blocks.anvil ? true : block1.isReplaceable(this, p_147472_2_, p_147472_3_, p_147472_4_) && p_147472_1_.func_149705_a(this, p_147472_2_, p_147472_3_, p_147472_4_, p_147472_6_, p_147472_8_));
++        // CraftBukkit start
++        BlockCanBuildEvent event = new BlockCanBuildEvent(this.getWorld().getBlockAt(p_147472_2_, p_147472_3_, p_147472_4_), CraftMagicNumbers.getId(p_147472_1_), defaultReturn);
++        this.getServer().getPluginManager().callEvent(event);
++        boolean result = event.isBuildable();
++        // MCPC+ start - all forge blocks will now send a BlockPlaceEvent here to allow events to occur with mods 
++        //               that override ItemBlock.onItemUse and ItemBlock.placeBlockAt such as RP2's microblocks, BC pipes, etc.
++        if (p_147472_7_ != null && !this.callingPlaceEvent && block1 != null && block1.isForgeBlock && result)
++        {
++            if (p_147472_7_ instanceof EntityPlayer)
++            {
++                EntityPlayer player = (EntityPlayer)p_147472_7_;
++                ItemStack itemstack = (player.getCurrentEquippedItem() != null ? player.getCurrentEquippedItem() : null);
++                NBTTagCompound savedCompound = null;
++                // workaround for MFR DSU's
++                if (itemstack != null && itemstack.getTagCompound() != null && (itemstack.getUnlocalizedName()).contains("deepstorageunit"))
++                {
++                    savedCompound = itemstack.getTagCompound(); // save current itemstack NBT
++                    itemstack.setTagCompound(new NBTTagCompound()); // dont use any itemstack NBT in our simulation, fixes MFR DSU dupe
++                }
++
++                org.bukkit.block.BlockState blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, p_147472_2_, p_147472_3_, p_147472_4_);
++                this.callingPlaceEvent = true;
++                int metadata = 0;
++                if (itemstack != null && itemstack.getItem() instanceof ItemBlock)
++                {
++                    ItemBlock itemblock = (ItemBlock)itemstack.getItem();
++                    int itemData = itemblock.getMetadata(itemstack.getItemDamage());
++                    metadata = p_147472_1_.func_149660_a(this, p_147472_2_, p_147472_3_, p_147472_4_, p_147472_6_, this.curPlacedItemHitX, this.curPlacedItemHitY, this.curPlacedItemHitZ, itemData);
++                    if (itemblock.placeBlockAt(itemstack, player, this, p_147472_2_, p_147472_3_, p_147472_4_, p_147472_6_, this.curPlacedItemHitX, this.curPlacedItemHitY, this.curPlacedItemHitZ, metadata))
++                    {
++                        // since this is only a simulation, there is no need to play sound or decrement stacksize
++                    }
++                }
++                this.curPlacedItemHitX = 0;
++                this.curPlacedItemHitY = 0;
++                this.curPlacedItemHitZ = 0;
++
++                // send place event
++                org.bukkit.event.block.BlockPlaceEvent placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(this, player, blockstate, p_147472_2_, p_147472_3_, p_147472_4_);
++
++                if (placeEvent.isCancelled() || !placeEvent.canBuild())
++                {
++                    result = false; // cancel placement
++                }
++
++                blockstate.update(true, false); // revert blockstate since this was only a simulation
++                this.callingPlaceEvent = false;
++                if (savedCompound != null)
++                {
++                    itemstack.setTagCompound(savedCompound); // restore itemstack NBT
++                }
++            }
++        }
++        return result;
++        // MCPC+ end
+     }
+ 
+     public PathEntity getPathEntityToEntity(Entity par1Entity, Entity par2Entity, float par3, boolean par4, boolean par5, boolean par6, boolean par7)
+@@ -3509,7 +4222,15 @@
+ 
+         for (int i = 0; i < this.playerEntities.size(); ++i)
+         {
+-            EntityPlayer entityplayer1 = (EntityPlayer)this.playerEntities.get(i);
++            EntityPlayer entityplayer1 = (EntityPlayer) this.playerEntities.get(i);
++
++            // CraftBukkit start - Fixed an NPE
++            if (entityplayer1 == null || entityplayer1.isDead)
++            {
++                continue;
++            }
++
++            // CraftBukkit end
+             double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
+ 
+             if ((par7 < 0.0D || d5 < par7 * par7) && (d4 == -1.0D || d5 < d4))
+@@ -3536,8 +4257,16 @@
+ 
+         for (int i = 0; i < this.playerEntities.size(); ++i)
+         {
+-            EntityPlayer entityplayer1 = (EntityPlayer)this.playerEntities.get(i);
++            EntityPlayer entityplayer1 = (EntityPlayer) this.playerEntities.get(i);
+ 
++            // CraftBukkit start - Fixed an NPE
++            if (entityplayer1 == null || entityplayer1.isDead)
++            {
++                continue;
++            }
++
++            // CraftBukkit end
++
+             if (!entityplayer1.capabilities.disableDamage && entityplayer1.isEntityAlive())
+             {
+                 double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
+@@ -3705,6 +4434,18 @@
+     // JAVADOC METHOD $$ func_72854_c
+     public void updateAllPlayersSleepingFlag() {}
+ 
++    // CraftBukkit start
++    // Calls the method that checks to see if players are sleeping
++    // Called by CraftPlayer.setPermanentSleeping()
++    public void checkSleepStatus()
++    {
++        if (!this.isRemote)
++        {
++            this.updateAllPlayersSleepingFlag();
++        }
++    }
++    // CraftBukkit end
++
+     public float getWeightedThunderStrength(float par1)
+     {
+         return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * par1) * this.getRainStrength(par1);
+@@ -3999,8 +4740,8 @@
+      */
+     public void addTileEntity(TileEntity entity)
+     {
+-        List dest = field_147481_N ? field_147484_a : field_147482_g;
+-        if(entity.canUpdate())
++        Collection dest = field_147481_N ? field_147484_a : field_147482_g; // MCPC+ - List -> Collection for CB loadedTileEntityList type change
++        if(MCPCHooks.canUpdate(entity))
+         {
+             dest.add(entity);
+         }
+@@ -4096,4 +4837,26 @@
+         }
+         return count;
+     }
++    
++    // MCPC+ start
++    public boolean isActiveChunk(int x, int z)
++    {
++        return getPersistentChunks().containsKey(new ChunkCoordIntPair(x, z)) || activeChunkSet_CB.containsKey(chunkToKey(x, z));
++    }
++
++    public boolean isActiveChunk(long key)
++    {
++        return isActiveChunk(keyToX(key), keyToZ(key));
++    }
++
++    public boolean isActiveBlockCoord(int x, int z)
++    {
++        return isActiveChunk(x >> 4, z >> 4);
++    }
++    
++    public boolean inActiveChunk(Entity entity)
++    {
++        return isActiveBlockCoord(MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posZ));
++    }
++    // MCPC+ end
+ }

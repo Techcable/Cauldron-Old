@@ -1,0 +1,31 @@
+--- ../src-base/minecraft/net/minecraft/inventory/SlotFurnace.java
++++ ../src-work/minecraft/net/minecraft/inventory/SlotFurnace.java
+@@ -9,6 +9,12 @@
+ import net.minecraft.stats.AchievementList;
+ import net.minecraft.util.MathHelper;
+ 
++// CraftBukkit start
++import net.minecraft.tileentity.TileEntityFurnace;
++import org.bukkit.entity.Player;
++import org.bukkit.event.inventory.FurnaceExtractEvent;
++// CraftBukkit end
++
+ public class SlotFurnace extends Slot
+ {
+     // JAVADOC FIELD $$ field_75229_a
+@@ -79,6 +85,15 @@
+                 i = j;
+             }
+ 
++            // CraftBukkit start
++            Player player = (Player) thePlayer.getBukkitEntity();
++            TileEntityFurnace furnace = ((TileEntityFurnace) this.inventory);
++            org.bukkit.block.Block block = thePlayer.worldObj.getWorld().getBlockAt(furnace.field_145851_c, furnace.field_145848_d, furnace.field_145849_e);
++            FurnaceExtractEvent event = new FurnaceExtractEvent(player, block, org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(par1ItemStack.getItem()), par1ItemStack.stackSize, i);
++            thePlayer.worldObj.getServer().getPluginManager().callEvent(event);
++            i = event.getExpToDrop();
++            // CraftBukkit end
++
+             while (i > 0)
+             {
+                 j = EntityXPOrb.getXPSplit(i);

@@ -1,0 +1,194 @@
+--- ../src-base/minecraft/net/minecraft/entity/EntityLiving.java
++++ ../src-work/minecraft/net/minecraft/entity/EntityLiving.java
+@@ -38,6 +38,13 @@
+ import cpw.mods.fml.common.eventhandler.Event.Result;
+ import net.minecraftforge.event.ForgeEventFactory;
+ 
++// CraftBukkit start
++import net.minecraft.entity.player.EntityPlayerMP;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityUnleashEvent;
++import org.bukkit.event.entity.EntityUnleashEvent.UnleashReason;
++// CraftBukkit end
++
+ public abstract class EntityLiving extends EntityLivingBase
+ {
+     // JAVADOC FIELD $$ field_70757_a
+@@ -50,19 +57,19 @@
+     private EntityJumpHelper jumpHelper;
+     private EntityBodyHelper bodyHelper;
+     private PathNavigate navigator;
+-    public final EntityAITasks tasks;
+-    public final EntityAITasks targetTasks;
++    protected final EntityAITasks tasks;
++    protected final EntityAITasks targetTasks;
+     // JAVADOC FIELD $$ field_70696_bz
+     private EntityLivingBase attackTarget;
+     private EntitySenses senses;
+     // JAVADOC FIELD $$ field_82182_bS
+     private ItemStack[] equipment = new ItemStack[5];
+     // JAVADOC FIELD $$ field_82174_bp
+-    protected float[] equipmentDropChances = new float[5];
++    public float[] equipmentDropChances = new float[5]; // CraftBukkit - protected -> public
+     // JAVADOC FIELD $$ field_82172_bs
+-    private boolean canPickUpLoot;
++    public boolean canPickUpLoot; // CraftBukkit - private -> public
+     // JAVADOC FIELD $$ field_82179_bU
+-    private boolean persistenceRequired;
++    public boolean persistenceRequired; // CraftBukkit - private -> public
+     protected float defaultPitch;
+     // JAVADOC FIELD $$ field_70776_bF
+     private Entity currentTarget;
+@@ -259,6 +266,8 @@
+     // JAVADOC METHOD $$ func_70628_a
+     protected void dropFewItems(boolean par1, int par2)
+     {
++        // CraftBukkit start - Whole method
++        List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
+         Item item = this.func_146068_u();
+ 
+         if (item != null)
+@@ -270,11 +279,30 @@
+                 j += this.rand.nextInt(par2 + 1);
+             }
+ 
+-            for (int k = 0; k < j; ++k)
++            if (j > 0)
+             {
+-                this.func_145779_a(item, 1);
++                loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(item), j));
+             }
+         }
++
++        // Determine rare item drops and add them to the loot
++        if (this.recentlyHit > 0)
++        {
++            int k = this.rand.nextInt(200) - par2;
++
++            if (k < 5)
++            {
++                ItemStack itemstack = this.getRareDrop(k <= 0 ? 1 : 0);
++
++                if (itemstack != null)
++                {
++                    loot.add(org.bukkit.craftbukkit.inventory.CraftItemStack.asCraftMirror(itemstack));
++                }
++            }
++        }
++
++        CraftEventFactory.callEntityDeathEvent(this, loot); // raise event even for those times when the entity does not drop loot
++        // CraftBukkit end
+     }
+ 
+     // JAVADOC METHOD $$ func_70014_b
+@@ -336,9 +364,23 @@
+     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
+     {
+         super.readEntityFromNBT(par1NBTTagCompound);
+-        this.setCanPickUpLoot(par1NBTTagCompound.getBoolean("CanPickUpLoot"));
+-        this.persistenceRequired = par1NBTTagCompound.getBoolean("PersistenceRequired");
++        // CraftBukkit start - If looting or persistence is false only use it if it was set after we started using it
++        boolean data = par1NBTTagCompound.getBoolean("CanPickUpLoot");
+ 
++        if (isLevelAtLeast(par1NBTTagCompound, 1) || data)
++        {
++            this.canPickUpLoot = data;
++        }
++
++        data = par1NBTTagCompound.getBoolean("PersistenceRequired");
++
++        if (isLevelAtLeast(par1NBTTagCompound, 1) || data)
++        {
++            this.persistenceRequired = data;
++        }
++
++        // CraftBukkit end
++
+         if (par1NBTTagCompound.func_150297_b("CustomName", 8) && par1NBTTagCompound.getString("CustomName").length() > 0)
+         {
+             this.setCustomNameTag(par1NBTTagCompound.getString("CustomName"));
+@@ -560,6 +602,14 @@
+         this.worldObj.theProfiler.startSection("checkDespawn");
+         this.despawnEntity();
+         this.worldObj.theProfiler.endSection();
++
++        // Spigot Start
++        if (this.fromMobSpawner)
++        {
++            return;
++        }
++
++        // Spigot End
+         this.worldObj.theProfiler.startSection("sensing");
+         this.senses.clearSensingCache();
+         this.worldObj.theProfiler.endSection();
+@@ -1052,6 +1102,14 @@
+     {
+         if (this.getLeashed() && this.getLeashedToEntity() == par1EntityPlayer)
+         {
++            // CraftBukkit start
++            if (CraftEventFactory.callPlayerUnleashEntityEvent(this, par1EntityPlayer).isCancelled())
++            {
++                ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.func_147359_a(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
++                return false;
++            }
++
++            // CraftBukkit end
+             this.clearLeashed(true, !par1EntityPlayer.capabilities.isCreativeMode);
+             return true;
+         }
+@@ -1063,6 +1121,14 @@
+             {
+                 if (!(this instanceof EntityTameable) || !((EntityTameable)this).isTamed())
+                 {
++                    // CraftBukkit start
++                    if (CraftEventFactory.callPlayerLeashEntityEvent(this, par1EntityPlayer, par1EntityPlayer).isCancelled())
++                    {
++                        ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.func_147359_a(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
++                        return false;
++                    }
++
++                    // CraftBukkit end
+                     this.setLeashedToEntity(par1EntityPlayer, true);
+                     --itemstack.stackSize;
+                     return true;
+@@ -1070,6 +1136,14 @@
+ 
+                 if (par1EntityPlayer.getCommandSenderName().equalsIgnoreCase(((EntityTameable)this).getOwnerName()))
+                 {
++                    // CraftBukkit start
++                    if (CraftEventFactory.callPlayerLeashEntityEvent(this, par1EntityPlayer, par1EntityPlayer).isCancelled())
++                    {
++                        ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.func_147359_a(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
++                        return false;
++                    }
++
++                    // CraftBukkit end
+                     this.setLeashedToEntity(par1EntityPlayer, true);
+                     --itemstack.stackSize;
+                     return true;
+@@ -1097,6 +1171,7 @@
+         {
+             if (this.leashedToEntity == null || this.leashedToEntity.isDead)
+             {
++                this.worldObj.getServer().getPluginManager().callEvent(new EntityUnleashEvent(this.getBukkitEntity(), UnleashReason.HOLDER_GONE)); // CraftBukkit
+                 this.clearLeashed(true, true);
+             }
+         }
+@@ -1186,10 +1261,16 @@
+             }
+             else
+             {
++                this.worldObj.getServer().getPluginManager().callEvent(new EntityUnleashEvent(this.getBukkitEntity(), UnleashReason.UNKNOWN)); // CraftBukkit
+                 this.clearLeashed(false, true);
+             }
+         }
+ 
+         this.field_110170_bx = null;
+     }
++
++    public boolean canDespawn_CB()
++    {
++        return this.canDespawn();
++    }
+ }

@@ -1,0 +1,71 @@
+--- ../src-base/minecraft/net/minecraft/entity/monster/EntitySpider.java
++++ ../src-work/minecraft/net/minecraft/entity/monster/EntitySpider.java
+@@ -14,6 +14,11 @@
+ import net.minecraft.world.EnumDifficulty;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.util.CraftMagicNumbers;
++import org.bukkit.event.entity.EntityTargetEvent;
++// CraftBukkti end
++
+ public class EntitySpider extends EntityMob
+ {
+     private static final String __OBFID = "CL_00001699";
+@@ -94,7 +99,25 @@
+ 
+         if (f1 > 0.5F && this.rand.nextInt(100) == 0)
+         {
+-            this.entityToAttack = null;
++            // CraftBukkit start
++            EntityTargetEvent event = new EntityTargetEvent(this.getBukkitEntity(), null, EntityTargetEvent.TargetReason.FORGOT_TARGET);
++            this.worldObj.getServer().getPluginManager().callEvent(event);
++
++            if (!event.isCancelled())
++            {
++                if (event.getTarget() == null)
++                {
++                    this.entityToAttack = null;
++                }
++                else
++                {
++                    this.entityToAttack = ((org.bukkit.craftbukkit.entity.CraftEntity) event.getTarget()).getHandle();
++                }
++
++                return;
++            }
++
++            // CraftBukkit end
+         }
+         else
+         {
+@@ -125,12 +148,27 @@
+     // JAVADOC METHOD $$ func_70628_a
+     protected void dropFewItems(boolean par1, int par2)
+     {
+-        super.dropFewItems(par1, par2);
++        // CraftBukkit start - Whole method; adapted from super.dropDeathLoot.
++        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
++        int k = this.rand.nextInt(3);
+ 
++        if (par2 > 0)
++        {
++            k += this.rand.nextInt(par2 + 1);
++        }
++
++        if (k > 0)
++        {
++            loot.add(new org.bukkit.inventory.ItemStack(CraftMagicNumbers.getMaterial(Items.string), k));
++        }
++
+         if (par1 && (this.rand.nextInt(3) == 0 || this.rand.nextInt(1 + par2) > 0))
+         {
+-            this.func_145779_a(Items.spider_eye, 1);
++            loot.add(new org.bukkit.inventory.ItemStack(CraftMagicNumbers.getMaterial(Items.spider_eye), 1));
+         }
++
++        org.bukkit.craftbukkit.event.CraftEventFactory.callEntityDeathEvent(this, loot); // raise event even for those times when the entity does not drop loot
++        // CraftBukkit end
+     }
+ 
+     // JAVADOC METHOD $$ func_70617_f_

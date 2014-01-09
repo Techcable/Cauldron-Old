@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/world/gen/feature/WorldGenDeadBush.java
++++ ../src-work/minecraft/net/minecraft/world/gen/feature/WorldGenDeadBush.java
+@@ -22,7 +22,7 @@
+         do
+         {
+             block = par1World.func_147439_a(par3, par4, par5);
+-            if (!(block.isLeaves(par1World, par3, par4, par5) || block.isAir(par1World, par3, par4, par5)))
++            if (block.isLeaves(par1World, par3, par4, par5) || block.isAir(par1World, par3, par4, par5))
+             {
+                 break;
+             }

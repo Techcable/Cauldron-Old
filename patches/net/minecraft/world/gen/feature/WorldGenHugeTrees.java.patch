@@ -1,0 +1,114 @@
+--- ../src-base/minecraft/net/minecraft/world/gen/feature/WorldGenHugeTrees.java
++++ ../src-work/minecraft/net/minecraft/world/gen/feature/WorldGenHugeTrees.java
+@@ -8,6 +8,9 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.common.util.ForgeDirection;
+ 
++import org.bukkit.BlockChangeDelegate;
++import org.bukkit.craftbukkit.CraftBlockChangeDelegate; // CraftBukkit
++
+ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
+ {
+     // JAVADOC FIELD $$ field_76522_a
+@@ -40,7 +43,8 @@
+         return i;
+     }
+ 
+-    private boolean func_150536_b(World p_150536_1_, Random p_150536_2_, int p_150536_3_, int p_150536_4_, int p_150536_5_, int p_150536_6_)
++    // CraftBukkit - Changed world to CraftBlockChangeDelegate
++    private boolean CB_func_150536_b(CraftBlockChangeDelegate p_150536_1_, Random p_150536_2_, int p_150536_3_, int p_150536_4_, int p_150536_5_, int p_150536_6_)
+     {
+         boolean flag = true;
+ 
+@@ -66,7 +70,7 @@
+                     {
+                         if (i1 >= 0 && i1 < 256)
+                         {
+-                            Block block = p_150536_1_.func_147439_a(j1, i1, k1);
++                            Block block = p_150536_1_.getType(j1, i1, k1);
+ 
+                             if (!this.isReplaceable(p_150536_1_, j1, i1, k1))
+                             {
+@@ -89,9 +93,10 @@
+         }
+     }
+ 
+-    private boolean func_150532_c(World p_150532_1_, Random p_150532_2_, int p_150532_3_, int p_150532_4_, int p_150532_5_)
++    // CraftBukkit - Change world to CraftBlockChangeDelegate
++    private boolean CB_func_150532_c(CraftBlockChangeDelegate p_150532_1_, Random p_150532_2_, int p_150532_3_, int p_150532_4_, int p_150532_5_)
+     {
+-        Block block = p_150532_1_.func_147439_a(p_150532_3_, p_150532_4_ - 1, p_150532_5_);
++        Block block = p_150532_1_.getType(p_150532_3_, p_150532_4_ - 1, p_150532_5_);
+ 
+         boolean isSoil = block.canSustainPlant(p_150532_1_, p_150532_3_, p_150532_4_ - 1, p_150532_5_, ForgeDirection.UP, (BlockSapling)Blocks.sapling);
+         if (isSoil && p_150532_4_ >= 2)
+@@ -108,12 +113,14 @@
+         }
+     }
+ 
+-    protected boolean func_150537_a(World p_150537_1_, Random p_150537_2_, int p_150537_3_, int p_150537_4_, int p_150537_5_, int p_150537_6_)
++    // CraftBukkit - Change world to CraftBlockChangeDelegate
++    protected boolean CB_func_150537_a(CraftBlockChangeDelegate p_150537_1_, Random p_150537_2_, int p_150537_3_, int p_150537_4_, int p_150537_5_, int p_150537_6_)
+     {
+-        return this.func_150536_b(p_150537_1_, p_150537_2_, p_150537_3_, p_150537_4_, p_150537_5_, p_150537_6_) && this.func_150532_c(p_150537_1_, p_150537_2_, p_150537_3_, p_150537_4_, p_150537_5_);
++        return this.CB_func_150536_b(p_150537_1_, p_150537_2_, p_150537_3_, p_150537_4_, p_150537_5_, p_150537_6_) && this.CB_func_150532_c(p_150537_1_, p_150537_2_, p_150537_3_, p_150537_4_, p_150537_5_);
+     }
+ 
+-    protected void func_150535_a(World p_150535_1_, int p_150535_2_, int p_150535_3_, int p_150535_4_, int p_150535_5_, Random p_150535_6_)
++    // CraftBukkit - Change world to CraftBlockChangeDelegate
++    protected void CB_func_150535_a(CraftBlockChangeDelegate p_150535_1_, int p_150535_2_, int p_150535_3_, int p_150535_4_, int p_150535_5_, Random p_150535_6_)
+     {
+         int i1 = p_150535_5_ * p_150535_5_;
+ 
+@@ -129,18 +136,19 @@
+ 
+                 if (k1 * k1 + i2 * i2 <= i1 || j2 * j2 + k2 * k2 <= i1 || k1 * k1 + k2 * k2 <= i1 || j2 * j2 + i2 * i2 <= i1)
+                 {
+-                    Block block = p_150535_1_.func_147439_a(j1, p_150535_3_, l1);
++                    Block block = p_150535_1_.getType(j1, p_150535_3_, l1);
+ 
+                     if (block.isAir(p_150535_1_, j1, p_150535_3_, l1) || block.isLeaves(p_150535_1_, j1, p_150535_3_, l1))
+                     {
+-                        this.func_150516_a(p_150535_1_, j1, p_150535_3_, l1, Blocks.leaves, this.leavesMetadata);
++                        this.setTypeAndData(p_150535_1_, j1, p_150535_3_, l1, Blocks.leaves, this.leavesMetadata);
+                     }
+                 }
+             }
+         }
+     }
+ 
+-    protected void func_150534_b(World p_150534_1_, int p_150534_2_, int p_150534_3_, int p_150534_4_, int p_150534_5_, Random p_150534_6_)
++    // CraftBukkit - Change world to CraftBlockChangeDelegate
++    protected void CB_func_150534_b(CraftBlockChangeDelegate p_150534_1_, int p_150534_2_, int p_150534_3_, int p_150534_4_, int p_150534_5_, Random p_150534_6_)
+     {
+         int i1 = p_150534_5_ * p_150534_5_;
+ 
+@@ -154,11 +162,11 @@
+ 
+                 if (k1 * k1 + i2 * i2 <= i1)
+                 {
+-                    Block block = p_150534_1_.func_147439_a(j1, p_150534_3_, l1);
++                    Block block = p_150534_1_.getType(j1, p_150534_3_, l1);
+ 
+                     if (block.isAir(p_150534_1_, j1, p_150534_3_, l1) || block.isLeaves(p_150534_1_, j1, p_150534_3_, l1))
+                     {
+-                        this.func_150516_a(p_150534_1_, j1, p_150534_3_, l1, Blocks.leaves, this.leavesMetadata);
++                        this.setTypeAndData(p_150534_1_, j1, p_150534_3_, l1, Blocks.leaves, this.leavesMetadata);
+                     }
+                 }
+             }
+@@ -166,8 +174,12 @@
+     }
+ 
+     //Just a helper macro
+-    private void onPlantGrow(World world, int x, int y, int z, int sourceX, int sourceY, int sourceZ)
++    private void onPlantGrow(CraftBlockChangeDelegate world, int x, int y, int z, int sourceX, int sourceY, int sourceZ)
+     {
+-        world.func_147439_a(x, y, z).onPlantGrow(world, x, y, z, sourceX, sourceY, sourceZ);
++        Block block = world.getType(x, y, z);
++        if (block != null)
++        {
++            block.onPlantGrow(world, x, y, z, sourceX, sourceY, sourceZ);
++        }
+     }
+ }

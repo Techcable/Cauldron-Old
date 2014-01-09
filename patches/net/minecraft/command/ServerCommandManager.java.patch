@@ -1,0 +1,74 @@
+--- ../src-base/minecraft/net/minecraft/command/ServerCommandManager.java
++++ ../src-work/minecraft/net/minecraft/command/ServerCommandManager.java
+@@ -37,8 +37,16 @@
+ {
+     private static final String __OBFID = "CL_00000922";
+ 
++    // MCPC+ start - moved commands to it's own method to be executed further in server startup + changed to registerVanillaCommand
+     public ServerCommandManager()
+     {
++        CommandBase.setAdminCommander(this);
++    }
++
++    public void registerVanillaCommands()
++    {
++        // MCPC+ - do not register vanilla commands replaced by Bukkit
++        /*    
+         this.registerCommand(new CommandTime());
+         this.registerCommand(new CommandGameMode());
+         this.registerCommand(new CommandDifficulty());
+@@ -54,7 +62,6 @@
+         this.registerCommand(new CommandEmote());
+         this.registerCommand(new CommandShowSeed());
+         this.registerCommand(new CommandHelp());
+-        this.registerCommand(new CommandDebug());
+         this.registerCommand(new CommandMessage());
+         this.registerCommand(new CommandBroadcast());
+         this.registerCommand(new CommandSetSpawnpoint());
+@@ -62,17 +69,22 @@
+         this.registerCommand(new CommandGameRule());
+         this.registerCommand(new CommandClearInventory());
+         this.registerCommand(new CommandTestFor());
+-        this.registerCommand(new CommandSpreadPlayers());
+-        this.registerCommand(new CommandPlaySound());
+-        this.registerCommand(new CommandScoreboard());
+-        this.registerCommand(new CommandAchievement());
+-        this.registerCommand(new CommandSummon());
+-        this.registerCommand(new CommandSetBlock());
+-        this.registerCommand(new CommandTestForBlock());
+-        this.registerCommand(new CommandMessageRaw());
++        */
++        // MCPC+ start - add permission nodes for rest of vanilla commands
++        this.registerCommand("vanilla.command", new CommandDebug());
++        this.registerCommand("vanilla.command", new CommandSpreadPlayers());
++        this.registerCommand("vanilla.command", new CommandPlaySound());
++        this.registerCommand("vanilla.command", new CommandScoreboard());
++        this.registerCommand("vanilla.command", new CommandAchievement());
++        this.registerCommand("vanilla.command", new CommandSummon());
++        this.registerCommand("vanilla.command", new CommandSetBlock());
++        this.registerCommand("vanilla.command", new CommandTestForBlock());
++        this.registerCommand("vanilla.command", new CommandMessageRaw());
++        // MCPC+ end
+ 
+         if (MinecraftServer.getServer().isDedicatedServer())
+         {
++            /*
+             this.registerCommand(new CommandOp());
+             this.registerCommand(new CommandDeOp());
+             this.registerCommand(new CommandStop());
+@@ -88,13 +100,13 @@
+             this.registerCommand(new CommandListPlayers());
+             this.registerCommand(new CommandWhitelist());
+             this.registerCommand(new CommandSetPlayerTimeout());
++            */
+         }
+         else
+         {
+             this.registerCommand(new CommandPublishLocalServer());
+         }
+-
+-        CommandBase.setAdminCommander(this);
++        // MCPC+ end
+     }
+ 
+     // JAVADOC METHOD $$ func_71563_a

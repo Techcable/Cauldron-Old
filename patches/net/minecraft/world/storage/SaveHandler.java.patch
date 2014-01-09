@@ -1,0 +1,127 @@
+--- ../src-base/minecraft/net/minecraft/world/storage/SaveHandler.java
++++ ../src-work/minecraft/net/minecraft/world/storage/SaveHandler.java
+@@ -9,6 +9,7 @@
+ 
+ import cpw.mods.fml.common.FMLCommonHandler;
+ import net.minecraft.entity.player.EntityPlayer;
++import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.nbt.CompressedStreamTools;
+ import net.minecraft.nbt.NBTTagCompound;
+ import net.minecraft.server.MinecraftServer;
+@@ -18,6 +19,12 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++// CraftBukkit start
++import java.util.UUID;
++
++import org.bukkit.craftbukkit.entity.CraftPlayer;
++// CraftBukkit end
++
+ public class SaveHandler implements ISaveHandler, IPlayerFileData
+ {
+     private static final Logger field_151478_a = LogManager.getLogger();
+@@ -30,6 +37,7 @@
+     private final long initializationTime = MinecraftServer.getSystemTimeMillis();
+     // JAVADOC FIELD $$ field_75767_f
+     private final String saveDirectoryName;
++    private UUID uuid = null; // CraftBukkit
+     private static final String __OBFID = "CL_00000585";
+ 
+     public SaveHandler(File par1File, String par2Str, boolean par3)
+@@ -278,6 +286,14 @@
+ 
+         if (nbttagcompound != null)
+         {
++            // CraftBukkit start
++            if (par1EntityPlayer instanceof EntityPlayerMP)
++            {
++                CraftPlayer player = (CraftPlayer) par1EntityPlayer.getBukkitEntity(); // MCPC+
++                player.setFirstPlayed(new File(playersDirectory, par1EntityPlayer.getCommandSenderName() + ".dat").lastModified());
++            }
++
++            // CraftBukkit end
+             par1EntityPlayer.readFromNBT(nbttagcompound);
+         }
+ 
+@@ -340,4 +356,80 @@
+     {
+         return this.saveDirectoryName;
+     }
++
++    // CraftBukkit start
++    public UUID getUUID()
++    {
++        if (uuid != null)
++        {
++            return uuid;
++        }
++
++        File file1 = new File(this.worldDirectory, "uid.dat");
++
++        if (file1.exists())
++        {
++            DataInputStream dis = null;
++
++            try
++            {
++                dis = new DataInputStream(new FileInputStream(file1));
++                return uuid = new UUID(dis.readLong(), dis.readLong());
++            }
++            catch (IOException ex)
++            {
++                field_151478_a.warn("Failed to read " + file1 + ", generating new random UUID", ex);
++            }
++            finally
++            {
++                if (dis != null)
++                {
++                    try
++                    {
++                        dis.close();
++                    }
++                    catch (IOException ex)
++                    {
++                        // NOOP
++                    }
++                }
++            }
++        }
++
++        uuid = UUID.randomUUID();
++        DataOutputStream dos = null;
++
++        try
++        {
++            dos = new DataOutputStream(new FileOutputStream(file1));
++            dos.writeLong(uuid.getMostSignificantBits());
++            dos.writeLong(uuid.getLeastSignificantBits());
++        }
++        catch (IOException ex)
++        {
++            field_151478_a.warn("Failed to write " + file1, ex);
++        }
++        finally
++        {
++            if (dos != null)
++            {
++                try
++                {
++                    dos.close();
++                }
++                catch (IOException ex)
++                {
++                    // NOOP
++                }
++            }
++        }
++
++        return uuid;
++    }
++
++    public File getPlayerDir()
++    {
++        return playersDirectory;
++    }
++    // CraftBukkit end
+ }

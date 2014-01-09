@@ -1,0 +1,136 @@
+--- ../src-base/minecraft/net/minecraft/block/Block.java
++++ ../src-work/minecraft/net/minecraft/block/Block.java
+@@ -10,6 +10,9 @@
+ import java.util.List;
+ import java.util.Random;
+ 
++import org.bukkit.craftbukkit.CraftBlockChangeDelegate;
++import org.bukkit.craftbukkit.util.CraftMagicNumbers;
++
+ import net.minecraft.block.material.MapColor;
+ import net.minecraft.block.material.Material;
+ import net.minecraft.client.particle.EffectRenderer;
+@@ -122,6 +125,7 @@
+     private String field_149770_b;
+     @SideOnly(Side.CLIENT)
+     protected IIcon field_149761_L;
++    public boolean isForgeBlock; // MCPC+
+     private static final String __OBFID = "CL_00000199";
+ 
+     public static int func_149682_b(Block p_149682_0_)
+@@ -417,6 +421,10 @@
+         this.field_149787_q = this.func_149662_c();
+         this.field_149786_r = this.func_149662_c() ? 255 : 0;
+         this.field_149785_s = !p_i45394_1_.getCanBlockGrass();
++        // MCPC+ start
++        //org.bukkit.Material.addMaterial(CraftMagicNumbers.getId(this), true); // MCPC+ - many mods do not register blocks through GameRegistry so to be safe we need to add materials here
++        this.isForgeBlock = (this.getClass().getName().length() > 3 && !this.getClass().getName().startsWith("net.minecraft.block")) ? true : false; // MCPC+
++        // MCPC+ end
+     }
+ 
+     public Block func_149672_a(Block.SoundType p_149672_1_)
+@@ -1123,6 +1131,30 @@
+         return this;
+     }
+ 
++    // CraftBukkit start
++    public int getExpDrop(World world, int data, int enchantmentLevel)
++    {
++        return 0;
++    }
++    // CraftBukkit end
++
++    // Spigot start
++    public static float range(float min, float value, float max)
++    {
++        if (value < min)
++        {
++            return min;
++        }
++
++        if (value > max)
++        {
++            return max;
++        }
++
++        return value;
++    }
++    // Spigot end
++
+     @SideOnly(Side.CLIENT)
+     protected String func_149641_N()
+     {
+@@ -1645,7 +1677,7 @@
+      */
+     public boolean canBeReplacedByLeaves(IBlockAccess world, int x, int y, int z)
+     {
+-        return !func_149730_j();
++        return func_149730_j();
+     }
+ 
+     /**
+@@ -1842,7 +1874,7 @@
+      *   Cacti checks if its a cacti, or if its sand
+      *   Nether types check for soul sand
+      *   Crops check for tilled soil
+-     *   Caves check if it's a solid surface
++     *   Caves check if it's a colid surface
+      *   Plains check if its grass or dirt
+      *   Water check if its still water
+      *
+@@ -2245,4 +2277,55 @@
+                 return this.func_150495_a();
+             }
+         }
++
++    //MCPC+ Start - Bukkit Compat
++    public boolean canBeReplacedByLeaves(CraftBlockChangeDelegate world, int x, int y, int z)
++    {
++        World forgeWorld = world.getDelegate() instanceof World ? (World)world.getDelegate() : null;
++        try {
++            return canBeReplacedByLeaves(forgeWorld, x, y, z);
++        } catch (Throwable t) { }
++        return world.getType(x, y, z) == Blocks.leaves;
++    }
++    public boolean isLeaves(CraftBlockChangeDelegate world, int x, int y, int z)
++    {
++        World forgeWorld = world.getDelegate() instanceof World ? (World)world.getDelegate() : null;
++        try {
++            return isLeaves(forgeWorld, x, y, z);
++        } catch (Throwable t) { }
++        return world.getType(x, y, z) == Blocks.leaves;
++    }
++    public boolean isWood(CraftBlockChangeDelegate world, int x, int y, int z)
++    {
++        World forgeWorld = world.getDelegate() instanceof World ? (World)world.getDelegate() : null;
++        try {
++            return isWood(forgeWorld, x, y, z);
++        } catch (Throwable t) { }
++        return world.getType(x, y, z) == Blocks.log;
++    }
++    public boolean isAir(CraftBlockChangeDelegate world, int x, int y, int z)
++    {
++        World forgeWorld = world.getDelegate() instanceof World ? (World)world.getDelegate() : null;
++        try {
++            return isAir(forgeWorld, x, y, z);
++        } catch (Throwable t) { }
++        return world.getType(x, y, z) == Blocks.air;
++    }
++    public boolean canSustainPlant(CraftBlockChangeDelegate world, int x, int y, int z, ForgeDirection direction, IPlantable plant){
++        World forgeWorld = world.getDelegate() instanceof World ? (World)world.getDelegate() : null;
++        try {
++            return canSustainPlant(forgeWorld, x, y, z, direction, plant);
++        } catch (Throwable t) { }
++        return world.getType(x, y, z) == Blocks.grass || world.getType(x, y, z) == Blocks.dirt;
++    }
++    public void onPlantGrow(CraftBlockChangeDelegate world, int x, int y, int z, int sourceX, int sourceY, int sourceZ)
++    {
++        World forgeWorld = world.getDelegate() instanceof World ? (World)world.getDelegate() : null;
++        try {
++            onPlantGrow(forgeWorld, x, y, z, sourceX, sourceY, sourceZ);
++            return;
++        } catch (Throwable t) { }
++        world.setTypeAndData(x, y, z, Blocks.dirt, 0, 2);
++    }
++    //MCPC+ end
+ }

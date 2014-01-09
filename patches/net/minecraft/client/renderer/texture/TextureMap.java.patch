@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/client/renderer/texture/TextureMap.java
++++ ../src-work/minecraft/net/minecraft/client/renderer/texture/TextureMap.java
+@@ -363,7 +363,7 @@
+         {
+             throw new IllegalArgumentException("Name cannot be null!");
+         }
+-        else if (par1Str.indexOf(92) == -1) // Disable backslashes (\) in texture asset paths.
++        else if (par1Str.indexOf(47) == -1 && par1Str.indexOf(92) == -1)
+         {
+             Object object = (TextureAtlasSprite)this.mapRegisteredSprites.get(par1Str);
+ 

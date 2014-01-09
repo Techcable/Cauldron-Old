@@ -1,0 +1,117 @@
+--- ../src-base/minecraft/net/minecraft/block/BlockDynamicLiquid.java
++++ ../src-work/minecraft/net/minecraft/block/BlockDynamicLiquid.java
+@@ -5,6 +5,11 @@
+ import net.minecraft.init.Blocks;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import org.bukkit.block.BlockFace;
++import org.bukkit.event.block.BlockFromToEvent;
++// CraftBukkit end
++
+ public class BlockDynamicLiquid extends BlockLiquid
+ {
+     int field_149815_a;
+@@ -25,6 +30,11 @@
+ 
+     public void func_149674_a(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
+     {
++        // CraftBukkit start
++        org.bukkit.World bworld = p_149674_1_.getWorld();
++        org.bukkit.Server server = p_149674_1_.getServer();
++        org.bukkit.block.Block source = bworld == null ? null : bworld.getBlockAt(p_149674_2_, p_149674_3_, p_149674_4_);
++        // CraftBukkit end
+         int l = this.func_149804_e(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_);
+         byte b0 = 1;
+ 
+@@ -113,21 +123,34 @@
+ 
+         if (this.func_149809_q(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_))
+         {
+-            if (this.field_149764_J == Material.field_151587_i && p_149674_1_.func_147439_a(p_149674_2_, p_149674_3_ - 1, p_149674_4_).func_149688_o() == Material.field_151586_h)
++            // CraftBukkit start - Send "down" to the server
++            BlockFromToEvent event = new BlockFromToEvent(source, BlockFace.DOWN);
++
++            if (server != null)
+             {
+-                p_149674_1_.func_147449_b(p_149674_2_, p_149674_3_ - 1, p_149674_4_, Blocks.stone);
+-                this.func_149799_m(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_);
+-                return;
++                server.getPluginManager().callEvent(event);
+             }
+ 
+-            if (l >= 8)
++            if (!event.isCancelled())
+             {
+-                this.func_149813_h(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_, l);
++                if (this.field_149764_J == Material.field_151587_i && p_149674_1_.func_147439_a(p_149674_2_, p_149674_3_ - 1, p_149674_4_).func_149688_o() == Material.field_151586_h)
++                {
++                    p_149674_1_.func_147449_b(p_149674_2_, p_149674_3_ - 1, p_149674_4_, Blocks.stone);
++                    this.func_149799_m(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_);
++                    return;
++                }
++
++                if (l >= 8)
++                {
++                    this.func_149813_h(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_, l);
++                }
++                else
++                {
++                    this.func_149813_h(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_, l + 8);
++                }
+             }
+-            else
+-            {
+-                this.func_149813_h(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_, l + 8);
+-            }
++
++            // CraftBukkit end
+         }
+         else if (l >= 0 && (l == 0 || this.func_149807_p(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_)))
+         {
+@@ -144,25 +167,31 @@
+                 return;
+             }
+ 
+-            if (aboolean[0])
+-            {
+-                this.func_149813_h(p_149674_1_, p_149674_2_ - 1, p_149674_3_, p_149674_4_, j1);
+-            }
++            // CraftBukkit start - All four cardinal directions. Do not change the order!
++            BlockFace[] faces = new BlockFace[] { BlockFace.WEST, BlockFace.EAST, BlockFace.NORTH, BlockFace.SOUTH };
++            int index = 0;
+ 
+-            if (aboolean[1])
++            for (BlockFace currentFace : faces)
+             {
+-                this.func_149813_h(p_149674_1_, p_149674_2_ + 1, p_149674_3_, p_149674_4_, j1);
+-            }
++                if (aboolean[index])
++                {
++                    BlockFromToEvent event = new BlockFromToEvent(source, currentFace);
+ 
+-            if (aboolean[2])
+-            {
+-                this.func_149813_h(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ - 1, j1);
+-            }
++                    if (server != null)
++                    {
++                        server.getPluginManager().callEvent(event);
++                    }
+ 
+-            if (aboolean[3])
+-            {
+-                this.func_149813_h(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ + 1, j1);
++                    if (!event.isCancelled())
++                    {
++                        this.func_149813_h(p_149674_1_, p_149674_2_ + currentFace.getModX(), p_149674_3_, p_149674_4_ + currentFace.getModZ(), j1);
++                    }
++                }
++
++                index++;
+             }
++
++            // CraftBukkit end
+         }
+     }
+ 

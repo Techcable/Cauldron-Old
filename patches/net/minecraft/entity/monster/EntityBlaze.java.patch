@@ -1,0 +1,26 @@
+--- ../src-base/minecraft/net/minecraft/entity/monster/EntityBlaze.java
++++ ../src-work/minecraft/net/minecraft/entity/monster/EntityBlaze.java
+@@ -182,15 +182,21 @@
+     // JAVADOC METHOD $$ func_70628_a
+     protected void dropFewItems(boolean par1, int par2)
+     {
++        // CraftBukkit start
++        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
++
+         if (par1)
+         {
+             int j = this.rand.nextInt(2 + par2);
+ 
+-            for (int k = 0; k < j; ++k)
++            if (j > 0)
+             {
+-                this.func_145779_a(Items.blaze_rod, 1);
++                loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(Items.blaze_rod), j));
+             }
+         }
++
++        org.bukkit.craftbukkit.event.CraftEventFactory.callEntityDeathEvent(this, loot);
++        // CraftBukkit end
+     }
+ 
+     public boolean func_70845_n()

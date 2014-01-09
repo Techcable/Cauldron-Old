@@ -1,0 +1,20 @@
+--- ../src-base/minecraft/net/minecraft/network/play/server/S0CPacketSpawnPlayer.java
++++ ../src-work/minecraft/net/minecraft/network/play/server/S0CPacketSpawnPlayer.java
+@@ -15,6 +15,8 @@
+ import net.minecraft.network.play.INetHandlerPlayClient;
+ import net.minecraft.util.MathHelper;
+ 
++import java.io.IOException; // CraftBukkit
++
+ public class S0CPacketSpawnPlayer extends Packet
+ {
+     private int field_148957_a;
+@@ -62,7 +64,7 @@
+     {
+         p_148840_1_.func_150787_b(this.field_148957_a);
+         p_148840_1_.func_150785_a(this.field_148955_b.getId());
+-        p_148840_1_.func_150785_a(this.field_148955_b.getName());
++        p_148840_1_.func_150785_a(this.field_148955_b.getName().length() > 16 ? this.field_148955_b.getName().substring(0, 16) : this.field_148955_b.getName()); // CraftBukkit - Limit name length to 16 characters
+         p_148840_1_.writeInt(this.field_148956_c);
+         p_148840_1_.writeInt(this.field_148953_d);
+         p_148840_1_.writeInt(this.field_148954_e);

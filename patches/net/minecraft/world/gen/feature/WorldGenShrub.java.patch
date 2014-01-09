@@ -1,0 +1,72 @@
+--- ../src-base/minecraft/net/minecraft/world/gen/feature/WorldGenShrub.java
++++ ../src-work/minecraft/net/minecraft/world/gen/feature/WorldGenShrub.java
+@@ -6,6 +6,8 @@
+ import net.minecraft.init.Blocks;
+ import net.minecraft.world.World;
+ 
++import org.bukkit.craftbukkit.CraftBlockChangeDelegate; // CraftBukkit
++
+ public class WorldGenShrub extends WorldGenTrees
+ {
+     private int field_150528_a;
+@@ -21,24 +23,31 @@
+ 
+     public boolean generate(World par1World, Random par2Random, int par3, int par4, int par5)
+     {
++        // CraftBukkit start - Moved to generate
++        return this.generate(new CraftBlockChangeDelegate((org.bukkit.BlockChangeDelegate) par1World), par2Random, par3, par4, par5);
++    }
++
++    public boolean generate(CraftBlockChangeDelegate par1World, Random par2Random, int par3, int par4, int par5)
++    {
++        // CraftBukkit end
+         Block block;
+ 
+         do
+         {
+-            block = par1World.func_147439_a(par3, par4, par5);
+-            if (!(block.isLeaves(par1World, par3, par4, par5) || block.isAir(par1World, par3, par4, par5)))
++            block = par1World.getType(par3, par4, par5);
++            if (block.isLeaves(par1World, par3, par4, par5) || block.isAir(par1World, par3, par4, par5))
+             {
+                 break;
+             }
+             --par4;
+         } while (par4 > 0);
+ 
+-        Block block1 = par1World.func_147439_a(par3, par4, par5);
++        Block block1 = par1World.getType(par3, par4, par5);
+ 
+         if (block1 == Blocks.dirt || block1 == Blocks.grass)
+         {
+             ++par4;
+-            this.func_150516_a(par1World, par3, par4, par5, Blocks.log, this.field_150527_b);
++            this.setTypeAndData(par1World, par3, par4, par5, Blocks.log, this.field_150527_b);
+ 
+             for (int l = par4; l <= par4 + 2; ++l)
+             {
+@@ -53,15 +62,22 @@
+                     {
+                         int j2 = i2 - par5;
+ 
+-                        if ((Math.abs(l1) != j1 || Math.abs(j2) != j1 || par2Random.nextInt(2) != 0) && par1World.func_147439_a(k1, l, i2).canBeReplacedByLeaves(par1World, k1, l, i2))
++                        if ((Math.abs(l1) != j1 || Math.abs(j2) != j1 || par2Random.nextInt(2) != 0) && !par1World.getType(k1, l, i2).canBeReplacedByLeaves(par1World, k1, l, i2))
+                         {
+-                            this.func_150516_a(par1World, k1, l, i2, Blocks.leaves, this.field_150528_a);
++                            this.setTypeAndData(par1World, k1, l, i2, Blocks.leaves, this.field_150528_a);
+                         }
+                     }
+                 }
+             }
++
++            // CraftBukkit start - Return false if gen was unsuccessful
+         }
++        else
++        {
++            return false;
++        }
+ 
++        // CraftBukkit end
+         return true;
+     }
+ }

@@ -1,0 +1,50 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemSign.java
++++ ../src-work/minecraft/net/minecraft/item/ItemSign.java
+@@ -6,6 +6,7 @@
+ import net.minecraft.tileentity.TileEntitySign;
+ import net.minecraft.util.MathHelper;
+ import net.minecraft.world.World;
++import net.minecraft.block.Block; // CraftBukkit
+ 
+ public class ItemSign extends Item
+ {
+@@ -20,6 +21,8 @@
+     // JAVADOC METHOD $$ func_77648_a
+     public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
+     {
++        final int clickedX = par4, clickedY = par5, clickedZ = par6; // CraftBukkit
++
+         if (par7 == 0)
+         {
+             return false;
+@@ -69,16 +72,28 @@
+             }
+             else
+             {
++                // CraftBukkit start
++                final Block block;
++
+                 if (par7 == 1)
+                 {
+                     int i1 = MathHelper.floor_double((double)((par2EntityPlayer.rotationYaw + 180.0F) * 16.0F / 360.0F) + 0.5D) & 15;
+-                    par3World.func_147465_d(par4, par5, par6, Blocks.standing_sign, i1, 3);
++                    // par3World.func_147465_d(par4, par5, par6, Blocks.standing_sign, i1, 3);
++                    block = Blocks.standing_sign;
++                    par7 = i1;
+                 }
+                 else
+                 {
+-                    par3World.func_147465_d(par4, par5, par6, Blocks.wall_sign, par7, 3);
++                    // par3World.func_147465_d(par4, par5, par6, Blocks.wall_sign, par7, 3);
++                    block = Blocks.wall_sign;
+                 }
+ 
++                if (!ItemBlock.processBlockPlace(par3World, par2EntityPlayer, null, par4, par5, par6, block, par7, clickedX, clickedY, clickedZ))
++                {
++                    return false;
++                }
++
++                // CraftBukkit end
+                 --par1ItemStack.stackSize;
+                 TileEntitySign tileentitysign = (TileEntitySign)par3World.func_147438_o(par4, par5, par6);
+ 

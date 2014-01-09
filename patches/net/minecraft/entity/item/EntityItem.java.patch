@@ -1,0 +1,203 @@
+--- ../src-base/minecraft/net/minecraft/entity/item/EntityItem.java
++++ ../src-work/minecraft/net/minecraft/entity/item/EntityItem.java
+@@ -22,6 +22,11 @@
+ import cpw.mods.fml.common.FMLCommonHandler;
+ import cpw.mods.fml.common.eventhandler.Event.Result;
+ 
++// CraftBukkit start
++import org.bukkit.event.player.PlayerPickupItemEvent;
++import net.minecraft.server.MinecraftServer;
++// CraftBukkit end
++
+ public class EntityItem extends Entity
+ {
+     private static final Logger field_145803_d = LogManager.getLogger();
+@@ -34,6 +39,7 @@
+     private String field_145802_g;
+     // JAVADOC FIELD $$ field_70290_d
+     public float hoverStart;
++    private int lastTick = MinecraftServer.currentTick; // CraftBukkit
+     private static final String __OBFID = "CL_00001669";
+ 
+     /**
+@@ -57,7 +63,15 @@
+ 
+     public EntityItem(World par1World, double par2, double par4, double par6, ItemStack par8ItemStack)
+     {
+-        this(par1World, par2, par4, par6);        
++        this(par1World, par2, par4, par6);
++
++        // CraftBukkit start - Can't set null items in the datawatcher
++        if (par8ItemStack == null || par8ItemStack.getItem() == null)
++        {
++            return;
++        }
++
++        // CraftBukkit end
+         this.setEntityItemStack(par8ItemStack);
+         this.lifespan = (par8ItemStack.getItem() == null ? 6000 : par8ItemStack.getItem().getEntityLifespan(par8ItemStack, par1World));
+     }
+@@ -101,21 +115,27 @@
+         else
+         {
+             super.onUpdate();
+-
+-            if (this.field_145804_b > 0)
+-            {
+-                --this.field_145804_b;
+-            }
+-
++            // CraftBukkit start - Use wall time for pickup and despawn timers
++            int elapsedTicks = MinecraftServer.currentTick - this.lastTick;
++            this.field_145804_b -= elapsedTicks;
++            this.age += elapsedTicks;
++            this.lastTick = MinecraftServer.currentTick;
++            // CraftBukkit end
++            boolean forceUpdate = this.ticksExisted > 0 && this.ticksExisted % 25 == 0; // MCPC+ - optimize item tick updates
+             this.prevPosX = this.posX;
+             this.prevPosY = this.posY;
+             this.prevPosZ = this.posZ;
+             this.motionY -= 0.03999999910593033D;
+-            this.noClip = this.func_145771_j(this.posX, (this.boundingBox.minY + this.boundingBox.maxY) / 2.0D, this.posZ);
++            // MCPC+ start - if forced
++            if (forceUpdate || noClip) 
++            {
++                this.noClip = this.func_145771_j(this.posX, (this.boundingBox.minY + this.boundingBox.maxY) / 2.0D, this.posZ);
++            }
++            // MCPC+ end
+             this.moveEntity(this.motionX, this.motionY, this.motionZ);
+             boolean flag = (int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ;
+ 
+-            if (flag || this.ticksExisted % 25 == 0)
++            if ((flag || this.ticksExisted % 25 == 0) || forceUpdate) // MCPC+ - if forced
+             {
+                 if (this.worldObj.func_147439_a(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).func_149688_o() == Material.field_151587_i)
+                 {
+@@ -125,7 +145,7 @@
+                     this.playSound("random.fizz", 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
+                 }
+ 
+-                if (!this.worldObj.isRemote)
++                if (!this.worldObj.isRemote && forceUpdate) // MCPC+ - if forced
+                 {
+                     this.searchForOtherItemsNearby();
+                 }
+@@ -147,15 +167,23 @@
+                 this.motionY *= -0.5D;
+             }
+ 
+-            ++this.age;
++            // ++this.age; // CraftBukkit - Moved up (base age on wall time)
+ 
+             ItemStack item = getDataWatcher().getWatchableObjectItemStack(10);
+     
+-            if (!this.worldObj.isRemote && this.age >= lifespan)
++            if (!this.worldObj.isRemote && this.age >= lifespan - 1) // MCPC+ adjust for age being off by one when it is first dropped
+             {
++                // CraftBukkit start
++                if (org.bukkit.craftbukkit.event.CraftEventFactory.callItemDespawnEvent(this).isCancelled())
++                {
++                    this.age = 0;
++                    return;
++                }
++
++                // CraftBukkit end
+                 if (item != null)
+                 {   
+-                    ItemExpireEvent event = new ItemExpireEvent(this, (item.getItem() == null ? 6000 : item.getItem().getEntityLifespan(item, worldObj)));
++                    ItemExpireEvent event = new ItemExpireEvent(this, (item.getItem() == null ? this.worldObj.spigotConfig.itemDespawnRate : item.getItem().getEntityLifespan(item, worldObj))); // Spigot
+                     if (MinecraftForge.EVENT_BUS.post(event))
+                     {
+                         lifespan += event.extraLife;
+@@ -181,7 +209,10 @@
+     // JAVADOC METHOD $$ func_85054_d
+     private void searchForOtherItemsNearby()
+     {
+-        Iterator iterator = this.worldObj.getEntitiesWithinAABB(EntityItem.class, this.boundingBox.expand(0.5D, 0.0D, 0.5D)).iterator();
++        // Spigot start
++        double radius = worldObj.spigotConfig.itemMerge;
++        Iterator iterator = this.worldObj.getEntitiesWithinAABB(EntityItem.class, this.boundingBox.expand(radius, radius, radius)).iterator();
++        // Spigot end
+ 
+         while (iterator.hasNext())
+         {
+@@ -232,11 +263,13 @@
+             }
+             else
+             {
+-                itemstack1.stackSize += itemstack.stackSize;
+-                par1EntityItem.field_145804_b = Math.max(par1EntityItem.field_145804_b, this.field_145804_b);
+-                par1EntityItem.age = Math.min(par1EntityItem.age, this.age);
+-                par1EntityItem.setEntityItemStack(itemstack1);
+-                this.setDead();
++                // Spigot start
++                itemstack.stackSize += itemstack1.stackSize;
++                this.field_145804_b = Math.max(par1EntityItem.field_145804_b, this.field_145804_b);
++                this.age = Math.min(par1EntityItem.age, this.age);
++                this.setEntityItemStack(itemstack);
++                par1EntityItem.setDead();
++                // Spigot end
+                 return true;
+             }
+         }
+@@ -329,8 +362,27 @@
+         }
+ 
+         NBTTagCompound nbttagcompound1 = par1NBTTagCompound.getCompoundTag("Item");
+-        this.setEntityItemStack(ItemStack.loadItemStackFromNBT(nbttagcompound1));
+ 
++        // CraftBukkit start
++        if (nbttagcompound1 != null)
++        {
++            ItemStack itemstack = ItemStack.loadItemStackFromNBT(nbttagcompound1);
++
++            if (itemstack != null)
++            {
++                this.setEntityItemStack(itemstack);
++            }
++            else
++            {
++                this.setDead();
++            }
++        }
++        else
++        {
++            this.setDead();
++        }
++
++        // CraftBukkit end
+         ItemStack item = getDataWatcher().getWatchableObjectItemStack(10);
+ 
+         if (item == null || item.stackSize <= 0)
+@@ -364,6 +416,31 @@
+             ItemStack itemstack = this.getEntityItem();
+             int i = itemstack.stackSize;
+ 
++            // CraftBukkit start
++            int canHold = par1EntityPlayer.inventory.canHold(itemstack);
++            int remaining = itemstack.stackSize - canHold;
++
++            if (this.field_145804_b <= 0 && canHold > 0)
++            {
++                itemstack.stackSize = canHold;
++                // MCPC+ start - rename to cbEvent to fix naming collision
++                PlayerPickupItemEvent cbEvent = new PlayerPickupItemEvent((org.bukkit.entity.Player) par1EntityPlayer.getBukkitEntity(), (org.bukkit.entity.Item) this.getBukkitEntity(), remaining);
++                //cbEvent.setCancelled(!par1EntityPlayer.canPickUpLoot); TODO
++                this.worldObj.getServer().getPluginManager().callEvent(cbEvent);
++                itemstack.stackSize = canHold + remaining;
++
++                if (cbEvent.isCancelled())
++                {
++                    return;
++                }
++                // MCPC+ end
++
++                // Possibly < 0; fix here so we do not have to modify code below
++                this.field_145804_b = 0;
++            }
++
++            // CraftBukkit end
++
+             if (this.field_145804_b <= 0 && (this.field_145802_g == null || lifespan - this.age <= 200 || this.field_145802_g.equals(par1EntityPlayer.getCommandSenderName())) && (event.getResult() == Result.ALLOW || i <= 0 || par1EntityPlayer.inventory.addItemStackToInventory(itemstack)))
+             {
+                 if (itemstack.getItem() == Item.func_150898_a(Blocks.log))

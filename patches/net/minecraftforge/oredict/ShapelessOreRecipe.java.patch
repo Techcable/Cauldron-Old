@@ -1,0 +1,41 @@
+--- ../src-base/minecraft/net/minecraftforge/oredict/ShapelessOreRecipe.java
++++ ../src-work/minecraft/net/minecraftforge/oredict/ShapelessOreRecipe.java
+@@ -15,10 +15,16 @@
+ import net.minecraft.item.crafting.ShapelessRecipes;
+ import net.minecraft.world.World;
+ 
++// MCPC+ start
++import za.co.mcportcentral.potion.CustomModRecipe;
++import org.bukkit.inventory.Recipe;
++// MCPC+ end
++
+ public class ShapelessOreRecipe implements IRecipe
+ {
+     private ItemStack output = null;
+     private ArrayList input = new ArrayList();
++    private ShapelessRecipes vanillaRecipe = null; // MCPC+ - bukkit compatibility
+ 
+     public ShapelessOreRecipe(Block result, Object... recipe){ this(new ItemStack(result), recipe); }
+     public ShapelessOreRecipe(Item  result, Object... recipe){ this(new ItemStack(result), recipe); }
+@@ -59,6 +65,7 @@
+ 
+     ShapelessOreRecipe(ShapelessRecipes recipe, Map<ItemStack, String> replacements)
+     {
++        vanillaRecipe = recipe; // MCPC+ - bukkit compatibility
+         output = recipe.getRecipeOutput();
+ 
+         for(ItemStack ingred : ((List<ItemStack>)recipe.recipeItems))
+@@ -149,4 +156,13 @@
+     {
+         return this.input;
+     }
++
++    // MCPC+ start - required for Bukkit API
++    @Override
++    public Recipe toBukkitRecipe() {
++        if (vanillaRecipe != null)
++            return vanillaRecipe.toBukkitRecipe();
++        return new CustomModRecipe(this);
++    }
++    // MCPC+ end
+ }

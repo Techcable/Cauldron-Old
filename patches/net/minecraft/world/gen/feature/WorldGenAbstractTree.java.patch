@@ -1,0 +1,28 @@
+--- ../src-base/minecraft/net/minecraft/world/gen/feature/WorldGenAbstractTree.java
++++ ../src-work/minecraft/net/minecraft/world/gen/feature/WorldGenAbstractTree.java
+@@ -1,6 +1,9 @@
+ package net.minecraft.world.gen.feature;
+ 
+ import java.util.Random;
++
++import org.bukkit.craftbukkit.CraftBlockChangeDelegate;
++
+ import net.minecraft.block.Block;
+ import net.minecraft.block.material.Material;
+ import net.minecraft.init.Blocks;
+@@ -27,4 +30,15 @@
+         Block block = world.func_147439_a(x, y, z);
+         return block.isAir(world, x, y, z) || block.isLeaves(world, x, y, z) || block.isWood(world, x, y, z) || func_150523_a(block);
+     }
++
++    // MCPC+ start
++    protected boolean isReplaceable(CraftBlockChangeDelegate world, int x, int y, int z)
++    {
++        World forgeWorld = world.getDelegate() instanceof World ? (World)world.getDelegate() : null;
++        try {
++            return isReplaceable(forgeWorld, x, y, z);
++        } catch (Throwable t) { }
++        return func_150523_a(world.getType(x, y, z));
++    }
++    // MCPC+ end
+ }

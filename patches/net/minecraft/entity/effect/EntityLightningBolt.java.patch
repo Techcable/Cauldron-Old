@@ -1,0 +1,101 @@
+--- ../src-base/minecraft/net/minecraft/entity/effect/EntityLightningBolt.java
++++ ../src-work/minecraft/net/minecraft/entity/effect/EntityLightningBolt.java
+@@ -10,6 +10,8 @@
+ import net.minecraft.world.EnumDifficulty;
+ import net.minecraft.world.World;
+ 
++import org.bukkit.craftbukkit.event.CraftEventFactory; // CraftBukkit
++
+ public class EntityLightningBolt extends EntityWeatherEffect
+ {
+     // JAVADOC FIELD $$ field_70262_b
+@@ -20,15 +22,26 @@
+     private int boltLivingTime;
+     private static final String __OBFID = "CL_00001666";
+ 
++    // CraftBukkit start
++    public boolean isEffect = false;
++
+     public EntityLightningBolt(World par1World, double par2, double par4, double par6)
+     {
++        this(par1World, par2, par4, par6, false);
++    }
++
++    public EntityLightningBolt(World par1World, double par2, double par4, double par6, boolean isEffect)
++    {
+         super(par1World);
++        this.isEffect = isEffect;
++        // CraftBukkit end
+         this.setLocationAndAngles(par2, par4, par6, 0.0F, 0.0F);
+         this.lightningState = 2;
+         this.boltVertex = this.rand.nextLong();
+         this.boltLivingTime = this.rand.nextInt(3) + 1;
+ 
+-        if (!par1World.isRemote && par1World.getGameRules().getGameRuleBooleanValue("doFireTick") && (par1World.difficultySetting == EnumDifficulty.NORMAL || par1World.difficultySetting == EnumDifficulty.HARD) && par1World.doChunksNearChunkExist(MathHelper.floor_double(par2), MathHelper.floor_double(par4), MathHelper.floor_double(par6), 10))
++        // CraftBukkit
++        if (!isEffect && !par1World.isRemote && par1World.getGameRules().getGameRuleBooleanValue("doFireTick") && (par1World.difficultySetting == EnumDifficulty.NORMAL || par1World.difficultySetting == EnumDifficulty.HARD) && par1World.doChunksNearChunkExist(MathHelper.floor_double(par2), MathHelper.floor_double(par4), MathHelper.floor_double(par6), 10))
+         {
+             int i = MathHelper.floor_double(par2);
+             int j = MathHelper.floor_double(par4);
+@@ -36,7 +49,13 @@
+ 
+             if (par1World.func_147439_a(i, j, k).func_149688_o() == Material.field_151579_a && Blocks.fire.func_149742_c(par1World, i, j, k))
+             {
+-                par1World.func_147449_b(i, j, k, Blocks.fire);
++                // CraftBukkit start
++                if (!CraftEventFactory.callBlockIgniteEvent(par1World, i, j, k, this).isCancelled())
++                {
++                    par1World.func_147449_b(i, j, k, Blocks.fire);
++                }
++
++                // CraftBukkit end
+             }
+ 
+             for (i = 0; i < 4; ++i)
+@@ -47,7 +66,13 @@
+ 
+                 if (par1World.func_147439_a(j, k, l).func_149688_o() == Material.field_151579_a && Blocks.fire.func_149742_c(par1World, j, k, l))
+                 {
+-                    par1World.func_147449_b(j, k, l, Blocks.fire);
++                    // CraftBukkit start
++                    if (!CraftEventFactory.callBlockIgniteEvent(par1World, j, k, l, this).isCancelled())
++                    {
++                        par1World.func_147449_b(j, k, l, Blocks.fire);
++                    }
++
++                    // CraftBukkit end
+                 }
+             }
+         }
+@@ -78,7 +103,8 @@
+                 this.lightningState = 1;
+                 this.boltVertex = this.rand.nextLong();
+ 
+-                if (!this.worldObj.isRemote && this.worldObj.getGameRules().getGameRuleBooleanValue("doFireTick") && this.worldObj.doChunksNearChunkExist(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ), 10))
++                // CraftBukkit
++                if (!isEffect && !this.worldObj.isRemote && this.worldObj.getGameRules().getGameRuleBooleanValue("doFireTick") && this.worldObj.doChunksNearChunkExist(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ), 10))
+                 {
+                     int i = MathHelper.floor_double(this.posX);
+                     int j = MathHelper.floor_double(this.posY);
+@@ -86,13 +112,19 @@
+ 
+                     if (this.worldObj.func_147439_a(i, j, k).func_149688_o() == Material.field_151579_a && Blocks.fire.func_149742_c(this.worldObj, i, j, k))
+                     {
+-                        this.worldObj.func_147449_b(i, j, k, Blocks.fire);
++                        // CraftBukkit start
++                        if (!CraftEventFactory.callBlockIgniteEvent(worldObj, i, j, k, this).isCancelled())
++                        {
++                            this.worldObj.func_147449_b(i, j, k, Blocks.fire);
++                        }
++
++                        // CraftBukkit end
+                     }
+                 }
+             }
+         }
+ 
+-        if (this.lightningState >= 0)
++        if (this.lightningState >= 0 && !this.isEffect)   // CraftBukkit - add !this.isEffect
+         {
+             if (this.worldObj.isRemote)
+             {

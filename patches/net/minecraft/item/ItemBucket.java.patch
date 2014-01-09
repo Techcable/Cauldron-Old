@@ -1,0 +1,170 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemBucket.java
++++ ../src-work/minecraft/net/minecraft/item/ItemBucket.java
+@@ -12,6 +12,13 @@
+ import net.minecraftforge.common.MinecraftForge;
+ import net.minecraftforge.event.entity.player.FillBucketEvent;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.event.player.PlayerBucketEmptyEvent;
++import org.bukkit.event.player.PlayerBucketFillEvent;
++// CraftBukkit end
++
+ public class ItemBucket extends Item
+ {
+     // JAVADOC FIELD $$ field_77876_a
+@@ -37,13 +44,14 @@
+         }
+         else
+         {
+-            FillBucketEvent event = new FillBucketEvent(par3EntityPlayer, par1ItemStack, par2World, movingobjectposition);
+-            if (MinecraftForge.EVENT_BUS.post(event))
++            // MCPC+ start - rename to forgeEvent fixing naming clash
++            FillBucketEvent forgeEvent = new FillBucketEvent(par3EntityPlayer, par1ItemStack, par2World, movingobjectposition);
++            if (MinecraftForge.EVENT_BUS.post(forgeEvent))
+             {
+                 return par1ItemStack;
+             }
+ 
+-            if (event.getResult() == Event.Result.ALLOW)
++            if (forgeEvent.getResult() == Event.Result.ALLOW)
+             {
+                 if (par3EntityPlayer.capabilities.isCreativeMode)
+                 {
+@@ -52,14 +60,14 @@
+ 
+                 if (--par1ItemStack.stackSize <= 0)
+                 {
+-                    return event.result;
++                    return forgeEvent.result;
+                 }
+ 
+-                if (!par3EntityPlayer.inventory.addItemStackToInventory(event.result))
++                if (!par3EntityPlayer.inventory.addItemStackToInventory(forgeEvent.result))
+                 {
+-                    par3EntityPlayer.dropPlayerItemWithRandomChoice(event.result, false);
++                    par3EntityPlayer.dropPlayerItemWithRandomChoice(forgeEvent.result, false);
+                 }
+-
++             // MCPC+ end
+                 return par1ItemStack;
+             }
+             if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
+@@ -85,23 +93,52 @@
+ 
+                     if (material == Material.field_151586_h && l == 0)
+                     {
++                        // CraftBukkit start
++                        PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(par3EntityPlayer, i, j, k, -1, par1ItemStack, Items.water_bucket);
++
++                        if (event.isCancelled())
++                        {
++                            return par1ItemStack;
++                        }
++
++                        // CraftBukkit end
+                         par2World.func_147468_f(i, j, k);
+-                        return this.func_150910_a(par1ItemStack, par3EntityPlayer, Items.water_bucket);
++                        return this.func_150910_a(par1ItemStack, par3EntityPlayer, Items.water_bucket, event.getItemStack()); // CraftBukkit - added Event stack
+                     }
+ 
+                     if (material == Material.field_151587_i && l == 0)
+                     {
++                        // CraftBukkit start
++                        PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(par3EntityPlayer, i, j, k, -1, par1ItemStack, Items.lava_bucket);
++
++                        if (event.isCancelled())
++                        {
++                            return par1ItemStack;
++                        }
++
++                        // CraftBukkit end
+                         par2World.func_147468_f(i, j, k);
+-                        return this.func_150910_a(par1ItemStack, par3EntityPlayer, Items.lava_bucket);
++                        return this.func_150910_a(par1ItemStack, par3EntityPlayer, Items.lava_bucket, event.getItemStack()); // CraftBukkit - added Event stack
+                     }
+                 }
+                 else
+                 {
+                     if (this.isFull == Blocks.air)
+                     {
+-                        return new ItemStack(Items.bucket);
++                        // CraftBukkit start
++                        PlayerBucketEmptyEvent event = CraftEventFactory.callPlayerBucketEmptyEvent(par3EntityPlayer, i, j, k, movingobjectposition.sideHit, par1ItemStack);
++
++                        if (event.isCancelled())
++                        {
++                            return par1ItemStack;
++                        }
++
++                        return CraftItemStack.asNMSCopy(event.getItemStack());
+                     }
+ 
++                    int clickedX = i, clickedY = j, clickedZ = k;
++                    // CraftBukkit end
++
+                     if (movingobjectposition.sideHit == 0)
+                     {
+                         --j;
+@@ -137,9 +174,19 @@
+                         return par1ItemStack;
+                     }
+ 
++                    // CraftBukkit start
++                    PlayerBucketEmptyEvent event = CraftEventFactory.callPlayerBucketEmptyEvent(par3EntityPlayer, clickedX, clickedY, clickedZ, movingobjectposition.sideHit, par1ItemStack);
++
++                    if (event.isCancelled())
++                    {
++                        return par1ItemStack;
++                    }
++
++                    // CraftBukkit end
++
+                     if (this.tryPlaceContainedLiquid(par2World, i, j, k) && !par3EntityPlayer.capabilities.isCreativeMode)
+                     {
+-                        return new ItemStack(Items.bucket);
++                        return CraftItemStack.asNMSCopy(event.getItemStack()); // CraftBukkit
+                     }
+                 }
+             }
+@@ -148,24 +195,32 @@
+         }
+     }
+ 
++    // MCPC+ start - vanilla compatibility
+     private ItemStack func_150910_a(ItemStack p_150910_1_, EntityPlayer p_150910_2_, Item p_150910_3_)
+     {
+-        if (p_150910_2_.capabilities.isCreativeMode)
++        return this.func_150910_a(p_150910_1_, p_150910_2_, p_150910_3_, null);
++    }
++    // MCPC+ end
++
++    // CraftBukkit - added ob.ItemStack result - TODO: Is this... the right way to handle this?
++    private ItemStack func_150910_a(ItemStack itemstack, EntityPlayer entityplayer, Item item, org.bukkit.inventory.ItemStack result)
++    {
++        if (entityplayer.capabilities.isCreativeMode)
+         {
+-            return p_150910_1_;
++            return itemstack;
+         }
+-        else if (--p_150910_1_.stackSize <= 0)
++        else if (--itemstack.stackSize <= 0)
+         {
+-            return new ItemStack(p_150910_3_);
++            return CraftItemStack.asNMSCopy(result); // CraftBukkit
+         }
+         else
+         {
+-            if (!p_150910_2_.inventory.addItemStackToInventory(new ItemStack(p_150910_3_)))
++            if (!entityplayer.inventory.addItemStackToInventory(CraftItemStack.asNMSCopy(result)))   // CraftBukkit
+             {
+-                p_150910_2_.dropPlayerItemWithRandomChoice(new ItemStack(p_150910_3_, 1, 0), false);
++                entityplayer.dropPlayerItemWithRandomChoice(CraftItemStack.asNMSCopy(result), false); // CraftBukkit
+             }
+ 
+-            return p_150910_1_;
++            return itemstack;
+         }
+     }
+ 

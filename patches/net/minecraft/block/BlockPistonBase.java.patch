@@ -1,0 +1,127 @@
+--- ../src-base/minecraft/net/minecraft/block/BlockPistonBase.java
++++ ../src-work/minecraft/net/minecraft/block/BlockPistonBase.java
+@@ -21,6 +21,12 @@
+ import net.minecraft.world.IBlockAccess;
+ import net.minecraft.world.World;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.block.CraftBlock;
++import org.bukkit.event.block.BlockPistonRetractEvent;
++import org.bukkit.event.block.BlockPistonExtendEvent;
++// CraftBukkit end
++
+ public class BlockPistonBase extends Block
+ {
+     private final boolean field_150082_a;
+@@ -128,13 +134,37 @@
+ 
+             if (flag && !func_150075_c(l))
+             {
+-                if (func_150077_h(p_150078_1_, p_150078_2_, p_150078_3_, p_150078_4_, i1))
++                // CraftBukkit start
++                int length = canExtend_IntCB(p_150078_1_, p_150078_2_, p_150078_3_, p_150078_4_, i1);
++
++                if (length >= 0)
+                 {
++                    org.bukkit.block.Block block = p_150078_1_.getWorld().getBlockAt(p_150078_2_, p_150078_3_, p_150078_4_);
++                    BlockPistonExtendEvent event = new BlockPistonExtendEvent(block, length, CraftBlock.notchToBlockFace(i1));
++                    p_150078_1_.getServer().getPluginManager().callEvent(event);
++
++                    if (event.isCancelled())
++                    {
++                        return;
++                    }
++
++                    // CraftBukkit end
+                     p_150078_1_.func_147452_c(p_150078_2_, p_150078_3_, p_150078_4_, this, 0, i1);
+                 }
+             }
+             else if (!flag && func_150075_c(l))
+             {
++                // CraftBukkit start
++                org.bukkit.block.Block block = p_150078_1_.getWorld().getBlockAt(p_150078_2_, p_150078_3_, p_150078_4_);
++                BlockPistonRetractEvent event = new BlockPistonRetractEvent(block, CraftBlock.notchToBlockFace(i1));
++                p_150078_1_.getServer().getPluginManager().callEvent(event);
++
++                if (event.isCancelled())
++                {
++                    return;
++                }
++
++                // CraftBukkit end
+                 p_150078_1_.setBlockMetadataWithNotify(p_150078_2_, p_150078_3_, p_150078_4_, i1, 2);
+                 p_150078_1_.func_147452_c(p_150078_2_, p_150078_3_, p_150078_4_, this, 1, i1);
+             }
+@@ -297,6 +327,11 @@
+ 
+     public static int func_150076_b(int p_150076_0_)
+     {
++        if ((p_150076_0_ & 7) >= Facing.oppositeSide.length)
++        {
++            return 7;    // CraftBukkit - check for AIOOB on piston data
++        }
++
+         return p_150076_0_ & 7;
+     }
+ 
+@@ -366,7 +401,13 @@
+         }
+     }
+ 
+-    private static boolean func_150077_h(World p_150077_0_, int p_150077_1_, int p_150077_2_, int p_150077_3_, int p_150077_4_)
++    // MCPC+ start - vanilla compatibility
++    private static boolean func_150077_h(World world, int i, int j, int k, int l) {
++        return canExtend_IntCB(world, i, j, k, l) >= 0;
++    }
++    // MCPC+ end
++
++    private static int canExtend_IntCB(World p_150077_0_, int p_150077_1_, int p_150077_2_, int p_150077_3_, int p_150077_4_) // CraftBukkit int -> boolean
+     {
+         int i1 = p_150077_1_ + Facing.offsetsXForSide[p_150077_4_];
+         int j1 = p_150077_2_ + Facing.offsetsYForSide[p_150077_4_];
+@@ -379,23 +420,23 @@
+             {
+                 if (j1 <= 0 || j1 >= p_150077_0_.getHeight())
+                 {
+-                    return false;
++                    return -1; // CraftBukkit
+                 }
+ 
+                 Block block = p_150077_0_.func_147439_a(i1, j1, k1);
+ 
+-                if (!block.isAir(p_150077_0_, i1, j1, k1))
++                if (block.isAir(p_150077_0_, i1, j1, k1))
+                 {
+                     if (!func_150080_a(block, p_150077_0_, i1, j1, k1, true))
+                     {
+-                        return false;
++                        return -1; // CraftBukkit
+                     }
+ 
+                     if (block.func_149656_h() != 1)
+                     {
+                         if (l1 == 12)
+                         {
+-                            return false;
++                            return -1; // CraftBukkit
+                         }
+ 
+                         i1 += Facing.offsetsXForSide[p_150077_4_];
+@@ -407,7 +448,7 @@
+                 }
+             }
+ 
+-            return true;
++            return l1; // CraftBukkit
+         }
+     }
+ 
+@@ -429,7 +470,7 @@
+ 
+                 Block block = p_150079_1_.func_147439_a(i1, j1, k1);
+ 
+-                if (!block.isAir(p_150079_1_, i1, j1, k1))
++                if (block.isAir(p_150079_1_, i1, j1, k1))
+                 {
+                     if (!func_150080_a(block, p_150079_1_, i1, j1, k1, true))
+                     {

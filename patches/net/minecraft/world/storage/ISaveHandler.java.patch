@@ -1,0 +1,9 @@
+--- ../src-base/minecraft/net/minecraft/world/storage/ISaveHandler.java
++++ ../src-work/minecraft/net/minecraft/world/storage/ISaveHandler.java
+@@ -37,4 +37,6 @@
+ 
+     // JAVADOC METHOD $$ func_75760_g
+     String getWorldDirectoryName();
++
++    java.util.UUID getUUID(); // CraftBukkit
+ }

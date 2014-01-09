@@ -1,0 +1,29 @@
+--- ../src-base/minecraft/net/minecraft/world/gen/feature/WorldGenIceSpike.java
++++ ../src-work/minecraft/net/minecraft/world/gen/feature/WorldGenIceSpike.java
+@@ -56,7 +56,7 @@
+ 
+                             if (block.func_149688_o() == Material.field_151579_a || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice)
+                             {
+-                                this.func_150515_a(par1World, par3 + l1, par4 + j1, par5 + i2, Blocks.packed_ice);
++                                par1World.func_147449_b(par3 + l1, par4 + j1, par5 + i2, Blocks.packed_ice); // Spigot
+                             }
+ 
+                             if (j1 != 0 && k1 > 1)
+@@ -65,7 +65,7 @@
+ 
+                                 if (block.func_149688_o() == Material.field_151579_a || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice)
+                                 {
+-                                    this.func_150515_a(par1World, par3 + l1, par4 - j1, par5 + i2, Blocks.packed_ice);
++                                    par1World.func_147449_b(par3 + l1, par4 - j1, par5 + i2, Blocks.packed_ice); // Spigot
+                                 }
+                             }
+                         }
+@@ -106,7 +106,7 @@
+ 
+                             if (block1.func_149688_o() == Material.field_151579_a || block1 == Blocks.dirt || block1 == Blocks.snow || block1 == Blocks.ice || block1 == Blocks.packed_ice)
+                             {
+-                                this.func_150515_a(par1World, par3 + j2, l1, par5 + k1, Blocks.packed_ice);
++                                par1World.func_147449_b(par3 + j2, l1, par5 + k1, Blocks.packed_ice); // Spigot
+                                 --l1;
+                                 --k2;
+ 

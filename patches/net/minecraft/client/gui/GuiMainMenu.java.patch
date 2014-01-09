@@ -1,0 +1,20 @@
+--- ../src-base/minecraft/net/minecraft/client/gui/GuiMainMenu.java
++++ ../src-work/minecraft/net/minecraft/client/gui/GuiMainMenu.java
+@@ -285,7 +285,7 @@
+     {
+         this.minecraftRealmsButton.field_146125_m = true;
+         fmlModButton.field_146120_f = 98;
+-        fmlModButton.field_146128_h = this.field_146294_l / 2 + 2;
++        fmlModButton.field_146121_g = this.field_146294_l / 2 + 2;
+     }
+ 
+     // JAVADOC METHOD $$ func_73969_a
+@@ -299,7 +299,7 @@
+ 
+         minecraftRealmsButton = new GuiButton(14, this.field_146294_l / 2 - 100, par1 + par2 * 2, I18n.getStringParams("menu.online"));
+         minecraftRealmsButton.field_146120_f = 98;
+-        minecraftRealmsButton.field_146128_h = this.field_146294_l / 2 - 100;
++        minecraftRealmsButton.field_146121_g = this.field_146294_l / 2 - 100;
+         this.field_146292_n.add(minecraftRealmsButton);
+         this.minecraftRealmsButton.field_146125_m = false;
+     }

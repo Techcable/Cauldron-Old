@@ -1,0 +1,38 @@
+--- ../src-base/minecraft/net/minecraft/entity/passive/EntityWolf.java
++++ ../src-work/minecraft/net/minecraft/entity/passive/EntityWolf.java
+@@ -147,7 +147,8 @@
+     // JAVADOC METHOD $$ func_70639_aQ
+     protected String getLivingSound()
+     {
+-        return this.isAngry() ? "mob.wolf.growl" : (this.rand.nextInt(3) == 0 ? (this.isTamed() && this.dataWatcher.getWatchableObjectFloat(18) < 10.0F ? "mob.wolf.whine" : "mob.wolf.panting") : "mob.wolf.bark");
++        // CraftBukkit - (getFloat(18) < 10) -> (getFloat(18) < this.getMaxHealth() / 2)
++        return this.isAngry() ? "mob.wolf.growl" : (this.rand.nextInt(3) == 0 ? (this.isTamed() && this.dataWatcher.getWatchableObjectFloat(18) < (this.getMaxHealth() / 2) ? "mob.wolf.whine" : "mob.wolf.panting") : "mob.wolf.bark");
+     }
+ 
+     // JAVADOC METHOD $$ func_70621_aR
+@@ -406,13 +407,14 @@
+ 
+             if (!this.worldObj.isRemote)
+             {
+-                if (this.rand.nextInt(3) == 0)
++                // CraftBukkit - added event call and isCancelled check.
++                if (this.rand.nextInt(3) == 0 && !org.bukkit.craftbukkit.event.CraftEventFactory.callEntityTameEvent(this, par1EntityPlayer).isCancelled())
+                 {
+                     this.setTamed(true);
+                     this.setPathToEntity((PathEntity)null);
+                     this.setAttackTarget((EntityLivingBase)null);
+                     this.aiSit.setSitting(true);
+-                    this.setHealth(20.0F);
++                    this.setHealth(this.getMaxHealth()); // CraftBukkit - 20.0 -> getMaxHealth()
+                     this.setOwner(par1EntityPlayer.getCommandSenderName());
+                     this.playTameEffect(true);
+                     this.worldObj.setEntityState(this, (byte)7);
+@@ -552,7 +554,7 @@
+     // JAVADOC METHOD $$ func_70692_ba
+     protected boolean canDespawn()
+     {
+-        return !this.isTamed() && this.ticksExisted > 2400;
++        return !this.isTamed(); // CraftBukkit
+     }
+ 
+     public boolean func_142018_a(EntityLivingBase par1EntityLivingBase, EntityLivingBase par2EntityLivingBase)

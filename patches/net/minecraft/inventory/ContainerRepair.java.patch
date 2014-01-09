@@ -1,0 +1,74 @@
+--- ../src-base/minecraft/net/minecraft/inventory/ContainerRepair.java
++++ ../src-work/minecraft/net/minecraft/inventory/ContainerRepair.java
+@@ -16,22 +16,15 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++import org.bukkit.craftbukkit.inventory.CraftInventoryView; // CraftBukkit
++
+ public class ContainerRepair extends Container
+ {
+     private static final Logger field_148326_f = LogManager.getLogger();
+     // JAVADOC FIELD $$ field_82852_f
+     private IInventory outputSlot = new InventoryCraftResult();
+     // JAVADOC FIELD $$ field_82853_g
+-    private IInventory inputSlots = new InventoryBasic("Repair", true, 2)
+-    {
+-        private static final String __OBFID = "CL_00001733";
+-        // JAVADOC METHOD $$ func_70296_d
+-        public void onInventoryChanged()
+-        {
+-            super.onInventoryChanged();
+-            ContainerRepair.this.onCraftMatrixChanged(this);
+-        }
+-    };
++    private IInventory inputSlots = new ContainerRepairInventory(this, "Repair", true, 2);
+     private World theWorld;
+     private int field_82861_i;
+     private int field_82858_j;
+@@ -44,9 +37,14 @@
+     // JAVADOC FIELD $$ field_82855_n
+     private final EntityPlayer thePlayer;
+     private static final String __OBFID = "CL_00001732";
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private InventoryPlayer player;
+ 
+     public ContainerRepair(InventoryPlayer par1InventoryPlayer, final World par2World, final int par3, final int par4, final int par5, EntityPlayer par6EntityPlayer)
+     {
++        this.player = par1InventoryPlayer;
++        // CraftBukkit end
+         this.theWorld = par2World;
+         this.field_82861_i = par3;
+         this.field_82858_j = par4;
+@@ -467,6 +465,11 @@
+ 
+     public boolean canInteractWith(EntityPlayer par1EntityPlayer)
+     {
++        if (!this.checkReachable)
++        {
++            return true;    // CraftBukkit
++        }
++
+         return this.theWorld.func_147439_a(this.field_82861_i, this.field_82858_j, this.field_82859_k) != Blocks.anvil ? false : par1EntityPlayer.getDistanceSq((double)this.field_82861_i + 0.5D, (double)this.field_82858_j + 0.5D, (double)this.field_82859_k + 0.5D) <= 64.0D;
+     }
+ 
+@@ -543,4 +546,18 @@
+ 
+         this.updateRepairOutput();
+     }
++
++    // CraftBukkit start
++    public CraftInventoryView getBukkitView()
++    {
++        if (bukkitEntity != null)
++        {
++            return bukkitEntity;
++        }
++
++        org.bukkit.craftbukkit.inventory.CraftInventory inventory = new org.bukkit.craftbukkit.inventory.CraftInventoryAnvil(this.inputSlots, this.outputSlot);
++        bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
+ }

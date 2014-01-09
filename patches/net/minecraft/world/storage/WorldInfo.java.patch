@@ -1,0 +1,24 @@
+--- ../src-base/minecraft/net/minecraft/world/storage/WorldInfo.java
++++ ../src-work/minecraft/net/minecraft/world/storage/WorldInfo.java
+@@ -307,6 +307,21 @@
+         return this.playerTag;
+     }
+ 
++    // MCPC+ start
++    /**
++     * Sets the Dimension.
++     */
++    public void setDimension(int dim)
++    {
++        this.dimension = dim;
++    }
++
++    public int getDimension()
++    {
++        return this.dimension;
++    }
++    // MCPC+ end
++
+     // JAVADOC METHOD $$ func_76076_i
+     public int getVanillaDimension()
+     {

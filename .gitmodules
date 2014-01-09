@@ -1,3 +1,9 @@
 [submodule "fml"]
 	path = fml
 	url = https://github.com/MinecraftPortCentral/FML.git
+[submodule "forge"]
+	path = forge
+	url = git://github.com/MinecraftForge/MinecraftForge.git
+[submodule "bukkit"]
+	path = bukkit
+	url = git://github.com/SpigotMC/Spigot-API.git

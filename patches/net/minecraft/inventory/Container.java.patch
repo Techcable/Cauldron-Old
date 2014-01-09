@@ -1,0 +1,139 @@
+--- ../src-base/minecraft/net/minecraft/inventory/Container.java
++++ ../src-work/minecraft/net/minecraft/inventory/Container.java
+@@ -13,6 +13,17 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.util.MathHelper;
+ 
++// CraftBukkit start
++import java.util.HashMap;
++import java.util.Map;
++import net.minecraft.entity.player.EntityPlayerMP;
++import org.bukkit.craftbukkit.inventory.CraftInventory;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.event.Event.Result;
++import org.bukkit.event.inventory.InventoryDragEvent;
++import org.bukkit.inventory.InventoryView;
++// CraftBukkit end
++
+ public abstract class Container
+ {
+     // JAVADOC FIELD $$ field_75153_a
+@@ -23,13 +34,28 @@
+     @SideOnly(Side.CLIENT)
+     private short transactionID;
+     private int field_94535_f = -1;
+-    private int field_94536_g;
++    public int field_94536_g; // CraftBukkit - private -> public
+     private final Set field_94537_h = new HashSet();
++    public InventoryView bukkitView = null; // MCPC+
++
+     // JAVADOC FIELD $$ field_75149_d
+     protected List crafters = new ArrayList();
+     private Set playerList = new HashSet();
+     private static final String __OBFID = "CL_00001730";
+ 
++    // CraftBukkit start
++    public boolean checkReachable = true;
++    public InventoryView getBukkitView() { return bukkitView; } // MCPC+
++    public void transferTo(Container other, org.bukkit.craftbukkit.entity.CraftHumanEntity player)
++    {
++        InventoryView source = this.getBukkitView(), destination = other.getBukkitView();
++        ((CraftInventory) source.getTopInventory()).getInventory().onClose(player);
++        ((CraftInventory) source.getBottomInventory()).getInventory().onClose(player);
++        ((CraftInventory) destination.getTopInventory()).getInventory().onOpen(player);
++        ((CraftInventory) destination.getBottomInventory()).getInventory().onOpen(player);
++    }
++    // CraftBukkit end
++
+     // JAVADOC METHOD $$ func_75146_a
+     protected Slot addSlotToContainer(Slot par1Slot)
+     {
+@@ -177,6 +203,7 @@
+                     itemstack3 = inventoryplayer.getItemStack().copy();
+                     i1 = inventoryplayer.getItemStack().stackSize;
+                     Iterator iterator = this.field_94537_h.iterator();
++                    Map<Integer, ItemStack> draggedSlots = new HashMap<Integer, ItemStack>(); // CraftBukkit - Store slots from drag in map (raw slot id -> new stack)
+ 
+                     while (iterator.hasNext())
+                     {
+@@ -199,18 +226,55 @@
+                             }
+ 
+                             i1 -= itemstack1.stackSize - j1;
+-                            slot1.putStack(itemstack1);
++                            draggedSlots.put(slot1.slotNumber, itemstack1); // CraftBukkit - Put in map instead of setting
+                         }
+                     }
+ 
+-                    itemstack3.stackSize = i1;
++                    // CraftBukkit start - InventoryDragEvent
++                    InventoryView view = getBukkitView();
++                    org.bukkit.inventory.ItemStack newcursor = CraftItemStack.asCraftMirror(itemstack3);
++                    newcursor.setAmount(i1);
++                    Map<Integer, org.bukkit.inventory.ItemStack> eventmap = new HashMap<Integer, org.bukkit.inventory.ItemStack>();
+ 
+-                    if (itemstack3.stackSize <= 0)
++                    for (Map.Entry<Integer, ItemStack> ditem : draggedSlots.entrySet())
+                     {
+-                        itemstack3 = null;
++                        eventmap.put(ditem.getKey(), CraftItemStack.asBukkitCopy(ditem.getValue()));
+                     }
+ 
+-                    inventoryplayer.setItemStack(itemstack3);
++                    // It's essential that we set the cursor to the new value here to prevent item duplication if a plugin closes the inventory.
++                    ItemStack oldCursor = inventoryplayer.getItemStack();
++                    inventoryplayer.setItemStack(CraftItemStack.asNMSCopy(newcursor));
++                    InventoryDragEvent event = new InventoryDragEvent(view, (newcursor.getType() != org.bukkit.Material.AIR ? newcursor : null), CraftItemStack.asBukkitCopy(oldCursor), this.field_94535_f == i1, eventmap); // Should be dragButton
++                    par4EntityPlayer.worldObj.getServer().getPluginManager().callEvent(event);
++                    // Whether or not a change was made to the inventory that requires an update.
++                    boolean needsUpdate = event.getResult() != Result.DEFAULT;
++
++                    if (event.getResult() != Result.DENY)
++                    {
++                        for (Map.Entry<Integer, ItemStack> dslot : draggedSlots.entrySet())
++                        {
++                            view.setItem(dslot.getKey(), CraftItemStack.asBukkitCopy(dslot.getValue()));
++                        }
++
++                        // The only time the carried item will be set to null is if the inventory is closed by the server.
++                        // If the inventory is closed by the server, then the cursor items are dropped.  This is why we change the cursor early.
++                        if (inventoryplayer.getItemStack() != null)
++                        {
++                            inventoryplayer.setItemStack(CraftItemStack.asNMSCopy(event.getCursor()));
++                            needsUpdate = true;
++                        }
++                    }
++                    else
++                    {
++                        inventoryplayer.setItemStack(oldCursor);
++                    }
++
++                    if (needsUpdate && par4EntityPlayer instanceof EntityPlayerMP)
++                    {
++                        ((EntityPlayerMP) par4EntityPlayer).sendContainerToPlayer(this);
++                    }
++
++                    // CraftBukkit end
+                 }
+ 
+                 this.func_94533_d();
+@@ -244,10 +308,17 @@
+ 
+                         if (par2 == 1)
+                         {
+-                            par4EntityPlayer.dropPlayerItemWithRandomChoice(inventoryplayer.getItemStack().splitStack(1), true);
++                            // CraftBukkit start - Store a reference
++                            ItemStack itemstack4 = inventoryplayer.getItemStack();
+ 
+-                            if (inventoryplayer.getItemStack().stackSize == 0)
++                            if (itemstack4.stackSize > 0)
+                             {
++                                par4EntityPlayer.dropPlayerItemWithRandomChoice(itemstack4.splitStack(1), true);
++                            }
++
++                            if (itemstack4.stackSize == 0)
++                            {
++                                // CraftBukkit end
+                                 inventoryplayer.setItemStack((ItemStack)null);
+                             }
+                         }

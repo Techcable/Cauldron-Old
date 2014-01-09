@@ -1,0 +1,105 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemBlock.java
++++ ../src-work/minecraft/net/minecraft/item/ItemBlock.java
+@@ -11,6 +11,7 @@
+ import net.minecraft.init.Blocks;
+ import net.minecraft.util.IIcon;
+ import net.minecraft.world.World;
++import net.minecraft.block.BlockContainer; // CraftBukkit
+ 
+ public class ItemBlock extends Item
+ {
+@@ -48,6 +49,7 @@
+     // JAVADOC METHOD $$ func_77648_a
+     public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
+     {
++        final int clickedX = par4, clickedY = par5, clickedZ = par6; // CraftBukkit
+         Block block = par3World.func_147439_a(par4, par5, par6);
+ 
+         if (block == Blocks.snow_layer && (par3World.getBlockMetadata(par4, par5, par6) & 7) < 1)
+@@ -103,14 +105,21 @@
+         {
+             int i1 = this.getMetadata(par1ItemStack.getItemDamage());
+             int j1 = this.field_150939_a.func_149660_a(par3World, par4, par5, par6, par7, par8, par9, par10, i1);
+-
+-            if (placeBlockAt(par1ItemStack, par2EntityPlayer, par3World, par4, par5, par6, par7, par8, par9, par10, j1))
++            // MCPC+ start - seperate forge/vanilla process block calls            
++            if (field_150939_a.isForgeBlock) // process forge block
+             {
+-                par3World.playSoundEffect((double)((float)par4 + 0.5F), (double)((float)par5 + 0.5F), (double)((float)par6 + 0.5F), this.field_150939_a.field_149762_H.func_150496_b(), (this.field_150939_a.field_149762_H.func_150497_c() + 1.0F) / 2.0F, this.field_150939_a.field_149762_H.func_150494_d() * 0.8F);
+-                --par1ItemStack.stackSize;
++                if (placeBlockAt(par1ItemStack, par2EntityPlayer, par3World, par4, par5, par6, par7, par8, par9, par10, j1))
++                {
++                    par3World.playSoundEffect((double)((float)par4 + 0.5F), (double)((float)par5 + 0.5F), (double)((float)par6 + 0.5F), this.field_150939_a.field_149762_H.func_150496_b(), (this.field_150939_a.field_149762_H.func_150497_c() + 1.0F) / 2.0F, this.field_150939_a.field_149762_H.func_150494_d() * 0.8F);
++                    --par1ItemStack.stackSize;
++                }
++                return true;
+             }
+-
+-            return true;
++            else // process vanilla block 
++            {
++            // MCPC+ end
++                return processBlockPlace(par3World, par2EntityPlayer, par1ItemStack, par4, par5, par6, this.field_150939_a, j1, clickedX, clickedY, clickedZ);   // CraftBukkit 
++            }
+         }
+         else
+         {
+@@ -118,6 +127,58 @@
+         }
+     }
+ 
++    // CraftBukkit start - Add method to process block placement
++    // MCPC+ - public
++    public static boolean processBlockPlace(final World world, final EntityPlayer entityplayer, final ItemStack itemstack, final int x, final int y, final int z, final Block id, final int data, final int clickedX, final int clickedY, final int clickedZ)
++    {
++        org.bukkit.block.BlockState blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(world, x, y, z);
++        world.callingPlaceEvent = true;
++        // Sign is now 3 not 2.
++        int flag = (id == Blocks.standing_sign || id == Blocks.wall_sign) ? 3 : 2;
++        world.func_147465_d(x, y, z, id, data, flag);
++        org.bukkit.event.block.BlockPlaceEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(world, entityplayer, blockstate, clickedX, clickedY, clickedZ);
++
++        if (event.isCancelled() || !event.canBuild())
++        {
++            blockstate.update(true, false);
++            world.callingPlaceEvent = false;
++            return false;
++        }
++
++        world.callingPlaceEvent = false;
++        Block block = world.func_147439_a(x, y, z);
++        int newData = world.getBlockMetadata(x, y, z);
++
++        if (block != null && !(block instanceof BlockContainer))   // Containers get placed automatically
++        {
++            block.func_149726_b(world, x, y, z);
++        }
++
++        world.func_147444_c(x, y, z, block);
++
++        // Cocoa beans placed via ItemDye do not need the rest of the processing
++        if (block == Blocks.cocoa && itemstack != null && itemstack.getItem() instanceof ItemDye)
++        {
++            return true;
++        }
++
++        // Skulls don't get block data applied to them
++        if (block != null && block != Blocks.skull)
++        {
++            block.func_149689_a(world, x, y, z, entityplayer, itemstack);
++            block.func_149714_e(world, x, y, z, newData);
++            world.playSoundEffect((double)((float) x + 0.5F), (double)((float) y + 0.5F), (double)((float) z + 0.5F), block.field_149762_H.func_150496_b(), (block.field_149762_H.func_150497_c() + 1.0F) / 2.0F, block.field_149762_H.func_150494_d() * 0.8F);
++        }
++
++        if (itemstack != null)
++        {
++            --itemstack.stackSize;
++        }
++
++        return true;
++    }
++    // CraftBukkit end
++
+     @SideOnly(Side.CLIENT)
+     public boolean func_150936_a(World p_150936_1_, int p_150936_2_, int p_150936_3_, int p_150936_4_, int p_150936_5_, EntityPlayer p_150936_6_, ItemStack p_150936_7_)
+     {

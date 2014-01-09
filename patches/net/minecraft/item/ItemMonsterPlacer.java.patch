@@ -1,0 +1,20 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemMonsterPlacer.java
++++ ../src-work/minecraft/net/minecraft/item/ItemMonsterPlacer.java
+@@ -56,7 +56,7 @@
+     // JAVADOC METHOD $$ func_77648_a
+     public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
+     {
+-        if (par3World.isRemote)
++        if (par3World.isRemote || par1ItemStack.getItemDamage() == 48 || par1ItemStack.getItemDamage() == 49 || par1ItemStack.getItemDamage() == 63 || par1ItemStack.getItemDamage() == 64)   // CraftBukkit
+         {
+             return true;
+         }
+@@ -171,7 +171,7 @@
+                     entityliving.rotationYawHead = entityliving.rotationYaw;
+                     entityliving.renderYawOffset = entityliving.rotationYaw;
+                     entityliving.onSpawnWithEgg((IEntityLivingData)null);
+-                    par0World.spawnEntityInWorld(entity);
++                    par0World.addEntity(entity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SPAWNER_EGG); // CraftBukkit
+                     entityliving.playLivingSound();
+                 }
+             }

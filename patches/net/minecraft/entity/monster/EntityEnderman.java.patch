@@ -1,0 +1,138 @@
+--- ../src-base/minecraft/net/minecraft/entity/monster/EntityEnderman.java
++++ ../src-work/minecraft/net/minecraft/entity/monster/EntityEnderman.java
+@@ -22,6 +22,12 @@
+ import net.minecraftforge.common.MinecraftForge;
+ import net.minecraftforge.event.entity.living.EnderTeleportEvent;
+ 
++// CraftBukkit start
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityTeleportEvent;
++// CraftBukkit end
++
+ public class EntityEnderman extends EntityMob
+ {
+     private static final UUID attackingSpeedBoostModifierUUID = UUID.fromString("020E0DFB-87AE-4653-9556-831010E291A0");
+@@ -146,50 +152,62 @@
+         }
+ 
+         this.lastEntityToAttack = this.entityToAttack;
+-        int k;
++        int i;
+ 
+         if (!this.worldObj.isRemote && this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing"))
+         {
+-            int i;
+             int j;
++            int k;
+             Block block;
+ 
+             if (this.func_146080_bZ().func_149688_o() == Material.field_151579_a)
+             {
+                 if (this.rand.nextInt(20) == 0)
+                 {
+-                    k = MathHelper.floor_double(this.posX - 2.0D + this.rand.nextDouble() * 4.0D);
+-                    i = MathHelper.floor_double(this.posY + this.rand.nextDouble() * 3.0D);
+-                    j = MathHelper.floor_double(this.posZ - 2.0D + this.rand.nextDouble() * 4.0D);
+-                    block = this.worldObj.func_147439_a(k, i, j);
++                    i = MathHelper.floor_double(this.posX - 2.0D + this.rand.nextDouble() * 4.0D);
++                    j = MathHelper.floor_double(this.posY + this.rand.nextDouble() * 3.0D);
++                    k = MathHelper.floor_double(this.posZ - 2.0D + this.rand.nextDouble() * 4.0D);
++                    block = this.worldObj.func_147439_a(i, j, k);
+ 
+                     if (carriableBlocks[Block.func_149682_b(block)])
+                     {
+-                        this.func_146081_a(block);
+-                        this.setCarryingData(this.worldObj.getBlockMetadata(k, i, j));
+-                        this.worldObj.func_147449_b(k, i, j, Blocks.air);
++                        // CraftBukkit start - Pickup event
++                        if (!CraftEventFactory.callEntityChangeBlockEvent(this, this.worldObj.getWorld().getBlockAt(i, j, k), org.bukkit.Material.AIR).isCancelled())
++                        {
++                            this.func_146081_a(block);
++                            this.setCarryingData(this.worldObj.getBlockMetadata(i, j, k));
++                            this.worldObj.func_147449_b(i, j, k, Blocks.air);
++                        }
++
++                        // CraftBukkit end
+                     }
+                 }
+             }
+             else if (this.rand.nextInt(2000) == 0)
+             {
+-                k = MathHelper.floor_double(this.posX - 1.0D + this.rand.nextDouble() * 2.0D);
+-                i = MathHelper.floor_double(this.posY + this.rand.nextDouble() * 2.0D);
+-                j = MathHelper.floor_double(this.posZ - 1.0D + this.rand.nextDouble() * 2.0D);
+-                block = this.worldObj.func_147439_a(k, i, j);
+-                Block block1 = this.worldObj.func_147439_a(k, i - 1, j);
++                i = MathHelper.floor_double(this.posX - 1.0D + this.rand.nextDouble() * 2.0D);
++                j = MathHelper.floor_double(this.posY + this.rand.nextDouble() * 2.0D);
++                k = MathHelper.floor_double(this.posZ - 1.0D + this.rand.nextDouble() * 2.0D);
++                block = this.worldObj.func_147439_a(i, j, k);
++                Block block1 = this.worldObj.func_147439_a(i, j - 1, k);
+ 
+                 if (block.func_149688_o() == Material.field_151579_a && block1.func_149688_o() != Material.field_151579_a && block1.func_149686_d())
+                 {
+-                    this.worldObj.func_147465_d(k, i, j, this.func_146080_bZ(), this.getCarryingData(), 3);
+-                    this.func_146081_a(Blocks.air);
++                    // CraftBukkit start - Place event
++                    if (!CraftEventFactory.callEntityChangeBlockEvent(this, i, j, k, this.func_146080_bZ(), this.getCarryingData()).isCancelled())
++                    {
++                        this.worldObj.func_147465_d(i, j, k, this.func_146080_bZ(), this.getCarryingData(), 3);
++                        this.func_146081_a(Blocks.air);
++                    }
++
++                    // CraftBukkit end
+                 }
+             }
+         }
+ 
+-        for (k = 0; k < 2; ++k)
++        for (i = 0; i < 2; ++i)
+         {
+-            this.worldObj.spawnParticle("portal", this.posX + (this.rand.nextDouble() - 0.5D) * (double)this.width, this.posY + this.rand.nextDouble() * (double)this.height - 0.25D, this.posZ + (this.rand.nextDouble() - 0.5D) * (double)this.width, (this.rand.nextDouble() - 0.5D) * 2.0D, -this.rand.nextDouble(), (this.rand.nextDouble() - 0.5D) * 2.0D);
++            this.worldObj.spawnParticle("portal", this.posX + (this.rand.nextDouble() - 0.5D) * (double) this.width, this.posY + this.rand.nextDouble() * (double) this.height - 0.25D, this.posZ + (this.rand.nextDouble() - 0.5D) * (double) this.width, (this.rand.nextDouble() - 0.5D) * 2.0D, -this.rand.nextDouble(), (this.rand.nextDouble() - 0.5D) * 2.0D);
+         }
+ 
+         if (this.worldObj.isDaytime() && !this.worldObj.isRemote)
+@@ -313,8 +331,19 @@
+ 
+             if (flag1)
+             {
+-                this.setPosition(this.posX, this.posY, this.posZ);
++                // CraftBukkit start - Teleport event
++                EntityTeleportEvent teleport = new EntityTeleportEvent(this.getBukkitEntity(), new Location(this.worldObj.getWorld(), d3, d4, d5), new Location(this.worldObj.getWorld(), this.posX, this.posY, this.posZ));
++                this.worldObj.getServer().getPluginManager().callEvent(teleport);
+ 
++                if (teleport.isCancelled())
++                {
++                    return false;
++                }
++
++                Location to = teleport.getTo();
++                this.setPosition(to.getX(), to.getY(), to.getZ());
++                // CraftBukkit end
++
+                 if (this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox).isEmpty() && !this.worldObj.isAnyLiquid(this.boundingBox))
+                 {
+                     flag = true;
+@@ -379,12 +408,17 @@
+ 
+         if (item != null)
+         {
+-            int j = this.rand.nextInt(2 + par2);
++            // CraftBukkit start - Whole method
++            java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
++            int count = this.rand.nextInt(2 + par2);
+ 
+-            for (int k = 0; k < j; ++k)
++            if (count > 0)
+             {
+-                this.func_145779_a(item, 1);
++                loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(item), count));
+             }
++
++            CraftEventFactory.callEntityDeathEvent(this, loot);
++            // CraftBukkit end
+         }
+     }
+ 

@@ -1,0 +1,45 @@
+--- ../src-base/minecraft/net/minecraft/server/network/NetHandlerHandshakeTCP.java
++++ ../src-work/minecraft/net/minecraft/server/network/NetHandlerHandshakeTCP.java
+@@ -32,19 +32,39 @@
+ 
+                 if (p_147383_1_.func_149595_d() > 4)
+                 {
+-                    chatcomponenttext = new ChatComponentText("Outdated server! I\'m still on 1.7.2");
++                    chatcomponenttext = new ChatComponentText(org.spigotmc.SpigotConfig.outdatedServerMessage);   // Spigot
+                     this.field_147386_b.func_150725_a(new S00PacketDisconnect(chatcomponenttext), new GenericFutureListener[0]);
+                     this.field_147386_b.func_150718_a(chatcomponenttext);
+                 }
+                 else if (p_147383_1_.func_149595_d() < 4)
+                 {
+-                    chatcomponenttext = new ChatComponentText("Outdated client! Please use 1.7.2");
++                    chatcomponenttext = new ChatComponentText(org.spigotmc.SpigotConfig.outdatedClientMessage);   // Spigot
+                     this.field_147386_b.func_150725_a(new S00PacketDisconnect(chatcomponenttext), new GenericFutureListener[0]);
+                     this.field_147386_b.func_150718_a(chatcomponenttext);
+                 }
+                 else
+                 {
+-                    this.field_147386_b.func_150719_a(new NetHandlerLoginServer(this.field_147387_a, this.field_147386_b));
++                    this.field_147386_b.func_150719_a((new NetHandlerLoginServer(this.field_147387_a, this.field_147386_b)));
++
++                    // Spigot Start
++                    if (org.spigotmc.SpigotConfig.bungee)
++                    {
++                        String[] split = p_147383_1_.field_149598_b.split("\00");
++
++                        if (split.length == 2 || split.length == 3)
++                        {
++                            p_147383_1_.field_149598_b = split[0];
++                            field_147386_b.field_150743_l = new java.net.InetSocketAddress(split[1], ((java.net.InetSocketAddress) field_147386_b.getSocketAddress()).getPort());
++                        }
++
++                        if (split.length == 3)
++                        {
++                            field_147386_b.spoofedUUID = split[2];
++                        }
++                    }
++
++                    // Spigot End
++                    ((NetHandlerLoginServer) this.field_147386_b.func_150729_e()).hostname = p_147383_1_.field_149598_b + ":" + p_147383_1_.field_149599_c; // CraftBukkit - set hostname
+                 }
+ 
+                 break;
