@@ -33,6 +33,7 @@ class ThreadPlayerLookupUUID extends Thread
             if (!MinecraftServer.getServer().isServerInOnlineMode())
             {
                 fireLoginEvents();
+                NetHandlerLoginServer.setLoginState(this.field_151292_a, LoginState.READY_TO_ACCEPT);
                 return;
             }
 
@@ -46,6 +47,7 @@ class ThreadPlayerLookupUUID extends Thread
                 fireLoginEvents();
                 // Spigot End
                 NetHandlerLoginServer.getLogger().info("UUID of player " + NetHandlerLoginServer.getGameProfile(this.field_151292_a).getName() + " is " + NetHandlerLoginServer.getGameProfile(this.field_151292_a).getId());
+                NetHandlerLoginServer.setLoginState(this.field_151292_a, LoginState.READY_TO_ACCEPT);
             }
             else
             {

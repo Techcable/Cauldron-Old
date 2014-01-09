@@ -18,7 +18,7 @@ public class MCPCUtils {
     public static boolean isOverridingUpdateEntity(Class<? extends TileEntity> c) 
     {
         Class clazz = null;
-        String method = "func_70316_g";
+        String method = "func_145845_h";
         if (MinecraftServer.deobfuscatedEnvironment)
             method = "canUpdate";
         try {

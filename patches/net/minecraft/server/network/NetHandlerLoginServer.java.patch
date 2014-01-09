@@ -77,7 +77,8 @@
 +        // CraftBukkit start
 +        EntityPlayerMP s = this.field_147327_f.getConfigurationManager().attemptLogin(this, this.field_147337_i, this.hostname);
  
-         if (s != null)
+-        if (s != null)
++        if (s == null)
          {
 -            this.func_147322_a(s);
 +            // this.func_147322_a(s);
@@ -128,7 +129,7 @@
          PrivateKey privatekey = this.field_147327_f.getKeyPair().getPrivate();
  
          if (!Arrays.equals(this.field_147330_e, p_147315_1_.func_149299_b(privatekey)))
-@@ -147,39 +170,38 @@
+@@ -147,39 +170,43 @@
          else
          {
              this.field_147335_k = p_147315_1_.func_149300_a(privatekey);
@@ -190,6 +191,11 @@
 +
 +    static Logger getLogger() {
 +        return field_147332_c;
++    }
++
++    static void setLoginState(NetHandlerLoginServer loginServer, LoginState state)
++    {
++        loginServer.field_147328_g = state;
 +    }
 +    // MCPC+ end
 +
