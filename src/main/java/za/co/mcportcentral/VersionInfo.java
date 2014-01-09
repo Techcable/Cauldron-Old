@@ -5,11 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import argo.jdom.JdomParser;
+import argo.jdom.JsonNode;
+import argo.jdom.JsonRootNode;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
@@ -21,12 +20,12 @@ import com.google.common.io.OutputSupplier;
 
 public class VersionInfo {
     public static final VersionInfo INSTANCE = new VersionInfo();
-    public final JsonElement versionData;
+    public final JsonRootNode versionData;
 
     public VersionInfo()
     {
-        InputStream installProfile = getClass().getResourceAsStream("/install_profile.json");
-        JsonParser parser = new JsonParser();
+        InputStream installProfile = getClass().getResourceAsStream("/mcpc_libs.json");
+        JdomParser parser = new JdomParser();
 
         try
         {
@@ -40,19 +39,16 @@ public class VersionInfo {
 
     public static String getProfileName()
     {
-        JsonObject jsonobject = INSTANCE.versionData.getAsJsonObject();
-        return jsonobject.get("install").getAsJsonObject().get("profileName").getAsString();
+        return INSTANCE.versionData.getStringValue("install","profileName");
     }
 
     public static String getVersionTarget()
     {
-        JsonObject jsonobject = INSTANCE.versionData.getAsJsonObject();
-        return jsonobject.get("install").getAsJsonObject().get("target").getAsString();
+        return INSTANCE.versionData.getStringValue("install","target");
     }
     public static File getLibraryPath(File root)
     {
-        JsonObject jsonobject = INSTANCE.versionData.getAsJsonObject();
-        String path = jsonobject.get("install").getAsJsonObject().get("path").getAsString();
+        String path = INSTANCE.versionData.getStringValue("install","path");
         String[] split = Iterables.toArray(Splitter.on(':').omitEmptyStrings().split(path), String.class);
         File dest = root;
         Iterable<String> subSplit = Splitter.on('.').omitEmptyStrings().split(split[0]);
@@ -67,20 +63,22 @@ public class VersionInfo {
 
     public static String getVersion()
     {
-        JsonObject jsonobject = INSTANCE.versionData.getAsJsonObject();
-        return jsonobject.get("install").getAsJsonObject().get("version").getAsString();
+        return INSTANCE.versionData.getStringValue("install","version");
     }
 
     public static String getWelcomeMessage()
     {
-        JsonObject jsonobject = INSTANCE.versionData.getAsJsonObject();
-        return jsonobject.get("install").getAsJsonObject().get("welcome").getAsString();
+        return INSTANCE.versionData.getStringValue("install","welcome");
     }
 
     public static String getLogoFileName()
     {
-        JsonObject jsonobject = INSTANCE.versionData.getAsJsonObject();
-        return jsonobject.get("install").getAsJsonObject().get("logo").getAsString();
+        return INSTANCE.versionData.getStringValue("install","logo");
+    }
+
+    public static JsonNode getVersionInfo()
+    {
+        return INSTANCE.versionData.getNode("versionInfo");
     }
 
     public static File getMinecraftFile(File path)
@@ -89,8 +87,7 @@ public class VersionInfo {
     }
     public static String getContainedFile()
     {
-        JsonObject jsonobject = INSTANCE.versionData.getAsJsonObject();
-        return jsonobject.get("install").getAsJsonObject().get("filePath").getAsString();
+        return INSTANCE.versionData.getStringValue("install","filePath");
     }
     public static void extractFile(File path) throws IOException
     {
@@ -107,7 +104,6 @@ public class VersionInfo {
 
     public static String getMinecraftVersion()
     {
-        JsonObject jsonobject = INSTANCE.versionData.getAsJsonObject();
-        return jsonobject.get("install").getAsJsonObject().get("minecraft").getAsString();
+        return INSTANCE.versionData.getStringValue("install","minecraft");
     }
 }

@@ -113,8 +113,8 @@
       "url" : "http://repo.maven.apache.org/maven2"
     },
     {
-      "name": "argo:argo:2.25_fixed",
-      "url" : "http://repo.maven.apache.org/maven2"
+      "name": "net.sourceforge.argo:argo:2.25",
+      "url" : "http://repo.maven.apache.org/maven2/"
     },
     {
       "name": "org.fusesource.jansi:jansi:1.8",

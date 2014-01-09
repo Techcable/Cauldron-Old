@@ -7,7 +7,6 @@
   "filePath":"@universal_jar@",
   "welcome":"Welcome to the simple @project@ installer.",
   "minecraft":"@minecraft_version@",
-  "mirrorList" : "http://files.minecraftforge.net/mirror-brand.list",
   "logo":"/big_logo.png"
 },
 "versionInfo": {
@@ -134,6 +133,11 @@
     },
     {
       "name": "org.fusesource.jansi:jansi:1.8",
+      "url" : "http://repo.maven.apache.org/maven2/",
+      "serverreq":true
+    },
+    {
+      "name": "net.sourceforge.argo:argo:2.25",
       "url" : "http://repo.maven.apache.org/maven2/",
       "serverreq":true
     },
