@@ -32,7 +32,15 @@
  
      public S26PacketMapChunkBulk() {}
  
-@@ -53,34 +63,36 @@
+@@ -46,6 +56,7 @@
+         {
+             Chunk chunk = (Chunk)p_i45197_1_.get(k);
+             S21PacketChunkData.Extracted extracted = S21PacketChunkData.func_149269_a(chunk, true, 65535);
++            world = chunk.worldObj; // Spigot
+             j += extracted.field_150282_a.length;
+             this.field_149266_a[k] = chunk.xPosition;
+             this.field_149264_b[k] = chunk.zPosition;
+@@ -53,34 +64,36 @@
              this.field_149262_d[k] = extracted.field_150281_c;
              this.field_149260_f[k] = extracted.field_150282_a;
          }
@@ -90,7 +98,7 @@
  
      public static int func_149258_c()
      {
-@@ -155,16 +167,7 @@
+@@ -155,16 +168,7 @@
  
      public void func_148840_b(PacketBuffer p_148840_1_) throws IOException
      {

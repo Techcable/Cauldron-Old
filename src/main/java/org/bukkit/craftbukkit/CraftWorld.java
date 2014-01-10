@@ -49,7 +49,7 @@ import org.bukkit.plugin.messaging.StandardMessenger;
 import org.bukkit.util.Vector;
 
 public class CraftWorld implements World {
-    public static final int CUSTOM_DIMENSION_OFFSET = 10;
+    //public static final int CUSTOM_DIMENSION_OFFSET = 10; // MCPC+ - disabled
 
     private final net.minecraft.world.WorldServer world;
     private Environment environment;

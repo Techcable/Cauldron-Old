@@ -193,10 +193,23 @@
      }
  
      // JAVADOC METHOD $$ func_72358_d
-@@ -294,6 +389,50 @@
-         this.func_148540_a(new S38PacketPlayerListItem(par1EntityPlayerMP.getCommandSenderName(), false, 9999));
+@@ -274,24 +369,55 @@
      }
  
+     // JAVADOC METHOD $$ func_72367_e
+-    public void playerLoggedOut(EntityPlayerMP par1EntityPlayerMP)
++    // MCPC+ start - vanilla compatibility
++    public void playerLoggedOut(EntityPlayerMP entityPlayerMP)
+     {
+-        FMLCommonHandler.instance().firePlayerLoggedOut(par1EntityPlayerMP);
+-        par1EntityPlayerMP.triggerAchievement(StatList.leaveGameStat);
+-        this.writePlayerData(par1EntityPlayerMP);
+-        WorldServer worldserver = par1EntityPlayerMP.getServerForPlayer();
++        disconnect(entityPlayerMP);
++    }
++    // MCPC+ end
+ 
+-        if (par1EntityPlayerMP.ridingEntity != null)
 +    public String disconnect(EntityPlayerMP entityplayermp)   // CraftBukkit - return string
 +    {
 +        FMLCommonHandler.instance().firePlayerLoggedOut(entityplayermp);
@@ -211,11 +224,17 @@
 +        WorldServer worldserver = entityplayermp.getServerForPlayer();
 +
 +        if (entityplayermp.ridingEntity != null && !(entityplayermp.ridingEntity instanceof EntityPlayerMP))   // CraftBukkit - Don't remove players
-+        {
+         {
+-            worldserver.removePlayerEntityDangerously(par1EntityPlayerMP.ridingEntity);
 +            worldserver.removePlayerEntityDangerously(entityplayermp.ridingEntity);
-+            field_148546_d.debug("removing player mount");
-+        }
-+
+             field_148546_d.debug("removing player mount");
+         }
+ 
+-        worldserver.removeEntity(par1EntityPlayerMP);
+-        worldserver.getPlayerManager().removePlayer(par1EntityPlayerMP);
+-        this.playerEntityList.remove(par1EntityPlayerMP);
+-        this.field_148547_k.remove(par1EntityPlayerMP.getCommandSenderName());
+-        this.func_148540_a(new S38PacketPlayerListItem(par1EntityPlayerMP.getCommandSenderName(), false, 9999));
 +        worldserver.removeEntity(entityplayermp);
 +        worldserver.getPlayerManager().removePlayer(entityplayermp);
 +        this.playerEntityList.remove(entityplayermp);
@@ -239,12 +258,10 @@
 +        this.cserver.getScoreboardManager().removePlayer(entityplayermp.getBukkitEntity());
 +        return playerQuitEvent.getQuitMessage();
 +        // CraftBukkit end
-+    }
-+
+     }
+ 
      public String func_148542_a(SocketAddress p_148542_1_, GameProfile p_148542_2_)
-     {
-         if (this.bannedPlayers.isBanned(p_148542_2_.getName()))
-@@ -337,6 +476,77 @@
+@@ -337,6 +463,77 @@
          }
      }
  
@@ -322,7 +339,7 @@
      public EntityPlayerMP func_148545_a(GameProfile p_148545_1_)
      {
          ArrayList arraylist = new ArrayList();
-@@ -373,27 +583,84 @@
+@@ -373,27 +570,84 @@
  
          return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
      }
@@ -412,7 +429,7 @@
          par1EntityPlayerMP.dimension = par2;
          Object object;
  
-@@ -407,51 +674,214 @@
+@@ -407,51 +661,213 @@
          }
  
          EntityPlayerMP entityplayermp1 = new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension), par1EntityPlayerMP.func_146103_bH(), (ItemInWorldManager)object);
@@ -522,7 +539,6 @@
 +        }
 +        // MCPC+ end
 +        // CraftBukkit start
-+        entityplayermp1.playerNetServerHandler.func_147359_a(new S07PacketRespawn(actualDimension, worldserver.difficultySetting, worldserver.getWorldInfo().getTerrainType(), par1EntityPlayerMP.theItemInWorldManager.getGameType()));
 +        entityplayermp1.playerNetServerHandler.func_147359_a(new S07PacketRespawn(actualDimension, worldserver.difficultySetting, worldserver.getWorldInfo().getTerrainType(), entityplayermp1.theItemInWorldManager.getGameType()));
 +        entityplayermp1.setWorld(worldserver);
 +        entityplayermp1.isDead = false;
@@ -570,19 +586,8 @@
 +    // CraftBukkit start - Replaced the standard handling of portals with a more customised method.
 +    public void changeDimension(EntityPlayerMP entityplayermp, int i, TeleportCause cause)
 +    {
-+        WorldServer exitWorld = null;
-+
-+        if (entityplayermp.dimension < CraftWorld.CUSTOM_DIMENSION_OFFSET)   // plugins must specify exit from custom Bukkit worlds
-+        {
-+            // only target existing worlds (compensate for allow-nether/allow-end as false)
-+            for (WorldServer world : this.mcServer.worlds)
-+            {
-+                if (world.dimension == i)
-+                {
-+                    exitWorld = world;
-+                }
-+            }
-+        }
++        // MCPC+ start - Allow Forge hotloading on teleport
++        WorldServer exitWorld = this.mcServer.worldServerForDimension(i);
 +
 +        Location enter = entityplayermp.getBukkitEntity().getLocation();
 +        Location exit = null;
@@ -608,7 +613,18 @@
 +            }
 +        }
 +
-+        TravelAgent agent = exit != null ? (TravelAgent)((CraftWorld) exit.getWorld()).getHandle().getDefaultTeleporter() : org.bukkit.craftbukkit.CraftTravelAgent.DEFAULT;  // return arbitrary TA to compensate for implementation dependent plugins
++        // MCPC+ start - allow for forge mods to be the teleporter
++        TravelAgent agent = null;
++        if (exit != null) {
++            net.minecraft.world.Teleporter teleporter = ((CraftWorld)exit.getWorld()).getHandle().getDefaultTeleporter();
++            if (teleporter instanceof TravelAgent) {
++                agent = (TravelAgent)teleporter;
++            }
++        }
++        if (agent == null) {
++            agent = org.bukkit.craftbukkit.CraftTravelAgent.DEFAULT; // return arbitrary TA to compensate for implementation dependent plugins
++        }
++        // MCPC+ end
 +        PlayerPortalEvent event = new PlayerPortalEvent(entityplayermp.getBukkitEntity(), enter, exit, agent, cause);
 +        event.useTravelAgent(useTravelAgent);
 +        Bukkit.getServer().getPluginManager().callEvent(event);
@@ -644,7 +660,7 @@
      public void transferPlayerToDimension(EntityPlayerMP par1EntityPlayerMP, int par2)
      {
          transferPlayerToDimension(par1EntityPlayerMP, par2, mcServer.worldServerForDimension(par2).getDefaultTeleporter());
-@@ -485,7 +915,10 @@
+@@ -485,7 +901,10 @@
      // JAVADOC METHOD $$ func_82448_a
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer)
      {
@@ -656,7 +672,7 @@
      }
  
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer, Teleporter teleporter)
-@@ -571,6 +1004,192 @@
+@@ -571,6 +990,192 @@
          par1Entity.setWorld(par4WorldServer);
      }
  
@@ -849,7 +865,7 @@
      // JAVADOC METHOD $$ func_72374_b
      public void sendPlayerInfoToAllPlayers()
      {
-@@ -579,11 +1198,36 @@
+@@ -579,11 +1184,36 @@
              this.playerPingIndex = 0;
          }
  
@@ -886,7 +902,7 @@
      }
  
      public void func_148540_a(Packet p_148540_1_)
-@@ -652,12 +1296,30 @@
+@@ -652,12 +1282,30 @@
      public void addOp(String par1Str)
      {
          this.ops.add(par1Str.toLowerCase());
@@ -917,7 +933,7 @@
      }
  
      // JAVADOC METHOD $$ func_72370_d
-@@ -833,8 +1495,16 @@
+@@ -833,8 +1481,16 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -935,7 +951,7 @@
              if (entityplayermp != p_148543_1_ && entityplayermp.dimension == p_148543_10_)
              {
                  double d4 = p_148543_2_ - entityplayermp.posX;
-@@ -891,9 +1561,12 @@
+@@ -891,9 +1547,12 @@
  
          if (par2WorldServer.isRaining())
          {
@@ -951,7 +967,7 @@
          }
      }
  
-@@ -901,7 +1574,7 @@
+@@ -901,7 +1560,7 @@
      public void syncPlayerInventory(EntityPlayerMP par1EntityPlayerMP)
      {
          par1EntityPlayerMP.sendContainerToPlayer(par1EntityPlayerMP.inventoryContainer);
@@ -960,7 +976,7 @@
          par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S09PacketHeldItemChange(par1EntityPlayerMP.inventory.currentItem));
      }
  
-@@ -993,12 +1666,31 @@
+@@ -993,12 +1652,31 @@
      // JAVADOC METHOD $$ func_72392_r
      public void removeAllPlayers()
      {

@@ -8,7 +8,7 @@
      private static final Logger field_151505_a = LogManager.getLogger();
      private List chunksToRemove = new ArrayList();
      private Set pendingAnvilChunksCoordinates = new HashSet();
-@@ -49,26 +50,65 @@
+@@ -49,26 +50,66 @@
          this.chunkSaveLocation = par1File;
      }
  
@@ -46,6 +46,7 @@
 +            Chunk chunk = (Chunk) data[0];
 +            NBTTagCompound nbttagcompound = (NBTTagCompound) data[1];
 +            this.loadEntities(chunk, nbttagcompound.getCompoundTag("Level"), par1World);
++            MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, nbttagcompound)); // MCPC+ - Don't call ChunkDataEvent.Load async
 +            return chunk;
 +        }
 +
@@ -84,7 +85,7 @@
          }
  
          if (nbttagcompound == null)
-@@ -80,14 +120,20 @@
+@@ -80,14 +121,20 @@
                  return null;
              }
  
@@ -108,7 +109,7 @@
      {
          if (!par4NBTTagCompound.func_150297_b("Level", 10))
          {
-@@ -106,20 +152,51 @@
+@@ -106,20 +153,51 @@
              if (!chunk.isAtLocation(par2, par3))
              {
                  field_151505_a.error("Chunk file at " + par2 + "," + par3 + " is in the wrong location; relocating. (Expected " + par2 + ", " + par3 + ", got " + chunk.xPosition + ", " + chunk.zPosition + ")");
@@ -166,7 +167,7 @@
          try
          {
              NBTTagCompound nbttagcompound = new NBTTagCompound();
-@@ -141,20 +218,13 @@
+@@ -141,20 +219,13 @@
  
          synchronized (this.syncLockObject)
          {
@@ -191,7 +192,7 @@
              ThreadedFileIOBase.threadedIOInstance.queueIO(this);
          }
      }
-@@ -167,13 +237,15 @@
+@@ -167,13 +238,15 @@
  
          synchronized (this.syncLockObject)
          {
@@ -210,7 +211,7 @@
          }
  
          if (pendingchunk != null)
-@@ -191,7 +263,7 @@
+@@ -191,7 +264,7 @@
          return true;
      }
  
@@ -219,7 +220,7 @@
      {
          DataOutputStream dataoutputstream = RegionFileCache.getChunkOutputStream(this.chunkSaveLocation, par1AnvilChunkLoaderPending.chunkCoordinate.chunkXPos, par1AnvilChunkLoaderPending.chunkCoordinate.chunkZPos);
          CompressedStreamTools.write(par1AnvilChunkLoaderPending.nbtTags, dataoutputstream);
-@@ -243,19 +315,19 @@
+@@ -243,19 +316,19 @@
  
                  if (extendedblockstorage.getBlockMSBArray() != null)
                  {
@@ -244,7 +245,7 @@
                  }
  
                  nbttaglist.appendTag(nbttagcompound1);
-@@ -386,6 +458,13 @@
+@@ -386,6 +459,13 @@
              chunk.setBiomeArray(par2NBTTagCompound.getByteArray("Biomes"));
          }
  
@@ -258,7 +259,7 @@
          NBTTagList nbttaglist1 = par2NBTTagCompound.func_150295_c("Entities", 10);
  
          if (nbttaglist1 != null)
-@@ -447,7 +526,7 @@
+@@ -447,7 +527,7 @@
              }
          }
  
