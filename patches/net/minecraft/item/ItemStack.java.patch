@@ -10,7 +10,56 @@
  public final class ItemStack
  {
      public static final DecimalFormat field_111284_a = new DecimalFormat("#.###");
-@@ -244,8 +247,22 @@
+@@ -131,12 +134,47 @@
+ 
+     public boolean tryPlaceItemIntoWorld(EntityPlayer par1EntityPlayer, World par2World, int par3, int par4, int par5, int par6, float par7, float par8, float par9)
+     {
++        // MCPC+ start - handle all placement events here
++        int meta = this.getItemDamage();
++        int size = this.stackSize;
++        par2World.captureBlocks = true;
+         boolean flag = this.getItem().onItemUse(this, par1EntityPlayer, par2World, par3, par4, par5, par6, par7, par8, par9);
++        par2World.captureBlocks = false;
+ 
+         if (flag)
+         {
+-            par1EntityPlayer.addStat(StatList.objectUseStats[Item.func_150891_b(this.field_151002_e)], 1);
++            boolean isCancelled = false;
++            for (int i = 0; i < par2World.capturedBlocks.size(); i++)
++            {
++                org.bukkit.event.block.BlockPlaceEvent placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(par2World, par1EntityPlayer, par2World.capturedBlocks.get(i), par3, par4, par5);
++
++                if (placeEvent.isCancelled() || !placeEvent.canBuild())
++                {
++                    isCancelled = true;
++                    break;
++                }
++            }
++            if (isCancelled)
++            {
++                flag = false; // cancel placement
++                // revert back all captured blocks
++                for (int i = 0; i < par2World.capturedBlocks.size(); i++)
++                {
++                    par2World.restoringBlockStates = true;
++                    par2World.capturedBlocks.get(i).update(true, false); // restore blockstate
++                    par2World.restoringBlockStates = false;
++                }
++                // make sure to restore stack after cancel
++                this.setItemDamage(meta);
++                this.stackSize = size;
++            }
++            else
++            {
++                par1EntityPlayer.addStat(StatList.objectUseStats[Item.func_150891_b(this.field_151002_e)], 1);
++            }
+         }
++        par2World.capturedBlocks.clear();
++        // MCPC+ end
+ 
+         return flag;
+     }
+@@ -244,8 +282,22 @@
      }
  
      // JAVADOC METHOD $$ func_96631_a
@@ -33,7 +82,7 @@
          if (!this.isItemStackDamageable())
          {
              return false;
-@@ -267,6 +284,22 @@
+@@ -267,6 +319,22 @@
  
                  par1 -= k;
  
@@ -56,7 +105,7 @@
                  if (par1 <= 0)
                  {
                      return false;
-@@ -306,6 +339,13 @@
+@@ -306,6 +374,13 @@
                          this.stackSize = 0;
                      }
  

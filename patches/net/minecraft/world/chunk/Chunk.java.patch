@@ -83,52 +83,7 @@
              if (extendedblockstorage.func_150819_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_) != p_150807_4_)
              {
                  return false;
-@@ -670,15 +707,42 @@
- 
-                 TileEntity tileentity;
- 
--                if (!this.worldObj.isRemote)
-+                if (block1 instanceof ITileEntityProvider)
-                 {
-+                    tileentity = this.func_150806_e(p_150807_1_, p_150807_2_, p_150807_3_);
-+
-+                    if (tileentity != null)
-+                    {
-+                        tileentity.func_145836_u();
-+                    }
-+                }
-+
-+                // CraftBukkit - Don't place while processing the BlockPlaceEvent, unless it's a BlockContainer
-+                if (!this.worldObj.isRemote && (!this.worldObj.callingPlaceEvent || (p_150807_4_ instanceof BlockContainer)))
-+                {
-                     p_150807_4_.func_149726_b(this.worldObj, l1, p_150807_2_, i2);
-                 }
- 
--                if (p_150807_4_.hasTileEntity(p_150807_5_))
-+                if (p_150807_4_ instanceof ITileEntityProvider)
-                 {
-+                    // CraftBukkit start - Don't create tile entity if placement failed
-+                    if (this.func_150810_a(p_150807_1_, p_150807_2_, p_150807_3_) != p_150807_4_)
-+                    {
-+                        return false;
-+                    }
-+
-+                    // CraftBukkit end
-                     tileentity = this.func_150806_e(p_150807_1_, p_150807_2_, p_150807_3_);
- 
-+                    // MCPC+ - func_150806_e guarantees a TE is created so this is no longer needed
-+                    /*
-+                    if (tileentity == null)
-+                    {
-+                        tileentity = ((ITileEntityProvider) p_150807_4_).func_149915_a(this.worldObj, p_150807_5_);
-+                        this.worldObj.func_147455_a(l1, p_150807_2_, i2, tileentity);
-+                    }
-+                    */
-+
-                     if (tileentity != null)
-                     {
-                         tileentity.func_145836_u();
-@@ -802,8 +866,12 @@
+@@ -802,8 +839,12 @@
  
          if (i != this.xPosition || j != this.zPosition)
          {
@@ -143,7 +98,7 @@
          }
  
          int k = MathHelper.floor_double(par1Entity.posY / 16.0D);
-@@ -824,6 +892,28 @@
+@@ -824,6 +865,28 @@
          par1Entity.chunkCoordY = k;
          par1Entity.chunkCoordZ = this.zPosition;
          this.entityLists[k].add(par1Entity);
@@ -172,7 +127,7 @@
      }
  
      // JAVADOC METHOD $$ func_76622_b
-@@ -846,6 +936,28 @@
+@@ -846,6 +909,28 @@
          }
  
          this.entityLists[par2].remove(par1Entity);
@@ -201,7 +156,7 @@
      }
  
      // JAVADOC METHOD $$ func_76619_d
-@@ -913,7 +1025,16 @@
+@@ -913,7 +998,16 @@
  
              p_150812_4_.func_145829_t();
              this.field_150816_i.put(chunkposition, p_150812_4_);
@@ -218,7 +173,7 @@
      }
  
      public void func_150805_f(int p_150805_1_, int p_150805_2_, int p_150805_3_)
-@@ -961,11 +1082,49 @@
+@@ -961,11 +1055,49 @@
          while (iterator.hasNext())
          {
              TileEntity tileentity = (TileEntity)iterator.next();
@@ -268,7 +223,7 @@
              this.worldObj.unloadEntities(this.entityLists[i]);
          }
          MinecraftForge.EVENT_BUS.post(new ChunkEvent.Unload(this));
-@@ -1131,7 +1290,7 @@
+@@ -1131,7 +1263,7 @@
  
          this.field_150815_m = true;
  
@@ -277,7 +232,7 @@
          {
              this.func_150809_p();
          }
-@@ -1139,7 +1298,15 @@
+@@ -1139,7 +1271,15 @@
  
      public boolean func_150802_k()
      {
@@ -294,7 +249,7 @@
      }
  
      // JAVADOC METHOD $$ func_76632_l
-@@ -1222,8 +1389,8 @@
+@@ -1222,8 +1362,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getMetadataArray();
@@ -305,7 +260,7 @@
              }
          }
  
-@@ -1232,8 +1399,8 @@
+@@ -1232,8 +1372,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getBlocklightArray();
@@ -316,7 +271,7 @@
              }
          }
  
-@@ -1244,8 +1411,8 @@
+@@ -1244,8 +1384,8 @@
                  if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
                  {
                      nibblearray = this.storageArrays[l].getSkylightArray();
@@ -327,7 +282,7 @@
                  }
              }
          }
-@@ -1267,8 +1434,8 @@
+@@ -1267,8 +1407,8 @@
                          nibblearray = this.storageArrays[l].createBlockMSBArray();
                      }
  
