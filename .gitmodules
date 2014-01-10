@@ -7,3 +7,4 @@
 [submodule "bukkit"]
 	path = bukkit
 	url = git://github.com/SpigotMC/Spigot-API.git
+	branch = master
