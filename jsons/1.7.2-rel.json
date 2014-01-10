@@ -108,37 +108,37 @@
     },
     {
       "name": "org.yaml:snakeyaml:1.9",
-      "url" : "http://repo.maven.apache.org/maven2/",
+      "url" : "http://repo.maven.apache.org/maven2",
       "serverreq":true
     },
     {
       "name": "commons-lang:commons-lang:2.6",
-      "url" : "http://repo.maven.apache.org/maven2/",
+      "url" : "http://repo.maven.apache.org/maven2",
       "serverreq":true
     },
     {
       "name": "org.avaje:ebean:2.7.3",
-      "url" : "http://repo.maven.apache.org/maven2/",
+      "url" : "http://repo.maven.apache.org/maven2",
       "serverreq":true
     },
     {
       "name": "jline:jline:2.6",
-      "url" : "http://repo.maven.apache.org/maven2/",
+      "url" : "http://repo.maven.apache.org/maven2",
       "serverreq":true
     },
     {
-      "name": "net.md-5:SpecialSource:1.6",
-      "url" : "http://repo.md-5.net/content/groups/public/",
+      "name": "net.md-5:SpecialSource:1.7-SNAPSHOT",
+      "url" : "https://oss.sonatype.org/content/repositories/snapshots",
       "serverreq":true
     },
     {
       "name": "org.fusesource.jansi:jansi:1.8",
-      "url" : "http://repo.maven.apache.org/maven2/",
+      "url" : "http://repo.maven.apache.org/maven2",
       "serverreq":true
     },
     {
       "name": "net.sourceforge.argo:argo:2.25",
-      "url" : "http://repo.maven.apache.org/maven2/",
+      "url" : "http://repo.maven.apache.org/maven2",
       "serverreq":true
     },
     {

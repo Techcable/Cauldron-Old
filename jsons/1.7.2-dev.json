@@ -109,12 +109,12 @@
       "url" : "http://repo.maven.apache.org/maven2"
     },
     {
-      "name": "net.md-5:SpecialSource:1.6",
-      "url" : "http://repo.maven.apache.org/maven2"
+      "name": "net.md-5:SpecialSource:1.7-SNAPSHOT",
+      "url" : "https://oss.sonatype.org/content/repositories/snapshots"
     },
     {
       "name": "net.sourceforge.argo:argo:2.25",
-      "url" : "http://repo.maven.apache.org/maven2/"
+      "url" : "http://repo.maven.apache.org/maven2"
     },
     {
       "name": "org.fusesource.jansi:jansi:1.8",
