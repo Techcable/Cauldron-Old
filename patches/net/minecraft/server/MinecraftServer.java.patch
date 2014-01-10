@@ -76,7 +76,7 @@
      private final ServerStatusResponse field_147147_p = new ServerStatusResponse();
      private final Random field_147146_q = new Random();
      // JAVADOC FIELD $$ field_71320_r
-@@ -149,8 +180,37 @@
+@@ -149,8 +180,36 @@
      private boolean isGamemodeForced;
      private final MinecraftSessionService field_147143_S;
      private long field_147142_T = 0L;
@@ -106,7 +106,6 @@
 +    public static boolean useConsole = true;
 +    public static boolean callingForgeTick = false;
 +    public static List<Class<? extends TileEntity>> bannedTileEntityUpdates = new ArrayList<Class<? extends TileEntity>>();
-+    public static boolean deobfuscatedEnvironment = false;
 +    // MCPC+ end
      private static final String __OBFID = "CL_00001462";
  
@@ -114,7 +113,7 @@
      public MinecraftServer(File p_i45281_1_, Proxy p_i45281_2_)
      {
          mcServer = this;
-@@ -160,18 +220,83 @@
+@@ -160,18 +219,68 @@
          this.commandManager = new ServerCommandManager();
          this.anvilConverterForAnvilFile = new AnvilSaveConverter(p_i45281_1_);
          this.field_147143_S = (new YggdrasilAuthenticationService(p_i45281_2_, UUID.randomUUID().toString())).createMinecraftSessionService();
@@ -165,21 +164,6 @@
 +        za.co.mcportcentral.MCPCHooks.enableThreadContentionMonitoring();
 +        Runtime.getRuntime().addShutdownHook(new org.bukkit.craftbukkit.util.ServerShutdownThread(this));
 +        primaryThread = new Thread(this, "Server thread"); // Moved from main
-+        // MCPC+ start
-+        try
-+        {
-+            // Are we in a 'decompiled' environment?
-+            byte[] bs = ((net.minecraft.launchwrapper.LaunchClassLoader)this.getClass().getClassLoader()).getClassBytes("net.minecraft.world.World");
-+            if (bs != null)
-+            {
-+                FMLRelaunchLog.info("Managed to load a deobfuscated Minecraft name- we are in a deobfuscated environment. Skipping runtime deobfuscation");
-+                deobfuscatedEnvironment = true;
-+            }
-+        }
-+        catch (IOException e1)
-+        {
-+        }
-+        // MCPC+ end
 +    }
 +
 +    public abstract PropertyManager getPropertyManager();
@@ -206,7 +190,7 @@
      protected void convertMapIfNeeded(String par1Str)
      {
          if (this.getActiveAnvilConverter().isOldMapFormat(par1Str))
-@@ -219,31 +344,92 @@
+@@ -219,31 +328,92 @@
  
      protected void loadAllWorlds(String par1Str, String par2Str, long par3, WorldType par5WorldType, String par6Str)
      {
@@ -314,7 +298,7 @@
              world.addWorldAccess(new WorldManager(this, world));
  
              if (!this.isSinglePlayer())
-@@ -251,12 +437,31 @@
+@@ -251,12 +421,31 @@
                  world.getWorldInfo().setGameType(this.getGameType());
              }
  
@@ -349,7 +333,7 @@
      }
  
      protected void initialWorldChunkLoad()
-@@ -268,9 +473,12 @@
+@@ -268,9 +457,12 @@
          int i = 0;
          this.setUserMessage("menu.generatingTerrain");
          byte b0 = 0;
@@ -362,7 +346,7 @@
          long j = getSystemTimeMillis();
  
          for (int k = -192; k <= 192 && this.isServerRunning(); k += 16)
-@@ -289,7 +497,8 @@
+@@ -289,7 +481,8 @@
                  worldserver.theChunkProviderServer.loadChunk(chunkcoordinates.posX + k >> 4, chunkcoordinates.posZ + l >> 4);
              }
          }
@@ -372,7 +356,7 @@
          this.clearCurrentTask();
      }
  
-@@ -317,20 +526,18 @@
+@@ -317,20 +510,18 @@
      {
          this.currentTask = null;
          this.percentDone = 0;
@@ -398,7 +382,7 @@
  
                  if (worldserver != null)
                  {
-@@ -339,14 +546,11 @@
+@@ -339,14 +530,11 @@
                          field_147145_h.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/" + worldserver.provider.getDimensionName());
                      }
  
@@ -418,7 +402,7 @@
                  }
              }
          }
-@@ -359,6 +563,14 @@
+@@ -359,6 +547,14 @@
          {
              field_147145_h.info("Stopping server");
  
@@ -433,7 +417,7 @@
              if (this.func_147137_ag() != null)
              {
                  this.func_147137_ag().func_151268_b();
-@@ -372,7 +584,14 @@
+@@ -372,7 +568,14 @@
              }
  
              field_147145_h.info("Saving worlds");
@@ -449,7 +433,7 @@
  
              for (int i = 0; i < this.worldServers.length; ++i)
              {
-@@ -412,50 +631,34 @@
+@@ -412,50 +615,34 @@
              if (this.startServer())
              {
                  FMLCommonHandler.instance().handleServerStarted();
@@ -519,7 +503,7 @@
                  FMLCommonHandler.instance().handleServerStopping();
              }
              else
-@@ -466,6 +669,14 @@
+@@ -466,6 +653,14 @@
          catch (Throwable throwable1)
          {
              field_147145_h.error("Encountered an unexpected exception", throwable1);
@@ -534,7 +518,7 @@
              CrashReport crashreport = null;
  
              if (throwable1 instanceof ReportedException)
-@@ -492,6 +703,7 @@
+@@ -492,6 +687,7 @@
          }
          finally
          {
@@ -542,7 +526,7 @@
              try
              {
                  if (FMLCommonHandler.instance().shouldServerBeKilledQuietly())
-@@ -507,6 +719,16 @@
+@@ -507,6 +703,16 @@
              }
              finally
              {
@@ -559,7 +543,7 @@
                  FMLCommonHandler.instance().handleServerStopped();
                  this.serverStopped = true;
                  this.systemExitNow();
-@@ -554,7 +776,9 @@
+@@ -554,7 +760,9 @@
      {
          long i = System.nanoTime();
          AxisAlignedBB.getAABBPool().cleanPool();
@@ -569,7 +553,7 @@
          ++this.tickCounter;
  
          if (this.startProfiling)
-@@ -583,11 +807,18 @@
+@@ -583,11 +791,18 @@
              this.field_147147_p.func_151318_b().func_151330_a(agameprofile);
          }
  
@@ -590,7 +574,7 @@
              this.theProfiler.endSection();
          }
  
-@@ -596,24 +827,51 @@
+@@ -596,24 +811,51 @@
          this.theProfiler.endSection();
          this.theProfiler.startSection("snooper");
  
@@ -644,7 +628,7 @@
          int i;
  
          Integer[] ids = DimensionManager.getIDs(this.tickCounter % 200 == 0);
-@@ -622,20 +880,21 @@
+@@ -622,20 +864,21 @@
              int id = ids[x];
              long j = System.nanoTime();
  
@@ -669,7 +653,7 @@
  
                  this.theProfiler.startSection("tick");
                  FMLCommonHandler.instance().onPreWorldTick(worldserver);
-@@ -666,10 +925,12 @@
+@@ -666,10 +909,12 @@
                  FMLCommonHandler.instance().onPostWorldTick(worldserver);
                  this.theProfiler.endSection();
                  this.theProfiler.startSection("tracker");
@@ -683,7 +667,7 @@
  
              worldTickTimes.get(id)[this.tickCounter % 100] = System.nanoTime() - j;
          }
-@@ -677,16 +938,22 @@
+@@ -677,16 +922,22 @@
          this.theProfiler.endStartSection("dim_unloading");
          DimensionManager.unloadWorlds(worldTickTimes);
          this.theProfiler.endStartSection("connection");
@@ -706,7 +690,7 @@
          this.theProfiler.endSection();
      }
  
-@@ -722,6 +989,13 @@
+@@ -722,6 +973,13 @@
      // JAVADOC METHOD $$ func_71218_a
      public WorldServer worldServerForDimension(int par1)
      {
@@ -720,7 +704,7 @@
          WorldServer ret = DimensionManager.getWorld(par1);
          if (ret == null)
          {
-@@ -808,7 +1082,7 @@
+@@ -808,7 +1066,7 @@
      // JAVADOC METHOD $$ func_71248_a
      public List getPossibleCompletions(ICommandSender par1ICommandSender, String par2Str)
      {
@@ -729,7 +713,7 @@
  
          if (par2Str.startsWith("/"))
          {
-@@ -834,8 +1108,6 @@
+@@ -834,8 +1092,6 @@
                      }
                  }
              }
@@ -738,7 +722,7 @@
          }
          else
          {
-@@ -853,9 +1125,10 @@
+@@ -853,9 +1109,10 @@
                      arraylist.add(s2);
                  }
              }
@@ -751,7 +735,7 @@
      }
  
      // JAVADOC METHOD $$ func_71276_C
-@@ -1069,7 +1342,7 @@
+@@ -1069,7 +1326,7 @@
  
      public boolean isServerInOnlineMode()
      {
@@ -760,7 +744,7 @@
      }
  
      public void setOnlineMode(boolean par1)
-@@ -1161,7 +1434,7 @@
+@@ -1161,7 +1418,7 @@
  
      public NetworkSystem func_147137_ag()
      {
@@ -769,7 +753,7 @@
      }
  
      @SideOnly(Side.CLIENT)
-@@ -1292,8 +1565,11 @@
+@@ -1292,8 +1549,11 @@
      {
          Bootstrap.func_151354_b();
  
@@ -781,7 +765,7 @@
              boolean flag = !GraphicsEnvironment.isHeadless();
              String s = null;
              String s1 = ".";
-@@ -1389,16 +1665,32 @@
+@@ -1389,16 +1649,32 @@
              {
                  dedicatedserver.func_120011_ar();
              }
@@ -820,7 +804,7 @@
          }
          catch (Exception exception)
          {
-@@ -1406,6 +1698,156 @@
+@@ -1406,6 +1682,156 @@
          }
      }
  
@@ -977,7 +961,7 @@
      // JAVADOC METHOD $$ func_71244_g
      @SideOnly(Side.SERVER)
      public void logInfo(String par1Str)
-@@ -1434,19 +1876,77 @@
+@@ -1434,19 +1860,77 @@
          return this.motd;
      }
  
@@ -1061,7 +1045,7 @@
      }
  
      // JAVADOC METHOD $$ func_71239_B
-@@ -1502,4 +2002,11 @@
+@@ -1502,4 +1986,11 @@
      {
          this.isGamemodeForced = par1;
      }

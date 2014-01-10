@@ -8,18 +8,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import cpw.mods.fml.relauncher.FMLRelaunchLog;
 import cpw.mods.fml.relauncher.Side;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 
 public class MCPCUtils {
+    private static boolean deobfuscated = false;
 
     public static boolean isOverridingUpdateEntity(Class<? extends TileEntity> c) 
     {
         Class clazz = null;
         String method = "func_145845_h";
-        if (MinecraftServer.deobfuscatedEnvironment)
+        if (deobfuscatedEnvironment())
             method = "canUpdate";
         try {
             clazz = c.getMethod(method).getDeclaringClass();  // updateEntity
@@ -107,5 +109,23 @@ public class MCPCUtils {
             else result = false;
         }
         return result;
+    }
+
+    public static boolean deobfuscatedEnvironment()
+    {
+        try
+        {
+            // Are we in a 'decompiled' environment?
+            byte[] bs = ((net.minecraft.launchwrapper.LaunchClassLoader)MinecraftServer.getServer().getClass().getClassLoader()).getClassBytes("net.minecraft.world.World");
+            if (bs != null)
+            {
+                FMLRelaunchLog.info("Managed to load a deobfuscated Minecraft name- we are in a deobfuscated environment. Skipping runtime deobfuscation");
+                deobfuscated = true;
+            }
+        }
+        catch (IOException e1)
+        {
+        }
+        return deobfuscated;
     }
 }

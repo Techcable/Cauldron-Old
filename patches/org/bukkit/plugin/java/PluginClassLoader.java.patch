@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/org/bukkit/plugin/java/PluginClassLoader.java
 +++ ../src-work/minecraft/org/bukkit/plugin/java/PluginClassLoader.java
-@@ -1,5 +1,20 @@
+@@ -1,5 +1,21 @@
  package org.bukkit.plugin.java;
  
 +// MCPC+ start
@@ -16,12 +16,13 @@
 +import java.security.CodeSource;
 +import java.util.concurrent.*;
 +import za.co.mcportcentral.MCPCConfig;
++import za.co.mcportcentral.MCPCUtils;
 +// MCPC+ end
 +
  import java.net.URL;
  import java.net.URLClassLoader;
  import java.util.HashMap;
-@@ -15,9 +30,39 @@
+@@ -15,9 +31,33 @@
   */
  public class PluginClassLoader extends URLClassLoader {
      private final JavaPluginLoader loader;
@@ -30,29 +31,23 @@
      final boolean extended = this.getClass() != PluginClassLoader.class;
 +    // MCPC+ start
 +    private JarRemapper remapper;     // class remapper for this plugin, or null
-+    private RemapperPreprocessor remapperPreprocessor; // secondary; for inheritance & remapping reflection
++    private RemapperProcessor remapperProcessor; // secondary; for inheritance & remapping reflection
 +    private boolean debug;            // classloader debugging
  
 +    private static ConcurrentMap<Integer,JarMapping> jarMappings = new ConcurrentHashMap<Integer, JarMapping>();
 +    private static final int F_USE_GUAVA10      = 1 << 1;
 +    private static final int F_GLOBAL_INHERIT   = 1 << 2;
 +    private static final int F_REMAP_OBCPRE     = 1 << 3;
-+    private static final int F_REMAP_NMS146     = 1 << 4;
-+    private static final int F_REMAP_OBC146     = 1 << 5;
-+    private static final int F_REMAP_NMS147     = 1 << 6;
-+    private static final int F_REMAP_NMS150     = 1 << 7;
-+    private static final int F_REMAP_NMS151     = 1 << 8;
-+    private static final int F_REMAP_OBC147     = 1 << 9;
-+    private static final int F_REMAP_OBC150     = 1 << 10;
-+    private static final int F_REMAP_NMS152     = 1 << 11;
-+    private static final int F_REMAP_OBC151     = 1 << 12;
-+    private static final int F_REMAP_OBC152     = 1 << 13;
-+    private static final int F_REMAP_NMS161     = 1 << 14;
-+    private static final int F_REMAP_NMS162     = 1 << 15;
-+    private static final int F_REMAP_NMS164     = 1 << 16;
-+    private static final int F_REMAP_OBC161     = 1 << 17;
-+    private static final int F_REMAP_OBC162     = 1 << 18;
-+    private static final int F_REMAP_OBC164     = 1 << 19;
++    private static final int F_REMAP_NMS152     = 1 << 4;
++    private static final int F_REMAP_NMS161     = 1 << 5;
++    private static final int F_REMAP_NMS162     = 1 << 6;
++    private static final int F_REMAP_NMS164     = 1 << 7;
++    private static final int F_REMAP_NMS172     = 1 << 8;
++    private static final int F_REMAP_OBC152     = 1 << 9;
++    private static final int F_REMAP_OBC161     = 1 << 10;
++    private static final int F_REMAP_OBC162     = 1 << 11;
++    private static final int F_REMAP_OBC164     = 1 << 12;
++    private static final int F_REMAP_OBC172     = 1 << 13;
 +    private static final int F_REMAP_NMSPRE_MASK= 0xfff00000;  // "unversioned" NMS plugin version
 +
 +    // This trick bypasses Maven Shade's package rewriting when using String literals [same trick in jline]
@@ -62,7 +57,7 @@
      /**
       * Internal class not intended to be exposed
       */
-@@ -35,12 +80,148 @@
+@@ -35,12 +75,120 @@
          }
      }
  
@@ -82,23 +77,17 @@
 +        boolean useCustomClassLoader = MCPCConfig.getBoolean("plugin-settings.default.custom-class-loader", true);
 +        debug = MCPCConfig.getBoolean("plugin-settings.default.debug", false);
 +        boolean useGuava10 = MCPCConfig.getBoolean("plugin-settings.default.use-guava10", true);
++        boolean remapNMS172 = MCPCConfig.getBoolean("plugin-settings.default.remap-nms-v1_7_R1", true);
 +        boolean remapNMS164 = MCPCConfig.getBoolean("plugin-settings.default.remap-nms-v1_6_R3", true);
 +        boolean remapNMS162 = MCPCConfig.getBoolean("plugin-settings.default.remap-nms-v1_6_R2", true);
 +        boolean remapNMS161 = MCPCConfig.getBoolean("plugin-settings.default.remap-nms-v1_6_R1", true);
 +        boolean remapNMS152 = MCPCConfig.getBoolean("plugin-settings.default.remap-nms-v1_5_R3", true);
-+        boolean remapNMS151 = MCPCConfig.getBoolean("plugin-settings.default.remap-nms-v1_5_R2", true);
-+        boolean remapNMS150 = MCPCConfig.getBoolean("plugin-settings.default.remap-nms-v1_5_R1", true);
-+        boolean remapNMS147 = MCPCConfig.getBoolean("plugin-settings.default.remap-nms-v1_4_R1", true);
-+        boolean remapNMS146 = MCPCConfig.getBoolean("plugin-settings.default.remap-nms-v1_4_6", true);
 +        String remapNMSPre = MCPCConfig.getString("plugin-settings.default.remap-nms-pre", "false");
++        boolean remapOBC172 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_7_R1", false);
 +        boolean remapOBC164 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R3", false);
 +        boolean remapOBC162 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R2", false);
 +        boolean remapOBC161 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R1", false);
 +        boolean remapOBC152 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_5_R3", true);
-+        boolean remapOBC151 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_5_R2", true);
-+        boolean remapOBC150 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_5_R1", true);
-+        boolean remapOBC147 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_4_R1", false);
-+        boolean remapOBC146 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_4_6", false);
 +        boolean remapOBCPre = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-pre", false);
 +        boolean globalInherit = MCPCConfig.getBoolean("plugin-settings.default.global-inheritance", true);
 +        boolean pluginInherit = MCPCConfig.getBoolean("plugin-settings.default.plugin-inheritance", true);
@@ -110,23 +99,16 @@
 +        useCustomClassLoader = MCPCConfig.getBoolean("plugin-settings."+pluginName+".custom-class-loader", useCustomClassLoader, false);
 +        debug = MCPCConfig.getBoolean("plugin-settings."+pluginName+".debug", debug, false);
 +        useGuava10 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".use-guava10", useGuava10, false);
++        remapNMS172 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_7_R1", remapNMS172, false);
 +        remapNMS164 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_6_R3", remapNMS164, false);
 +        remapNMS162 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_6_R2", remapNMS162, false);
 +        remapNMS161 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_6_R1", remapNMS161, false);
 +        remapNMS152 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_5_R3", remapNMS152, false);
-+        remapNMS151 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_5_R2", remapNMS151, false);
-+        remapNMS150 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_5_R1", remapNMS150, false);
-+        remapNMS147 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_4_R1", remapNMS147, false);
-+        remapNMS146 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_4_6", remapNMS146, false);
 +        remapNMSPre = MCPCConfig.getString("plugin-settings."+pluginName+".remap-nms-pre", remapNMSPre, false);
 +        remapOBC164 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_6_R3", remapOBC164, false);
 +        remapOBC162 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_6_R2", remapOBC162, false);
 +        remapOBC161 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_6_R1", remapOBC161, false);
 +        remapOBC152 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_5_R3", remapOBC152, false);
-+        remapOBC151 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_5_R2", remapOBC151, false);
-+        remapOBC150 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_5_R1", remapOBC150, false);
-+        remapOBC147 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_4_R1", remapOBC147, false);
-+        remapOBC146 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_4_6", remapOBC146, false);
 +        remapOBCPre = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-pre", remapOBCPre, false);
 +        globalInherit = MCPCConfig.getBoolean("plugin-settings."+pluginName+".global-inheritance", globalInherit, false);
 +        pluginInherit = MCPCConfig.getBoolean("plugin-settings."+pluginName+".plugin-inheritance", pluginInherit, false);
@@ -145,42 +127,27 @@
 +
 +        int flags = 0;
 +        if (useGuava10) flags |= F_USE_GUAVA10;
++        if (remapNMS172) flags |= F_REMAP_NMS172;
 +        if (remapNMS164) flags |= F_REMAP_NMS164;
 +        if (remapNMS162) flags |= F_REMAP_NMS162;
 +        if (remapNMS161) flags |= F_REMAP_NMS161;
 +        if (remapNMS152) flags |= F_REMAP_NMS152;
-+        if (remapNMS151) flags |= F_REMAP_NMS151;
-+        if (remapNMS150) flags |= F_REMAP_NMS150;
-+        if (remapNMS147) flags |= F_REMAP_NMS147;
-+        if (remapNMS146) flags |= F_REMAP_NMS146;
++        //if (remapNMS146) flags |= F_REMAP_NMS146;
 +        if (!remapNMSPre.equals("false")) {
-+            if      (remapNMSPre.equals("1.6.4")) flags |= 0x16400000;
++            if      (remapNMSPre.equals("1.7.2")) flags |= 0x17200000;
++            else if (remapNMSPre.equals("1.6.4")) flags |= 0x16400000;
 +            else if (remapNMSPre.equals("1.6.2")) flags |= 0x16200000;
 +            else if (remapNMSPre.equals("1.6.1")) flags |= 0x16100000;
 +            else if (remapNMSPre.equals("1.5.2")) flags |= 0x15200000;
-+            else if (remapNMSPre.equals("1.5.1")) flags |= 0x15100000;
-+            else if (remapNMSPre.equals("1.5.0")) flags |= 0x15000000;
-+            else if (remapNMSPre.equals("1.5"))   flags |= 0x15000000;
-+            else if (remapNMSPre.equals("1.4.7")) flags |= 0x14700000;
-+            else if (remapNMSPre.equals("1.4.6")) flags |= 0x14600000;
-+            else if (remapNMSPre.equals("1.4.5")) flags |= 0x14500000;
-+            else if (remapNMSPre.equals("1.4.4")) flags |= 0x14400000;
-+            else if (remapNMSPre.equals("1.4.2")) flags |= 0x14200000;
-+            else if (remapNMSPre.equals("1.3.2")) flags |= 0x13200000;
-+            else if (remapNMSPre.equals("1.3.1")) flags |= 0x13100000;
-+            else if (remapNMSPre.equals("1.2.5")) flags |= 0x12500000;
 +            else {
 +                System.out.println("Unsupported nms-remap-pre version '"+remapNMSPre+"', disabling");
 +            }
 +        }
++        if (remapOBC172) flags |= F_REMAP_OBC172;
 +        if (remapOBC164) flags |= F_REMAP_OBC164;
 +        if (remapOBC162) flags |= F_REMAP_OBC162;
 +        if (remapOBC161) flags |= F_REMAP_OBC161;
 +        if (remapOBC152) flags |= F_REMAP_OBC152;
-+        if (remapOBC151) flags |= F_REMAP_OBC151;
-+        if (remapOBC150) flags |= F_REMAP_OBC150;
-+        if (remapOBC147) flags |= F_REMAP_OBC147;
-+        if (remapOBC146) flags |= F_REMAP_OBC146;
 +        if (remapOBCPre) flags |= F_REMAP_OBCPRE;
 +        if (globalInherit) flags |= F_GLOBAL_INHERIT;
 +
@@ -199,21 +166,21 @@
 +        remapper = new JarRemapper(jarMapping);
 +
 +        if (pluginInherit || reflectFields || reflectClass) {
-+            remapperPreprocessor = new RemapperPreprocessor(
++            remapperProcessor = new RemapperProcessor(
 +                    pluginInherit ? loader.getGlobalInheritanceMap() : null,
 +                    (reflectFields || reflectClass) ? jarMapping : null);
 +
-+            remapperPreprocessor.setRemapReflectField(reflectFields);
-+            remapperPreprocessor.setRemapReflectClass(reflectClass);
-+            remapperPreprocessor.debug = debug;
++            remapperProcessor.setRemapReflectField(reflectFields);
++            remapperProcessor.setRemapReflectClass(reflectClass);
++            remapperProcessor.debug = debug;
 +        } else {
-+            remapperPreprocessor = null;
++            remapperProcessor = null;
 +        }
 +        // MCPC+ end
      }
  
      @Override
-@@ -65,48 +246,300 @@
+@@ -65,48 +213,266 @@
          return findClass0(name, checkGlobal);
      }
  
@@ -240,8 +207,9 @@
 +    public static String getNativeVersion() {
 +        // see https://github.com/mbax/VanishNoPacket/blob/master/src/main/java/org/kitteh/vanish/compat/NMSManager.java
 +        final String packageName = org.bukkit.craftbukkit.CraftServer.class.getPackage().getName();
-+
-+        return packageName.substring(packageName.lastIndexOf('.')  + 1);
++        //if (MCPCUtils.deobfuscatedEnvironment())
++            return "v1_7_R1";
++        //else return packageName.substring(packageName.lastIndexOf('.')  + 1);
 +    }
 +
 +    /**
@@ -284,12 +252,16 @@
 +        try {
 +
 +            if ((flags & F_USE_GUAVA10) != 0) {
-+                // Guava 10 is part of the Bukkit API, so plugins can use it, but FML includes Guava 12
++                // Guava 10 is part of the Bukkit API, so plugins can use it, but FML includes Guava 15
 +                // To resolve this conflict, remap plugin usages to Guava 10 in a separate package
 +                // Most plugins should keep this enabled, unless they want a newer Guava
 +                jarMapping.packages.put("com/google/common", "guava10/com/google/common");
 +            }
 +            jarMapping.packages.put(org_bukkit_craftbukkit + "/libs/com/google/gson", "com/google/gson"); // Handle Gson being in a "normal" place
++
++            if ((flags & F_REMAP_NMS172) != 0) {
++                loadNmsMappings(jarMapping, "v1_7_R1");
++            }
 +
 +            if ((flags & F_REMAP_NMS164) != 0) {
 +                loadNmsMappings(jarMapping, "v1_6_R3");
@@ -307,21 +279,8 @@
 +                loadNmsMappings(jarMapping, "v1_5_R3");
 +            }
 +
-+            if ((flags & F_REMAP_NMS151) != 0) {
-+                loadNmsMappings(jarMapping, "v1_5_R2");
-+            }
-+
-+            if ((flags & F_REMAP_NMS150) != 0) {
-+                loadNmsMappings(jarMapping, "v1_5_R1");
-+            }
-+
-+
-+            if ((flags & F_REMAP_NMS147) != 0) {
-+                loadNmsMappings(jarMapping, "v1_4_R1");
-+            }
-+
-+            if ((flags & F_REMAP_NMS146) != 0) {
-+                loadNmsMappings(jarMapping, "v1_4_6");
++            if ((flags & F_REMAP_OBC172) != 0) {
++                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R1", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
 +
 +            if ((flags & F_REMAP_OBC164) != 0) {
@@ -340,24 +299,6 @@
 +                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_5_R3", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
 +
-+            if ((flags & F_REMAP_OBC151) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_5_R2", org_bukkit_craftbukkit+"/"+getNativeVersion());
-+            }
-+
-+            if ((flags & F_REMAP_OBC150) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_5_R1", org_bukkit_craftbukkit+"/"+getNativeVersion());
-+            }
-+
-+            if ((flags & F_REMAP_OBC147) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_4_R1", org_bukkit_craftbukkit+"/"+getNativeVersion());
-+            }
-+
-+            if ((flags & F_REMAP_OBC146) != 0) {
-+                // Remap OBC v1_4_6  to v1_4_R1 (or current) for 1.4.6 plugin compatibility
-+                // Note this should only be mapped statically - since plugins MAY use reflection to determine the OBC version
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_4_6", org_bukkit_craftbukkit+"/"+getNativeVersion());
-+            }
-+
 +            if ((flags & F_REMAP_OBCPRE) != 0) {
 +                // enabling unversioned obc not currently compatible with versioned obc plugins (overmapped) -
 +                // admins should enable remap-obc-pre on a per-plugin basis, as needed
@@ -372,19 +313,11 @@
 +                String filename;
 +                switch (flags & F_REMAP_NMSPRE_MASK)
 +                {
++                    case 0x01720000: filename = "mappings/v1_7_R1/cb2numpkg.srg"; break;
 +                    case 0x01640000: filename = "mappings/v1_6_R3/cb2numpkg.srg"; break;
 +                    case 0x01620000: filename = "mappings/v1_6_R2/cb2numpkg.srg"; break;
 +                    case 0x01610000: filename = "mappings/v1_6_R1/cb2numpkg.srg"; break;
 +                    case 0x01510000: filename = "mappings/v1_5_R2/cb2numpkg.srg"; break;
-+                    case 0x01500000: filename = "mappings/v1_5_R1/cb2numpkg.srg"; break;
-+                    case 0x01470000: filename = "mappings/v1_4_R1/cb2numpkg.srg"; break;
-+                    case 0x01460000: filename = "mappings/v1_4_6/cb2numpkg.srg"; break;
-+                    case 0x01450000: filename = "mappings/v1_4_5/cb2numpkg.srg"; break;
-+                    case 0x01440000: filename = "mappings/v1_4_4/cb2numpkg.srg"; break;
-+                    case 0x01420000: filename = "mappings/v1_4_2/cb2numpkg.srg"; break;
-+                    case 0x01320000: filename = "mappings/v1_3_2/cb2numpkg.srg"; break;
-+                    case 0x01310000: filename = "mappings/v1_3_1/cb2numpkg.srg"; break;
-+                    case 0x01250000: filename = "mappings/v1_2_5/cb2numpkg.srg"; break;
 +                    default: throw new IllegalArgumentException("Invalid unversioned mapping flags: "+Integer.toHexString(flags & F_REMAP_NMSPRE_MASK)+" in "+Integer.toHexString(flags));
 +                }
 +
@@ -483,9 +416,9 @@
 +                    byte[] bytecode = null;
 +
 +                    // Reflection remap and inheritance extract
-+                    if (remapperPreprocessor != null) {
++                    if (remapperProcessor != null) {
 +                        // add to inheritance map
-+                        bytecode = remapperPreprocessor.preprocess(stream);
++                        bytecode = remapperProcessor.process(stream);
 +                        if (bytecode == null) stream = url.openStream();
 +                    }
 +
