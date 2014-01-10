@@ -29,10 +29,9 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 
-import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.SpigotTimings;
  // MCPC+ start
-import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraftforge.common.util.FakePlayer;
 // MCPC+ end
 
@@ -53,12 +52,16 @@ public class ActivationRange
      */
     public static byte initializeEntityActivationType(Entity entity)
     {
-        if ( entity instanceof EntityMob || entity instanceof EntitySlime )
+        Chunk chunk = null;
+        // MCPC+ start - account for entities that dont extend EntityMob, EntityAmbientCreature, EntityCreature
+        if ( entity instanceof EntityMob || entity instanceof EntitySlime || entity.isCreatureType(EnumCreatureType.monster, false)) // MCPC+ - account for entities that dont extend EntityMob
         {
             return 1; // Monster
-        } else if ( entity instanceof EntityCreature || entity instanceof EntityAmbientCreature )
+        } else if ( entity instanceof EntityCreature || entity instanceof EntityAmbientCreature || entity.isCreatureType(EnumCreatureType.creature, false) 
+                 || entity.isCreatureType(EnumCreatureType.waterCreature, false) || entity.isCreatureType(EnumCreatureType.ambient, false))
         {
             return 2; // Animal
+        // MCPC+ end
         } else
         {
             return 3; // Misc
@@ -77,7 +80,7 @@ public class ActivationRange
         if ( ( entity.activationType == 3 && config.miscActivationRange == 0 )
                 || ( entity.activationType == 2 && config.animalActivationRange == 0 )
                 || ( entity.activationType == 1 && config.monsterActivationRange == 0 )
-                || entity instanceof EntityPlayer
+                || (entity instanceof EntityPlayer && !(entity instanceof FakePlayer)) // MCPC+
                 || entity instanceof EntityThrowable
                 || entity instanceof EntityDragon
                 || entity instanceof EntityDragonPart
@@ -86,7 +89,12 @@ public class ActivationRange
                 || entity instanceof EntityWeatherEffect
                 || entity instanceof EntityTNTPrimed
                 || entity instanceof EntityEnderCrystal
-                || entity instanceof EntityFireworkRocket )
+                || entity instanceof EntityFireworkRocket
+                || entity instanceof EntityVillager
+                // MCPC+ start - force ticks for entities with superclass of Entity and not a creature/monster
+                || (entity.getClass().getSuperclass() == Entity.class && !entity.isCreatureType(EnumCreatureType.creature, false)
+                && !entity.isCreatureType(EnumCreatureType.ambient, false) && !entity.isCreatureType(EnumCreatureType.monster, false)
+                && !entity.isCreatureType(EnumCreatureType.waterCreature, false)))
         {
             return true;
         }
@@ -269,14 +277,8 @@ public class ActivationRange
     public static boolean checkIfActive(Entity entity)
     {
         SpigotTimings.checkIfActiveTimer.startTiming();
-        if (entity instanceof EntityPlayer && !(entity instanceof FakePlayer)) return true;
         
-        // MCPC+ start - check if entity is in forced chunk and if so, set to active
-        int i = MathHelper.floor_double(entity.posX);
-        int j = MathHelper.floor_double(entity.posZ);
-        boolean isForced = entity.worldObj.getPersistentChunks().containsKey(new ChunkCoordIntPair(i >> 4, j >> 4));
-        boolean isActive = entity.activatedTick >= MinecraftServer.currentTick || entity.defaultActivationState || isForced;
-        // MCPC+ end
+        boolean isActive = entity.activatedTick >= MinecraftServer.currentTick || entity.defaultActivationState;
 
         // Should this entity tick?
         if ( !isActive )
@@ -296,7 +298,7 @@ public class ActivationRange
         {
             isActive = false;
         }
-        // MCPC+ start - disabled, this breaks moving chunkloaders such as AnchorCarts when entering new chunks that are not yet loaded
+
         // Make sure not on edge of unloaded chunk
 
         int x = MathHelper.floor_double( entity.posX );

@@ -482,37 +482,45 @@
              }
  
              this.theProfiler.startSection("cleaning");
-@@ -676,7 +964,28 @@
+@@ -676,7 +964,36 @@
      protected IChunkProvider createChunkProvider()
      {
          IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
 -        this.theChunkProviderServer = new ChunkProviderServer(this, ichunkloader, this.provider.createChunkGenerator());
-+        // CraftBukkit start
-+        org.bukkit.craftbukkit.generator.InternalChunkGenerator gen;
-+
-+        if (this.generator != null)
++        // MCPC+ start - if provider is vanilla, proceed to create a bukkit compatible chunk generator
++        if (this.provider.getClass().toString().length() <= 3 || this.provider.getClass().toString().contains("net.minecraft"))
 +        {
-+            gen = new org.bukkit.craftbukkit.generator.CustomChunkGenerator(this, this.getSeed(), this.generator);
++            // CraftBukkit start
++            org.bukkit.craftbukkit.generator.InternalChunkGenerator gen;
++    
++            if (this.generator != null)
++            {
++                gen = new org.bukkit.craftbukkit.generator.CustomChunkGenerator(this, this.getSeed(), this.generator);
++            }
++            else if (this.provider instanceof WorldProviderHell)
++            {
++                gen = new org.bukkit.craftbukkit.generator.NetherChunkGenerator(this, this.getSeed());
++            }
++            else if (this.provider instanceof WorldProviderEnd)
++            {
++                gen = new org.bukkit.craftbukkit.generator.SkyLandsChunkGenerator(this, this.getSeed());
++            }
++            else
++            {
++                gen = new org.bukkit.craftbukkit.generator.NormalChunkGenerator(this, this.getSeed());
++            }
++            this.theChunkProviderServer = new ChunkProviderServer(this, ichunkloader, gen);
++            // CraftBukkit end
 +        }
-+        else if (this.provider instanceof WorldProviderHell)
++        else // custom provider, load normally for forge compatibility
 +        {
-+            gen = new org.bukkit.craftbukkit.generator.NetherChunkGenerator(this, this.getSeed());
++            this.theChunkProviderServer = new ChunkProviderServer(this, ichunkloader, this.provider.createChunkGenerator());
 +        }
-+        else if (this.provider instanceof WorldProviderEnd)
-+        {
-+            gen = new org.bukkit.craftbukkit.generator.SkyLandsChunkGenerator(this, this.getSeed());
-+        }
-+        else
-+        {
-+            gen = new org.bukkit.craftbukkit.generator.NormalChunkGenerator(this, this.getSeed());
-+        }
-+
-+        this.theChunkProviderServer = new ChunkProviderServer(this, ichunkloader, gen);
-+        // CraftBukkit end
++        // MCPC+ end
          return this.theChunkProviderServer;
      }
  
-@@ -684,29 +993,31 @@
+@@ -684,29 +1001,31 @@
      {
          ArrayList arraylist = new ArrayList();
  
@@ -558,7 +566,7 @@
          return arraylist;
      }
  
-@@ -760,6 +1071,29 @@
+@@ -760,6 +1079,29 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 0;
  
@@ -588,7 +596,7 @@
              if (chunkposition != null)
              {
                  i = chunkposition.field_151329_a;
-@@ -841,7 +1175,7 @@
+@@ -841,7 +1183,7 @@
      }
  
      // JAVADOC METHOD $$ func_104140_m
@@ -597,7 +605,7 @@
      {
          if (this.chunkProvider.canSave())
          {
-@@ -897,6 +1231,15 @@
+@@ -897,6 +1239,15 @@
      // JAVADOC METHOD $$ func_72942_c
      public boolean addWeatherEffect(Entity par1Entity)
      {
@@ -613,7 +621,7 @@
          if (super.addWeatherEffect(par1Entity))
          {
              this.mcServer.getConfigurationManager().func_148541_a(par1Entity.posX, par1Entity.posY, par1Entity.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(par1Entity));
-@@ -917,11 +1260,22 @@
+@@ -917,11 +1268,22 @@
      // JAVADOC METHOD $$ func_72885_a
      public Explosion newExplosion(Entity par1Entity, double par2, double par4, double par6, float par8, boolean par9, boolean par10)
      {
@@ -636,7 +644,7 @@
  
          if (!par10)
          {
-@@ -1002,6 +1356,7 @@
+@@ -1002,6 +1364,7 @@
          boolean flag = this.isRaining();
          super.updateWeather();
  
@@ -644,7 +652,7 @@
          if (this.prevRainingStrength != this.rainingStrength)
          {
              this.mcServer.getConfigurationManager().func_148537_a(new S2BPacketChangeGameState(7, this.rainingStrength), this.provider.dimensionId);
-@@ -1026,6 +1381,20 @@
+@@ -1026,6 +1389,20 @@
              this.mcServer.getConfigurationManager().func_148540_a(new S2BPacketChangeGameState(7, this.rainingStrength));
              this.mcServer.getConfigurationManager().func_148540_a(new S2BPacketChangeGameState(8, this.thunderingStrength));
          }
@@ -665,7 +673,7 @@
      }
  
      // JAVADOC METHOD $$ func_73046_m
-@@ -1070,20 +1439,48 @@
+@@ -1070,20 +1447,48 @@
          }
      }
  

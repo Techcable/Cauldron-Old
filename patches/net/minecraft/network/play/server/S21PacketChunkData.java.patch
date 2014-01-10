@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/network/play/server/S21PacketChunkData.java
 +++ ../src-work/minecraft/net/minecraft/network/play/server/S21PacketChunkData.java
-@@ -37,22 +37,18 @@
+@@ -37,22 +37,17 @@
          this.field_149282_b = p_i45196_1_.zPosition;
          this.field_149279_g = p_i45196_2_;
          S21PacketChunkData.Extracted extracted = func_149269_a(p_i45196_1_, p_i45196_2_, p_i45196_3_);
@@ -10,7 +10,6 @@
 -        this.field_149278_f = extracted.field_150282_a;
 -        this.deflateGate = new Semaphore(1);
 -    }
-+        p_i45196_1_.worldObj.spigotConfig.antiXrayInstance.obfuscateSync(p_i45196_1_.xPosition, p_i45196_1_.zPosition, p_i45196_3_, extracted.field_150282_a, p_i45196_1_.worldObj); // Spigot
  
 -    private void deflate()
 -    {
@@ -29,7 +28,7 @@
          }
          finally
          {
-@@ -118,15 +114,6 @@
+@@ -118,15 +113,6 @@
  
      public void func_148840_b(PacketBuffer p_148840_1_) throws IOException
      {
@@ -45,7 +44,7 @@
          p_148840_1_.writeInt(this.field_149284_a);
          p_148840_1_.writeInt(this.field_149282_b);
          p_148840_1_.writeBoolean(this.field_149279_g);
-@@ -198,8 +185,10 @@
+@@ -198,8 +184,10 @@
              if (aextendedblockstorage[l] != null && (!p_149269_1_ || !aextendedblockstorage[l].isEmpty()) && (p_149269_2_ & 1 << l) != 0)
              {
                  nibblearray = aextendedblockstorage[l].getMetadataArray();
@@ -58,7 +57,7 @@
              }
          }
  
-@@ -208,8 +197,10 @@
+@@ -208,8 +196,10 @@
              if (aextendedblockstorage[l] != null && (!p_149269_1_ || !aextendedblockstorage[l].isEmpty()) && (p_149269_2_ & 1 << l) != 0)
              {
                  nibblearray = aextendedblockstorage[l].getBlocklightArray();
@@ -71,7 +70,7 @@
              }
          }
  
-@@ -220,8 +211,10 @@
+@@ -220,8 +210,10 @@
                  if (aextendedblockstorage[l] != null && (!p_149269_1_ || !aextendedblockstorage[l].isEmpty()) && (p_149269_2_ & 1 << l) != 0)
                  {
                      nibblearray = aextendedblockstorage[l].getSkylightArray();
@@ -84,7 +83,7 @@
                  }
              }
          }
-@@ -233,8 +226,10 @@
+@@ -233,8 +225,10 @@
                  if (aextendedblockstorage[l] != null && (!p_149269_1_ || !aextendedblockstorage[l].isEmpty()) && aextendedblockstorage[l].getBlockMSBArray() != null && (p_149269_2_ & 1 << l) != 0)
                  {
                      nibblearray = aextendedblockstorage[l].getBlockMSBArray();
