@@ -157,12 +157,12 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public String getDisplayName() {
-        return getHandle().cb_displayName;
+        return getHandle().displayName;
     }
 
     @Override
     public void setDisplayName(final String name) {
-        getHandle().cb_displayName = name;
+        getHandle().displayName = name;
     }
 
     @Override
