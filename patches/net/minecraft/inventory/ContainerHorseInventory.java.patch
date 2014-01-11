@@ -1,0 +1,43 @@
+--- ../src-base/minecraft/net/minecraft/inventory/ContainerHorseInventory.java
++++ ../src-work/minecraft/net/minecraft/inventory/ContainerHorseInventory.java
+@@ -7,14 +7,39 @@
+ import net.minecraft.init.Items;
+ import net.minecraft.item.ItemStack;
+ 
++// CraftBukkit start
++import net.minecraft.entity.player.InventoryPlayer;
++import org.bukkit.craftbukkit.inventory.CraftInventory;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
++import org.bukkit.inventory.InventoryView;
++// CraftBukkit end
++
+ public class ContainerHorseInventory extends Container
+ {
+     private IInventory field_111243_a;
+     private EntityHorse theHorse;
+     private static final String __OBFID = "CL_00001751";
+ 
+-    public ContainerHorseInventory(IInventory par1IInventory, final IInventory par2IInventory, final EntityHorse par3EntityHorse)
++    // CraftBukkit start
++    org.bukkit.craftbukkit.inventory.CraftInventoryView bukkitEntity;
++    InventoryPlayer player;
++
++    @Override
++    public InventoryView getBukkitView()
+     {
++        if (bukkitEntity != null)
++        {
++            return bukkitEntity;
++        }
++
++        CraftInventory inventory = new org.bukkit.craftbukkit.inventory.CraftInventoryHorse(this.field_111243_a);
++        return bukkitEntity = new CraftInventoryView(player.player.getBukkitEntity(), inventory, this);
++    }
++
++    public ContainerHorseInventory(IInventory par1IInventory, IInventory par2IInventory, final EntityHorse par3EntityHorse)
++    {
++        player = (InventoryPlayer) par1IInventory;
++        // CraftBukkit end
+         this.field_111243_a = par2IInventory;
+         this.theHorse = par3EntityHorse;
+         byte b0 = 3;

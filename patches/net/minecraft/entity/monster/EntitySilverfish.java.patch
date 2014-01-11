@@ -1,0 +1,39 @@
+--- ../src-base/minecraft/net/minecraft/entity/monster/EntitySilverfish.java
++++ ../src-work/minecraft/net/minecraft/entity/monster/EntitySilverfish.java
+@@ -15,6 +15,8 @@
+ import net.minecraft.world.World;
+ import org.apache.commons.lang3.tuple.ImmutablePair;
+ 
++import org.bukkit.craftbukkit.event.CraftEventFactory; // CraftBukkit
++
+ public class EntitySilverfish extends EntityMob
+ {
+     // JAVADOC FIELD $$ field_70843_d
+@@ -141,6 +143,13 @@
+                             {
+                                 if (this.worldObj.func_147439_a(i + i1, j + l, k + j1) == Blocks.monster_egg)
+                                 {
++                                    // CraftBukkit start
++                                    if (CraftEventFactory.callEntityChangeBlockEvent(this, i + i1, j + l, k + j1, Blocks.air, 0).isCancelled())
++                                    {
++                                        continue;
++                                    }
++
++                                    // CraftBukkit end
+                                     if (!this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing"))
+                                     {
+                                         int k1 = this.worldObj.getBlockMetadata(i + i1, j + l, k + j1);
+@@ -177,6 +186,13 @@
+ 
+                 if (BlockSilverfish.func_150196_a(block))
+                 {
++                    // CraftBukkit start
++                    if (CraftEventFactory.callEntityChangeBlockEvent(this, i + Facing.offsetsXForSide[l1], j + Facing.offsetsYForSide[l1], k + Facing.offsetsZForSide[l1], Blocks.monster_egg, Block.func_149682_b(BlockSilverfish.func_149729_e(i1))).isCancelled())
++                    {
++                        return;
++                    }
++
++                    // CraftBukkit end
+                     this.worldObj.func_147465_d(i + Facing.offsetsXForSide[l1], j + Facing.offsetsYForSide[l1], k + Facing.offsetsZForSide[l1], Blocks.monster_egg, BlockSilverfish.func_150195_a(block, i1), 3);
+                     this.spawnExplosionParticle();
+                     this.setDead();

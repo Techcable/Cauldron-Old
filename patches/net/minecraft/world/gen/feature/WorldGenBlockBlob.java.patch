@@ -1,0 +1,12 @@
+--- ../src-base/minecraft/net/minecraft/world/gen/feature/WorldGenBlockBlob.java
++++ ../src-work/minecraft/net/minecraft/world/gen/feature/WorldGenBlockBlob.java
+@@ -1,6 +1,9 @@
+ package net.minecraft.world.gen.feature;
+ 
+ import java.util.Random;
++
++import org.bukkit.craftbukkit.CraftBlockChangeDelegate;
++
+ import net.minecraft.block.Block;
+ import net.minecraft.init.Blocks;
+ import net.minecraft.world.World;

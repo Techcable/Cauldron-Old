@@ -1,0 +1,295 @@
+--- ../src-base/minecraft/net/minecraft/world/chunk/Chunk.java
++++ ../src-work/minecraft/net/minecraft/world/chunk/Chunk.java
+@@ -36,6 +36,17 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++// CraftBukkit start
++import net.minecraft.block.BlockContainer;
++import org.bukkit.Bukkit;
++// CraftBukkit end
++// Spigot start
++import net.minecraft.entity.EntityLiving;
++import net.minecraft.entity.EnumCreatureType;
++import net.minecraft.entity.player.EntityPlayerMP;
++import net.minecraft.inventory.IInventory;
++// Spigot end
++
+ public class Chunk
+ {
+     private static final Logger field_150817_t = LogManager.getLogger();
+@@ -80,6 +91,8 @@
+     public long inhabitedTime;
+     // JAVADOC FIELD $$ field_76649_t
+     private int queuedLightChecks;
++    public gnu.trove.map.hash.TObjectIntHashMap<Class> entityCount = new gnu.trove.map.hash.TObjectIntHashMap<Class>(); // Spigot (MCPC+ protected -> public)
++    public int lastAccessedTick; // MCPC+ track last time the chunk was accessed
+     private static final String __OBFID = "CL_00000373";
+ 
+     public Chunk(World par1World, int par2, int par3)
+@@ -98,13 +111,23 @@
+ 
+         for (int k = 0; k < this.entityLists.length; ++k)
+         {
+-            this.entityLists[k] = new ArrayList();
++            this.entityLists[k] = new org.bukkit.craftbukkit.util.UnsafeList(); // CraftBukkit - ArrayList -> UnsafeList
+         }
+ 
+         Arrays.fill(this.precipitationHeightMap, -999);
+         Arrays.fill(this.blockBiomeArray, (byte) - 1);
++
++        // CraftBukkit start
++        if (!(this instanceof EmptyChunk))
++        {
++            this.bukkitChunk = new org.bukkit.craftbukkit.CraftChunk(this);
++        }
+     }
+ 
++    public org.bukkit.Chunk bukkitChunk;
++    public boolean mustSave;
++    // CraftBukkit end
++
+     public Chunk(World p_i45446_1_, Block[] p_i45446_2_, int p_i45446_3_, int p_i45446_4_)
+     {
+         this(p_i45446_1_, p_i45446_3_, p_i45446_4_);
+@@ -618,8 +641,14 @@
+                 block1.func_149725_f(this.worldObj, l1, p_150807_2_, i2, k1);
+             }
+ 
+-            extendedblockstorage.func_150818_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_4_);
++            // CraftBukkit start - Delay removing containers until after they're cleaned up
++            if (!(block1 instanceof ITileEntityProvider))
++            {
++                extendedblockstorage.func_150818_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_4_);
++            }
+ 
++            // CraftBukkit end
++
+             if (!this.worldObj.isRemote)
+             {
+                 block1.func_149749_a(this.worldObj, l1, p_150807_2_, i2, block1, k1);
+@@ -633,6 +662,14 @@
+                 }
+             }
+ 
++            // CraftBukkit start - Remove containers now after cleanup
++            if (block1 instanceof ITileEntityProvider)
++            {
++                extendedblockstorage.func_150818_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_4_);
++            }
++
++            // CraftBukkit end
++
+             if (extendedblockstorage.func_150819_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_) != p_150807_4_)
+             {
+                 return false;
+@@ -802,8 +839,12 @@
+ 
+         if (i != this.xPosition || j != this.zPosition)
+         {
+-            field_150817_t.error("Wrong location! " + par1Entity);
+-            Thread.dumpStack();
++            // CraftBukkit start
++            Bukkit.getLogger().warning("Wrong location for " + par1Entity + " in world '" + worldObj.getWorld().getName() + "'!");
++            // t.error("Wrong location! " + entity);
++            // Thread.dumpStack();
++            Bukkit.getLogger().warning("Entity is at " + par1Entity.posX + "," + par1Entity.posZ + " (chunk " + i + "," + j + ") but was stored in chunk " + this.xPosition + "," + this.zPosition);
++            // CraftBukkit end
+         }
+ 
+         int k = MathHelper.floor_double(par1Entity.posY / 16.0D);
+@@ -824,6 +865,28 @@
+         par1Entity.chunkCoordY = k;
+         par1Entity.chunkCoordZ = this.zPosition;
+         this.entityLists[k].add(par1Entity);
++
++        // Spigot start - increment creature type count
++        // Keep this synced up with World.a(Class)
++        if (par1Entity instanceof EntityLiving)
++        {
++            EntityLiving entityliving = (EntityLiving) par1Entity;
++
++            if (entityliving.canDespawn_CB() && entityliving.isNoDespawnRequired())
++            {
++                return;
++            }
++        }
++
++        for (EnumCreatureType creatureType : EnumCreatureType.values())
++        {
++            if (creatureType.getCreatureClass().isAssignableFrom(par1Entity.getClass()))
++            {
++                this.entityCount.adjustOrPutValue(creatureType.getCreatureClass(), 1, 1);
++            }
++        }
++
++        // Spigot end
+     }
+ 
+     // JAVADOC METHOD $$ func_76622_b
+@@ -846,6 +909,28 @@
+         }
+ 
+         this.entityLists[par2].remove(par1Entity);
++
++        // Spigot start - decrement creature type count
++        // Keep this synced up with World.a(Class)
++        if (par1Entity instanceof EntityLiving)
++        {
++            EntityLiving entityliving = (EntityLiving) par1Entity;
++
++            if (entityliving.canDespawn_CB() && entityliving.isNoDespawnRequired())
++            {
++                return;
++            }
++        }
++
++        for (EnumCreatureType creatureType : EnumCreatureType.values())
++        {
++            if (creatureType.getCreatureClass().isAssignableFrom(par1Entity.getClass()))
++            {
++                this.entityCount.adjustValue(creatureType.getCreatureClass(), -1);
++            }
++        }
++
++        // Spigot end
+     }
+ 
+     // JAVADOC METHOD $$ func_76619_d
+@@ -913,7 +998,16 @@
+ 
+             p_150812_4_.func_145829_t();
+             this.field_150816_i.put(chunkposition, p_150812_4_);
++            // CraftBukkit start
+         }
++        else
++        {
++            System.out.println("Attempted to place a tile entity (" + p_150812_4_ + ") at " + p_150812_4_.field_145851_c + "," + p_150812_4_.field_145848_d + "," + p_150812_4_.field_145849_e
++                               + " (" + org.bukkit.Material.getMaterial(Block.func_149682_b(func_150810_a(p_150812_1_, p_150812_2_, p_150812_3_))) + ") where there was no entity tile!");
++            System.out.println("Chunk coordinates: " + (this.xPosition * 16) + "," + (this.zPosition * 16));
++            new Exception().printStackTrace();
++            // CraftBukkit end
++        }
+     }
+ 
+     public void func_150805_f(int p_150805_1_, int p_150805_2_, int p_150805_3_)
+@@ -961,11 +1055,49 @@
+         while (iterator.hasNext())
+         {
+             TileEntity tileentity = (TileEntity)iterator.next();
++
++            // Spigot Start
++            if (tileentity instanceof IInventory)
++            {
++                for (org.bukkit.craftbukkit.entity.CraftHumanEntity h : new ArrayList<org.bukkit.craftbukkit.entity.CraftHumanEntity>((List)((IInventory) tileentity).getViewers()))
++                {
++                    h.getHandle().closeScreen();
++                }
++            }
++
++            // Spigot End
+             this.worldObj.func_147457_a(tileentity);
+         }
+ 
+         for (int i = 0; i < this.entityLists.length; ++i)
+         {
++            // CraftBukkit start
++            java.util.Iterator<Object> iter = this.entityLists[i].iterator();
++
++            while (iter.hasNext())
++            {
++                Entity entity = (Entity) iter.next();
++
++                // Spigot Start
++                if (entity instanceof IInventory)
++                {
++                    for (org.bukkit.craftbukkit.entity.CraftHumanEntity h : new ArrayList<org.bukkit.craftbukkit.entity.CraftHumanEntity>((List)((IInventory) entity).getViewers()))
++                    {
++                        h.getHandle().closeScreen();
++                    }
++                }
++
++                // Spigot End
++
++                // Do not pass along players, as doing so can get them stuck outside of time.
++                // (which for example disables inventory icon updates and prevents block breaking)
++                if (entity instanceof EntityPlayerMP)
++                {
++                    iter.remove();
++                }
++            }
++
++            // CraftBukkit end
+             this.worldObj.unloadEntities(this.entityLists[i]);
+         }
+         MinecraftForge.EVENT_BUS.post(new ChunkEvent.Unload(this));
+@@ -1131,7 +1263,7 @@
+ 
+         this.field_150815_m = true;
+ 
+-        if (!this.field_150814_l && this.isTerrainPopulated)
++        if (!this.field_150814_l && this.isTerrainPopulated && this.worldObj.spigotConfig.randomLightUpdates)   // Spigot - also use random light updates setting to determine if we should relight
+         {
+             this.func_150809_p();
+         }
+@@ -1139,7 +1271,15 @@
+ 
+     public boolean func_150802_k()
+     {
+-        return this.field_150815_m && this.isTerrainPopulated && this.field_150814_l;
++        // Spigot Start
++        /*
++         * As of 1.7, Mojang added a check to make sure that only chunks which have been lit are sent to the client.
++         * Unfortunately this interferes with our modified chunk ticking algorithm, which will only tick chunks distant from the player on a very infrequent basis.
++         * We cannot unfortunately do this lighting stage during chunk gen as it appears to put a lot more noticeable load on the server, than when it is done at play time.
++         * For now at least we will simply send all chunks, in accordance with pre 1.7 behaviour.
++         */
++        return true;
++        // Spigot End
+     }
+ 
+     // JAVADOC METHOD $$ func_76632_l
+@@ -1222,8 +1362,8 @@
+             if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
+             {
+                 nibblearray = this.storageArrays[l].getMetadataArray();
+-                System.arraycopy(par1ArrayOfByte, k, nibblearray.data, 0, nibblearray.data.length);
+-                k += nibblearray.data.length;
++                System.arraycopy(par1ArrayOfByte, k, nibblearray.getValueArray(), 0, nibblearray.getValueArray().length);
++                k += nibblearray.getValueArray().length;
+             }
+         }
+ 
+@@ -1232,8 +1372,8 @@
+             if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
+             {
+                 nibblearray = this.storageArrays[l].getBlocklightArray();
+-                System.arraycopy(par1ArrayOfByte, k, nibblearray.data, 0, nibblearray.data.length);
+-                k += nibblearray.data.length;
++                System.arraycopy(par1ArrayOfByte, k, nibblearray.getValueArray(), 0, nibblearray.getValueArray().length);
++                k += nibblearray.getValueArray().length;
+             }
+         }
+ 
+@@ -1244,8 +1384,8 @@
+                 if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
+                 {
+                     nibblearray = this.storageArrays[l].getSkylightArray();
+-                    System.arraycopy(par1ArrayOfByte, k, nibblearray.data, 0, nibblearray.data.length);
+-                    k += nibblearray.data.length;
++                    System.arraycopy(par1ArrayOfByte, k, nibblearray.getValueArray(), 0, nibblearray.getValueArray().length);
++                    k += nibblearray.getValueArray().length;
+                 }
+             }
+         }
+@@ -1267,8 +1407,8 @@
+                         nibblearray = this.storageArrays[l].createBlockMSBArray();
+                     }
+ 
+-                    System.arraycopy(par1ArrayOfByte, k, nibblearray.data, 0, nibblearray.data.length);
+-                    k += nibblearray.data.length;
++                    System.arraycopy(par1ArrayOfByte, k, nibblearray.getValueArray(), 0, nibblearray.getValueArray().length);
++                    k += nibblearray.getValueArray().length;
+                 }
+             }
+             else if (par4 && this.storageArrays[l] != null && this.storageArrays[l].getBlockMSBArray() != null)

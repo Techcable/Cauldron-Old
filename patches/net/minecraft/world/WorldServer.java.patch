@@ -1,0 +1,747 @@
+--- ../src-base/minecraft/net/minecraft/world/WorldServer.java
++++ ../src-work/minecraft/net/minecraft/world/WorldServer.java
+@@ -66,11 +66,26 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+-public class WorldServer extends World
++// CraftBukkit start
++import net.minecraft.block.ITileEntityProvider;
++import net.minecraft.block.BlockJukebox;
++import net.minecraft.tileentity.*;
++import org.bukkit.WeatherType;
++import org.bukkit.block.BlockState;
++import org.bukkit.craftbukkit.util.LongHash;
++
++import org.bukkit.event.block.BlockFormEvent;
++import org.bukkit.event.weather.LightningStrikeEvent;
++import org.bukkit.event.weather.ThunderChangeEvent;
++import org.bukkit.event.weather.WeatherChangeEvent;
++
++public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
+ {
++    // CraftBukkit end
++
+     private static final Logger field_147491_a = LogManager.getLogger();
+     private final MinecraftServer mcServer;
+-    private final EntityTracker theEntityTracker;
++    public EntityTracker theEntityTracker; // CraftBukkit - private final -> public
+     private final PlayerManager thePlayerManager;
+     private Set pendingTickListEntriesHashSet;
+     // JAVADOC FIELD $$ field_73065_O
+@@ -92,6 +107,9 @@
+     private IntHashMap entityIdMap;
+     private static final String __OBFID = "CL_00001437";
+ 
++    // CraftBukkit start
++    public final int dimension;
++
+     /** Stores the recently processed (lighting) chunks */
+     protected Set<ChunkCoordIntPair> doneChunks = new HashSet<ChunkCoordIntPair>();
+     public List<Teleporter> customTeleporters = new ArrayList<Teleporter>();
+@@ -99,6 +117,7 @@
+     public WorldServer(MinecraftServer p_i45284_1_, ISaveHandler p_i45284_2_, String p_i45284_3_, int p_i45284_4_, WorldSettings p_i45284_5_, Profiler p_i45284_6_)
+     {
+         super(p_i45284_2_, p_i45284_3_, p_i45284_5_, WorldProvider.getProviderForDimension(p_i45284_4_), p_i45284_6_);
++        this.dimension = p_i45284_4_;
+         this.mcServer = p_i45284_1_;
+         this.theEntityTracker = new EntityTracker(this);
+         this.thePlayerManager = new PlayerManager(this, p_i45284_1_.getConfigurationManager().getViewDistance());
+@@ -128,6 +147,46 @@
+             this.mapStorage.setData("scoreboard", scoreboardsavedata);
+         }
+ 
++        scoreboardsavedata.func_96499_a(this.worldScoreboard);
++        ((ServerScoreboard)this.worldScoreboard).func_96547_a(scoreboardsavedata);
++    }
++
++    // Add env and gen to constructor
++    public WorldServer(MinecraftServer p_i45284_1_, ISaveHandler p_i45284_2_, String p_i45284_3_, int p_i45284_4_, WorldSettings p_i45284_5_, Profiler p_i45284_6_, org.bukkit.World.Environment env, org.bukkit.generator.ChunkGenerator gen)
++    {
++        super(p_i45284_2_, p_i45284_3_, p_i45284_5_, WorldProvider.getProviderForDimension(env.getId()), p_i45284_6_, gen, env);
++        this.dimension = p_i45284_4_;
++        this.pvpMode = p_i45284_1_.isPVPEnabled();
++        // CraftBukkit end
++        this.mcServer = p_i45284_1_;
++        this.theEntityTracker = new EntityTracker(this);
++        this.thePlayerManager = new PlayerManager(this, spigotConfig.viewDistance); // Spigot
++
++        if (this.entityIdMap == null)
++        {
++            this.entityIdMap = new IntHashMap();
++        }
++
++        if (this.pendingTickListEntriesHashSet == null)
++        {
++            this.pendingTickListEntriesHashSet = new HashSet();
++        }
++
++        if (this.pendingTickListEntriesTreeSet == null)
++        {
++            this.pendingTickListEntriesTreeSet = new TreeSet();
++        }
++
++        this.worldTeleporter = new org.bukkit.craftbukkit.CraftTravelAgent(this); // CraftBukkit
++        this.worldScoreboard = new ServerScoreboard(p_i45284_1_);
++        ScoreboardSaveData scoreboardsavedata = (ScoreboardSaveData)this.mapStorage.loadData(ScoreboardSaveData.class, "scoreboard");
++
++        if (scoreboardsavedata == null)
++        {
++            scoreboardsavedata = new ScoreboardSaveData();
++            this.mapStorage.setData("scoreboard", scoreboardsavedata);
++        }
++
+         if (!(this instanceof WorldServerMulti)) //Forge: We fix the global mapStorage, which causes us to share scoreboards early. So don't associate the save data with the temporary scoreboard
+         {
+             scoreboardsavedata.func_96499_a(this.worldScoreboard);
+@@ -136,6 +195,145 @@
+         DimensionManager.setWorld(p_i45284_4_, this);
+     }
+ 
++    public WorldServer(MinecraftServer minecraftServer, ISaveHandler saveHandler, String par2String, WorldProvider provider, WorldSettings par4WorldSettings, Profiler theProfiler)
++    {
++        super(saveHandler, par2String, provider, par4WorldSettings, theProfiler);
++        this.dimension = provider.dimensionId;
++        this.pvpMode = minecraftServer.isPVPEnabled();
++        this.mcServer = minecraftServer;
++        this.theEntityTracker = null;
++        this.thePlayerManager = null;
++        this.worldTeleporter = null;
++    }
++
++    // CraftBukkit start
++    @Override
++    public TileEntity func_147438_o(int i, int j, int k)
++    {
++        TileEntity result = super.func_147438_o(i, j, k);
++        Block type = func_147439_a(i, j, k);
++
++        if (type == Blocks.chest)
++        {
++            if (!(result instanceof TileEntityChest))
++            {
++                // MCPC+ - allow non-vanilla tile entities on chests for Terrafirmacraft, fixes #724
++                //result = fixTileEntity(i, j, k, type, result);
++            }
++        }
++        else if (type == Blocks.furnace)
++        {
++            if (!(result instanceof TileEntityFurnace))
++            {
++                result = fixTileEntity(i, j, k, type, result);
++            }
++        }
++        else if (type == Blocks.dropper)
++        {
++            if (!(result instanceof TileEntityDropper))
++            {
++                result = fixTileEntity(i, j, k, type, result);
++            }
++        }
++        else if (type == Blocks.dispenser)
++        {
++            if (!(result instanceof TileEntityDispenser))
++            {
++                result = fixTileEntity(i, j, k, type, result);
++            }
++        }
++        else if (type == Blocks.jukebox)
++        {
++            if (!(result instanceof BlockJukebox.TileEntityJukebox))
++            {
++                result = fixTileEntity(i, j, k, type, result);
++            }
++        }
++        else if (type == Blocks.noteblock)
++        {
++            if (!(result instanceof TileEntityNote))
++            {
++                result = fixTileEntity(i, j, k, type, result);
++            }
++        }
++        else if (type == Blocks.mob_spawner)
++        {
++            if (!(result instanceof TileEntityMobSpawner))
++            {
++                result = fixTileEntity(i, j, k, type, result);
++            }
++        }
++        else if ((type == Blocks.standing_sign) || (type == Blocks.wall_sign))
++        {
++            if (!(result instanceof TileEntitySign))
++            {
++                result = fixTileEntity(i, j, k, type, result);
++            }
++        }
++        else if (type == Blocks.ender_chest)
++        {
++            if (!(result instanceof TileEntityEnderChest))
++            {
++                result = fixTileEntity(i, j, k, type, result);
++            }
++        }
++        else if (type == Blocks.brewing_stand)
++        {
++            if (!(result instanceof TileEntityBrewingStand))
++            {
++                result = fixTileEntity(i, j, k, type, result);
++            }
++        }
++        else if (type == Blocks.beacon)
++        {
++            if (!(result instanceof TileEntityBeacon))
++            {
++                result = fixTileEntity(i, j, k, type, result);
++            }
++        }
++        else if (type == Blocks.hopper)
++        {
++            if (!(result instanceof TileEntityHopper))
++            {
++                result = fixTileEntity(i, j, k, type, result);
++            }
++        }
++
++        return result;
++    }
++
++    private TileEntity fixTileEntity(int x, int y, int z, Block type, TileEntity found)
++    {
++        this.getServer().getLogger().severe("Block at " + x + "," + y + "," + z + " is " + org.bukkit.Material.getMaterial(Block.func_149682_b(type)).toString() + " but has " + found + ". "
++                                            + "Bukkit will attempt to fix this, but there may be additional damage that we cannot recover.");
++
++        if (type instanceof ITileEntityProvider)
++        {
++            TileEntity replacement = ((ITileEntityProvider) type).func_149915_a(this, this.getBlockMetadata(x, y, z));
++            replacement.field_145850_b = this;
++            this.func_147455_a(x, y, z, replacement);
++            return replacement;
++        }
++        else
++        {
++            this.getServer().getLogger().severe("Don't know how to fix for this type... Can't do anything! :(");
++            return found;
++        }
++    }
++
++    private boolean canSpawn(int x, int z)
++    {
++        if (this.generator != null)
++        {
++            return this.generator.canSpawn(this.getWorld(), x, z);
++        }
++        else
++        {
++            return this.provider.canCoordinateBeSpawn(x, z);
++        }
++    }
++    // CraftBukkit end
++
+     // JAVADOC METHOD $$ func_72835_b
+     public void tick()
+     {
+@@ -160,12 +358,18 @@
+         }
+ 
+         this.theProfiler.startSection("mobSpawner");
++        // CraftBukkit start - Only call spawner if we have players online and the world allows for mobs or animals
++        long time = this.worldInfo.getWorldTotalTime();
+ 
+-        if (this.getGameRules().getGameRuleBooleanValue("doMobSpawning"))
++        if (this.getGameRules().getGameRuleBooleanValue("doMobSpawning") && (this.spawnHostileMobs || this.spawnPeacefulMobs) && (this instanceof WorldServer && this.playerEntities.size() > 0))
+         {
+-            this.animalSpawner.findChunksForSpawning(this, this.spawnHostileMobs, this.spawnPeacefulMobs, this.worldInfo.getWorldTotalTime() % 400L == 0L);
++            timings.mobSpawn.startTiming(); // Spigot
++            this.animalSpawner.findChunksForSpawning(this, this.spawnHostileMobs && (this.ticksPerMonsterSpawns != 0 && time % this.ticksPerMonsterSpawns == 0L), this.spawnPeacefulMobs && (this.ticksPerAnimalSpawns != 0 && time % this.ticksPerAnimalSpawns == 0L), this.worldInfo.getWorldTotalTime() % 400L == 0L);
++            timings.mobSpawn.stopTiming(); // Spigot
++            // CraftBukkit end
+         }
+ 
++        timings.doChunkUnload.startTiming(); // Spigot
+         this.theProfiler.endStartSection("chunkSource");
+         this.chunkProvider.unloadQueuedChunks();
+         int j = this.calculateSkylightSubtracted(1.0F);
+@@ -182,23 +386,39 @@
+             this.worldInfo.setWorldTime(this.worldInfo.getWorldTime() + 1L);
+         }
+ 
++        timings.doChunkUnload.stopTiming(); // Spigot
+         this.theProfiler.endStartSection("tickPending");
++        timings.doTickPending.startTiming(); // Spigot
+         this.tickUpdates(false);
++        timings.doTickPending.stopTiming(); // Spigot
+         this.theProfiler.endStartSection("tickBlocks");
++        timings.doTickTiles.startTiming(); // Spigot
+         this.func_147456_g();
++        timings.doTickTiles.stopTiming(); // Spigot
+         this.theProfiler.endStartSection("chunkMap");
++        timings.doChunkMap.startTiming(); // Spigot
+         this.thePlayerManager.updatePlayerInstances();
++        timings.doChunkMap.stopTiming(); // Spigot
+         this.theProfiler.endStartSection("village");
++        timings.doVillages.startTiming(); // Spigot
+         this.villageCollectionObj.tick();
+         this.villageSiegeObj.tick();
++        timings.doVillages.stopTiming(); // Spigot
+         this.theProfiler.endStartSection("portalForcer");
++        timings.doPortalForcer.startTiming(); // Spigot
+         this.worldTeleporter.removeStalePortalLocations(this.getTotalWorldTime());
+         for (Teleporter tele : customTeleporters)
+         {
+             tele.removeStalePortalLocations(getTotalWorldTime());
+         }
++        timings.doPortalForcer.stopTiming(); // Spigot
+         this.theProfiler.endSection();
++        timings.doSounds.startTiming(); // Spigot
+         this.func_147488_Z();
++        timings.doSounds.stopTiming(); // Spigot
++        timings.doChunkGC.startTiming(); // Spigot
++        this.getWorld().processChunkGC(); // CraftBukkit
++        timings.doChunkGC.stopTiming(); // Spigot
+     }
+ 
+     // JAVADOC METHOD $$ func_73057_a
+@@ -219,7 +439,7 @@
+         {
+             EntityPlayer entityplayer = (EntityPlayer)iterator.next();
+ 
+-            if (!entityplayer.isPlayerSleeping())
++            if (!entityplayer.isPlayerSleeping() && !entityplayer.fauxSleeping)   // CraftBukkit
+             {
+                 this.allPlayersSleeping = false;
+                 break;
+@@ -247,7 +467,25 @@
+ 
+     private void resetRainAndThunder()
+     {
+-        provider.resetRainAndThunder();
++        // CraftBukkit start
++        WeatherChangeEvent weather = new WeatherChangeEvent(this.getWorld(), false);
++        this.getServer().getPluginManager().callEvent(weather);
++        ThunderChangeEvent thunder = new ThunderChangeEvent(this.getWorld(), false);
++        this.getServer().getPluginManager().callEvent(thunder);
++
++        if (!weather.isCancelled())
++        {
++            this.worldInfo.setRainTime(0);
++            this.worldInfo.setRaining(false);
++        }
++
++        if (!thunder.isCancelled())
++        {
++            this.worldInfo.setThunderTime(0);
++            this.worldInfo.setThundering(false);
++        }
++
++        // CraftBukkit end
+     }
+ 
+     public boolean areAllPlayersAsleep()
+@@ -255,19 +493,28 @@
+         if (this.allPlayersSleeping && !this.isRemote)
+         {
+             Iterator iterator = this.playerEntities.iterator();
++            // CraftBukkit - This allows us to assume that some people are in bed but not really, allowing time to pass in spite of AFKers
++            boolean foundActualSleepers = false;
+             EntityPlayer entityplayer;
+ 
+             do
+             {
+                 if (!iterator.hasNext())
+                 {
+-                    return true;
++                    return foundActualSleepers; // CraftBukkit
+                 }
+ 
+-                entityplayer = (EntityPlayer)iterator.next();
++                entityplayer = (EntityPlayer) iterator.next();
++
++                // CraftBukkit start
++                if (entityplayer.isPlayerFullyAsleep())
++                {
++                    foundActualSleepers = true;
++                }
+             }
+-            while (entityplayer.isPlayerFullyAsleep());
++            while (entityplayer.isPlayerFullyAsleep() || entityplayer.fauxSleeping);
+ 
++            // CraftBukkit end
+             return false;
+         }
+         else
+@@ -310,27 +557,37 @@
+         super.func_147456_g();
+         int i = 0;
+         int j = 0;
+-        Iterator iterator = this.activeChunkSet.iterator();
++        // CraftBukkit start
++        // Iterator iterator = this.activeChunkSet.iterator();
++        final long startTime = System.nanoTime();
+ 
+-        doneChunks.retainAll(activeChunkSet);
+-        if (doneChunks.size() == activeChunkSet.size())
++        // Spigot start
++        for (gnu.trove.iterator.TLongShortIterator iter = activeChunkSet_CB.iterator(); iter.hasNext();)
+         {
+-            doneChunks.clear();
+-        }
++            iter.advance();
++            long chunkCoord = iter.key();
++            int chunkX = World.keyToX(chunkCoord);
++            int chunkZ = World.keyToZ(chunkCoord);
+ 
+-        final long startTime = System.nanoTime();
++            // If unloaded, or in procedd of being unloaded, drop it
++            if ((!this.chunkExists(chunkX, chunkZ)) || (this.theChunkProviderServer.chunksToUnload.contains(chunkX, chunkZ)))
++            {
++                activeChunkSet.remove(new ChunkCoordIntPair(chunkX, chunkZ)); // MCPC+ - vanilla compatibility
++                iter.remove();
++                continue;
++            }
+ 
+-        while (iterator.hasNext())
+-        {
+-            ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair)iterator.next();
+-            int k = chunkcoordintpair.chunkXPos * 16;
+-            int l = chunkcoordintpair.chunkZPos * 16;
++            // Spigot end
++            // ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) iterator.next();
++            int k = chunkX * 16;
++            int l = chunkZ * 16;
+             this.theProfiler.startSection("getChunk");
+-            Chunk chunk = this.getChunkFromChunkCoords(chunkcoordintpair.chunkXPos, chunkcoordintpair.chunkZPos);
++            Chunk chunk = this.getChunkFromChunkCoords(chunkX, chunkZ);
++            // CraftBukkit end
+             this.func_147467_a(k, l, chunk);
+             this.theProfiler.endStartSection("tickChunk");
+             //Limits and evenly distributes the lighting update time
+-            if (System.nanoTime() - startTime <= 4000000 && doneChunks.add(chunkcoordintpair))
++            if (System.nanoTime() - startTime <= 4000000 && doneChunks.add(chunk.getChunkCoordIntPair()))
+             {
+                 chunk.func_150804_b(false);
+             }
+@@ -366,12 +623,34 @@
+ 
+                 if (this.isBlockFreezableNaturally(j1 + k, l1 - 1, k1 + l))
+                 {
+-                    this.func_147449_b(j1 + k, l1 - 1, k1 + l, Blocks.ice);
++                    // CraftBukkit start
++                    BlockState blockState = this.getWorld().getBlockAt(j1 + k, l1 - 1, k1 + l).getState();
++                    blockState.setTypeId(Block.func_149682_b(Blocks.ice));
++                    BlockFormEvent iceBlockForm = new BlockFormEvent(blockState.getBlock(), blockState);
++                    this.getServer().getPluginManager().callEvent(iceBlockForm);
++
++                    if (!iceBlockForm.isCancelled())
++                    {
++                        blockState.update(true);
++                    }
++
++                    // CraftBukkit end
+                 }
+ 
+                 if (this.isRaining() && this.func_147478_e(j1 + k, l1, k1 + l, true))
+                 {
+-                    this.func_147449_b(j1 + k, l1, k1 + l, Blocks.snow_layer);
++                    // CraftBukkit start
++                    BlockState blockState = this.getWorld().getBlockAt(j1 + k, l1, k1 + l).getState();
++                    blockState.setTypeId(Block.func_149682_b(Blocks.snow_layer));
++                    BlockFormEvent snow = new BlockFormEvent(blockState.getBlock(), blockState);
++                    this.getServer().getPluginManager().callEvent(snow);
++
++                    if (!snow.isCancelled())
++                    {
++                        blockState.update(true);
++                    }
++
++                    // CraftBukkit end
+                 }
+ 
+                 if (this.isRaining())
+@@ -408,6 +687,7 @@
+                         if (block.func_149653_t())
+                         {
+                             ++i;
++                            this.growthOdds = (iter.value() < 1) ? this.modifiedOdds : 100; // Spigot - grow fast if no players are in this chunk (value = player count)
+                             block.func_149674_a(this, j2 + k, l2 + extendedblockstorage.getYLocation(), k2 + l, this.rand);
+                         }
+                     }
+@@ -495,7 +775,7 @@
+     // JAVADOC METHOD $$ func_72939_s
+     public void updateEntities()
+     {
+-        if (this.playerEntities.isEmpty() && getPersistentChunks().isEmpty())
++        if (this.playerEntities.isEmpty() && getPersistentChunks().isEmpty()) // MCPC+ Use Forge logic here
+         {
+             if (this.updateEntityTick++ >= 1200)
+             {
+@@ -529,7 +809,17 @@
+         {
+             if (i > 1000)
+             {
+-                i = 1000;
++                // CraftBukkit start - If the server has too much to process over time, try to alleviate that
++                if (i > 20 * 1000)
++                {
++                    i = i / 20;
++                }
++                else
++                {
++                    i = 1000;
++                }
++
++                // CraftBukkit end
+             }
+ 
+             this.theProfiler.startSection("cleaning");
+@@ -676,7 +966,36 @@
+     protected IChunkProvider createChunkProvider()
+     {
+         IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
+-        this.theChunkProviderServer = new ChunkProviderServer(this, ichunkloader, this.provider.createChunkGenerator());
++        // MCPC+ start - if provider is vanilla, proceed to create a bukkit compatible chunk generator
++        if (this.provider.getClass().toString().length() <= 3 || this.provider.getClass().toString().contains("net.minecraft"))
++        {
++            // CraftBukkit start
++            org.bukkit.craftbukkit.generator.InternalChunkGenerator gen;
++    
++            if (this.generator != null)
++            {
++                gen = new org.bukkit.craftbukkit.generator.CustomChunkGenerator(this, this.getSeed(), this.generator);
++            }
++            else if (this.provider instanceof WorldProviderHell)
++            {
++                gen = new org.bukkit.craftbukkit.generator.NetherChunkGenerator(this, this.getSeed());
++            }
++            else if (this.provider instanceof WorldProviderEnd)
++            {
++                gen = new org.bukkit.craftbukkit.generator.SkyLandsChunkGenerator(this, this.getSeed());
++            }
++            else
++            {
++                gen = new org.bukkit.craftbukkit.generator.NormalChunkGenerator(this, this.getSeed());
++            }
++            this.theChunkProviderServer = new ChunkProviderServer(this, ichunkloader, gen);
++            // CraftBukkit end
++        }
++        else // custom provider, load normally for forge compatibility
++        {
++            this.theChunkProviderServer = new ChunkProviderServer(this, ichunkloader, this.provider.createChunkGenerator());
++        }
++        // MCPC+ end
+         return this.theChunkProviderServer;
+     }
+ 
+@@ -684,29 +1003,31 @@
+     {
+         ArrayList arraylist = new ArrayList();
+ 
+-        for(int x = (p_147486_1_ >> 4); x <= (p_147486_4_ >> 4); x++)
++        // CraftBukkit start - Get tile entities from chunks instead of world
++        for (int chunkX = (p_147486_1_ >> 4); chunkX <= ((p_147486_4_ - 1) >> 4); chunkX++)
+         {
+-            for(int z = (p_147486_3_ >> 4); z <= (p_147486_6_ >> 4); z++)
++            for (int chunkZ = (p_147486_3_ >> 4); chunkZ <= ((p_147486_6_ - 1) >> 4); chunkZ++)
+             {
+-                Chunk chunk = getChunkFromChunkCoords(x, z);
+-                if (chunk != null)
++                Chunk chunk = getChunkFromChunkCoords(chunkX, chunkZ);
++
++                if (chunk == null)
+                 {
+-                    for(Object obj : chunk.field_150816_i.values())
++                    continue;
++                }
++
++                for (Object te : chunk.field_150816_i.values())
++                {
++                    TileEntity tileentity = (TileEntity) te;
++
++                    if ((tileentity.field_145851_c >= p_147486_1_) && (tileentity.field_145848_d >= p_147486_2_) && (tileentity.field_145849_e >= p_147486_3_) && (tileentity.field_145851_c < p_147486_4_) && (tileentity.field_145848_d < p_147486_5_) && (tileentity.field_145849_e < p_147486_6_))
+                     {
+-                        TileEntity entity = (TileEntity)obj;
+-                        if (!entity.func_145837_r())
+-                        {
+-                            if (entity.field_145851_c >= p_147486_1_ && entity.field_145848_d >= p_147486_2_ && entity.field_145849_e >= p_147486_3_ &&
+-                                entity.field_145851_c <= p_147486_4_ && entity.field_145848_d <= p_147486_5_ && entity.field_145849_e <= p_147486_6_)
+-                            {
+-                                arraylist.add(entity);
+-                            }
+-                        }
++                        arraylist.add(tileentity);
+                     }
+                 }
+             }
+         }
+ 
++        // CraftBukkit end
+         return arraylist;
+     }
+ 
+@@ -760,6 +1081,29 @@
+             int j = this.provider.getAverageGroundLevel();
+             int k = 0;
+ 
++            // CraftBukkit start
++            if (this.generator != null)
++            {
++                Random rand = new Random(this.getSeed());
++                org.bukkit.Location spawn = this.generator.getFixedSpawnLocation(((WorldServer) this).getWorld(), rand);
++
++                if (spawn != null)
++                {
++                    if (spawn.getWorld() != ((WorldServer) this).getWorld())
++                    {
++                        throw new IllegalStateException("Cannot set spawn point for " + this.worldInfo.getWorldName() + " to be in another world (" + spawn.getWorld().getName() + ")");
++                    }
++                    else
++                    {
++                        this.worldInfo.setSpawnPosition(spawn.getBlockX(), spawn.getBlockY(), spawn.getBlockZ());
++                        this.findingSpawnPoint = false;
++                        return;
++                    }
++                }
++            }
++
++            // CraftBukkit end
++
+             if (chunkposition != null)
+             {
+                 i = chunkposition.field_151329_a;
+@@ -841,7 +1185,7 @@
+     }
+ 
+     // JAVADOC METHOD $$ func_104140_m
+-    public void saveChunkData()
++    public void saveChunkData() 
+     {
+         if (this.chunkProvider.canSave())
+         {
+@@ -897,6 +1241,20 @@
+     // JAVADOC METHOD $$ func_72942_c
+     public boolean addWeatherEffect(Entity par1Entity)
+     {
++        // MCPC+ start - vanilla compatibility
++        if (par1Entity instanceof net.minecraft.entity.effect.EntityLightningBolt) 
++        {
++            // CraftBukkit start
++            LightningStrikeEvent lightning = new LightningStrikeEvent(this.getWorld(), (org.bukkit.entity.LightningStrike) par1Entity.getBukkitEntity());
++            this.getServer().getPluginManager().callEvent(lightning);
++
++            if (lightning.isCancelled())
++            {
++                return false;
++            }
++            // CraftBukkit end
++        }
++        // MCPC+ end
+         if (super.addWeatherEffect(par1Entity))
+         {
+             this.mcServer.getConfigurationManager().func_148541_a(par1Entity.posX, par1Entity.posY, par1Entity.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(par1Entity));
+@@ -917,11 +1275,22 @@
+     // JAVADOC METHOD $$ func_72885_a
+     public Explosion newExplosion(Entity par1Entity, double par2, double par4, double par6, float par8, boolean par9, boolean par10)
+     {
++        // CraftBukkit start
++        Explosion explosion = super.newExplosion(par1Entity, par2, par4, par6, par8, par9, par10);
++
++        if (explosion.wasCanceled)
++        {
++            return explosion;
++        }
++
++        /* Remove
+         Explosion explosion = new Explosion(this, par1Entity, par2, par4, par6, par8);
+         explosion.isFlaming = par9;
+         explosion.isSmoking = par10;
+         explosion.doExplosionA();
+         explosion.doExplosionB(false);
++        */
++        // CraftBukkit end - TODO: Check if explosions are still properly implemented
+ 
+         if (!par10)
+         {
+@@ -1002,6 +1371,7 @@
+         boolean flag = this.isRaining();
+         super.updateWeather();
+ 
++        /* CraftBukkit start
+         if (this.prevRainingStrength != this.rainingStrength)
+         {
+             this.mcServer.getConfigurationManager().func_148537_a(new S2BPacketChangeGameState(7, this.rainingStrength), this.provider.dimensionId);
+@@ -1026,6 +1396,20 @@
+             this.mcServer.getConfigurationManager().func_148540_a(new S2BPacketChangeGameState(7, this.rainingStrength));
+             this.mcServer.getConfigurationManager().func_148540_a(new S2BPacketChangeGameState(8, this.thunderingStrength));
+         }
++        // */
++        if (flag != this.isRaining())
++        {
++            // Only send weather packets to those affected
++            for (int i = 0; i < this.playerEntities.size(); ++i)
++            {
++                if (((EntityPlayerMP) this.playerEntities.get(i)).worldObj == this)
++                {
++                    ((EntityPlayerMP) this.playerEntities.get(i)).setPlayerWeather((!flag ? WeatherType.DOWNFALL : WeatherType.CLEAR), false);
++                }
++            }
++
++            // CraftBukkit end
++        }
+     }
+ 
+     // JAVADOC METHOD $$ func_73046_m
+@@ -1070,20 +1454,48 @@
+         }
+     }
+ 
++
+     public File getChunkSaveLocation()
+     {
+         return ((AnvilChunkLoader)theChunkProviderServer.currentChunkLoader).chunkSaveLocation;
+     }
+ 
+     static class ServerBlockEventList extends ArrayList
+-        {
+-            private static final String __OBFID = "CL_00001439";
++    {
++        private static final String __OBFID = "CL_00001439";
+ 
+-            private ServerBlockEventList() {}
++        private ServerBlockEventList() {}
+ 
+-            ServerBlockEventList(Object par1ServerBlockEvent)
+-            {
+-                this();
+-            }
++        ServerBlockEventList(Object par1ServerBlockEvent)
++        {
++            this();
+         }
++    }
++
++    // CraftBukkit start - Compatibility methods for BlockChangeDelegate
++    public boolean setRawTypeId(int x, int y, int z, int typeId)
++    {
++        return this.func_147465_d(x, y, z, Block.func_149729_e(typeId), 0, 4);
++    }
++
++    public boolean setRawTypeIdAndData(int x, int y, int z, int typeId, int data)
++    {
++        return this.func_147465_d(x, y, z, Block.func_149729_e(typeId), data, 4);
++    }
++
++    public boolean setTypeId(int x, int y, int z, int typeId)
++    {
++        return this.func_147465_d(x, y, z, Block.func_149729_e(typeId), 0, 3);
++    }
++
++    public boolean setTypeIdAndData(int x, int y, int z, int typeId, int data)
++    {
++        return this.func_147465_d(x, y, z, Block.func_149729_e(typeId), data, 3);
++    }
++
++    public int getTypeId(int x, int y, int z)
++    {
++        return Block.func_149682_b(func_147439_a(x, y, z));
++    }
++    // CraftBukkit end
+ }

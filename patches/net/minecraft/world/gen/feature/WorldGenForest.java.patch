@@ -1,0 +1,73 @@
+--- ../src-base/minecraft/net/minecraft/world/gen/feature/WorldGenForest.java
++++ ../src-work/minecraft/net/minecraft/world/gen/feature/WorldGenForest.java
+@@ -8,7 +8,9 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.common.util.ForgeDirection;
+ 
+-public class WorldGenForest extends WorldGenAbstractTree
++import org.bukkit.craftbukkit.CraftBlockChangeDelegate; // CraftBukkit
++
++public class WorldGenForest extends WorldGenAbstractTree implements BlockSapling.TreeGenerator   // CraftBukkit - add interface
+ {
+     private boolean field_150531_a;
+     private static final String __OBFID = "CL_00000401";
+@@ -21,6 +23,13 @@
+ 
+     public boolean generate(World par1World, Random par2Random, int par3, int par4, int par5)
+     {
++        // CraftBukkit start - Moved to generate
++        return this.generate(new CraftBlockChangeDelegate((org.bukkit.BlockChangeDelegate) par1World), par2Random, par3, par4, par5);
++    }
++
++    public boolean generate(CraftBlockChangeDelegate par1World, Random par2Random, int par3, int par4, int par5)
++    {
++        // CraftBukkit end
+         int l = par2Random.nextInt(3) + 5;
+ 
+         if (this.field_150531_a)
+@@ -55,7 +64,7 @@
+                     {
+                         if (i1 >= 0 && i1 < 256)
+                         {
+-                            Block block = par1World.func_147439_a(j1, i1, k1);
++                            Block block = par1World.getType(j1, i1, k1);
+ 
+                             if (!this.isReplaceable(par1World, j1, i1, k1))
+                             {
+@@ -76,7 +85,7 @@
+             }
+             else
+             {
+-                Block block2 = par1World.func_147439_a(par3, par4 - 1, par5);
++                Block block2 = par1World.getType(par3, par4 - 1, par5);
+ 
+                 boolean isSoil = block2.canSustainPlant(par1World, par3, par4 - 1, par5, ForgeDirection.UP, (BlockSapling)Blocks.sapling);
+                 if (isSoil && par4 < 256 - l - 1)
+@@ -99,11 +108,11 @@
+ 
+                                 if (Math.abs(l1) != k1 || Math.abs(j2) != k1 || par2Random.nextInt(2) != 0 && j1 != 0)
+                                 {
+-                                    Block block1 = par1World.func_147439_a(l2, k2, i2);
++                                    Block block1 = par1World.getType(l2, k2, i2);
+ 
+                                     if (block1.isAir(par1World, l2, k2, i2) || block1.isLeaves(par1World, l2, k2, i2))
+                                     {
+-                                        this.func_150516_a(par1World, l2, k2, i2, Blocks.leaves, 2);
++                                        this.setTypeAndData(par1World, l2, k2, i2, Blocks.leaves, 2);
+                                     }
+                                 }
+                             }
+@@ -112,11 +121,11 @@
+ 
+                     for (k2 = 0; k2 < l; ++k2)
+                     {
+-                        Block block3 = par1World.func_147439_a(par3, par4 + k2, par5);
++                        Block block3 = par1World.getType(par3, par4 + k2, par5);
+ 
+                         if (block3.isAir(par1World, par3, par4 + k2, par5) || block3.isLeaves(par1World, par3, par4 + k2, par5))
+                         {
+-                            this.func_150516_a(par1World, par3, par4 + k2, par5, Blocks.log, 2);
++                            this.setTypeAndData(par1World, par3, par4 + k2, par5, Blocks.log, 2);
+                         }
+                     }
+ 

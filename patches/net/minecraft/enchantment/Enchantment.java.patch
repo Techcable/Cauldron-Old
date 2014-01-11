@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/enchantment/Enchantment.java
++++ ../src-work/minecraft/net/minecraft/enchantment/Enchantment.java
+@@ -79,6 +79,8 @@
+         {
+             enchantmentsList[par1] = this;
+         }
++
++        org.bukkit.enchantments.Enchantment.registerEnchantment(new org.bukkit.craftbukkit.enchantments.CraftEnchantment(this)); // CraftBukkit
+     }
+ 
+     public int getWeight()

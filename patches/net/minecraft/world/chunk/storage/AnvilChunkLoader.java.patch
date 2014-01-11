@@ -1,0 +1,270 @@
+--- ../src-base/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
++++ ../src-work/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
+@@ -36,6 +36,7 @@
+ 
+ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO
+ {
++    private java.util.LinkedHashMap<ChunkCoordIntPair, PendingChunk> pendingSaves = new java.util.LinkedHashMap<ChunkCoordIntPair, PendingChunk>(); // Spigot
+     private static final Logger field_151505_a = LogManager.getLogger();
+     private List chunksToRemove = new ArrayList();
+     private Set pendingAnvilChunksCoordinates = new HashSet();
+@@ -49,26 +50,66 @@
+         this.chunkSaveLocation = par1File;
+     }
+ 
++    // CraftBukkit start
++    public boolean chunkExists(World world, int i, int j)
++    {
++        ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(i, j);
++
++        synchronized (this.syncLockObject)
++        {
++            // Spigot start
++            if (pendingSaves.containsKey(chunkcoordintpair))
++            {
++                return true;
++            }
++
++            // Spigot end
++        }
++
++        return RegionFileCache.createOrLoadRegionFile(this.chunkSaveLocation, i, j).chunkExists(i & 31, j & 31);
++    }
++    // CraftBukkit end
++
++    // CraftBukkit start - Add async variant, provide compatibility
++
++    /**
++     * Loads the specified(XZ) chunk into the specified world.
++     */
++    public Chunk loadChunk(World par1World, int par2, int par3)
++    {
++        Object[] data = this.loadChunk__Async_CB(par1World, par2, par3); // MCPC+
++
++        if (data != null)
++        {
++            Chunk chunk = (Chunk) data[0];
++            NBTTagCompound nbttagcompound = (NBTTagCompound) data[1];
++            this.loadEntities(chunk, nbttagcompound.getCompoundTag("Level"), par1World);
++            MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, nbttagcompound)); // MCPC+ - Don't call ChunkDataEvent.Load async
++            return chunk;
++        }
++
++        return null;
++    }
++
+     // JAVADOC METHOD $$ func_75815_a
+-    public Chunk loadChunk(World par1World, int par2, int par3) throws IOException
++    public Object[] loadChunk__Async_CB(World par1World, int par2, int par3)
+     {
++        // CraftBukkit end
+         NBTTagCompound nbttagcompound = null;
+         ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(par2, par3);
+         Object object = this.syncLockObject;
+ 
+         synchronized (this.syncLockObject)
+         {
+-            if (this.pendingAnvilChunksCoordinates.contains(chunkcoordintpair))
++            // Spigot start
++            AnvilChunkLoader.PendingChunk pendingchunktosave = pendingSaves.get(chunkcoordintpair);
++
++            if (pendingchunktosave != null)
+             {
+-                for (int k = 0; k < this.chunksToRemove.size(); ++k)
+-                {
+-                    if (((AnvilChunkLoader.PendingChunk)this.chunksToRemove.get(k)).chunkCoordinate.equals(chunkcoordintpair))
+-                    {
+-                        nbttagcompound = ((AnvilChunkLoader.PendingChunk)this.chunksToRemove.get(k)).nbtTags;
+-                        break;
+-                    }
+-                }
++                nbttagcompound = pendingchunktosave.nbtTags;
+             }
++
++            // Spigot end
+         }
+ 
+         if (nbttagcompound == null)
+@@ -80,14 +121,20 @@
+                 return null;
+             }
+ 
+-            nbttagcompound = CompressedStreamTools.read(datainputstream);
++            // MCPC+ start - catch exception for MCP binary compatibility
++            try {
++                nbttagcompound = CompressedStreamTools.read(datainputstream);
++            } catch (Throwable t) {
++                t.printStackTrace();
++            }
++            // MCPC+ end
+         }
+ 
+-        return this.checkedReadChunkFromNBT(par1World, par2, par3, nbttagcompound);
++        return this.checkedReadChunkFromNBT_CB(par1World, par2, par3, nbttagcompound);
+     }
+ 
+     // JAVADOC METHOD $$ func_75822_a
+-    protected Chunk checkedReadChunkFromNBT(World par1World, int par2, int par3, NBTTagCompound par4NBTTagCompound)
++    protected Object[] checkedReadChunkFromNBT_CB(World par1World, int par2, int par3, NBTTagCompound par4NBTTagCompound) // CraftBukkit - return Chunk -> Object[]
+     {
+         if (!par4NBTTagCompound.func_150297_b("Level", 10))
+         {
+@@ -106,20 +153,51 @@
+             if (!chunk.isAtLocation(par2, par3))
+             {
+                 field_151505_a.error("Chunk file at " + par2 + "," + par3 + " is in the wrong location; relocating. (Expected " + par2 + ", " + par3 + ", got " + chunk.xPosition + ", " + chunk.zPosition + ")");
+-                par4NBTTagCompound.setInteger("xPos", par2);
+-                par4NBTTagCompound.setInteger("zPos", par3);
++                par4NBTTagCompound.getCompoundTag("Level").setInteger("xPos", par2); // CraftBukkit - .getCompound("Level")
++                par4NBTTagCompound.getCompoundTag("Level").setInteger("zPos", par3); // CraftBukkit - .getCompound("Level")
++                // CraftBukkit start - Have to move tile entities since we don't load them at this stage
++                NBTTagList tileEntities = par4NBTTagCompound.getCompoundTag("Level").func_150295_c("TileEntities", 10);
++
++                if (tileEntities != null)
++                {
++                    for (int te = 0; te < tileEntities.tagCount(); te++)
++                    {
++                        NBTTagCompound tileEntity = (NBTTagCompound) tileEntities.func_150305_b(te);
++                        int x = tileEntity.getInteger("x") - chunk.xPosition * 16;
++                        int z = tileEntity.getInteger("z") - chunk.zPosition * 16;
++                        tileEntity.setInteger("x", par2 * 16 + x);
++                        tileEntity.setInteger("z", par3 * 16 + z);
++                    }
++                }
++
++                // CraftBukkit end
+                 chunk = this.readChunkFromNBT(par1World, par4NBTTagCompound.getCompoundTag("Level"));
+             }
+ 
+-            MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, par4NBTTagCompound));
+-            return chunk;
++            // CraftBukkit start
++            Object[] data = new Object[2];
++            data[0] = chunk;
++            data[1] = par4NBTTagCompound;
++            // MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, par4NBTTagCompound)); // MCPC+ Don't call ChunkDataEvent.Load async
++            return data;
++            // CraftBukkit end
+         }
+     }
+ 
+-    public void saveChunk(World par1World, Chunk par2Chunk) throws MinecraftException, IOException
++    public void saveChunk(World par1World, Chunk par2Chunk)
+     {
+-        par1World.checkSessionLock();
++        // CraftBukkit start - "handle" exception
++        try
++        {
++            par1World.checkSessionLock();
++        }
++        catch (MinecraftException ex)
++        {
++            ex.printStackTrace();
++        }
+ 
++        // CraftBukkit end
++
+         try
+         {
+             NBTTagCompound nbttagcompound = new NBTTagCompound();
+@@ -141,20 +219,13 @@
+ 
+         synchronized (this.syncLockObject)
+         {
+-            if (this.pendingAnvilChunksCoordinates.contains(par1ChunkCoordIntPair))
++            // Spigot start
++            if (this.pendingSaves.put(par1ChunkCoordIntPair, new PendingChunk(par1ChunkCoordIntPair, par2NBTTagCompound)) != null)
+             {
+-                for (int i = 0; i < this.chunksToRemove.size(); ++i)
+-                {
+-                    if (((AnvilChunkLoader.PendingChunk)this.chunksToRemove.get(i)).chunkCoordinate.equals(par1ChunkCoordIntPair))
+-                    {
+-                        this.chunksToRemove.set(i, new AnvilChunkLoader.PendingChunk(par1ChunkCoordIntPair, par2NBTTagCompound));
+-                        return;
+-                    }
+-                }
++                return;
+             }
+ 
+-            this.chunksToRemove.add(new AnvilChunkLoader.PendingChunk(par1ChunkCoordIntPair, par2NBTTagCompound));
+-            this.pendingAnvilChunksCoordinates.add(par1ChunkCoordIntPair);
++            // Spigot end
+             ThreadedFileIOBase.threadedIOInstance.queueIO(this);
+         }
+     }
+@@ -167,13 +238,15 @@
+ 
+         synchronized (this.syncLockObject)
+         {
+-            if (this.chunksToRemove.isEmpty())
++            // Spigot start
++            if (this.pendingSaves.isEmpty())
+             {
+                 return false;
+             }
+ 
+-            pendingchunk = (AnvilChunkLoader.PendingChunk)this.chunksToRemove.remove(0);
+-            this.pendingAnvilChunksCoordinates.remove(pendingchunk.chunkCoordinate);
++            pendingchunk = this.pendingSaves.values().iterator().next();
++            this.pendingSaves.remove(pendingchunk.chunkCoordinate);
++            // Spigot end
+         }
+ 
+         if (pendingchunk != null)
+@@ -191,7 +264,7 @@
+         return true;
+     }
+ 
+-    private void writeChunkNBTTags(AnvilChunkLoader.PendingChunk par1AnvilChunkLoaderPending) throws IOException
++    public void writeChunkNBTTags(PendingChunk par1AnvilChunkLoaderPending) throws java.io.IOException   // CraftBukkit - public -> private, added throws
+     {
+         DataOutputStream dataoutputstream = RegionFileCache.getChunkOutputStream(this.chunkSaveLocation, par1AnvilChunkLoaderPending.chunkCoordinate.chunkXPos, par1AnvilChunkLoaderPending.chunkCoordinate.chunkZPos);
+         CompressedStreamTools.write(par1AnvilChunkLoaderPending.nbtTags, dataoutputstream);
+@@ -243,19 +316,19 @@
+ 
+                 if (extendedblockstorage.getBlockMSBArray() != null)
+                 {
+-                    nbttagcompound1.setByteArray("Add", extendedblockstorage.getBlockMSBArray().data);
++                    nbttagcompound1.setByteArray("Add", extendedblockstorage.getBlockMSBArray().getValueArray()); // Spigot
+                 }
+ 
+-                nbttagcompound1.setByteArray("Data", extendedblockstorage.getMetadataArray().data);
+-                nbttagcompound1.setByteArray("BlockLight", extendedblockstorage.getBlocklightArray().data);
++                nbttagcompound1.setByteArray("Data", extendedblockstorage.getMetadataArray().getValueArray()); // Spigot
++                nbttagcompound1.setByteArray("BlockLight", extendedblockstorage.getBlocklightArray().getValueArray()); // Spigot
+ 
+                 if (flag)
+                 {
+-                    nbttagcompound1.setByteArray("SkyLight", extendedblockstorage.getSkylightArray().data);
++                    nbttagcompound1.setByteArray("SkyLight", extendedblockstorage.getSkylightArray().getValueArray()); // Spigot
+                 }
+                 else
+                 {
+-                    nbttagcompound1.setByteArray("SkyLight", new byte[extendedblockstorage.getBlocklightArray().data.length]);
++                    nbttagcompound1.setByteArray("SkyLight", new byte[extendedblockstorage.getBlocklightArray().getValueArray().length]); // Spigot
+                 }
+ 
+                 nbttaglist.appendTag(nbttagcompound1);
+@@ -386,6 +459,13 @@
+             chunk.setBiomeArray(par2NBTTagCompound.getByteArray("Biomes"));
+         }
+ 
++        // CraftBukkit start - End this method here and split off entity loading to another method
++        return chunk;
++    }
++
++    public void loadEntities(Chunk chunk, NBTTagCompound par2NBTTagCompound, World par1World)
++    {
++        // CraftBukkit end
+         NBTTagList nbttaglist1 = par2NBTTagCompound.func_150295_c("Entities", 10);
+ 
+         if (nbttaglist1 != null)
+@@ -447,7 +527,7 @@
+             }
+         }
+ 
+-        return chunk;
++        // return chunk; // CraftBukkit
+     }
+ 
+     static class PendingChunk

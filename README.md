@@ -1,26 +1,19 @@
 MCPC-Plus
 ===========
-Note: 1.5.X repository has been moved to [MCPC-Plus-Legacy](https://github.com/MinecraftPortCentral/MCPC-Plus-Legacy)
+Note: 1.6.4 repository has been moved to [branch v164](https://github.com/MinecraftPortCentral/MCPC-Plus/tree/v164)
 
 A Forge/Bukkit/Spigot Minecraft Server
 
 Compilation
 -----------
 
-We use Maven to handle our dependencies.
+We use Gradle to handle our dependencies.
 
-1. Install [Maven 3](http://maven.apache.org/download.html)
-2. Check out and install [MCPC API](https://github.com/MinecraftPortCentral/Bukkit/tree/mcpc-api-162) 
- * Note: this is not needed as the repository we use has MCPC-API too, but you might have a newer one (with your own changes :D)
- * Check out this repo and run: 
-3. Init a the [FML] module : `git submodule update --init
-4. Copy entire contents of FML to root folder in fml
-5. `python setup.py`
-6. extract eclipse-resources.zip to eclipse/Forge folder
-7. `mvn initialize -P -built` from eclipse/Forge folder
-8. `mvn clean package`
-
-If you get "Could not find artifact net.minecraftforge:minecraft-forge:jar", repeat step 3. To fix "out of heap space", run mvn with more memory: MAVEN\_OPTS=-mx2G
+1. Checkout project.
+2. Init submodules : git submodule update --init
+3. Setup workspace : gradlew setupMCPC
+4. Build binaries  : gradlew buildPackages
+Note: all binaries will be in distributions folder
 
 
 Profiling
@@ -89,4 +82,3 @@ Donating
 Click here to [Donate to BloodMC](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YNCKCALNQKFAS)
 
 Click here to [Donate to Onibait](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=B29U8Y8AF7A2Q)
-

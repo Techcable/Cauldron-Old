@@ -1,0 +1,159 @@
+--- ../src-base/minecraft/net/minecraft/block/BlockMushroom.java
++++ ../src-work/minecraft/net/minecraft/block/BlockMushroom.java
+@@ -6,6 +6,16 @@
+ import net.minecraft.world.gen.feature.WorldGenBigMushroom;
+ import net.minecraftforge.common.util.ForgeDirection;
+ 
++// CraftBukkit start
++import java.util.ArrayList;
++import net.minecraft.item.ItemStack;
++import org.bukkit.Location;
++import org.bukkit.TreeType;
++import org.bukkit.block.BlockState;
++import org.bukkit.event.block.BlockSpreadEvent;
++import org.bukkit.event.world.StructureGrowEvent;
++// CraftBukkit end
++
+ public class BlockMushroom extends BlockBush implements IGrowable
+ {
+     private static final String __OBFID = "CL_00000272";
+@@ -19,7 +29,9 @@
+ 
+     public void func_149674_a(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
+     {
+-        if (p_149674_5_.nextInt(25) == 0)
++        final int sourceX = p_149674_2_, sourceY = p_149674_3_, sourceZ = p_149674_4_; // CraftBukkit
++
++        if (p_149674_5_.nextInt(Math.max(1, (int) p_149674_1_.growthOdds / p_149674_1_.spigotConfig.mushroomModifier * 25)) == 0)   // Spigot
+         {
+             byte b0 = 4;
+             int l = 5;
+@@ -66,7 +78,19 @@
+ 
+             if (p_149674_1_.func_147437_c(i1, j1, k1) && this.func_149718_j(p_149674_1_, i1, j1, k1))
+             {
+-                p_149674_1_.func_147465_d(i1, j1, k1, this, 0, 2);
++                // CraftBukkit start
++                org.bukkit.World bworld = p_149674_1_.getWorld();
++                BlockState blockState = bworld.getBlockAt(i1, j1, k1).getState();
++                blockState.setTypeId(Block.func_149682_b(this)); // nms: this.id, 0, 2
++                BlockSpreadEvent event = new BlockSpreadEvent(blockState.getBlock(), bworld.getBlockAt(sourceX, sourceY, sourceZ), blockState);
++                p_149674_1_.getServer().getPluginManager().callEvent(event);
++
++                if (!event.isCancelled())
++                {
++                    blockState.update(true);
++                }
++
++                // CraftBukkit end
+             }
+         }
+     }
+@@ -94,30 +118,82 @@
+         }
+     }
+ 
+-    public boolean func_149884_c(World p_149884_1_, int p_149884_2_, int p_149884_3_, int p_149884_4_, Random p_149884_5_)
++    // MCPC+ start - wrapper for vanilla compatibility
++    public boolean fertilizeMushroom(World world, int i, int j, int k, Random random)
+     {
+-        int l = p_149884_1_.getBlockMetadata(p_149884_2_, p_149884_3_, p_149884_4_);
+-        p_149884_1_.func_147468_f(p_149884_2_, p_149884_3_, p_149884_4_);
++        return this.fertilizeMushroom(world, i, j, k, random, false, null, null);
++    }
++    // MCPC+ end    
++
++    // CraftBukkit - added bonemeal, player and itemstack
++    /**
++     * Fertilize the mushroom.
++     */
++    public boolean fertilizeMushroom(World par1World, int par2, int par3, int par4, Random par5Random, boolean bonemeal, org.bukkit.entity.Player player, ItemStack itemstack)
++    {
++        int l = par1World.getBlockMetadata(par2, par3, par4);
++        par1World.func_147468_f(par2, par3, par4);
++        // CraftBukkit start
++        boolean grown = false;
++        StructureGrowEvent event = null;
++        Location location = new Location(par1World.getWorld(), par2, par3, par4);
+         WorldGenBigMushroom worldgenbigmushroom = null;
+ 
+-        if (this == Blocks.brown_mushroom)
++        // MCPC+ start - add support for Twilight Forest; CB only if non-null player, otherwise vanilla
++        if (player != null)
+         {
+-            worldgenbigmushroom = new WorldGenBigMushroom(0);
++            if (this == Blocks.brown_mushroom)
++            {
++                event = new StructureGrowEvent(location, TreeType.BROWN_MUSHROOM, bonemeal, player, new ArrayList<BlockState>());
++                worldgenbigmushroom = new WorldGenBigMushroom(0);
++            }
++            else if (this == Blocks.red_mushroom)
++            {
++                event = new StructureGrowEvent(location, TreeType.RED_MUSHROOM, bonemeal, player, new ArrayList<BlockState>());
++                worldgenbigmushroom = new WorldGenBigMushroom(1);
++            }
++
++            if (worldgenbigmushroom != null && event != null)
++            {
++                grown = worldgenbigmushroom.grow(new org.bukkit.craftbukkit.CraftBlockChangeDelegate((org.bukkit.BlockChangeDelegate)par1World), par5Random, par2, par3, par4, event, itemstack, par1World.getWorld());
++
++                if (event.isFromBonemeal() && itemstack != null)
++                {
++                    --itemstack.stackSize;
++                }
++            }
++
++            if (!grown || event.isCancelled())
++            {
++                par1World.func_147465_d(par2, par3, par4, this, l, 3);
++                return false;
++            }
+         }
+-        else if (this == Blocks.red_mushroom)
+-        {
+-            worldgenbigmushroom = new WorldGenBigMushroom(1);
+-        }
++        else 
++        { // do vanilla
++            if (this == Blocks.brown_mushroom)
++            {
++                worldgenbigmushroom = new WorldGenBigMushroom(0);
++            }
++            else if (this == Blocks.red_mushroom)
++            {
++                worldgenbigmushroom = new WorldGenBigMushroom(1);
++            }
+ 
+-        if (worldgenbigmushroom != null && worldgenbigmushroom.generate(p_149884_1_, p_149884_5_, p_149884_2_, p_149884_3_, p_149884_4_))
+-        {
+-            return true;
++            if (worldgenbigmushroom != null && worldgenbigmushroom.generate(par1World, par5Random, par2, par3, par4))
++            {
++                return true;
++            }
++            else
++            {
++                par1World.func_147465_d(par2, par3, par4, this, l, 3);
++                return false;
++            }
+         }
+-        else
+-        {
+-            p_149884_1_.func_147465_d(p_149884_2_, p_149884_3_, p_149884_4_, this, l, 3);
+-            return false;
+-        }
++        // MCPC+ end        
++
++        return true;
++        // CraftBukkit end
+     }
+ 
+     public boolean func_149851_a(World p_149851_1_, int p_149851_2_, int p_149851_3_, int p_149851_4_, boolean p_149851_5_)
+@@ -132,6 +208,6 @@
+ 
+     public void func_149853_b(World p_149853_1_, Random p_149853_2_, int p_149853_3_, int p_149853_4_, int p_149853_5_)
+     {
+-        this.func_149884_c(p_149853_1_, p_149853_3_, p_149853_4_, p_149853_5_, p_149853_2_);
++        this.fertilizeMushroom(p_149853_1_, p_149853_3_, p_149853_4_, p_149853_5_, p_149853_2_, false, null, null); // CraftBukkit - Add bonemeal, player, and itemstack
+     }
+ }

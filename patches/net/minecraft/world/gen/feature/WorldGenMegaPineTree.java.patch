@@ -1,0 +1,145 @@
+--- ../src-base/minecraft/net/minecraft/world/gen/feature/WorldGenMegaPineTree.java
++++ ../src-work/minecraft/net/minecraft/world/gen/feature/WorldGenMegaPineTree.java
+@@ -9,7 +9,9 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.common.util.ForgeDirection;
+ 
+-public class WorldGenMegaPineTree extends WorldGenHugeTrees
++import org.bukkit.craftbukkit.CraftBlockChangeDelegate; // CraftBukkit
++
++public class WorldGenMegaPineTree extends WorldGenHugeTrees implements BlockSapling.TreeGenerator   // CraftBukkit - add interface
+ {
+     private boolean field_150542_e;
+     private static final String __OBFID = "CL_00000421";
+@@ -22,46 +24,53 @@
+ 
+     public boolean generate(World par1World, Random par2Random, int par3, int par4, int par5)
+     {
++        // CraftBukkit start - Moved to generate
++        return this.generate(new CraftBlockChangeDelegate((org.bukkit.BlockChangeDelegate) par1World), par2Random, par3, par4, par5);
++    }
++
++    public boolean generate(CraftBlockChangeDelegate par1World, Random par2Random, int par3, int par4, int par5)
++    {
++        // CraftBukkit end
+         int l = this.func_150533_a(par2Random);
+ 
+-        if (!this.func_150537_a(par1World, par2Random, par3, par4, par5, l))
++        if (!this.CB_func_150537_a(par1World, par2Random, par3, par4, par5, l))
+         {
+             return false;
+         }
+         else
+         {
+-            this.func_150541_c(par1World, par3, par5, par4 + l, 0, par2Random);
++            this.CB_func_150541_c(par1World, par3, par5, par4 + l, 0, par2Random);
+ 
+             for (int i1 = 0; i1 < l; ++i1)
+             {
+-                Block block = par1World.func_147439_a(par3, par4 + i1, par5);
++                Block block = par1World.getType(par3, par4 + i1, par5);
+ 
+                 if (block.isAir(par1World, par3, par4 + i1, par5) || block.isLeaves(par1World, par3, par4 + i1, par5))
+                 {
+-                    this.func_150516_a(par1World, par3, par4 + i1, par5, Blocks.log, this.woodMetadata);
++                    this.setTypeAndData(par1World, par3, par4 + i1, par5, Blocks.log, this.woodMetadata);
+                 }
+ 
+                 if (i1 < l - 1)
+                 {
+-                    block = par1World.func_147439_a(par3 + 1, par4 + i1, par5);
++                    block = par1World.getType(par3 + 1, par4 + i1, par5);
+ 
+                     if (block.isAir(par1World, par3 + 1, par4 + i1, par5) || block.isLeaves(par1World, par3 + 1, par4 + i1, par5))
+                     {
+-                        this.func_150516_a(par1World, par3 + 1, par4 + i1, par5, Blocks.log, this.woodMetadata);
++                        this.setTypeAndData(par1World, par3 + 1, par4 + i1, par5, Blocks.log, this.woodMetadata);
+                     }
+ 
+-                    block = par1World.func_147439_a(par3 + 1, par4 + i1, par5 + 1);
++                    block = par1World.getType(par3 + 1, par4 + i1, par5 + 1);
+ 
+                     if (block.isAir(par1World, par3 + 1, par4 + i1, par5 + 1) || block.isLeaves(par1World, par3 + 1, par4 + i1, par5 + 1))
+                     {
+-                        this.func_150516_a(par1World, par3 + 1, par4 + i1, par5 + 1, Blocks.log, this.woodMetadata);
++                        this.setTypeAndData(par1World, par3 + 1, par4 + i1, par5 + 1, Blocks.log, this.woodMetadata);
+                     }
+ 
+-                    block = par1World.func_147439_a(par3, par4 + i1, par5 + 1);
++                    block = par1World.getType(par3, par4 + i1, par5 + 1);
+ 
+                     if (block.isAir(par1World, par3, par4 + i1, par5 + 1) || block.isLeaves(par1World, par3, par4 + i1, par5 + 1))
+                     {
+-                        this.func_150516_a(par1World, par3, par4 + i1, par5 + 1, Blocks.log, this.woodMetadata);
++                        this.setTypeAndData(par1World, par3, par4 + i1, par5 + 1, Blocks.log, this.woodMetadata);
+                     }
+                 }
+             }
+@@ -70,7 +79,8 @@
+         }
+     }
+ 
+-    private void func_150541_c(World p_150541_1_, int p_150541_2_, int p_150541_3_, int p_150541_4_, int p_150541_5_, Random p_150541_6_)
++    // CraftBukkit - Changed signature
++    private void CB_func_150541_c(CraftBlockChangeDelegate p_150541_1_, int p_150541_2_, int p_150541_3_, int p_150541_4_, int p_150541_5_, Random p_150541_6_)
+     {
+         int i1 = p_150541_6_.nextInt(5);
+ 
+@@ -89,12 +99,13 @@
+         {
+             int l1 = p_150541_4_ - k1;
+             int i2 = p_150541_5_ + MathHelper.floor_float((float)l1 / (float)i1 * 3.5F);
+-            this.func_150535_a(p_150541_1_, p_150541_2_, k1, p_150541_3_, i2 + (l1 > 0 && i2 == j1 && (k1 & 1) == 0 ? 1 : 0), p_150541_6_);
++            this.CB_func_150535_a(p_150541_1_, p_150541_2_, k1, p_150541_3_, i2 + (l1 > 0 && i2 == j1 && (k1 & 1) == 0 ? 1 : 0), p_150541_6_);
+             j1 = i2;
+         }
+     }
+ 
+-    public void func_150524_b(World p_150524_1_, Random p_150524_2_, int p_150524_3_, int p_150524_4_, int p_150524_5_)
++    // CraftBukkit - Changed signature
++    public void func_150524_b(CraftBlockChangeDelegate p_150524_1_, Random p_150524_2_, int p_150524_3_, int p_150524_4_, int p_150524_5_)
+     {
+         this.func_150539_c(p_150524_1_, p_150524_2_, p_150524_3_ - 1, p_150524_4_, p_150524_5_ - 1);
+         this.func_150539_c(p_150524_1_, p_150524_2_, p_150524_3_ + 2, p_150524_4_, p_150524_5_ - 1);
+@@ -114,7 +125,8 @@
+         }
+     }
+ 
+-    private void func_150539_c(World p_150539_1_, Random p_150539_2_, int p_150539_3_, int p_150539_4_, int p_150539_5_)
++    // CraftBukkit - Changed signature
++    private void func_150539_c(CraftBlockChangeDelegate p_150539_1_, Random p_150539_2_, int p_150539_3_, int p_150539_4_, int p_150539_5_)
+     {
+         for (int l = -2; l <= 2; ++l)
+         {
+@@ -128,15 +140,16 @@
+         }
+     }
+ 
+-    private void func_150540_a(World p_150540_1_, int p_150540_2_, int p_150540_3_, int p_150540_4_)
++    // CraftBukkit - Changed signature
++    private void func_150540_a(CraftBlockChangeDelegate p_150540_1_, int p_150540_2_, int p_150540_3_, int p_150540_4_)
+     {
+         for (int l = p_150540_3_ + 2; l >= p_150540_3_ - 3; --l)
+         {
+-            Block block = p_150540_1_.func_147439_a(p_150540_2_, l, p_150540_4_);
++            Block block = p_150540_1_.getType(p_150540_2_, l, p_150540_4_);
+ 
+             if (block.canSustainPlant(p_150540_1_, p_150540_2_, l, p_150540_4_, ForgeDirection.UP, (BlockSapling)Blocks.sapling))
+             {
+-                this.func_150516_a(p_150540_1_, p_150540_2_, l, p_150540_4_, Blocks.dirt, 2);
++                this.setTypeAndData(p_150540_1_, p_150540_2_, l, p_150540_4_, Blocks.dirt, 2);
+                 break;
+             }
+ 
+@@ -146,4 +159,11 @@
+             }
+         }
+     }
++
++    // MCPC+ start - vanilla compatibility
++    private void func_150541_c(World world, int i, int j, int k, int l, Random random)
++    {
++        this.CB_func_150541_c(new CraftBlockChangeDelegate((org.bukkit.BlockChangeDelegate) world), i, j, k, l, random);
++    }
++    // MCPC+ end
+ }

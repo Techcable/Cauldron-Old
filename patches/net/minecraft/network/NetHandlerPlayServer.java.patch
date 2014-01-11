@@ -1,0 +1,1950 @@
+--- ../src-base/minecraft/net/minecraft/network/NetHandlerPlayServer.java
++++ ../src-work/minecraft/net/minecraft/network/NetHandlerPlayServer.java
+@@ -12,6 +12,8 @@
+ import java.util.Iterator;
+ import java.util.Random;
+ import java.util.concurrent.Callable;
++
++import net.minecraft.block.Block;
+ import net.minecraft.block.material.Material;
+ import net.minecraft.command.server.CommandBlockLogic;
+ import net.minecraft.crash.CrashReport;
+@@ -31,6 +33,7 @@
+ import net.minecraft.inventory.ContainerMerchant;
+ import net.minecraft.inventory.ContainerRepair;
+ import net.minecraft.inventory.Slot;
++import net.minecraft.item.Item;
+ import net.minecraft.item.ItemEditableBook;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.item.ItemWritableBook;
+@@ -60,6 +63,7 @@
+ import net.minecraft.network.play.server.S00PacketKeepAlive;
+ import net.minecraft.network.play.server.S02PacketChat;
+ import net.minecraft.network.play.server.S08PacketPlayerPosLook;
++import net.minecraft.network.play.server.S1CPacketEntityMetadata;
+ import net.minecraft.network.play.server.S23PacketBlockChange;
+ import net.minecraft.network.play.server.S2FPacketSetSlot;
+ import net.minecraft.network.play.server.S32PacketConfirmTransaction;
+@@ -80,6 +84,7 @@
+ import net.minecraft.util.IChatComponent;
+ import net.minecraft.util.IntHashMap;
+ import net.minecraft.util.ReportedException;
++import net.minecraft.world.World;
+ import net.minecraft.world.WorldServer;
+ import org.apache.commons.lang3.StringUtils;
+ import org.apache.logging.log4j.LogManager;
+@@ -87,12 +92,65 @@
+ 
+ import net.minecraftforge.common.ForgeHooks;
+ import net.minecraftforge.common.MinecraftForge;
+-import cpw.mods.fml.common.eventhandler.Event;
+ import net.minecraftforge.event.ForgeEventFactory;
+ import net.minecraftforge.event.ServerChatEvent;
+ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+-import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
+ 
++// CraftBukkit start
++import java.io.UnsupportedEncodingException;
++import java.util.concurrent.ExecutionException;
++import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
++import java.util.HashSet;
++
++import net.minecraft.entity.EntityLiving;
++import net.minecraft.init.Blocks;
++import net.minecraft.network.play.server.S05PacketSpawnPosition;
++import net.minecraft.network.play.server.S09PacketHeldItemChange;
++import net.minecraft.network.play.server.S1BPacketEntityAttach;
++import net.minecraft.network.play.server.S33PacketUpdateSign;
++import net.minecraft.util.MathHelper;
++import net.minecraft.util.MovingObjectPosition;
++import net.minecraft.util.Vec3;
++
++import org.bukkit.craftbukkit.entity.CraftPlayer;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.util.CraftChatMessage;
++import org.bukkit.craftbukkit.util.LazyPlayerSet;
++import org.bukkit.craftbukkit.util.Waitable;
++
++import org.bukkit.Location;
++import org.bukkit.entity.Player;
++import org.bukkit.event.Event;
++import org.bukkit.event.block.Action;
++import org.bukkit.event.block.SignChangeEvent;
++import org.bukkit.event.inventory.ClickType;
++import org.bukkit.event.inventory.CraftItemEvent;
++import org.bukkit.event.inventory.InventoryAction;
++import org.bukkit.event.inventory.InventoryClickEvent;
++import org.bukkit.event.inventory.InventoryCreativeEvent;
++import org.bukkit.event.inventory.InventoryType.SlotType;
++import org.bukkit.event.player.AsyncPlayerChatEvent;
++import org.bukkit.event.player.PlayerAnimationEvent;
++import org.bukkit.event.player.PlayerChatEvent;
++import org.bukkit.event.player.PlayerCommandPreprocessEvent;
++import org.bukkit.event.player.PlayerInteractEntityEvent;
++import org.bukkit.event.player.PlayerItemHeldEvent;
++import org.bukkit.event.player.PlayerKickEvent;
++import org.bukkit.event.player.PlayerMoveEvent;
++import org.bukkit.event.player.PlayerTeleportEvent;
++import org.bukkit.event.player.PlayerToggleFlightEvent;
++import org.bukkit.event.player.PlayerToggleSneakEvent;
++import org.bukkit.event.player.PlayerToggleSprintEvent;
++import org.bukkit.inventory.CraftingInventory;
++import org.bukkit.inventory.InventoryView;
++import org.bukkit.util.NumberConversions;
++// CraftBukkit end
++import org.bukkit.event.inventory.InventoryType; // MCPC+
++
++import za.co.mcportcentral.MCPCUtils;
++
+ public class NetHandlerPlayServer implements INetHandlerPlayServer
+ {
+     private static final Logger field_147370_c = LogManager.getLogger();
+@@ -106,13 +164,15 @@
+     private long field_147379_i;
+     private static Random field_147376_j = new Random();
+     private long field_147377_k;
+-    private int field_147374_l;
++    private volatile int field_147374_l; // MCPC+ - set to volatile to fix multithreaded issues
++    private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, "field_147374_l"); // CraftBukkit - multithreaded field
+     private int field_147375_m;
+     private IntHashMap field_147372_n = new IntHashMap();
+     private double field_147373_o;
+     private double field_147382_p;
+     private double field_147381_q;
+-    private boolean field_147380_r = true;
++    public boolean field_147380_r = true; // CraftBukkit - private -> public
++    private boolean processedDisconnect; // CraftBukkit - added
+     private static final String __OBFID = "CL_00001452";
+ 
+     public NetHandlerPlayServer(MinecraftServer par1MinecraftServer, NetworkManager par2INetworkManager, EntityPlayerMP par3EntityPlayerMP)
+@@ -122,8 +182,41 @@
+         par2INetworkManager.func_150719_a(this);
+         this.field_147369_b = par3EntityPlayerMP;
+         par3EntityPlayerMP.playerNetServerHandler = this;
++        // CraftBukkit start
++        this.server = par1MinecraftServer.server;
+     }
+ 
++    private final org.bukkit.craftbukkit.CraftServer server;
++    private int lastTick = MinecraftServer.currentTick;
++    private int lastDropTick = MinecraftServer.currentTick;
++    private int dropCount = 0;
++    private static final int SURVIVAL_PLACE_DISTANCE_SQUARED = 6 * 6;
++    private static final int CREATIVE_PLACE_DISTANCE_SQUARED = 7 * 7;
++
++    // Get position of last block hit for BlockDamageLevel.STOPPED
++    private double lastPosX = Double.MAX_VALUE;
++    private double lastPosY = Double.MAX_VALUE;
++    private double lastPosZ = Double.MAX_VALUE;
++    private float lastPitch = Float.MAX_VALUE;
++    private float lastYaw = Float.MAX_VALUE;
++    private boolean justTeleported = false;
++    private boolean hasMoved; // Spigot
++
++    // For the PacketPlayOutBlockPlace hack :(
++    Long lastPacket;
++
++    // Store the last block right clicked and what type it was
++    private Item lastMaterial;
++
++    // MCPC+ - rename getPlayer -> getPlayerB() to disambiguate with FML's getPlayer() method of the same name (below)
++    // Plugins calling this method will be remapped appropriately, but CraftBukkit code should be updated
++    public CraftPlayer getPlayerB()
++    {
++        return (this.field_147369_b == null) ? null : (CraftPlayer) this.field_147369_b.getBukkitEntity();
++    }
++    private final static HashSet<Integer> invalidItems = new HashSet<Integer>(java.util.Arrays.asList(8, 9, 10, 11, 26, 34, 36, 43, 51, 52, 55, 59, 60, 62, 63, 64, 68, 71, 74, 75, 83, 90, 92, 93, 94, 104, 105, 115, 117, 118, 119, 125, 127, 132, 137, 140, 141, 142, 144)); // TODO: Check after every update.
++    // CraftBukkit end
++
+     public void func_147233_a()
+     {
+         this.field_147366_g = false;
+@@ -138,10 +231,16 @@
+             this.func_147359_a(new S00PacketKeepAlive(this.field_147378_h));
+         }
+ 
++        // CraftBukkit start
++        for (int spam; (spam = this.field_147374_l) > 0 && !chatSpamField.compareAndSet(this, spam, spam - 1);) ;
++
++        /* Use thread-safe field access instead
+         if (this.field_147374_l > 0)
+         {
+             --this.field_147374_l;
+         }
++        */
++        // CraftBukkit end
+ 
+         if (this.field_147375_m > 0)
+         {
+@@ -159,6 +258,24 @@
+ 
+     public void func_147360_c(String p_147360_1_)
+     {
++        // CraftBukkit start
++        String leaveMessage = EnumChatFormatting.YELLOW + this.field_147369_b.getCommandSenderName() + " left the game.";
++        PlayerKickEvent event = new PlayerKickEvent(this.server.getPlayer(this.field_147369_b), p_147360_1_, leaveMessage);
++
++        if (this.server.getServer().isServerRunning())
++        {
++            this.server.getPluginManager().callEvent(event);
++        }
++
++        if (event.isCancelled())
++        {
++            // Do not kick the player
++            return;
++        }
++
++        // Send the possibly modified leave message
++        p_147360_1_ = event.getReason();
++        // CraftBukkit end
+         final ChatComponentText chatcomponenttext = new ChatComponentText(p_147360_1_);
+         this.field_147371_a.func_150725_a(new S40PacketDisconnect(chatcomponenttext), new GenericFutureListener[] {new GenericFutureListener()
+         {
+@@ -167,8 +284,8 @@
+             {
+                 NetHandlerPlayServer.this.field_147371_a.func_150718_a(chatcomponenttext);
+             }
+-        }
+-                                                                                                     });
++        }});
++        this.func_147231_a(chatcomponenttext); // CraftBukkit - Process quit immediately
+         this.field_147371_a.func_150721_g();
+     }
+ 
+@@ -196,8 +313,85 @@
+                 }
+             }
+ 
+-            if (this.field_147380_r)
++            // CraftBukkit start
++            Player player = this.getPlayerB();
++            Location from = new Location(player.getWorld(), lastPosX, lastPosY, lastPosZ, lastYaw, lastPitch); // Get the Players previous Event location.
++            Location to = player.getLocation().clone(); // Start off the To location as the Players current location.
++
++            // If the packet contains movement information then we update the To location with the correct XYZ.
++            if (p_147347_1_.field_149480_h && !(p_147347_1_.field_149480_h && p_147347_1_.field_149477_b == -999.0D && p_147347_1_.field_149475_d == -999.0D))
+             {
++                to.setX(p_147347_1_.field_149479_a);
++                to.setY(p_147347_1_.field_149477_b);
++                to.setZ(p_147347_1_.field_149478_c);
++            }
++
++            // If the packet contains look information then we update the To location with the correct Yaw & Pitch.
++            if (p_147347_1_.field_149481_i)
++            {
++                to.setYaw(p_147347_1_.field_149476_e);
++                to.setPitch(p_147347_1_.field_149473_f);
++            }
++
++            // Prevent 40 event-calls for less than a single pixel of movement >.>
++            double delta = Math.pow(this.lastPosX - to.getX(), 2) + Math.pow(this.lastPosY - to.getY(), 2) + Math.pow(this.lastPosZ - to.getZ(), 2);
++            float deltaAngle = Math.abs(this.lastYaw - to.getYaw()) + Math.abs(this.lastPitch - to.getPitch());
++
++            if ((delta > 1f / 256 || deltaAngle > 10f) && (this.field_147380_r && !this.field_147369_b.isDead))
++            {
++                this.lastPosX = to.getX();
++                this.lastPosY = to.getY();
++                this.lastPosZ = to.getZ();
++                this.lastYaw = to.getYaw();
++                this.lastPitch = to.getPitch();
++
++                // Skip the first time we do this
++                if (hasMoved)   // Spigot - Better Check!
++                {
++                    PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
++                    this.server.getPluginManager().callEvent(event);
++
++                    // If the event is cancelled we move the player back to their old location.
++                    if (event.isCancelled())
++                    {
++                        this.field_147369_b.playerNetServerHandler.func_147359_a(new S08PacketPlayerPosLook(from.getX(), from.getY() + 1.6200000047683716D, from.getZ(), from.getYaw(), from.getPitch(), false));
++                        return;
++                    }
++
++                    /* If a Plugin has changed the To destination then we teleport the Player
++                    there to avoid any 'Moved wrongly' or 'Moved too quickly' errors.
++                    We only do this if the Event was not cancelled. */
++                    if (!to.equals(event.getTo()) && !event.isCancelled())
++                    {
++                        this.field_147369_b.getBukkitEntity().teleport(event.getTo(), PlayerTeleportEvent.TeleportCause.UNKNOWN);
++                        return;
++                    }
++
++                    /* Check to see if the Players Location has some how changed during the call of the event.
++                    This can happen due to a plugin teleporting the player instead of using .setTo() */
++                    if (!from.equals(this.getPlayerB().getLocation()) && this.justTeleported)
++                    {
++                        this.justTeleported = false;
++                        return;
++                    }
++                }
++                else
++                {
++                    hasMoved = true;    // Spigot - Better Check!
++                }
++            }
++
++            if (Double.isNaN(p_147347_1_.field_149479_a) || Double.isNaN(p_147347_1_.field_149477_b) || Double.isNaN(p_147347_1_.field_149478_c) || Double.isNaN(p_147347_1_.field_149475_d))
++            {
++                player.teleport(player.getWorld().getSpawnLocation(), PlayerTeleportEvent.TeleportCause.UNKNOWN);
++                System.err.println(player.getName() + " was caught trying to crash the server with an invalid position.");
++                player.kickPlayer("Nope!");
++                return;
++            }
++
++            if (this.field_147380_r && !this.field_147369_b.isDead)
++            {
++                // CraftBukkit end
+                 double d1;
+                 double d2;
+                 double d3;
+@@ -315,7 +509,7 @@
+                 double d9 = Math.max(Math.abs(d6), Math.abs(this.field_147369_b.motionZ));
+                 double d10 = d7 * d7 + d8 * d8 + d9 * d9;
+ 
+-                if (d10 > 100.0D && (!this.field_147367_d.isSinglePlayer() || !this.field_147367_d.getServerOwner().equals(this.field_147369_b.getCommandSenderName())))
++                if (d10 > 100.0D && this.field_147380_r && (!this.field_147367_d.isSinglePlayer() || !this.field_147367_d.getServerOwner().equals(this.field_147369_b.getCommandSenderName())))   // CraftBukkit - Added this.checkMovement condition to solve this check being triggered by teleports
+                 {
+                     field_147370_c.warn(this.field_147369_b.getCommandSenderName() + " moved too quickly! " + d4 + "," + d5 + "," + d6 + " (" + d7 + ", " + d8 + ", " + d9 + ")");
+                     this.func_147364_a(this.field_147373_o, this.field_147382_p, this.field_147381_q, this.field_147369_b.rotationYaw, this.field_147369_b.rotationPitch);
+@@ -410,21 +604,86 @@
+ 
+     public void func_147364_a(double p_147364_1_, double p_147364_3_, double p_147364_5_, float p_147364_7_, float p_147364_8_)
+     {
++        // CraftBukkit start - Delegate to teleport(Location)
++        Player player = this.getPlayerB();
++        Location from = player.getLocation();
++        Location to = new Location(this.getPlayerB().getWorld(), p_147364_1_, p_147364_3_, p_147364_5_, p_147364_7_, p_147364_8_);
++        PlayerTeleportEvent event = new PlayerTeleportEvent(player, from, to, PlayerTeleportEvent.TeleportCause.UNKNOWN);
++        this.server.getPluginManager().callEvent(event);
++        from = event.getFrom();
++        to = event.isCancelled() ? from : event.getTo();
++        this.teleport(to);
++    }
++
++    public void teleport(Location dest)
++    {
++        double d0, d1, d2;
++        float f, f1;
++        d0 = dest.getX();
++        d1 = dest.getY();
++        d2 = dest.getZ();
++        f = dest.getYaw();
++        f1 = dest.getPitch();
++
++        // TODO: make sure this is the best way to address this.
++        if (Float.isNaN(f))
++        {
++            f = 0;
++        }
++
++        if (Float.isNaN(f1))
++        {
++            f1 = 0;
++        }
++
++        this.lastPosX = d0;
++        this.lastPosY = d1;
++        this.lastPosZ = d2;
++        this.lastYaw = f;
++        this.lastPitch = f1;
++        this.justTeleported = true;
++        // CraftBukkit end
+         this.field_147380_r = false;
+-        this.field_147373_o = p_147364_1_;
+-        this.field_147382_p = p_147364_3_;
+-        this.field_147381_q = p_147364_5_;
+-        this.field_147369_b.setPositionAndRotation(p_147364_1_, p_147364_3_, p_147364_5_, p_147364_7_, p_147364_8_);
+-        this.field_147369_b.playerNetServerHandler.func_147359_a(new S08PacketPlayerPosLook(p_147364_1_, p_147364_3_ + 1.6200000047683716D, p_147364_5_, p_147364_7_, p_147364_8_, false));
++        this.field_147373_o = d0;
++        this.field_147382_p = d1;
++        this.field_147381_q = d2;
++        this.field_147369_b.setPositionAndRotation(d0, d1, d2, f, f1);
++        this.field_147369_b.playerNetServerHandler.func_147359_a(new S08PacketPlayerPosLook(d0, d1 + 1.6200000047683716D, d2, f, f1, false));
+     }
+ 
+     public void func_147345_a(C07PacketPlayerDigging p_147345_1_)
+     {
++        if (this.field_147369_b.isDead)
++        {
++            return;    // CraftBukkit
++        }
++
+         WorldServer worldserver = this.field_147367_d.worldServerForDimension(this.field_147369_b.dimension);
+         this.field_147369_b.func_143004_u();
+ 
+         if (p_147345_1_.func_149506_g() == 4)
+         {
++            // CraftBukkit start
++            // If the ticks aren't the same then the count starts from 0 and we update the lastDropTick.
++            if (this.lastDropTick != MinecraftServer.currentTick)
++            {
++                this.dropCount = 0;
++                this.lastDropTick = MinecraftServer.currentTick;
++            }
++            else
++            {
++                // Else we increment the drop count and check the amount.
++                this.dropCount++;
++
++                if (this.dropCount >= 20)
++                {
++                    this.field_147370_c.warn(this.field_147369_b.getCommandSenderName() + " dropped their items too quickly!");
++                    this.func_147360_c("You dropped your items too quickly (Hacking?)");
++                    return;
++                }
++            }
++
++            // CraftBukkit end
+             this.field_147369_b.dropOneItem(false);
+         }
+         else if (p_147345_1_.func_149506_g() == 3)
+@@ -487,7 +746,18 @@
+                 }
+                 else
+                 {
++                    // CraftBukkit start
++                    CraftEventFactory.callPlayerInteractEvent(this.field_147369_b, Action.LEFT_CLICK_BLOCK, i, j, k, p_147345_1_.func_149501_f(), this.field_147369_b.inventory.getCurrentItem());
+                     this.field_147369_b.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(i, j, k, worldserver));
++                    // Update any tile entity data for this block
++                    TileEntity tileentity = worldserver.func_147438_o(i, j, k);
++
++                    if (tileentity != null)
++                    {
++                        this.field_147369_b.playerNetServerHandler.func_147359_a(tileentity.func_145844_m());
++                    }
++
++                    // CraftBukkit end
+                 }
+             }
+             else if (p_147345_1_.func_149506_g() == 2)
+@@ -514,6 +784,39 @@
+     public void func_147346_a(C08PacketPlayerBlockPlacement p_147346_1_)
+     {
+         WorldServer worldserver = this.field_147367_d.worldServerForDimension(this.field_147369_b.dimension);
++
++        // CraftBukkit start
++        if (this.field_147369_b.isDead)
++        {
++            return;
++        }
++
++        // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
++        // aimed at a block. We shouldn't need to get the second packet if the data is handled
++        // but we cannot know what the client will do, so we might still get it
++        //
++        // If the time between packets is small enough, and the 'signature' similar, we discard the
++        // second one. This sadly has to remain until Mojang makes their packets saner. :(
++        //  -- Grum
++        if (p_147346_1_.func_149568_f() == 255)
++        {
++            if (p_147346_1_.func_149574_g() != null && p_147346_1_.func_149574_g().getItem() == this.lastMaterial && this.lastPacket != null && p_147346_1_.timestamp - this.lastPacket < 100)
++            {
++                this.lastPacket = null;
++                return;
++            }
++        }
++        else
++        {
++            this.lastMaterial = p_147346_1_.func_149574_g() == null ? null : p_147346_1_.func_149574_g().getItem();
++            this.lastPacket = p_147346_1_.timestamp;
++        }
++
++        // CraftBukkit - if rightclick decremented the item, always send the update packet. */
++        // this is not here for CraftBukkit's own functionality; rather it is to fix
++        // a notch bug where the item doesn't update correctly.
++        boolean always = false;
++        // CraftBukkit end
+         ItemStack itemstack = this.field_147369_b.inventory.getCurrentItem();
+         boolean flag = false;
+         int i = p_147346_1_.func_149576_c();
+@@ -529,11 +832,21 @@
+                 return;
+             }
+ 
+-            PlayerInteractEvent event = ForgeEventFactory.onPlayerInteract(field_147369_b, PlayerInteractEvent.Action.RIGHT_CLICK_AIR, 0, 0, 0, -1);
+-            if (event.useItem != Event.Result.DENY)
++            PlayerInteractEvent forgeEvent = ForgeEventFactory.onPlayerInteract(field_147369_b, PlayerInteractEvent.Action.RIGHT_CLICK_AIR, 0, 0, 0, -1); // MCPC+ - rename event
++            // CraftBukkit start
++            int itemstackAmount = itemstack.stackSize;
++            org.bukkit.event.player.PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(this.field_147369_b, Action.RIGHT_CLICK_AIR, itemstack);
++
++            if (forgeEvent.useItem != cpw.mods.fml.common.eventhandler.Event.Result.DENY && event.useItemInHand() != Event.Result.DENY)
+             {
+                 this.field_147369_b.theItemInWorldManager.tryUseItem(this.field_147369_b, worldserver, itemstack);
+             }
++
++            // CraftBukkit - notch decrements the counter by 1 in the above method with food,
++            // snowballs and so forth, but he does it in a place that doesn't cause the
++            // inventory update packet to get sent
++            always = (itemstack.stackSize != itemstackAmount);
++            // CraftBukkit end
+         }
+         else if (p_147346_1_.func_149571_d() >= this.field_147367_d.getBuildLimit() - 1 && (p_147346_1_.func_149568_f() == 1 || p_147346_1_.func_149571_d() >= this.field_147367_d.getBuildLimit()))
+         {
+@@ -544,13 +857,22 @@
+         }
+         else
+         {
+-            double dist = field_147369_b.theItemInWorldManager.getBlockReachDistance() + 1;
+-            dist *= dist;
+-            if (this.field_147380_r && this.field_147369_b.getDistanceSq((double)i + 0.5D, (double)j + 0.5D, (double)k + 0.5D) < dist && !this.field_147367_d.isBlockProtected(worldserver, i, j, k, this.field_147369_b))
++            // CraftBukkit start - Check if we can actually do something over this large a distance
++            Location eyeLoc = this.getPlayerB().getEyeLocation();
++            double reachDistance = NumberConversions.square(eyeLoc.getX() - i) + NumberConversions.square(eyeLoc.getY() - j) + NumberConversions.square(eyeLoc.getZ() - k);
++
++            if (reachDistance > (this.getPlayerB().getGameMode() == org.bukkit.GameMode.CREATIVE ? CREATIVE_PLACE_DISTANCE_SQUARED : SURVIVAL_PLACE_DISTANCE_SQUARED))
+             {
+-                this.field_147369_b.theItemInWorldManager.activateBlockOrUseItem(this.field_147369_b, worldserver, itemstack, i, j, k, l, p_147346_1_.func_149573_h(), p_147346_1_.func_149569_i(), p_147346_1_.func_149575_j());
++                return;
+             }
+ 
++            // MCPC+ start - record place result so we can update client inventory slot if place event is cancelled. Fixes stacksize client-side bug
++            if (!this.field_147369_b.theItemInWorldManager.activateBlockOrUseItem(this.field_147369_b, worldserver, itemstack, i, j, k, l, p_147346_1_.func_149573_h(), p_147346_1_.func_149569_i(), p_147346_1_.func_149575_j()))
++            {
++                always = true;
++            }
++            // MCPC+ end
++            // CraftBukkit end
+             flag = true;
+         }
+ 
+@@ -604,10 +926,18 @@
+             this.field_147369_b.playerInventoryBeingManipulated = true;
+             this.field_147369_b.inventory.mainInventory[this.field_147369_b.inventory.currentItem] = ItemStack.copyItemStack(this.field_147369_b.inventory.mainInventory[this.field_147369_b.inventory.currentItem]);
+             Slot slot = this.field_147369_b.openContainer.getSlotFromInventory(this.field_147369_b.inventory, this.field_147369_b.inventory.currentItem);
++            // MCPC+ start - abort if no slot, fixes RP2 timer crash block place - see #181   
++            if (slot == null) 
++            {
++                this.field_147369_b.playerInventoryBeingManipulated = false; // set flag to false or it will cause inventory to glitch on death
++                return;
++            }
++            // MCPC+ end
+             this.field_147369_b.openContainer.detectAndSendChanges();
+             this.field_147369_b.playerInventoryBeingManipulated = false;
+ 
+-            if (!ItemStack.areItemStacksEqual(this.field_147369_b.inventory.getCurrentItem(), p_147346_1_.func_149574_g()))
++            // CraftBukkit - TODO CHECK IF NEEDED -- new if structure might not need 'always'. Kept it in for now, but may be able to remove in future
++            if (!ItemStack.areItemStacksEqual(this.field_147369_b.inventory.getCurrentItem(), p_147346_1_.func_149574_g()) || always)
+             {
+                 this.func_147359_a(new S2FPacketSetSlot(this.field_147369_b.openContainer.windowId, slot.slotNumber, this.field_147369_b.inventory.getCurrentItem()));
+             }
+@@ -616,14 +946,35 @@
+ 
+     public void func_147231_a(IChatComponent p_147231_1_)
+     {
+-        field_147370_c.info(this.field_147369_b.getCommandSenderName() + " lost connection: " + p_147231_1_);
++        // CraftBukkit start - Rarely it would send a disconnect line twice
++        if (this.processedDisconnect)
++        {
++            return;
++        }
++        else
++        {
++            this.processedDisconnect = true;
++        }
++
++        // CraftBukkit end
++        field_147370_c.info(this.field_147369_b.getCommandSenderName() + " lost connection: " + p_147231_1_.func_150260_c()); // CraftBukkit - Don't toString the component
+         this.field_147367_d.func_147132_au();
+-        ChatComponentTranslation chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.left", new Object[] {this.field_147369_b.func_145748_c_()});
+-        chatcomponenttranslation.func_150256_b().func_150238_a(EnumChatFormatting.YELLOW);
+-        this.field_147367_d.getConfigurationManager().func_148539_a(chatcomponenttranslation);
++        // CraftBukkit start - Replace vanilla quit message handling with our own.
++        /*
++        ChatMessage chatcomponenttranslation = new ChatMessage("multiplayer.player.left", new Object[] { this.player.getScoreboardDisplayName()});
++
++        chatcomponenttranslation.b().setColor(EnumChatFormat.YELLOW);
++        this.minecraftServer.getPlayerList().sendMessage(chatcomponenttranslation);
++        */
+         this.field_147369_b.mountEntityAndWakeUp();
+-        this.field_147367_d.getConfigurationManager().playerLoggedOut(this.field_147369_b);
++        String quitMessage = this.field_147367_d.getConfigurationManager().disconnect(this.field_147369_b);
+ 
++        if ((quitMessage != null) && (quitMessage.length() > 0))
++        {
++            this.field_147367_d.getConfigurationManager().sendMessage(CraftChatMessage.fromString(quitMessage));
++        }
++
++        // CraftBukkit end
+         if (this.field_147367_d.isSinglePlayer() && this.field_147369_b.getCommandSenderName().equals(this.field_147367_d.getServerOwner()))
+         {
+             field_147370_c.info("Stopping singleplayer server as player logged out");
+@@ -649,6 +1000,19 @@
+             }
+         }
+ 
++        // CraftBukkit start
++        if (p_147359_1_ == null)
++        {
++            return;
++        }
++        else if (p_147359_1_ instanceof S05PacketSpawnPosition)
++        {
++            S05PacketSpawnPosition packet6 = (S05PacketSpawnPosition) p_147359_1_;
++            this.field_147369_b.compassTarget = new Location(this.getPlayerB().getWorld(), packet6.field_149364_a, packet6.field_149362_b, packet6.field_149363_c);
++        }
++
++        // CraftBukkit end
++
+         try
+         {
+             this.field_147371_a.func_150725_a(p_147359_1_, new GenericFutureListener[0]);
+@@ -671,20 +1035,38 @@
+ 
+     public void func_147355_a(C09PacketHeldItemChange p_147355_1_)
+     {
++        // CraftBukkit start
++        if (this.field_147369_b.isDead)
++        {
++            return;
++        }
++
+         if (p_147355_1_.func_149614_c() >= 0 && p_147355_1_.func_149614_c() < InventoryPlayer.getHotbarSize())
+         {
++            PlayerItemHeldEvent event = new PlayerItemHeldEvent(this.getPlayerB(), this.field_147369_b.inventory.currentItem, p_147355_1_.func_149614_c());
++            this.server.getPluginManager().callEvent(event);
++
++            if (event.isCancelled())
++            {
++                this.func_147359_a(new S09PacketHeldItemChange(this.field_147369_b.inventory.currentItem));
++                this.field_147369_b.func_143004_u();
++                return;
++            }
++
++            // CraftBukkit end
+             this.field_147369_b.inventory.currentItem = p_147355_1_.func_149614_c();
+             this.field_147369_b.func_143004_u();
+         }
+         else
+         {
+             field_147370_c.warn(this.field_147369_b.getCommandSenderName() + " tried to set an invalid carried item");
++            this.func_147360_c("Nope!"); // CraftBukkit
+         }
+     }
+ 
+     public void func_147354_a(C01PacketChatMessage p_147354_1_)
+     {
+-        if (this.field_147369_b.func_147096_v() == EntityPlayer.EnumChatVisibility.HIDDEN)
++        if (this.field_147369_b.isDead || this.field_147369_b.func_147096_v() == EntityPlayer.EnumChatVisibility.HIDDEN)   // CraftBukkit - dead men tell no tales
+         {
+             ChatComponentTranslation chatcomponenttranslation = new ChatComponentTranslation("chat.cannotSend", new Object[0]);
+             chatcomponenttranslation.func_150256_b().func_150238_a(EnumChatFormatting.RED);
+@@ -700,15 +1082,75 @@
+             {
+                 if (!ChatAllowedCharacters.isAllowedCharacter(s.charAt(i)))
+                 {
+-                    this.func_147360_c("Illegal characters in chat");
++                    // CraftBukkit start - threadsafety
++                    if (p_147354_1_.func_148836_a())
++                    {
++                        Waitable waitable = new Waitable()
++                        {
++                            @Override
++                            protected Object evaluate()
++                            {
++                                NetHandlerPlayServer.this.func_147360_c("Illegal characters in chat");
++                                return null;
++                            }
++                        };
++                        this.field_147367_d.processQueue.add(waitable);
++
++                        try
++                        {
++                            waitable.get();
++                        }
++                        catch (InterruptedException e)
++                        {
++                            Thread.currentThread().interrupt();
++                        }
++                        catch (ExecutionException e)
++                        {
++                            throw new RuntimeException(e);
++                        }
++                    }
++                    else
++                    {
++                        this.func_147360_c("Illegal characters in chat");
++                    }
++
++                    // CraftBukkit end
+                     return;
+                 }
+             }
+ 
+             if (s.startsWith("/"))
+             {
+-                this.func_147361_d(s);
++                // CraftBukkit start
++                try
++                {
++                    this.field_147367_d.server.playerCommandState = true;
++                    this.func_147361_d(s);
++                }
++                finally
++                {
++                    this.field_147367_d.server.playerCommandState = false;
++                }
+             }
++            else if (s.isEmpty())
++            {
++                field_147370_c.warn(this.field_147369_b.getCommandSenderName() + " tried to send an empty message");
++            }
++            else if (getPlayerB().isConversing())
++            {
++                getPlayerB().acceptConversationInput(s);
++            }
++            else if (this.field_147369_b.func_147096_v() == EntityPlayer.EnumChatVisibility.SYSTEM)     // Re-add "Command Only" flag check
++            {
++                ChatComponentTranslation chatcomponenttranslation = new ChatComponentTranslation("chat.cannotSend", new Object[0]);
++                chatcomponenttranslation.func_150256_b().func_150238_a(EnumChatFormatting.RED);
++                this.func_147359_a(new S02PacketChat(chatcomponenttranslation));
++            }
++            else if (true)
++            {
++                this.chat(s, p_147354_1_.func_148836_a());
++                // CraftBukkit end - the below is for reference. :)
++            }
+             else
+             {
+                 ChatComponentTranslation chatcomponenttranslation1 = new ChatComponentTranslation("chat.type.text", new Object[] {this.field_147369_b.func_145748_c_(), s});
+@@ -717,34 +1159,276 @@
+                 this.field_147367_d.getConfigurationManager().func_148544_a(chatcomponenttranslation1, false);
+             }
+ 
+-            this.field_147374_l += 20;
+-
+-            if (this.field_147374_l > 200 && !this.field_147367_d.getConfigurationManager().isPlayerOpped(this.field_147369_b.getCommandSenderName()))
++            // CraftBukkit start - replaced with thread safe throttle
++            // this.chatThrottle += 20;
++            if (chatSpamField.addAndGet(this, 20) > 200 && !this.field_147367_d.getConfigurationManager().isPlayerOpped(this.field_147369_b.getCommandSenderName()))
+             {
++                // CraftBukkit end
+                 this.func_147360_c("disconnect.spam");
+             }
+         }
+     }
+ 
++    // CraftBukkit start
++    public void chat(String s, boolean async)
++    {
++        if (s.isEmpty() || this.field_147369_b.func_147096_v() == EntityPlayer.EnumChatVisibility.HIDDEN)
++        {
++            return;
++        }
++
++        if (s.startsWith("/"))
++        {
++            this.func_147361_d(s);
++        }
++        else if (this.field_147369_b.func_147096_v() == EntityPlayer.EnumChatVisibility.SYSTEM)
++        {
++            // Do nothing, this is coming from a plugin
++        }
++        else
++        {
++            Player player = this.getPlayerB();
++            AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(async, player, s, new LazyPlayerSet());
++            this.server.getPluginManager().callEvent(event);
++
++            if (PlayerChatEvent.getHandlerList().getRegisteredListeners().length != 0)
++            {
++                // Evil plugins still listening to deprecated event
++                final PlayerChatEvent queueEvent = new PlayerChatEvent(player, event.getMessage(), event.getFormat(), event.getRecipients());
++                queueEvent.setCancelled(event.isCancelled());
++                Waitable waitable = new Waitable()
++                {
++                    @Override
++                    protected Object evaluate()
++                    {
++                        org.bukkit.Bukkit.getPluginManager().callEvent(queueEvent);
++
++                        if (queueEvent.isCancelled())
++                        {
++                            return null;
++                        }
++
++                        String message = String.format(queueEvent.getFormat(), queueEvent.getPlayer().getDisplayName(), queueEvent.getMessage());
++                        NetHandlerPlayServer.this.field_147367_d.console.sendMessage(message);
++
++                        if (((LazyPlayerSet) queueEvent.getRecipients()).isLazy())
++                        {
++                            for (Object player : NetHandlerPlayServer.this.field_147367_d.getConfigurationManager().playerEntityList)
++                            {
++                                ((EntityPlayerMP) player).sendMessage(CraftChatMessage.fromString(message));
++                            }
++                        }
++                        else
++                        {
++                            for (Player player : queueEvent.getRecipients())
++                            {
++                                player.sendMessage(message);
++                            }
++                        }
++
++                        return null;
++                    }
++                };
++
++                if (async)
++                {
++                    field_147367_d.processQueue.add(waitable);
++                }
++                else
++                {
++                    waitable.run();
++                }
++
++                try
++                {
++                    waitable.get();
++                }
++                catch (InterruptedException e)
++                {
++                    Thread.currentThread().interrupt(); // This is proper habit for java. If we aren't handling it, pass it on!
++                }
++                catch (ExecutionException e)
++                {
++                    throw new RuntimeException("Exception processing chat event", e.getCause());
++                }
++            }
++            else
++            {
++                if (event.isCancelled())
++                {
++                    return;
++                }
++
++                s = String.format(event.getFormat(), event.getPlayer().getDisplayName(), event.getMessage());
++                field_147367_d.console.sendMessage(s);
++
++                if (((LazyPlayerSet) event.getRecipients()).isLazy())
++                {
++                    for (Object recipient : field_147367_d.getConfigurationManager().playerEntityList)
++                    {
++                        ((EntityPlayerMP) recipient).sendMessage(CraftChatMessage.fromString(s));
++                    }
++                }
++                else
++                {
++                    for (Player recipient : event.getRecipients())
++                    {
++                        recipient.sendMessage(s);
++                    }
++                }
++            }
++        }
++    }
++    // CraftBukkit end
++
+     private void func_147361_d(String p_147361_1_)
+     {
+-        this.field_147367_d.getCommandManager().executeCommand(this.field_147369_b, p_147361_1_);
++        org.bukkit.craftbukkit.SpigotTimings.playerCommandTimer.startTiming(); // Spigot
++        // CraftBukkit start
++        CraftPlayer player = this.getPlayerB();
++        PlayerCommandPreprocessEvent event = new PlayerCommandPreprocessEvent(player, p_147361_1_, new LazyPlayerSet());
++        this.server.getPluginManager().callEvent(event);
++
++        if (event.isCancelled())
++        {
++            org.bukkit.craftbukkit.SpigotTimings.playerCommandTimer.stopTiming(); // Spigot
++            return;
++        }
++
++        try
++        {
++            // Spigot Start
++            if (org.spigotmc.SpigotConfig.logCommands)
++            {
++                this.field_147370_c.info(event.getPlayer().getName() + " issued server command: " + event.getMessage()); // CraftBukkit
++            }
++
++            // Spigot end
++            // MCPC+ start - handle bukkit/vanilla commands
++            int space = event.getMessage().indexOf(" ");
++            // if bukkit command exists then execute it over vanilla
++            if (this.server.getCommandMap().getCommand(event.getMessage().substring(1, space != -1 ? space : event.getMessage().length())) != null)
++            {
++                this.server.dispatchCommand(event.getPlayer(), event.getMessage().substring(1));
++                org.bukkit.craftbukkit.SpigotTimings.playerCommandTimer.stopTiming(); // Spigot
++                return;
++            }
++            else // process vanilla command
++            {
++                this.server.dispatchVanillaCommand(event.getPlayer(), event.getMessage().substring(1));
++                org.bukkit.craftbukkit.SpigotTimings.playerCommandTimer.stopTiming(); // Spigot
++                return;
++            }
++        }
++        catch (org.bukkit.command.CommandException ex)
++        {
++            player.sendMessage(org.bukkit.ChatColor.RED + "An internal error occurred while attempting to perform this command");
++            java.util.logging.Logger.getLogger(NetHandlerPlayServer.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
++            org.bukkit.craftbukkit.SpigotTimings.playerCommandTimer.stopTiming(); // Spigot
++            return;
++        }
++
++        //this.minecraftServer.getCommandHandler().a(this.player, s);
++        // CraftBukkit end
+     }
+ 
+     public void func_147350_a(C0APacketAnimation p_147350_1_)
+     {
++        if (this.field_147369_b.isDead)
++        {
++            return;    // CraftBukkit
++        }
++
+         this.field_147369_b.func_143004_u();
+ 
+         if (p_147350_1_.func_149421_d() == 1)
+         {
++            // CraftBukkit start - Raytrace to look for 'rogue armswings'
++            float f = 1.0F;
++            float f1 = this.field_147369_b.prevRotationPitch + (this.field_147369_b.rotationPitch - this.field_147369_b.prevRotationPitch) * f;
++            float f2 = this.field_147369_b.prevRotationYaw + (this.field_147369_b.rotationYaw - this.field_147369_b.prevRotationYaw) * f;
++            double d0 = this.field_147369_b.prevPosX + (this.field_147369_b.posX - this.field_147369_b.prevPosX) * (double) f;
++            double d1 = this.field_147369_b.prevPosY + (this.field_147369_b.posY - this.field_147369_b.prevPosY) * (double) f + 1.62D - (double) this.field_147369_b.yOffset;
++            double d2 = this.field_147369_b.prevPosZ + (this.field_147369_b.posZ - this.field_147369_b.prevPosZ) * (double) f;
++            Vec3 vec3 = this.field_147369_b.worldObj.getWorldVec3Pool().getVecFromPool(d0, d1, d2);
++            float f3 = MathHelper.cos(-f2 * 0.017453292F - (float)Math.PI);
++            float f4 = MathHelper.sin(-f2 * 0.017453292F - (float)Math.PI);
++            float f5 = -MathHelper.cos(-f1 * 0.017453292F);
++            float f6 = MathHelper.sin(-f1 * 0.017453292F);
++            float f7 = f4 * f5;
++            float f8 = f3 * f5;
++            double d3 = 5.0D;
++            Vec3 vec31 = vec3.addVector((double) f7 * d3, (double) f6 * d3, (double) f8 * d3);
++            MovingObjectPosition movingobjectposition = this.field_147369_b.worldObj.clip(vec3, vec31, true);
++            boolean valid = false;
++
++            if (movingobjectposition == null || movingobjectposition.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK)
++            {
++                valid = true;
++            }
++            else
++            {
++                Block block = this.field_147369_b.worldObj.func_147439_a(movingobjectposition.blockX, movingobjectposition.blockY, movingobjectposition.blockZ);
++
++                if (!block.func_149662_c())   // Should be isBreakable?
++                {
++                    valid = true;
++                }
++            }
++
++            if (valid)
++            {
++                CraftEventFactory.callPlayerInteractEvent(this.field_147369_b, Action.LEFT_CLICK_AIR, this.field_147369_b.inventory.getCurrentItem());
++            }
++
++            // Arm swing animation
++            PlayerAnimationEvent event = new PlayerAnimationEvent(this.getPlayerB());
++            this.server.getPluginManager().callEvent(event);
++
++            if (event.isCancelled())
++            {
++                return;
++            }
++
++            // CraftBukkit end
+             this.field_147369_b.swingItem();
+         }
+     }
+ 
+     public void func_147357_a(C0BPacketEntityAction p_147357_1_)
+     {
++        // CraftBukkit start
++        if (this.field_147369_b.isDead)
++        {
++            return;
++        }
++
+         this.field_147369_b.func_143004_u();
+ 
++        if (p_147357_1_.func_149513_d() == 1 || p_147357_1_.func_149513_d() == 2)
++        {
++            PlayerToggleSneakEvent event = new PlayerToggleSneakEvent(this.getPlayerB(), p_147357_1_.func_149513_d() == 1);
++            this.server.getPluginManager().callEvent(event);
++
++            if (event.isCancelled())
++            {
++                return;
++            }
++        }
++
++        if (p_147357_1_.func_149513_d() == 4 || p_147357_1_.func_149513_d() == 5)
++        {
++            PlayerToggleSprintEvent event = new PlayerToggleSprintEvent(this.getPlayerB(), p_147357_1_.func_149513_d() == 4);
++            this.server.getPluginManager().callEvent(event);
++
++            if (event.isCancelled())
++            {
++                return;
++            }
++        }
++
++        // CraftBukkit end
++
+         if (p_147357_1_.func_149513_d() == 1)
+         {
+             this.field_147369_b.setSneaking(true);
+@@ -764,7 +1448,7 @@
+         else if (p_147357_1_.func_149513_d() == 3)
+         {
+             this.field_147369_b.wakeUpPlayer(false, true, true);
+-            this.field_147380_r = false;
++            // this.field_147380_r = false; // CraftBukkit - this is handled in teleport
+         }
+         else if (p_147357_1_.func_149513_d() == 6)
+         {
+@@ -781,8 +1465,22 @@
+ 
+     public void func_147340_a(C02PacketUseEntity p_147340_1_)
+     {
++        if (this.field_147369_b.isDead)
++        {
++            return;    // CraftBukkit
++        }
++
+         WorldServer worldserver = this.field_147367_d.worldServerForDimension(this.field_147369_b.dimension);
+-        Entity entity = p_147340_1_.func_149564_a(worldserver);
++        Entity entity = p_147340_1_.func_149564_a((World) worldserver);
++
++        // Spigot Start
++        if (entity == field_147369_b)
++        {
++            func_147360_c("Cannot interact with self!");
++            return;
++        }
++
++        // Spigot End
+         this.field_147369_b.func_143004_u();
+ 
+         if (entity != null)
+@@ -797,9 +1495,49 @@
+ 
+             if (this.field_147369_b.getDistanceSqToEntity(entity) < d0)
+             {
++                ItemStack itemInHand = this.field_147369_b.inventory.getCurrentItem(); // CraftBukkit
++
+                 if (p_147340_1_.func_149565_c() == C02PacketUseEntity.Action.INTERACT)
+                 {
++                    // CraftBukkit start
++                    boolean triggerTagUpdate = itemInHand != null && itemInHand.getItem() == Items.name_tag && entity instanceof EntityLiving;
++                    boolean triggerChestUpdate = itemInHand != null && itemInHand.getItem() == Item.func_150898_a(Blocks.chest) && entity instanceof EntityHorse;
++                    boolean triggerLeashUpdate = itemInHand != null && itemInHand.getItem() == Items.lead && entity instanceof EntityLiving;
++                    PlayerInteractEntityEvent event = new PlayerInteractEntityEvent((Player) this.getPlayerB(), entity.getBukkitEntity());
++                    this.server.getPluginManager().callEvent(event);
++
++                    if (triggerLeashUpdate && (event.isCancelled() || this.field_147369_b.inventory.getCurrentItem() == null || this.field_147369_b.inventory.getCurrentItem().getItem() != Items.lead))
++                    {
++                        // Refresh the current leash state
++                        this.func_147359_a(new S1BPacketEntityAttach(1, entity, ((EntityLiving) entity).getLeashedToEntity()));
++                    }
++
++                    if (triggerTagUpdate && (event.isCancelled() || this.field_147369_b.inventory.getCurrentItem() == null || this.field_147369_b.inventory.getCurrentItem().getItem() != Items.name_tag))
++                    {
++                        // Refresh the current entity metadata
++                        this.func_147359_a(new S1CPacketEntityMetadata(entity.func_145782_y(), entity.dataWatcher, true));
++                    }
++
++                    if (triggerChestUpdate && (event.isCancelled() || this.field_147369_b.inventory.getCurrentItem() == null || this.field_147369_b.inventory.getCurrentItem().getItem() != Item.func_150898_a(Blocks.chest)))
++                    {
++                        this.func_147359_a(new S1CPacketEntityMetadata(entity.func_145782_y(), entity.dataWatcher, true));
++                    }
++
++                    if (event.isCancelled())
++                    {
++                        return;
++                    }
++
++                    // CraftBukkit end
+                     this.field_147369_b.interactWith(entity);
++
++                    // CraftBukkit start
++                    if (itemInHand != null && itemInHand.stackSize <= -1)
++                    {
++                        this.field_147369_b.sendContainerToPlayer(this.field_147369_b.openContainer);
++                    }
++
++                    // CraftBukkit end
+                 }
+                 else if (p_147340_1_.func_149565_c() == C02PacketUseEntity.Action.ATTACK)
+                 {
+@@ -811,6 +1549,14 @@
+                     }
+ 
+                     this.field_147369_b.attackTargetEntityWithCurrentItem(entity);
++
++                    // CraftBukkit start
++                    if (itemInHand != null && itemInHand.stackSize <= -1)
++                    {
++                        this.field_147369_b.sendContainerToPlayer(this.field_147369_b.openContainer);
++                    }
++
++                    // CraftBukkit end
+                 }
+             }
+         }
+@@ -826,7 +1572,7 @@
+             case 1:
+                 if (this.field_147369_b.playerConqueredTheEnd)
+                 {
+-                    this.field_147369_b = this.field_147367_d.getConfigurationManager().respawnPlayer(this.field_147369_b, 0, true);
++                    this.field_147367_d.getConfigurationManager().changeDimension(this.field_147369_b, 0, PlayerTeleportEvent.TeleportCause.END_PORTAL); // CraftBukkit - reroute logic through custom portal management
+                 }
+                 else if (this.field_147369_b.getServerForPlayer().getWorldInfo().isHardcoreModeEnabled())
+                 {
+@@ -864,17 +1610,450 @@
+ 
+     public void func_147356_a(C0DPacketCloseWindow p_147356_1_)
+     {
++        if (this.field_147369_b.isDead)
++        {
++            return;    // CraftBukkit
++        }
++
++        // MCPC+ start - vanilla compatibility
++        try 
++        {
++            if (this.field_147369_b.openContainer.getBukkitView() != null)
++            {
++                CraftEventFactory.handleInventoryCloseEvent(this.field_147369_b); // CraftBukkit
++            }
++        }
++        catch (AbstractMethodError e)
++        {
++            // do nothing
++        }
++        // MCPC+ end
+         this.field_147369_b.closeContainer();
+     }
+ 
+     public void func_147351_a(C0EPacketClickWindow p_147351_1_)
+     {
++        if (this.field_147369_b.isDead)
++        {
++            return;    // CraftBukkit
++        }
++
+         this.field_147369_b.func_143004_u();
+ 
+         if (this.field_147369_b.openContainer.windowId == p_147351_1_.func_149548_c() && this.field_147369_b.openContainer.isPlayerNotUsingContainer(this.field_147369_b))
+         {
+-            ItemStack itemstack = this.field_147369_b.openContainer.slotClick(p_147351_1_.func_149544_d(), p_147351_1_.func_149543_e(), p_147351_1_.func_149542_h(), this.field_147369_b);
++            // CraftBukkit start - Call InventoryClickEvent
++            if (p_147351_1_.func_149544_d() < -1 && p_147351_1_.func_149544_d() != -999)
++            {
++                return;
++            }
+ 
++            InventoryView inventory = this.field_147369_b.openContainer.getBukkitView();
++            SlotType type = CraftInventoryView.getSlotType(inventory, p_147351_1_.func_149544_d());
++            InventoryClickEvent event = null;
++            ClickType click = ClickType.UNKNOWN;
++            InventoryAction action = InventoryAction.UNKNOWN;
++            ItemStack itemstack = null;
++
++            // MCPC+ start - some containers such as NEI's Creative Container does not have a view at this point so we need to create one
++            if (inventory == null)
++            {
++                inventory = new CraftInventoryView(this.field_147369_b.getBukkitEntity(), MinecraftServer.getServer().server.createInventory(this.field_147369_b.getBukkitEntity(), InventoryType.CHEST), this.field_147369_b.openContainer);
++                this.field_147369_b.openContainer.bukkitView = inventory;
++            }
++            // MCPC+ end
++
++            if (p_147351_1_.func_149544_d() == -1)
++            {
++                type = SlotType.OUTSIDE; // override
++                click = p_147351_1_.func_149543_e() == 0 ? ClickType.WINDOW_BORDER_LEFT : ClickType.WINDOW_BORDER_RIGHT;
++                action = InventoryAction.NOTHING;
++            }
++            else if (p_147351_1_.func_149542_h() == 0)
++            {
++                if (p_147351_1_.func_149543_e() == 0)
++                {
++                    click = ClickType.LEFT;
++                }
++                else if (p_147351_1_.func_149543_e() == 1)
++                {
++                    click = ClickType.RIGHT;
++                }
++
++                if (p_147351_1_.func_149543_e() == 0 || p_147351_1_.func_149543_e() == 1)
++                {
++                    action = InventoryAction.NOTHING; // Don't want to repeat ourselves
++
++                    if (p_147351_1_.func_149544_d() == -999)
++                    {
++                        if (field_147369_b.inventory.getItemStack() != null)
++                        {
++                            action = p_147351_1_.func_149543_e() == 0 ? InventoryAction.DROP_ALL_CURSOR : InventoryAction.DROP_ONE_CURSOR;
++                        }
++                    }
++                    else
++                    {
++                        Slot slot = this.field_147369_b.openContainer.getSlot(p_147351_1_.func_149544_d());
++
++                        if (slot != null)
++                        {
++                            ItemStack clickedItem = slot.getStack();
++                            ItemStack cursor = field_147369_b.inventory.getItemStack();
++
++                            if (clickedItem == null)
++                            {
++                                if (cursor != null)
++                                {
++                                    action = p_147351_1_.func_149543_e() == 0 ? InventoryAction.PLACE_ALL : InventoryAction.PLACE_ONE;
++                                }
++                            }
++                            else if (slot.canTakeStack(field_147369_b))     // Should be Slot.isPlayerAllowed
++                            {
++                                if (cursor == null)
++                                {
++                                    action = p_147351_1_.func_149543_e() == 0 ? InventoryAction.PICKUP_ALL : InventoryAction.PICKUP_HALF;
++                                }
++                                else if (slot.isItemValid(cursor))     // Should be Slot.isItemAllowed
++                                {
++                                    if (clickedItem.isItemEqual(cursor) && ItemStack.areItemStackTagsEqual(clickedItem, cursor))
++                                    {
++                                        int toPlace = p_147351_1_.func_149543_e() == 0 ? cursor.stackSize : 1;
++                                        toPlace = Math.min(toPlace, clickedItem.getMaxStackSize() - clickedItem.stackSize);
++                                        toPlace = Math.min(toPlace, slot.inventory.getInventoryStackLimit() - clickedItem.stackSize);
++
++                                        if (toPlace == 1)
++                                        {
++                                            action = InventoryAction.PLACE_ONE;
++                                        }
++                                        else if (toPlace == cursor.stackSize)
++                                        {
++                                            action = InventoryAction.PLACE_ALL;
++                                        }
++                                        else if (toPlace < 0)
++                                        {
++                                            action = toPlace != -1 ? InventoryAction.PICKUP_SOME : InventoryAction.PICKUP_ONE; // this happens with oversized stacks
++                                        }
++                                        else if (toPlace != 0)
++                                        {
++                                            action = InventoryAction.PLACE_SOME;
++                                        }
++                                    }
++                                    else if (cursor.stackSize <= slot.getSlotStackLimit())     // Should be Slot.getMaxStackSize()
++                                    {
++                                        action = InventoryAction.SWAP_WITH_CURSOR;
++                                    }
++                                }
++                                else if (cursor.getItem() == clickedItem.getItem() && (!cursor.getHasSubtypes() || cursor.getItemDamage() == clickedItem.getItemDamage()) && ItemStack.areItemStackTagsEqual(cursor, clickedItem))
++                                {
++                                    if (clickedItem.stackSize >= 0)
++                                    {
++                                        if (clickedItem.stackSize + cursor.stackSize <= cursor.getMaxStackSize())
++                                        {
++                                            // As of 1.5, this is result slots only
++                                            action = InventoryAction.PICKUP_ALL;
++                                        }
++                                    }
++                                }
++                            }
++                        }
++                    }
++                }
++            }
++            else if (p_147351_1_.func_149542_h() == 1)
++            {
++                if (p_147351_1_.func_149543_e() == 0)
++                {
++                    click = ClickType.SHIFT_LEFT;
++                }
++                else if (p_147351_1_.func_149543_e() == 1)
++                {
++                    click = ClickType.SHIFT_RIGHT;
++                }
++
++                if (p_147351_1_.func_149543_e() == 0 || p_147351_1_.func_149543_e() == 1)
++                {
++                    if (p_147351_1_.func_149544_d() < 0)
++                    {
++                        action = InventoryAction.NOTHING;
++                    }
++                    else
++                    {
++                        Slot slot = this.field_147369_b.openContainer.getSlot(p_147351_1_.func_149544_d());
++
++                        if (slot != null && slot.canTakeStack(this.field_147369_b) && slot.getHasStack())   // Should be Slot.hasItem()
++                        {
++                            action = InventoryAction.MOVE_TO_OTHER_INVENTORY;
++                        }
++                        else
++                        {
++                            action = InventoryAction.NOTHING;
++                        }
++                    }
++                }
++            }
++            else if (p_147351_1_.func_149542_h() == 2)
++            {
++                if (p_147351_1_.func_149543_e() >= 0 && p_147351_1_.func_149543_e() < 9)
++                {
++                    click = ClickType.NUMBER_KEY;
++                    Slot clickedSlot = this.field_147369_b.openContainer.getSlot(p_147351_1_.func_149544_d());
++
++                    if (clickedSlot.canTakeStack(field_147369_b))
++                    {
++                        ItemStack hotbar = this.field_147369_b.inventory.getStackInSlot(p_147351_1_.func_149543_e());
++                        boolean canCleanSwap = hotbar == null || (clickedSlot.inventory == field_147369_b.inventory && clickedSlot.isItemValid(hotbar)); // the slot will accept the hotbar item
++
++                        if (clickedSlot.getHasStack())
++                        {
++                            if (canCleanSwap)
++                            {
++                                action = InventoryAction.HOTBAR_SWAP;
++                            }
++                            else
++                            {
++                                int firstEmptySlot = field_147369_b.inventory.getFirstEmptyStack(); // Should be Inventory.firstEmpty()
++
++                                if (firstEmptySlot > -1)
++                                {
++                                    action = InventoryAction.HOTBAR_MOVE_AND_READD;
++                                }
++                                else
++                                {
++                                    action = InventoryAction.NOTHING; // This is not sane! Mojang: You should test for other slots of same type
++                                }
++                            }
++                        }
++                        else if (!clickedSlot.getHasStack() && hotbar != null && clickedSlot.isItemValid(hotbar))
++                        {
++                            action = InventoryAction.HOTBAR_SWAP;
++                        }
++                        else
++                        {
++                            action = InventoryAction.NOTHING;
++                        }
++                    }
++                    else
++                    {
++                        action = InventoryAction.NOTHING;
++                    }
++
++                    // Special constructor for number key
++                    event = new InventoryClickEvent(inventory, type, p_147351_1_.func_149544_d(), click, action, p_147351_1_.func_149543_e());
++                }
++            }
++            else if (p_147351_1_.func_149542_h() == 3)
++            {
++                if (p_147351_1_.func_149543_e() == 2)
++                {
++                    click = ClickType.MIDDLE;
++
++                    if (p_147351_1_.func_149544_d() == -999)
++                    {
++                        action = InventoryAction.NOTHING;
++                    }
++                    else
++                    {
++                        Slot slot = this.field_147369_b.openContainer.getSlot(p_147351_1_.func_149544_d());
++
++                        if (slot != null && slot.getHasStack() && field_147369_b.capabilities.isCreativeMode && field_147369_b.inventory.getItemStack() == null)
++                        {
++                            action = InventoryAction.CLONE_STACK;
++                        }
++                        else
++                        {
++                            action = InventoryAction.NOTHING;
++                        }
++                    }
++                }
++                else
++                {
++                    click = ClickType.UNKNOWN;
++                    action = InventoryAction.UNKNOWN;
++                }
++            }
++            else if (p_147351_1_.func_149542_h() == 4)
++            {
++                if (p_147351_1_.func_149544_d() >= 0)
++                {
++                    if (p_147351_1_.func_149543_e() == 0)
++                    {
++                        click = ClickType.DROP;
++                        Slot slot = this.field_147369_b.openContainer.getSlot(p_147351_1_.func_149544_d());
++
++                        if (slot != null && slot.getHasStack() && slot.canTakeStack(field_147369_b) && slot.getStack() != null && slot.getStack().getItem() != Item.func_150898_a(Blocks.air))
++                        {
++                            action = InventoryAction.DROP_ONE_SLOT;
++                        }
++                        else
++                        {
++                            action = InventoryAction.NOTHING;
++                        }
++                    }
++                    else if (p_147351_1_.func_149543_e() == 1)
++                    {
++                        click = ClickType.CONTROL_DROP;
++                        Slot slot = this.field_147369_b.openContainer.getSlot(p_147351_1_.func_149544_d());
++
++                        if (slot != null && slot.getHasStack() && slot.canTakeStack(field_147369_b) && slot.getStack() != null && slot.getStack().getItem() != Item.func_150898_a(Blocks.air))
++                        {
++                            action = InventoryAction.DROP_ALL_SLOT;
++                        }
++                        else
++                        {
++                            action = InventoryAction.NOTHING;
++                        }
++                    }
++                }
++                else
++                {
++                    // Sane default (because this happens when they are holding nothing. Don't ask why.)
++                    click = ClickType.LEFT;
++
++                    if (p_147351_1_.func_149543_e() == 1)
++                    {
++                        click = ClickType.RIGHT;
++                    }
++
++                    action = InventoryAction.NOTHING;
++                }
++            }
++            else if (p_147351_1_.func_149542_h() == 5)
++            {
++                itemstack = this.field_147369_b.openContainer.slotClick(p_147351_1_.func_149544_d(), p_147351_1_.func_149543_e(), 5, this.field_147369_b);
++            }
++            else if (p_147351_1_.func_149542_h() == 6)
++            {
++                click = ClickType.DOUBLE_CLICK;
++                action = InventoryAction.NOTHING;
++
++                if (p_147351_1_.func_149544_d() >= 0 && this.field_147369_b.inventory.getItemStack() != null)
++                {
++                    ItemStack cursor = this.field_147369_b.inventory.getItemStack();
++                    action = InventoryAction.NOTHING;
++
++                    // Quick check for if we have any of the item
++                    // MCPC+ start - can't call getContents() on modded IInventory; CB-added method
++                    try {
++                    if (inventory.getTopInventory().contains(org.bukkit.Material.getMaterial(Item.func_150891_b(cursor.getItem()))) || inventory.getBottomInventory().contains(org.bukkit.Material.getMaterial(Item.func_150891_b(cursor.getItem()))))
++                    {
++                        action = InventoryAction.COLLECT_TO_CURSOR;
++                    }
++                    } catch (AbstractMethodError ex) {
++                        // nothing we can do
++                    }
++                    // MCPC+ end
++                }
++            }
++
++            // TODO check on updates
++
++            if (p_147351_1_.func_149542_h() != 5)
++            {
++                if (click == ClickType.NUMBER_KEY)
++                {
++                    event = new InventoryClickEvent(inventory, type, p_147351_1_.func_149544_d(), click, action, p_147351_1_.func_149543_e());
++                }
++                else
++                {
++                    event = new InventoryClickEvent(inventory, type, p_147351_1_.func_149544_d(), click, action);
++                }
++
++                org.bukkit.inventory.Inventory top = inventory.getTopInventory();
++
++                if (p_147351_1_.func_149544_d() == 0 && top instanceof CraftingInventory)
++                {
++                    // MCPC+ start - vanilla compatibility (mod recipes)
++                    org.bukkit.inventory.Recipe recipe = null;
++                    try
++                    {
++                        recipe = ((CraftingInventory) top).getRecipe();
++                    }
++                    catch (AbstractMethodError e)
++                    {
++                        // do nothing
++                    }
++                    // MCPC+ end
++
++                    if (recipe != null)
++                    {
++                        if (click == ClickType.NUMBER_KEY)
++                        {
++                            event = new CraftItemEvent(recipe, inventory, type, p_147351_1_.func_149544_d(), click, action, p_147351_1_.func_149543_e());
++                        }
++                        else
++                        {
++                            event = new CraftItemEvent(recipe, inventory, type, p_147351_1_.func_149544_d(), click, action);
++                        }
++                    }
++                }
++
++                server.getPluginManager().callEvent(event);
++
++                switch (event.getResult())
++                {
++                    case ALLOW:
++                    case DEFAULT:
++                        itemstack = this.field_147369_b.openContainer.slotClick(p_147351_1_.func_149544_d(), p_147351_1_.func_149543_e(), p_147351_1_.func_149542_h(), this.field_147369_b);
++                        break;
++                    case DENY:
++                        /* Needs enum constructor in InventoryAction
++                        if (action.modifiesOtherSlots()) {
++                        } else {
++                            if (action.modifiesCursor()) {
++                                this.player.playerConnection.sendPacket(new Packet103SetSlot(-1, -1, this.player.inventory.getCarried()));
++                            }
++                            if (action.modifiesClicked()) {
++                                this.player.playerConnection.sendPacket(new Packet103SetSlot(this.player.activeContainer.windowId, packet102windowclick.slot, this.player.activeContainer.getSlot(packet102windowclick.slot).getItem()));
++                            }
++                        }*/
++                        switch (action)
++                        {
++                                // Modified other slots
++                            case PICKUP_ALL:
++                            case MOVE_TO_OTHER_INVENTORY:
++                            case HOTBAR_MOVE_AND_READD:
++                            case HOTBAR_SWAP:
++                            case COLLECT_TO_CURSOR:
++                            case UNKNOWN:
++                                this.field_147369_b.sendContainerToPlayer(this.field_147369_b.openContainer);
++                                break;
++
++                                // Modified cursor and clicked
++                            case PICKUP_SOME:
++                            case PICKUP_HALF:
++                            case PICKUP_ONE:
++                            case PLACE_ALL:
++                            case PLACE_SOME:
++                            case PLACE_ONE:
++                            case SWAP_WITH_CURSOR:
++                                this.field_147369_b.playerNetServerHandler.func_147359_a(new S2FPacketSetSlot(-1, -1, this.field_147369_b.inventory.getItemStack()));
++                                this.field_147369_b.playerNetServerHandler.func_147359_a(new S2FPacketSetSlot(this.field_147369_b.openContainer.windowId, p_147351_1_.func_149544_d(), this.field_147369_b.openContainer.getSlot(p_147351_1_.func_149544_d()).getStack()));
++                                break;
++
++                                // Modified clicked only
++                            case DROP_ALL_SLOT:
++                            case DROP_ONE_SLOT:
++                                this.field_147369_b.playerNetServerHandler.func_147359_a(new S2FPacketSetSlot(this.field_147369_b.openContainer.windowId, p_147351_1_.func_149544_d(), this.field_147369_b.openContainer.getSlot(p_147351_1_.func_149544_d()).getStack()));
++                                break;
++
++                                // Modified cursor only
++                            case DROP_ALL_CURSOR:
++                            case DROP_ONE_CURSOR:
++                            case CLONE_STACK:
++                                this.field_147369_b.playerNetServerHandler.func_147359_a(new S2FPacketSetSlot(-1, -1, this.field_147369_b.inventory.getItemStack()));
++                                break;
++
++                                // Nothing
++                            case NOTHING:
++                                break;
++                        }
++
++                        return;
++                }
++            }
++
++            // CraftBukkit end
++
+             if (ItemStack.areItemStacksEqual(p_147351_1_.func_149546_g(), itemstack))
+             {
+                 this.field_147369_b.playerNetServerHandler.func_147359_a(new S32PacketConfirmTransaction(p_147351_1_.func_149548_c(), p_147351_1_.func_149547_f(), true));
+@@ -896,6 +2075,14 @@
+                 }
+ 
+                 this.field_147369_b.sendContainerAndContentsToPlayer(this.field_147369_b.openContainer, arraylist);
++
++                // CraftBukkit start - Send a Set Slot to update the crafting result slot
++                if (type == SlotType.RESULT && itemstack != null)
++                {
++                    this.field_147369_b.playerNetServerHandler.func_147359_a(new S2FPacketSetSlot(this.field_147369_b.openContainer.windowId, 0, itemstack));
++                }
++
++                // CraftBukkit end
+             }
+         }
+     }
+@@ -918,9 +2105,60 @@
+             boolean flag = p_147344_1_.func_149627_c() < 0;
+             ItemStack itemstack = p_147344_1_.func_149625_d();
+             boolean flag1 = p_147344_1_.func_149627_c() >= 1 && p_147344_1_.func_149627_c() < 36 + InventoryPlayer.getHotbarSize();
+-            boolean flag2 = itemstack == null || itemstack.getItem() != null;
++            // CraftBukkit - Add invalidItems check
++            boolean flag2 = itemstack == null || itemstack.getItem() != null && !invalidItems.contains(Item.func_150891_b(itemstack.getItem()));
+             boolean flag3 = itemstack == null || itemstack.getItemDamage() >= 0 && itemstack.stackSize <= 64 && itemstack.stackSize > 0;
+ 
++            // CraftBukkit start - Call click event
++            if (flag || (flag1 && !ItemStack.areItemStacksEqual(this.field_147369_b.inventoryContainer.getSlot(p_147344_1_.func_149627_c()).getStack(), p_147344_1_.func_149625_d())))   // Insist on valid slot
++            {
++                org.bukkit.entity.HumanEntity player = this.field_147369_b.getBukkitEntity();
++                InventoryView inventory = new CraftInventoryView(player, player.getInventory(), this.field_147369_b.inventoryContainer);
++                org.bukkit.inventory.ItemStack item = CraftItemStack.asBukkitCopy(p_147344_1_.func_149625_d()); // Should be packet107setcreativeslot.newitem
++                SlotType type = SlotType.QUICKBAR;
++
++                if (flag)
++                {
++                    type = SlotType.OUTSIDE;
++                }
++                else if (p_147344_1_.func_149627_c() < 36)
++                {
++                    if (p_147344_1_.func_149627_c() >= 5 && p_147344_1_.func_149627_c() < 9)
++                    {
++                        type = SlotType.ARMOR;
++                    }
++                    else
++                    {
++                        type = SlotType.CONTAINER;
++                    }
++                }
++
++                InventoryCreativeEvent event = new InventoryCreativeEvent(inventory, type, flag ? -999 : p_147344_1_.func_149627_c(), item);
++                server.getPluginManager().callEvent(event);
++                itemstack = CraftItemStack.asNMSCopy(event.getCursor());
++
++                switch (event.getResult())
++                {
++                    case ALLOW:
++                        // Plugin cleared the id / stacksize checks
++                        flag2 = flag3 = true;
++                        break;
++                    case DEFAULT:
++                        break;
++                    case DENY:
++                        // Reset the slot
++                        if (p_147344_1_.func_149627_c() >= 0)
++                        {
++                            this.field_147369_b.playerNetServerHandler.func_147359_a(new S2FPacketSetSlot(this.field_147369_b.inventoryContainer.windowId, p_147344_1_.func_149627_c(), this.field_147369_b.inventoryContainer.getSlot(p_147344_1_.func_149627_c()).getStack()));
++                            this.field_147369_b.playerNetServerHandler.func_147359_a(new S2FPacketSetSlot(-1, -1, null));
++                        }
++
++                        return;
++                }
++            }
++
++            // CraftBukkit end
++
+             if (flag1 && flag2 && flag3)
+             {
+                 if (itemstack == null)
+@@ -949,8 +2187,13 @@
+ 
+     public void func_147339_a(C0FPacketConfirmTransaction p_147339_1_)
+     {
+-        Short oshort = (Short)this.field_147372_n.lookup(this.field_147369_b.openContainer.windowId);
++        if (this.field_147369_b.isDead)
++        {
++            return;    // CraftBukkit
++        }
+ 
++        Short oshort = (Short) this.field_147372_n.lookup(this.field_147369_b.openContainer.windowId);
++
+         if (oshort != null && p_147339_1_.func_149533_d() == oshort.shortValue() && this.field_147369_b.openContainer.windowId == p_147339_1_.func_149532_c() && !this.field_147369_b.openContainer.isPlayerNotUsingContainer(this.field_147369_b))
+         {
+             this.field_147369_b.openContainer.setPlayerIsPresent(this.field_147369_b, true);
+@@ -959,6 +2202,11 @@
+ 
+     public void func_147343_a(C12PacketUpdateSign p_147343_1_)
+     {
++        if (this.field_147369_b.isDead)
++        {
++            return;    // CraftBukkit
++        }
++
+         this.field_147369_b.func_143004_u();
+         WorldServer worldserver = this.field_147367_d.worldServerForDimension(this.field_147369_b.dimension);
+ 
+@@ -973,6 +2221,7 @@
+                 if (!tileentitysign.func_145914_a() || tileentitysign.func_145911_b() != this.field_147369_b)
+                 {
+                     this.field_147367_d.logWarning("Player " + this.field_147369_b.getCommandSenderName() + " just tried to change non-editable sign");
++                    this.func_147359_a(new S33PacketUpdateSign(p_147343_1_.func_149588_c(), p_147343_1_.func_149586_d(), p_147343_1_.func_149585_e(), tileentitysign.field_145915_a)); // CraftBukkit
+                     return;
+                 }
+             }
+@@ -983,6 +2232,7 @@
+             for (j = 0; j < 4; ++j)
+             {
+                 boolean flag = true;
++                p_147343_1_.func_149589_f()[j] = p_147343_1_.func_149589_f()[j].replaceAll("\uF700", "").replaceAll("\uF701", "");     // Spigot - Mac OSX sends weird chars
+ 
+                 if (p_147343_1_.func_149589_f()[j].length() > 15)
+                 {
+@@ -1010,8 +2260,29 @@
+                 j = p_147343_1_.func_149588_c();
+                 int k = p_147343_1_.func_149586_d();
+                 i = p_147343_1_.func_149585_e();
+-                TileEntitySign tileentitysign1 = (TileEntitySign)tileentity;
+-                System.arraycopy(p_147343_1_.func_149589_f(), 0, tileentitysign1.field_145915_a, 0, 4);
++                TileEntitySign tileentitysign1 = (TileEntitySign) tileentity;
++                // CraftBukkit start
++                Player player = this.server.getPlayer(this.field_147369_b);
++                SignChangeEvent event = new SignChangeEvent((org.bukkit.craftbukkit.block.CraftBlock) player.getWorld().getBlockAt(j, k, i), this.server.getPlayer(this.field_147369_b), p_147343_1_.func_149589_f());
++                this.server.getPluginManager().callEvent(event);
++
++                if (!event.isCancelled())
++                {
++                    for (int l = 0; l < 4; ++l)
++                    {
++                        tileentitysign1.field_145915_a[l] = event.getLine(l);
++
++                        if (tileentitysign1.field_145915_a[l] == null)
++                        {
++                            tileentitysign1.field_145915_a[l] = "";
++                        }
++                    }
++
++                    tileentitysign1.field_145916_j = false;
++                }
++
++                // System.arraycopy(p_147343_1_.func_149589_f(), 0, tileentitysign1.field_145915_a, 0, 4);
++                // CraftBukkit end
+                 tileentitysign1.onInventoryChanged();
+                 worldserver.func_147471_g(j, k, i);
+             }
+@@ -1034,7 +2305,23 @@
+ 
+     public void func_147348_a(C13PacketPlayerAbilities p_147348_1_)
+     {
+-        this.field_147369_b.capabilities.isFlying = p_147348_1_.func_149488_d() && this.field_147369_b.capabilities.allowFlying;
++        // CraftBukkit start - d() should be isFlying()
++        if (this.field_147369_b.capabilities.allowFlying && this.field_147369_b.capabilities.isFlying != p_147348_1_.func_149488_d())
++        {
++            PlayerToggleFlightEvent event = new PlayerToggleFlightEvent(this.server.getPlayer(this.field_147369_b), p_147348_1_.func_149488_d());
++            this.server.getPluginManager().callEvent(event);
++
++            if (!event.isCancelled())
++            {
++                this.field_147369_b.capabilities.isFlying = p_147348_1_.func_149488_d(); // Actually set the player's flying status
++            }
++            else
++            {
++                this.field_147369_b.sendPlayerAbilities(); // Tell the player their ability was reverted
++            }
++        }
++
++        // CraftBukkit end
+     }
+ 
+     public void func_147341_a(C14PacketTabComplete p_147341_1_)
+@@ -1061,6 +2348,14 @@
+         ItemStack itemstack;
+         ItemStack itemstack1;
+ 
++        // CraftBukkit start - Ignore empty payloads
++        if (p_147349_1_.field_149560_b <= 0)
++        {
++            return;
++        }
++
++        // CraftBukkit end
++
+         if ("MC|BEdit".equals(p_147349_1_.func_149559_c()))
+         {
+             try
+@@ -1076,12 +2371,16 @@
+ 
+                 if (itemstack.getItem() == Items.writable_book && itemstack.getItem() == itemstack1.getItem())
+                 {
+-                    itemstack1.setTagInfo("pages", itemstack.getTagCompound().func_150295_c("pages", 8));
++                    CraftEventFactory.handleEditBookEvent(field_147369_b, itemstack); // CraftBukkit
+                 }
++
++                // CraftBukkit start
+             }
+-            catch (Exception exception4)
++            catch (Exception exception)
+             {
+-                field_147370_c.error("Couldn\'t handle book info", exception4);
++                field_147370_c.error("Couldn\'t handle book info", exception);
++                this.func_147360_c("Invalid book data!");
++                // CraftBukkit end
+             }
+         }
+         else if ("MC|BSign".equals(p_147349_1_.func_149559_c()))
+@@ -1099,15 +2398,16 @@
+ 
+                 if (itemstack.getItem() == Items.written_book && itemstack1.getItem() == Items.writable_book)
+                 {
+-                    itemstack1.setTagInfo("author", new NBTTagString(this.field_147369_b.getCommandSenderName()));
+-                    itemstack1.setTagInfo("title", new NBTTagString(itemstack.getTagCompound().getString("title")));
+-                    itemstack1.setTagInfo("pages", itemstack.getTagCompound().func_150295_c("pages", 8));
+-                    itemstack1.func_150996_a(Items.written_book);
++                    CraftEventFactory.handleEditBookEvent(field_147369_b, itemstack); // CraftBukkit
+                 }
++
++                // CraftBukkit start
+             }
+-            catch (Exception exception3)
++            catch (Exception exception1)
+             {
+-                field_147370_c.error("Couldn\'t sign book", exception3);
++                field_147370_c.error("Couldn\'t sign book", exception1);
++                this.func_147360_c("Invalid book data!");
++                // CraftBukkit end
+             }
+         }
+         else
+@@ -1130,7 +2430,10 @@
+                 }
+                 catch (Exception exception2)
+                 {
++                    // CraftBukkit start
+                     field_147370_c.error("Couldn\'t select trade", exception2);
++                    this.func_147360_c("Invalid trade data!");
++                    // CraftBukkit end
+                 }
+             }
+             else if ("MC|AdvCdm".equals(p_147349_1_.func_149559_c()))
+@@ -1175,9 +2478,12 @@
+                             this.field_147369_b.func_145747_a(new ChatComponentTranslation("advMode.setCommand.success", new Object[] {s1}));
+                         }
+                     }
+-                    catch (Exception exception1)
++                    catch (Exception exception3)
+                     {
+-                        field_147370_c.error("Couldn\'t set command block", exception1);
++                        // CraftBukkit start
++                        field_147370_c.error("Couldn\'t set command block", exception3);
++                        this.func_147360_c("Invalid CommandBlock data!");
++                        // CraftBukkit end
+                     }
+                 }
+                 else
+@@ -1206,9 +2512,12 @@
+                             tileentitybeacon.onInventoryChanged();
+                         }
+                     }
+-                    catch (Exception exception)
++                    catch (Exception exception4)
+                     {
+-                        field_147370_c.error("Couldn\'t set beacon", exception);
++                        // CraftBukkit start
++                        field_147370_c.error("Couldn\'t set beacon", exception4);
++                        this.func_147360_c("Invalid beacon data!");
++                        // CraftBukkit end
+                     }
+                 }
+             }
+@@ -1230,6 +2539,45 @@
+                     containerrepair.updateItemName("");
+                 }
+             }
++            // CraftBukkit start
++            else if (p_147349_1_.func_149559_c().equals("REGISTER"))
++            {
++                try
++                {
++                    String channels = new String(p_147349_1_.func_149558_e(), "UTF8");
++
++                    for (String channel : channels.split("\0"))
++                    {
++                        getPlayerB().addChannel(channel);
++                    }
++                }
++                catch (UnsupportedEncodingException ex)
++                {
++                    throw new AssertionError(ex);
++                }
++            }
++            else if (p_147349_1_.func_149559_c().equals("UNREGISTER"))
++            {
++                try
++                {
++                    String channels = new String(p_147349_1_.func_149558_e(), "UTF8");
++
++                    for (String channel : channels.split("\0"))
++                    {
++                        getPlayerB().removeChannel(channel);
++                    }
++                }
++                catch (UnsupportedEncodingException ex)
++                {
++                    throw new AssertionError(ex);
++                }
++            }
++            else
++            {
++                server.getMessenger().dispatchIncomingMessage(field_147369_b.getBukkitEntity(), p_147349_1_.func_149559_c(), p_147349_1_.func_149558_e());
++            }
++
++            // CraftBukkit end
+         }
+     }
+ 
+@@ -1241,39 +2589,46 @@
+         }
+     }
+ 
++    // CraftBukkit start - Add "isDisconnected" method
++    public final boolean isDisconnected()
++    {
++        return !this.field_147371_a.channel().config().isAutoRead();
++    }
++    // CraftBukkit end
++
+     static final class SwitchEnumState
++    {
++        static final int[] field_151290_a = new int[C16PacketClientStatus.EnumState.values().length];
++        private static final String __OBFID = "CL_00001455";
++
++        static
+         {
+-            static final int[] field_151290_a = new int[C16PacketClientStatus.EnumState.values().length];
+-            private static final String __OBFID = "CL_00001455";
++            try
++            {
++                field_151290_a[C16PacketClientStatus.EnumState.PERFORM_RESPAWN.ordinal()] = 1;
++            }
++            catch (NoSuchFieldError var3)
++            {
++                ;
++            }
+ 
+-            static
++            try
+             {
+-                try
+-                {
+-                    field_151290_a[C16PacketClientStatus.EnumState.PERFORM_RESPAWN.ordinal()] = 1;
+-                }
+-                catch (NoSuchFieldError var3)
+-                {
+-                    ;
+-                }
++                field_151290_a[C16PacketClientStatus.EnumState.REQUEST_STATS.ordinal()] = 2;
++            }
++            catch (NoSuchFieldError var2)
++            {
++                ;
++            }
+ 
+-                try
+-                {
+-                    field_151290_a[C16PacketClientStatus.EnumState.REQUEST_STATS.ordinal()] = 2;
+-                }
+-                catch (NoSuchFieldError var2)
+-                {
+-                    ;
+-                }
+-
+-                try
+-                {
+-                    field_151290_a[C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT.ordinal()] = 3;
+-                }
+-                catch (NoSuchFieldError var1)
+-                {
+-                    ;
+-                }
++            try
++            {
++                field_151290_a[C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT.ordinal()] = 3;
+             }
++            catch (NoSuchFieldError var1)
++            {
++                ;
++            }
+         }
++    }
+ }

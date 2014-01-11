@@ -1,0 +1,27 @@
+--- ../src-base/minecraft/net/minecraft/world/chunk/storage/AnvilSaveHandler.java
++++ ../src-work/minecraft/net/minecraft/world/chunk/storage/AnvilSaveHandler.java
+@@ -22,18 +22,12 @@
+     public IChunkLoader getChunkLoader(WorldProvider par1WorldProvider)
+     {
+         File file1 = this.getWorldDirectory();
+-        File file2;
+-
+-        if (par1WorldProvider.getSaveFolder() != null)
+-        {
+-            file2 = new File(file1, par1WorldProvider.getSaveFolder());
+-            file2.mkdirs();
+-            return new AnvilChunkLoader(file2);
+-        }
+-        else
+-        {
+-            return new AnvilChunkLoader(file1);
+-        }
++        // MCPC+ start
++        // To workaround the issue of Bukkit relying on every world having a seperate container
++        // we won't be generating a DIMXX folder for chunk loaders since this name is already generated
++        // for the world container with provider.getSaveFolder().
++        return new AnvilChunkLoader(file1);
++        // MCPC+ end
+     }
+ 
+     // JAVADOC METHOD $$ func_75755_a

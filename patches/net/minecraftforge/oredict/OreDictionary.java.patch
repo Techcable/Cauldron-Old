@@ -1,0 +1,20 @@
+--- ../src-base/minecraft/net/minecraftforge/oredict/OreDictionary.java
++++ ../src-work/minecraft/net/minecraftforge/oredict/OreDictionary.java
+@@ -151,7 +151,7 @@
+             {
+                 ShapedRecipes recipe = (ShapedRecipes)obj;
+                 ItemStack output = recipe.getRecipeOutput();
+-                if (output != null && containsMatch(false, exclusions, output))
++                if ((output != null && containsMatch(false, exclusions, output)) || output == null) // MCPC+ - fixes NPE's with null recipes being added to forge
+                 {
+                     continue;
+                 }
+@@ -166,7 +166,7 @@
+             {
+                 ShapelessRecipes recipe = (ShapelessRecipes)obj;
+                 ItemStack output = recipe.getRecipeOutput();
+-                if (output != null && containsMatch(false, exclusions, output))
++                if ((output != null && containsMatch(false, exclusions, output)) || output == null) // MCPC+ - fixes NPE's with null recipes being added to forge
+                 {
+                     continue;
+                 }

@@ -1,0 +1,136 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemStack.java
++++ ../src-work/minecraft/net/minecraft/item/ItemStack.java
+@@ -34,6 +34,9 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.event.ForgeEventFactory;
+ 
++import org.bukkit.craftbukkit.util.CraftMagicNumbers; // CraftBukkit
++import net.minecraft.entity.player.EntityPlayerMP; // Spigot
++
+ public final class ItemStack
+ {
+     public static final DecimalFormat field_111284_a = new DecimalFormat("#.###");
+@@ -46,8 +49,13 @@
+     public NBTTagCompound stackTagCompound;
+     // JAVADOC FIELD $$ field_77991_e
+     int itemDamage;
++
++    // MCPC+ - due to a bug in Gson(https://code.google.com/p/google-gson/issues/detail?id=440), a stackoverflow 
++    //         can occur when gson attempts to resolve a field of a class that points to itself.
++    //         As a temporary workaround, we will prevent serialization for this object until the bug is fixed.
++    //         This fixes EE3's serialization of ItemStack.
+     // JAVADOC FIELD $$ field_82843_f
+-    private EntityItemFrame itemFrame;
++    private transient EntityItemFrame itemFrame;
+     private static final String __OBFID = "CL_00000043";
+ 
+     public ItemStack(Block par1Block)
+@@ -131,12 +139,47 @@
+ 
+     public boolean tryPlaceItemIntoWorld(EntityPlayer par1EntityPlayer, World par2World, int par3, int par4, int par5, int par6, float par7, float par8, float par9)
+     {
++        // MCPC+ start - handle all placement events here
++        int meta = this.getItemDamage();
++        int size = this.stackSize;
++        par2World.captureBlocks = true;
+         boolean flag = this.getItem().onItemUse(this, par1EntityPlayer, par2World, par3, par4, par5, par6, par7, par8, par9);
++        par2World.captureBlocks = false;
+ 
+         if (flag)
+         {
+-            par1EntityPlayer.addStat(StatList.objectUseStats[Item.func_150891_b(this.field_151002_e)], 1);
++            boolean isCancelled = false;
++            for (int i = 0; i < par2World.capturedBlocks.size(); i++)
++            {
++                org.bukkit.event.block.BlockPlaceEvent placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(par2World, par1EntityPlayer, par2World.capturedBlocks.get(i), par3, par4, par5);
++
++                if (placeEvent.isCancelled() || !placeEvent.canBuild())
++                {
++                    isCancelled = true;
++                    break;
++                }
++            }
++            if (isCancelled)
++            {
++                flag = false; // cancel placement
++                // revert back all captured blocks
++                for (int i = 0; i < par2World.capturedBlocks.size(); i++)
++                {
++                    par2World.restoringBlockStates = true;
++                    par2World.capturedBlocks.get(i).update(true, false); // restore blockstate
++                    par2World.restoringBlockStates = false;
++                }
++                // make sure to restore stack after cancel
++                this.setItemDamage(meta);
++                this.stackSize = size;
++            }
++            else
++            {
++                par1EntityPlayer.addStat(StatList.objectUseStats[Item.func_150891_b(this.field_151002_e)], 1);
++            }
+         }
++        par2World.capturedBlocks.clear();
++        // MCPC+ end
+ 
+         return flag;
+     }
+@@ -244,8 +287,22 @@
+     }
+ 
+     // JAVADOC METHOD $$ func_96631_a
++    // Spigot start
++
++    /**
++     * Attempts to damage the ItemStack with par1 amount of damage, If the ItemStack has the Unbreaking enchantment
++     * there is a chance for each point of damage to be negated. Returns true if it takes more damage than
++     * getMaxDamage(). Returns false otherwise or if the ItemStack can't be damaged or if all points of damage are
++     * negated.
++     */
+     public boolean attemptDamageItem(int par1, Random par2Random)
+     {
++        return isDamaged(par1, par2Random, null);
++    }
++
++    public boolean isDamaged(int par1, Random par2Random, EntityLivingBase entitylivingbase)
++    {
++        // Spigot end
+         if (!this.isItemStackDamageable())
+         {
+             return false;
+@@ -267,6 +324,22 @@
+ 
+                 par1 -= k;
+ 
++                // Spigot start
++                if (entitylivingbase instanceof EntityPlayerMP)
++                {
++                    org.bukkit.craftbukkit.inventory.CraftItemStack item = org.bukkit.craftbukkit.inventory.CraftItemStack.asCraftMirror(this);
++                    org.bukkit.event.player.PlayerItemDamageEvent event = new org.bukkit.event.player.PlayerItemDamageEvent((org.bukkit.entity.Player) entitylivingbase.getBukkitEntity(), item, par1);
++                    org.bukkit.Bukkit.getServer().getPluginManager().callEvent(event);
++
++                    if (event.isCancelled())
++                    {
++                        return false;
++                    }
++
++                    par1 = event.getDamage();
++                }
++
++                // Spigot end
+                 if (par1 <= 0)
+                 {
+                     return false;
+@@ -306,6 +379,13 @@
+                         this.stackSize = 0;
+                     }
+ 
++                    // CraftBukkit start - Check for item breaking
++                    if (this.stackSize == 0 && par2EntityLivingBase instanceof EntityPlayer)
++                    {
++                        org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerItemBreakEvent((EntityPlayer) par2EntityLivingBase, this);
++                    }
++
++                    // CraftBukkit end
+                     this.itemDamage = 0;
+                 }
+             }

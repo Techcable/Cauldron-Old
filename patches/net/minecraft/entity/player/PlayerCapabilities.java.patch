@@ -1,0 +1,13 @@
+--- ../src-base/minecraft/net/minecraft/entity/player/PlayerCapabilities.java
++++ ../src-work/minecraft/net/minecraft/entity/player/PlayerCapabilities.java
+@@ -16,8 +16,8 @@
+     public boolean isCreativeMode;
+     // JAVADOC FIELD $$ field_75099_e
+     public boolean allowEdit = true;
+-    private float flySpeed = 0.05F;
+-    private float walkSpeed = 0.1F;
++    public float flySpeed = 0.05F; // CraftBukkit private -> public
++    public float walkSpeed = 0.1F; // CraftBukkit private -> public
+     private static final String __OBFID = "CL_00001708";
+ 
+     public void writeCapabilitiesToNBT(NBTTagCompound par1NBTTagCompound)

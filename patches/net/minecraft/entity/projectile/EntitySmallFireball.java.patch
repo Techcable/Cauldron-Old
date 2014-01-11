@@ -1,0 +1,44 @@
+--- ../src-base/minecraft/net/minecraft/entity/projectile/EntitySmallFireball.java
++++ ../src-work/minecraft/net/minecraft/entity/projectile/EntitySmallFireball.java
+@@ -6,6 +6,8 @@
+ import net.minecraft.util.MovingObjectPosition;
+ import net.minecraft.world.World;
+ 
++import org.bukkit.event.entity.EntityCombustByEntityEvent; // CraftBukkit
++
+ public class EntitySmallFireball extends EntityFireball
+ {
+     private static final String __OBFID = "CL_00001721";
+@@ -37,7 +39,16 @@
+             {
+                 if (!par1MovingObjectPosition.entityHit.isImmuneToFire() && par1MovingObjectPosition.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 5.0F))
+                 {
+-                    par1MovingObjectPosition.entityHit.setFire(5);
++                    // CraftBukkit start - Entity damage by entity event + combust event
++                    EntityCombustByEntityEvent event = new EntityCombustByEntityEvent((org.bukkit.entity.Projectile) this.getBukkitEntity(), par1MovingObjectPosition.entityHit.getBukkitEntity(), 5);
++                    par1MovingObjectPosition.entityHit.worldObj.getServer().getPluginManager().callEvent(event);
++
++                    if (!event.isCancelled())
++                    {
++                        par1MovingObjectPosition.entityHit.setFire(event.getDuration());
++                    }
++
++                    // CraftBukkit end
+                 }
+             }
+             else
+@@ -69,7 +80,13 @@
+ 
+                 if (this.worldObj.func_147437_c(i, j, k))
+                 {
+-                    this.worldObj.func_147449_b(i, j, k, Blocks.fire);
++                    // CraftBukkit start
++                    if (!org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(worldObj, i, j, k, this).isCancelled())
++                    {
++                        this.worldObj.func_147449_b(i, j, k, Blocks.fire);
++                    }
++
++                    // CraftBukkit end
+                 }
+             }
+ 

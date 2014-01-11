@@ -1,0 +1,469 @@
+--- ../src-base/minecraft/net/minecraft/world/gen/ChunkProviderServer.java
++++ ../src-work/minecraft/net/minecraft/world/gen/ChunkProviderServer.java
+@@ -23,29 +23,50 @@
+ import net.minecraft.world.chunk.Chunk;
+ import net.minecraft.world.chunk.EmptyChunk;
+ import net.minecraft.world.chunk.IChunkProvider;
++import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+ import net.minecraft.world.chunk.storage.IChunkLoader;
+ import net.minecraftforge.common.DimensionManager;
+ import net.minecraftforge.common.ForgeChunkManager;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++// CraftBukkit start
++import java.util.Random;
++import net.minecraft.block.BlockSand;
++import org.bukkit.Server;
++import org.bukkit.craftbukkit.util.LongHash;
++import org.bukkit.craftbukkit.util.LongHashSet;
++import org.bukkit.craftbukkit.util.LongObjectHashMap;
++import org.bukkit.event.world.ChunkUnloadEvent;
++// CraftBukkit end
++// MCPC+ start
++import cpw.mods.fml.common.FMLCommonHandler;
++import net.minecraft.server.MinecraftServer;
++import za.co.mcportcentral.MCPCConfig;
++import za.co.mcportcentral.MCPCHooks;
++// MCPC+ end
++
+ public class ChunkProviderServer implements IChunkProvider
+ {
+     private static final Logger field_147417_b = LogManager.getLogger();
++    // CraftBukkit start - private -> public
+     // JAVADOC FIELD $$ field_73248_b
+-    private Set chunksToUnload = new HashSet();
+-    private Chunk defaultEmptyChunk;
+-    private IChunkProvider currentChunkProvider;
++    public LongHashSet chunksToUnload = new LongHashSet(); // LongHashSet
++    public Chunk defaultEmptyChunk;
++    public IChunkProvider currentChunkProvider;
+     public IChunkLoader currentChunkLoader;
+     // JAVADOC FIELD $$ field_73250_a
+-    public boolean loadChunkOnProvideRequest = true;
+-    private LongHashMap loadedChunkHashMap = new LongHashMap();
+-    private List loadedChunks = new ArrayList();
+-    private WorldServer worldObj;
++    public boolean loadChunkOnProvideRequest = za.co.mcportcentral.MCPCConfig.Setting.loadChunkOnRequest.getValue(); // MCPC+ - if true, allows mods to force load chunks. to disable, set load-chunk-on-request in mcpc.yml to false
++    public int initialTick; // MCPC+ counter to keep track of when this loader was created
++    public LongObjectHashMap<Chunk> loadedChunkHashMap = new LongObjectHashMap<Chunk>();
++    public List loadedChunks = new ArrayList(); // MCPC+ - vanilla compatibility
++    public WorldServer worldObj;
++    // CraftBukkit end
+     private static final String __OBFID = "CL_00001436";
+ 
+     public ChunkProviderServer(WorldServer par1WorldServer, IChunkLoader par2IChunkLoader, IChunkProvider par3IChunkProvider)
+     {
++        this.initialTick = MinecraftServer.currentTick; // MCPC+ keep track of when the loader was created
+         this.defaultEmptyChunk = new EmptyChunk(par1WorldServer, 0, 0);
+         this.worldObj = par1WorldServer;
+         this.currentChunkLoader = par2IChunkLoader;
+@@ -55,7 +76,7 @@
+     // JAVADOC METHOD $$ func_73149_a
+     public boolean chunkExists(int par1, int par2)
+     {
+-        return this.loadedChunkHashMap.containsItem(ChunkCoordIntPair.chunkXZ2Int(par1, par2));
++        return this.loadedChunkHashMap.containsKey(LongHash.toLong(par1, par2)); // CraftBukkit
+     }
+ 
+     // JAVADOC METHOD $$ func_73241_b
+@@ -68,21 +89,40 @@
+             int l = par2 * 16 + 8 - chunkcoordinates.posZ;
+             short short1 = 128;
+ 
++            // CraftBukkit start
+             if (k < -short1 || k > short1 || l < -short1 || l > short1)
+             {
+-                this.chunksToUnload.add(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(par1, par2)));
++                this.chunksToUnload.add(par1, par2);
++                Chunk c = this.loadedChunkHashMap.get(LongHash.toLong(par1, par2));
++
++                if (c != null)
++                {
++                    c.mustSave = true;
++                }
++                MCPCHooks.logChunkUnload(this, par1, par2, "Chunk added to unload queue");
+             }
++
++            // CraftBukkit end
+         }
+         else
+         {
+-            this.chunksToUnload.add(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(par1, par2)));
++            // CraftBukkit start
++            this.chunksToUnload.add(par1, par2);
++            Chunk c = this.loadedChunkHashMap.get(LongHash.toLong(par1, par2));
++
++            if (c != null)
++            {
++                c.mustSave = true;
++            }
++            MCPCHooks.logChunkUnload(this, par1, par2, "Chunk added to unload queue");
++            // CraftBukkit end
+         }
+     }
+ 
+     // JAVADOC METHOD $$ func_73240_a
+     public void unloadAllChunks()
+     {
+-        Iterator iterator = this.loadedChunks.iterator();
++        Iterator iterator = this.loadedChunkHashMap.values().iterator(); // CraftBukkit
+ 
+         while (iterator.hasNext())
+         {
+@@ -94,16 +134,40 @@
+     // JAVADOC METHOD $$ func_73158_c
+     public Chunk loadChunk(int par1, int par2)
+     {
+-        long k = ChunkCoordIntPair.chunkXZ2Int(par1, par2);
+-        this.chunksToUnload.remove(Long.valueOf(k));
+-        Chunk chunk = (Chunk)this.loadedChunkHashMap.getValueByKey(k);
++        return getChunkAt(par1, par2, null);
++    }
+ 
++    public Chunk getChunkAt(int i, int j, Runnable runnable)
++    {
++        this.chunksToUnload.remove(i, j);
++        Chunk chunk = (Chunk) this.loadedChunkHashMap.get(LongHash.toLong(i, j));
++        boolean newChunk = false;
++        AnvilChunkLoader loader = null;
++
++        if (this.currentChunkLoader instanceof AnvilChunkLoader)
++        {
++            loader = (AnvilChunkLoader) this.currentChunkLoader;
++        }
++
++        MCPCHooks.logChunkLoad(this, "Get", i, j, true);
++
++        // If the chunk exists but isn't loaded do it async
++        if (chunk == null && runnable != null && loader != null && loader.chunkExists(this.worldObj, i, j) && MCPCConfig.Setting.loadChunkAsync.getValue()) // MCPC+ added config setting to disallow async chunk loading
++        {
++            org.bukkit.craftbukkit.chunkio.ChunkIOExecutor.queueChunkLoad(this.worldObj, loader, this, i, j, runnable);
++            return null;
++        }
++
++        // CraftBukkit end
++
+         if (chunk == null)
+         {
+-            chunk = ForgeChunkManager.fetchDormantChunk(k, this.worldObj);
++            org.bukkit.craftbukkit.SpigotTimings.syncChunkLoadTimer.startTiming(); // Spigot
++            chunk = ForgeChunkManager.fetchDormantChunk(LongHash.toLong(i, j), this.worldObj);
++
+             if (chunk == null)
+             {
+-                chunk = this.safeLoadChunk(par1, par2);
++                chunk = this.safeLoadChunk(i, j);
+             }
+ 
+             if (chunk == null)
+@@ -116,38 +180,80 @@
+                 {
+                     try
+                     {
+-                        chunk = this.currentChunkProvider.provideChunk(par1, par2);
++                        chunk = this.currentChunkProvider.provideChunk(i, j);
+                     }
+                     catch (Throwable throwable)
+                     {
+                         CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception generating new chunk");
+                         CrashReportCategory crashreportcategory = crashreport.makeCategory("Chunk to be generated");
+-                        crashreportcategory.addCrashSection("Location", String.format("%d,%d", new Object[] {Integer.valueOf(par1), Integer.valueOf(par2)}));
+-                        crashreportcategory.addCrashSection("Position hash", Long.valueOf(k));
++                        crashreportcategory.addCrashSection("Location", String.format("%d,%d", new Object[] { Integer.valueOf(i), Integer.valueOf(j)}));
++                        crashreportcategory.addCrashSection("Position hash", Long.valueOf(LongHash.toLong(i, j))); // CraftBukkit - Use LongHash
+                         crashreportcategory.addCrashSection("Generator", this.currentChunkProvider.makeString());
+                         throw new ReportedException(crashreport);
+                     }
+                 }
++
++                newChunk = true; // CraftBukkit
+             }
+ 
+-            this.loadedChunkHashMap.add(k, chunk);
+-            this.loadedChunks.add(chunk);
++            this.loadedChunkHashMap.put(LongHash.toLong(i, j), chunk); // CraftBukkit
++            this.loadedChunks.add(chunk); // MCPC+ - vanilla compatibility
+             chunk.onChunkLoad();
+-            chunk.populateChunk(this, this, par1, par2);
++            // CraftBukkit start
++            Server server = this.worldObj.getServer();
++
++            if (server != null)
++            {
++                /*
++                 * If it's a new world, the first few chunks are generated inside
++                 * the World constructor. We can't reliably alter that, so we have
++                 * no way of creating a CraftWorld/CraftServer at that point.
++                 */
++                server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(chunk.bukkitChunk, newChunk));
++            }
++
++            // CraftBukkit end
++            chunk.populateChunk(this, this, i, j);
++            org.bukkit.craftbukkit.SpigotTimings.syncChunkLoadTimer.stopTiming(); // Spigot
+         }
+ 
++        // CraftBukkit start - If we didn't need to load the chunk run the callback now
++        if (runnable != null)
++        {
++            runnable.run();
++        }
++
++        // CraftBukkit end
+         return chunk;
+     }
+ 
+     // JAVADOC METHOD $$ func_73154_d
+     public Chunk provideChunk(int par1, int par2)
+     {
+-        Chunk chunk = (Chunk)this.loadedChunkHashMap.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(par1, par2));
+-        return chunk == null ? (!this.worldObj.findingSpawnPoint && !this.loadChunkOnProvideRequest ? this.defaultEmptyChunk : this.loadChunk(par1, par2)) : chunk;
++        // CraftBukkit start
++        Chunk chunk = (Chunk) this.loadedChunkHashMap.get(LongHash.toLong(par1, par2));
++        chunk = chunk == null ? (shouldLoadChunk() ? this.loadChunk(par1, par2) : this.defaultEmptyChunk) : chunk; //MCPC+ handle forge server tick events and load the chunk within 5 seconds of the world being loaded (for chunk loaders)
++
++        if (chunk == this.defaultEmptyChunk)
++        {
++            return chunk;
++        }
++
++        if (par1 != chunk.xPosition || par2 != chunk.zPosition)
++        {
++            field_147417_b.error("Chunk (" + chunk.xPosition + ", " + chunk.zPosition + ") stored at  (" + par1 + ", " + par2 + ") in world '" + worldObj.getWorld().getName() + "'");
++            field_147417_b.error(chunk.getClass().getName());
++            Throwable ex = new Throwable();
++            ex.fillInStackTrace();
++            ex.printStackTrace();
++        }
++        chunk.lastAccessedTick = MinecraftServer.getServer().getTickCounter(); // MCPC+
++        return chunk;
++        // CraftBukkit end
+     }
+ 
+     // JAVADOC METHOD $$ func_73239_e
+-    private Chunk safeLoadChunk(int par1, int par2)
++    public Chunk safeLoadChunk(int par1, int par2)   // CraftBukkit - private -> public
+     {
+         if (this.currentChunkLoader == null)
+         {
+@@ -157,6 +263,8 @@
+         {
+             try
+             {
++                MCPCHooks.logChunkLoad(this, "Safe Load", par1, par2, false);
++
+                 Chunk chunk = this.currentChunkLoader.loadChunk(this.worldObj, par1, par2);
+ 
+                 if (chunk != null)
+@@ -167,6 +275,7 @@
+                     {
+                         this.currentChunkProvider.recreateStructures(par1, par2);
+                     }
++                    chunk.lastAccessedTick = MinecraftServer.getServer().getTickCounter(); // MCPC+
+                 }
+ 
+                 return chunk;
+@@ -180,7 +289,7 @@
+     }
+ 
+     // JAVADOC METHOD $$ func_73243_a
+-    private void safeSaveExtraChunkData(Chunk par1Chunk)
++    public void safeSaveExtraChunkData(Chunk par1Chunk)   // CraftBukkit - private -> public
+     {
+         if (this.currentChunkLoader != null)
+         {
+@@ -196,7 +305,7 @@
+     }
+ 
+     // JAVADOC METHOD $$ func_73242_b
+-    private void safeSaveChunk(Chunk par1Chunk)
++    public void safeSaveChunk(Chunk par1Chunk)   // CraftBukkit - private -> public
+     {
+         if (this.currentChunkLoader != null)
+         {
+@@ -204,15 +313,18 @@
+             {
+                 par1Chunk.lastSaveTime = this.worldObj.getTotalWorldTime();
+                 this.currentChunkLoader.saveChunk(this.worldObj, par1Chunk);
++                // CraftBukkit start - IOException to Exception
+             }
+-            catch (IOException ioexception)
++            catch (Exception ioexception)
+             {
+                 field_147417_b.error("Couldn\'t save chunk", ioexception);
+             }
++            /* Remove extra exception
+             catch (MinecraftException minecraftexception)
+             {
+                 field_147417_b.error("Couldn\'t save chunk; already in use by another instance of Minecraft?", minecraftexception);
+             }
++            // CraftBukkit end */
+         }
+     }
+ 
+@@ -228,6 +340,35 @@
+             if (this.currentChunkProvider != null)
+             {
+                 this.currentChunkProvider.populate(par1IChunkProvider, par2, par3);
++                // CraftBukkit start
++                BlockSand.field_149832_M = true;
++                Random random = new Random();
++                random.setSeed(worldObj.getSeed());
++                long xRand = random.nextLong() / 2L * 2L + 1L;
++                long zRand = random.nextLong() / 2L * 2L + 1L;
++                random.setSeed((long) par2 * xRand + (long) par3 * zRand ^ worldObj.getSeed());
++                org.bukkit.World world = this.worldObj.getWorld();
++
++                if (world != null)
++                {
++                    this.worldObj.populating = true;
++
++                    try
++                    {
++                        for (org.bukkit.generator.BlockPopulator populator : world.getPopulators())
++                        {
++                            populator.populate(world, random, chunk.bukkitChunk);
++                        }
++                    }
++                    finally
++                    {
++                        this.worldObj.populating = false;
++                    }
++                }
++
++                BlockSand.field_149832_M = false;
++                this.worldObj.getServer().getPluginManager().callEvent(new org.bukkit.event.world.ChunkPopulateEvent(chunk.bukkitChunk));
++                // CraftBukkit end
+                 GameRegistry.generateWorld(par2, par3, worldObj, currentChunkProvider, par1IChunkProvider);
+                 chunk.setChunkModified();
+             }
+@@ -238,10 +379,13 @@
+     public boolean saveChunks(boolean par1, IProgressUpdate par2IProgressUpdate)
+     {
+         int i = 0;
++        // CraftBukkit start
++        Iterator iterator = this.loadedChunkHashMap.values().iterator();
+ 
+-        for (int j = 0; j < this.loadedChunks.size(); ++j)
++        while (iterator.hasNext())
+         {
+-            Chunk chunk = (Chunk)this.loadedChunks.get(j);
++            Chunk chunk = (Chunk) iterator.next();
++            // CraftBukkit end
+ 
+             if (par1)
+             {
+@@ -278,23 +422,50 @@
+     {
+         if (!this.worldObj.canNotSave)
+         {
+-            for (ChunkCoordIntPair forced : this.worldObj.getPersistentChunks().keySet())
++            // MCPC+ start - remove any chunk that has a ticket associated with it
++            if (!this.chunksToUnload.isEmpty())
+             {
+-                this.chunksToUnload.remove(ChunkCoordIntPair.chunkXZ2Int(forced.chunkXPos, forced.chunkZPos));
++                for (ChunkCoordIntPair forcedChunk : this.worldObj.getPersistentChunks().keys())
++                {
++                    this.chunksToUnload.remove(forcedChunk.chunkXPos, forcedChunk.chunkZPos);
++                }
+             }
++            // MCPC+ end
++            // CraftBukkit start
++            Server server = this.worldObj.getServer();
+ 
+-            for (int i = 0; i < 100; ++i)
++            for (int i = 0; i < 100 && !this.chunksToUnload.isEmpty(); i++)
+             {
+-                if (!this.chunksToUnload.isEmpty())
++                long chunkcoordinates = this.chunksToUnload.popFirst();
++                Chunk chunk = this.loadedChunkHashMap.get(chunkcoordinates);
++
++                if (chunk == null)
+                 {
+-                    Long olong = (Long)this.chunksToUnload.iterator().next();
+-                    Chunk chunk = (Chunk)this.loadedChunkHashMap.getValueByKey(olong.longValue());
++                    continue;
++                }
++
++                // MCPC+ static - check if the chunk was accessed recently and keep it loaded if there are players in world
++                if (!shouldUnloadChunk(chunk) && this.worldObj.playerEntities.size() > 0)
++                {
++                    MCPCHooks.logChunkUnload(this, chunk.xPosition, chunk.zPosition, "** Chunk kept from unloading due to recent activity");
++                    continue;
++                }
++                // MCPC+ end
++
++
++                ChunkUnloadEvent event = new ChunkUnloadEvent(chunk.bukkitChunk);
++                server.getPluginManager().callEvent(event);
++
++                if (!event.isCancelled())
++                {
++                    MCPCHooks.logChunkUnload(this, chunk.xPosition, chunk.zPosition, "Unloading Chunk at");
++
+                     chunk.onChunkUnload();
+                     this.safeSaveChunk(chunk);
+                     this.safeSaveExtraChunkData(chunk);
+-                    this.chunksToUnload.remove(olong);
+-                    this.loadedChunkHashMap.remove(olong.longValue());
+-                    this.loadedChunks.remove(chunk);
++                    // this.unloadQueue.remove(olong);
++                    this.loadedChunkHashMap.remove(chunkcoordinates); // CraftBukkit
++                    this.loadedChunks.remove(chunk); // MCPC+ - vanilla compatibility
+                     ForgeChunkManager.putDormantChunk(ChunkCoordIntPair.chunkXZ2Int(chunk.xPosition, chunk.zPosition), chunk);
+                     if(loadedChunks.size() == 0 && ForgeChunkManager.getPersistentChunksFor(this.worldObj).size() == 0 && !DimensionManager.shouldLoadSpawn(this.worldObj.provider.dimensionId)){
+                         DimensionManager.unloadWorld(this.worldObj.provider.dimensionId);
+@@ -303,6 +474,8 @@
+                 }
+             }
+ 
++            // CraftBukkit end
++
+             if (this.currentChunkLoader != null)
+             {
+                 this.currentChunkLoader.chunkTick();
+@@ -321,7 +494,8 @@
+     // JAVADOC METHOD $$ func_73148_d
+     public String makeString()
+     {
+-        return "ServerChunkCache: " + this.loadedChunkHashMap.getNumHashElements() + " Drop: " + this.chunksToUnload.size();
++        // CraftBukkit - this.chunks.count() -> .values().size()
++        return "ServerChunkCache: " + this.loadedChunkHashMap.values().size() + " Drop: " + this.chunksToUnload.size();
+     }
+ 
+     // JAVADOC METHOD $$ func_73155_a
+@@ -337,8 +511,32 @@
+ 
+     public int getLoadedChunkCount()
+     {
+-        return this.loadedChunkHashMap.getNumHashElements();
++        // CraftBukkit - this.chunks.count() -> .values().size()
++        return this.loadedChunkHashMap.values().size();
+     }
+ 
+     public void recreateStructures(int par1, int par2) {}
++
++    // MCPC+ start
++    private boolean shouldLoadChunk()
++    {
++        return this.worldObj.findingSpawnPoint ||
++                this.loadChunkOnProvideRequest ||
++                (MinecraftServer.callingForgeTick && MCPCConfig.Setting.loadChunkOnForgeTick.getValue()) ||
++                (MinecraftServer.currentTick - initialTick <= 100);
++    }
++
++    public long lastAccessed(int x, int z)
++    {
++        long chunkHash = LongHash.toLong(x, z); 
++        if (!loadedChunkHashMap.containsKey(chunkHash)) return 0;
++        return loadedChunkHashMap.get(chunkHash).lastAccessedTick;
++    }
++
++    private boolean shouldUnloadChunk(Chunk chunk)
++    {
++        if (chunk == null) return false;
++        return MinecraftServer.getServer().getTickCounter() - chunk.lastAccessedTick > MCPCConfig.Setting.chunkGCGracePeriod.getValue();
++    }
++    // MCPC+ end
+ }

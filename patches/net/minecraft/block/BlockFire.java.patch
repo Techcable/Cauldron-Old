@@ -1,0 +1,145 @@
+--- ../src-base/minecraft/net/minecraft/block/BlockFire.java
++++ ../src-work/minecraft/net/minecraft/block/BlockFire.java
+@@ -17,6 +17,11 @@
+ import net.minecraft.world.WorldProviderEnd;
+ import net.minecraftforge.common.util.ForgeDirection;
+ import static net.minecraftforge.common.util.ForgeDirection.*;
++// CraftBukkit start
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.block.BlockBurnEvent;
++import org.bukkit.event.block.BlockSpreadEvent;
++// CraftBukkit end
+ 
+ public class BlockFire extends Block
+ {
+@@ -61,7 +66,6 @@
+         Blocks.fire.func_149842_a(func_149682_b(Blocks.carpet), 60, 20);
+     }
+ 
+-    @Deprecated // Use setFireInfo
+     public void func_149842_a(int p_149842_1_, int p_149842_2_, int p_149842_3_)
+     {
+         this.setFireInfo((Block)Block.field_149771_c.func_148754_a(p_149842_1_), p_149842_2_, p_149842_3_);
+@@ -105,12 +109,12 @@
+ 
+             if (!this.func_149742_c(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_))
+             {
+-                p_149674_1_.func_147468_f(p_149674_2_, p_149674_3_, p_149674_4_);
++                fireExtinguished(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_); // CraftBukkit - invalid place location
+             }
+ 
+             if (!flag && p_149674_1_.isRaining() && (p_149674_1_.canLightningStrikeAt(p_149674_2_, p_149674_3_, p_149674_4_) || p_149674_1_.canLightningStrikeAt(p_149674_2_ - 1, p_149674_3_, p_149674_4_) || p_149674_1_.canLightningStrikeAt(p_149674_2_ + 1, p_149674_3_, p_149674_4_) || p_149674_1_.canLightningStrikeAt(p_149674_2_, p_149674_3_, p_149674_4_ - 1) || p_149674_1_.canLightningStrikeAt(p_149674_2_, p_149674_3_, p_149674_4_ + 1)))
+             {
+-                p_149674_1_.func_147468_f(p_149674_2_, p_149674_3_, p_149674_4_);
++                fireExtinguished(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_); // CraftBukkit - extinguished by rain
+             }
+             else
+             {
+@@ -127,12 +131,12 @@
+                 {
+                     if (!World.func_147466_a(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_) || l > 3)
+                     {
+-                        p_149674_1_.func_147468_f(p_149674_2_, p_149674_3_, p_149674_4_);
++                        fireExtinguished(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_); // CraftBukkit - burn out of inflammable block
+                     }
+                 }
+                 else if (!flag && !this.canCatchFire(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_, UP) && l == 15 && p_149674_5_.nextInt(4) == 0)
+                 {
+-                    p_149674_1_.func_147468_f(p_149674_2_, p_149674_3_, p_149674_4_);
++                    fireExtinguished(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_); // CraftBukkit - burn out
+                 }
+                 else
+                 {
+@@ -186,7 +190,29 @@
+                                                 k2 = 15;
+                                             }
+ 
+-                                            p_149674_1_.func_147465_d(i1, k1, j1, this, k2, 3);
++                                            // CraftBukkit start - Call to stop spread of fire
++                                            if (p_149674_1_.func_147439_a(i1, k1, j1) != Blocks.fire)
++                                            {
++                                                if (CraftEventFactory.callBlockIgniteEvent(p_149674_1_, i1, k1, j1, p_149674_2_, p_149674_3_, p_149674_4_).isCancelled())
++                                                {
++                                                    continue;
++                                                }
++
++                                                org.bukkit.Server server = p_149674_1_.getServer();
++                                                org.bukkit.World bworld = p_149674_1_.getWorld();
++                                                org.bukkit.block.BlockState blockState = bworld.getBlockAt(i1, k1, j1).getState();
++                                                blockState.setTypeId(Block.func_149682_b(this));
++                                                blockState.setData(new org.bukkit.material.MaterialData(Block.func_149682_b(this), (byte) k2));
++                                                BlockSpreadEvent spreadEvent = new BlockSpreadEvent(blockState.getBlock(), bworld.getBlockAt(p_149674_2_, p_149674_3_, p_149674_4_), blockState);
++                                                server.getPluginManager().callEvent(spreadEvent);
++
++                                                if (!spreadEvent.isCancelled())
++                                                {
++                                                    blockState.update(true);
++                                                }
++                                            }
++
++                                            // CraftBukkit end
+                                         }
+                                     }
+                                 }
+@@ -216,7 +242,18 @@
+         if (p_149841_6_.nextInt(p_149841_5_) < j1)
+         {
+             boolean flag = p_149841_1_.func_147439_a(p_149841_2_, p_149841_3_, p_149841_4_) == Blocks.tnt;
++            // CraftBukkit start
++            org.bukkit.block.Block theBlock = p_149841_1_.getWorld().getBlockAt(p_149841_2_, p_149841_3_, p_149841_4_);
++            BlockBurnEvent event = new BlockBurnEvent(theBlock);
++            p_149841_1_.getServer().getPluginManager().callEvent(event);
+ 
++            if (event.isCancelled())
++            {
++                return;
++            }
++
++            // CraftBukkit end
++
+             if (p_149841_6_.nextInt(p_149841_7_ + 10) < 5 && !p_149841_1_.canLightningStrikeAt(p_149841_2_, p_149841_3_, p_149841_4_))
+             {
+                 int k1 = p_149841_7_ + p_149841_6_.nextInt(5) / 4;
+@@ -297,7 +334,7 @@
+     {
+         if (!World.func_147466_a(p_149695_1_, p_149695_2_, p_149695_3_ - 1, p_149695_4_) && !this.func_149847_e(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_))
+         {
+-            p_149695_1_.func_147468_f(p_149695_2_, p_149695_3_, p_149695_4_);
++            fireExtinguished(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_); // CraftBukkit - fuel block gone
+         }
+     }
+ 
+@@ -307,7 +344,7 @@
+         {
+             if (!World.func_147466_a(p_149726_1_, p_149726_2_, p_149726_3_ - 1, p_149726_4_) && !this.func_149847_e(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_))
+             {
+-                p_149726_1_.func_147468_f(p_149726_2_, p_149726_3_, p_149726_4_);
++                fireExtinguished(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_); // CraftBukkit - fuel block broke
+             }
+             else
+             {
+@@ -316,6 +353,16 @@
+         }
+     }
+ 
++    // CraftBukkit start
++    private void fireExtinguished(World world, int x, int y, int z)
++    {
++        if (!CraftEventFactory.callBlockFadeEvent(world.getWorld().getBlockAt(x, y, z), Blocks.air).isCancelled())
++        {
++            world.func_147468_f(x, y, z);
++        }
++    }
++    // CraftBukkit end
++
+     @SideOnly(Side.CLIENT)
+     public void func_149734_b(World p_149734_1_, int p_149734_2_, int p_149734_3_, int p_149734_4_, Random p_149734_5_)
+     {
+@@ -431,7 +478,6 @@
+ 
+     public void setFireInfo(Block block, int encouragement, int flammibility)
+     {
+-        if (block == Blocks.air) throw new IllegalArgumentException("Tried to set air on fire... This is bad.");
+         int id = Block.func_149682_b(block);
+         this.field_149849_a[id] = encouragement;
+         this.field_149848_b[id] = flammibility;

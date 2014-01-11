@@ -1,0 +1,64 @@
+--- ../src-base/minecraft/net/minecraft/world/chunk/storage/RegionFile.java
++++ ../src-work/minecraft/net/minecraft/world/chunk/storage/RegionFile.java
+@@ -105,6 +105,61 @@
+         }
+     }
+ 
++    // CraftBukkit start - This is a copy (sort of) of the method below it, make sure they stay in sync
++
++    public synchronized boolean chunkExists(int i, int j)
++    {
++        if (this.outOfBounds(i, j))
++        {
++            return false;
++        }
++        else
++        {
++            try
++            {
++                int k = this.getOffset(i, j);
++
++                if (k == 0)
++                {
++                    return false;
++                }
++                else
++                {
++                    int l = k >> 8;
++                    int i1 = k & 255;
++
++                    if (l + i1 > this.sectorFree.size())
++                    {
++                        return false;
++                    }
++
++                    this.dataFile.seek((long)(l * 4096));
++                    int j1 = this.dataFile.readInt();
++
++                    if (j1 > 4096 * i1 || j1 <= 0)
++                    {
++                        return false;
++                    }
++
++                    byte b0 = this.dataFile.readByte();
++
++                    if (b0 == 1 || b0 == 2)
++                    {
++                        return true;
++                    }
++                }
++            }
++            catch (IOException ioexception)
++            {
++                return false;
++            }
++        }
++
++        return false;
++    }
++
++    // CraftBukkit end
++
+     // JAVADOC METHOD $$ func_76704_a
+     public synchronized DataInputStream getChunkDataInputStream(int par1, int par2)
+     {

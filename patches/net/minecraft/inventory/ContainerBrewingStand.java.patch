@@ -1,0 +1,64 @@
+--- ../src-base/minecraft/net/minecraft/inventory/ContainerBrewingStand.java
++++ ../src-work/minecraft/net/minecraft/inventory/ContainerBrewingStand.java
+@@ -10,16 +10,26 @@
+ import net.minecraft.stats.AchievementList;
+ import net.minecraft.tileentity.TileEntityBrewingStand;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.inventory.CraftInventoryBrewer;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
++// CraftBukkit end
++
+ public class ContainerBrewingStand extends Container
+ {
+     private TileEntityBrewingStand tileBrewingStand;
+     // JAVADOC FIELD $$ field_75186_f
+     private final Slot theSlot;
+     private int brewTime;
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private InventoryPlayer player;
++    // CraftBukkit end
+     private static final String __OBFID = "CL_00001737";
+ 
+     public ContainerBrewingStand(InventoryPlayer par1InventoryPlayer, TileEntityBrewingStand par2TileEntityBrewingStand)
+     {
++        player = par1InventoryPlayer; // CraftBukkit
+         this.tileBrewingStand = par2TileEntityBrewingStand;
+         this.addSlotToContainer(new ContainerBrewingStand.Potion(par1InventoryPlayer.player, par2TileEntityBrewingStand, 0, 56, 46));
+         this.addSlotToContainer(new ContainerBrewingStand.Potion(par1InventoryPlayer.player, par2TileEntityBrewingStand, 1, 79, 53));
+@@ -76,6 +86,13 @@
+ 
+     public boolean canInteractWith(EntityPlayer par1EntityPlayer)
+     {
++        // CraftBukkit start
++        if (!this.checkReachable)
++        {
++            return true;
++        }
++        // CraftBukkit end
++
+         return this.tileBrewingStand.isUseableByPlayer(par1EntityPlayer);
+     }
+ 
+@@ -155,6 +172,20 @@
+         return itemstack;
+     }
+ 
++    // CraftBukkit start
++    public CraftInventoryView getBukkitView()
++    {
++        if (bukkitEntity != null)
++        {
++            return bukkitEntity;
++        }
++
++        CraftInventoryBrewer inventory = new CraftInventoryBrewer(this.tileBrewingStand);
++        bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
++    }
++    // CraftBukkit end
++
+     class Ingredient extends Slot
+     {
+         private static final String __OBFID = "CL_00001738";

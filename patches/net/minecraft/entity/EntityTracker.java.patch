@@ -1,0 +1,45 @@
+--- ../src-base/minecraft/net/minecraft/entity/EntityTracker.java
++++ ../src-work/minecraft/net/minecraft/entity/EntityTracker.java
+@@ -38,6 +38,7 @@
+ import net.minecraft.world.chunk.Chunk;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import net.minecraft.server.MinecraftServer; // Spigot
+ 
+ import cpw.mods.fml.common.registry.EntityRegistry;
+ 
+@@ -47,7 +48,7 @@
+     private final WorldServer theWorld;
+     // JAVADOC FIELD $$ field_72793_b
+     private Set trackedEntities = new HashSet();
+-    private IntHashMap trackedEntityIDs = new IntHashMap();
++    public IntHashMap trackedEntityIDs = new IntHashMap(); // CraftBukkit - private -> public
+     private int entityViewDistance;
+     private static final String __OBFID = "CL_00001431";
+ 
+@@ -186,6 +187,13 @@
+ 
+     public void addEntityToTracker(Entity par1Entity, int par2, final int par3, boolean par4)
+     {
++        if (Thread.currentThread() != MinecraftServer.getServer().primaryThread)
++        {
++            throw new IllegalStateException("Asynchronous entity track!");    // Spigot
++        }
++
++        par2 = org.spigotmc.TrackingRange.getEntityTrackingRange(par1Entity, par2); // Spigot
++
+         if (par2 > this.entityViewDistance)
+         {
+             par2 = this.entityViewDistance;
+@@ -240,6 +248,11 @@
+ 
+     public void removeEntityFromAllTrackingPlayers(Entity par1Entity)
+     {
++        if (Thread.currentThread() != MinecraftServer.getServer().primaryThread)
++        {
++            throw new IllegalStateException("Asynchronous entity untrack!");    // Spigot
++        }
++
+         if (par1Entity instanceof EntityPlayerMP)
+         {
+             EntityPlayerMP entityplayermp = (EntityPlayerMP)par1Entity;

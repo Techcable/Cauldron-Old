@@ -1,0 +1,82 @@
+--- ../src-base/minecraft/net/minecraft/entity/EntityAgeable.java
++++ ../src-work/minecraft/net/minecraft/entity/EntityAgeable.java
+@@ -10,6 +10,36 @@
+ {
+     private float field_98056_d = -1.0F;
+     private float field_98057_e;
++    public boolean ageLocked = false; // CraftBukkit
++
++    // Spigot start
++    @Override
++    public void inactiveTick()
++    {
++        super.inactiveTick();
++
++        if (this.worldObj.isRemote || this.ageLocked)
++        {
++            // CraftBukkit
++            this.setScaleForAge(this.isChild());
++        }
++        else
++        {
++            int i = this.getGrowingAge();
++
++            if (i < 0)
++            {
++                ++i;
++                this.setGrowingAge(i);
++            }
++            else if (i > 0)
++            {
++                --i;
++                this.setGrowingAge(i);
++            }
++        }
++    }
++    // Spigot end
+     private static final String __OBFID = "CL_00001530";
+ 
+     public EntityAgeable(World par1World)
+@@ -38,7 +68,7 @@
+                     {
+                         entityageable.setGrowingAge(-24000);
+                         entityageable.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
+-                        this.worldObj.spawnEntityInWorld(entityageable);
++                        this.worldObj.addEntity(entityageable, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SPAWNER_EGG); // CraftBukkit
+ 
+                         if (itemstack.hasDisplayName())
+                         {
+@@ -49,7 +79,7 @@
+                         {
+                             --itemstack.stackSize;
+ 
+-                            if (itemstack.stackSize <= 0)
++                            if (itemstack.stackSize == 0)    // CraftBukkit - allow less than 0 stacks as "infinite"
+                             {
+                                 par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack)null);
+                             }
+@@ -104,6 +134,7 @@
+     {
+         super.writeEntityToNBT(par1NBTTagCompound);
+         par1NBTTagCompound.setInteger("Age", this.getGrowingAge());
++        par1NBTTagCompound.setBoolean("AgeLocked", this.ageLocked); // CraftBukkit
+     }
+ 
+     // JAVADOC METHOD $$ func_70037_a
+@@ -111,6 +142,7 @@
+     {
+         super.readEntityFromNBT(par1NBTTagCompound);
+         this.setGrowingAge(par1NBTTagCompound.getInteger("Age"));
++        this.ageLocked = par1NBTTagCompound.getBoolean("AgeLocked"); // CraftBukkit
+     }
+ 
+     // JAVADOC METHOD $$ func_70636_d
+@@ -118,7 +150,7 @@
+     {
+         super.onLivingUpdate();
+ 
+-        if (this.worldObj.isRemote)
++        if (this.worldObj.isRemote || this.ageLocked)   // CraftBukkit
+         {
+             this.setScaleForAge(this.isChild());
+         }

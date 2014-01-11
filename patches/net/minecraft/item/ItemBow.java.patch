@@ -1,0 +1,33 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemBow.java
++++ ../src-work/minecraft/net/minecraft/item/ItemBow.java
+@@ -85,6 +85,21 @@
+                 entityarrow.setFire(100);
+             }
+ 
++            // CraftBukkit start
++            org.bukkit.event.entity.EntityShootBowEvent cbEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callEntityShootBowEvent(par3EntityPlayer, par1ItemStack, entityarrow, f);
++
++            if (cbEvent.isCancelled())
++            {
++                cbEvent.getProjectile().remove();
++                return;
++            }
++
++            if (cbEvent.getProjectile() == entityarrow.getBukkitEntity())
++            {
++                par2World.spawnEntityInWorld(entityarrow);
++            }
++
++            // CraftBukkit end
+             par1ItemStack.damageItem(1, par3EntityPlayer);
+             par2World.playSoundAtEntity(par3EntityPlayer, "random.bow", 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + f * 0.5F);
+ 
+@@ -99,7 +114,7 @@
+ 
+             if (!par2World.isRemote)
+             {
+-                par2World.spawnEntityInWorld(entityarrow);
++                // par2World.spawnEntityInWorld(entityarrow); // CraftBukkit - moved up
+             }
+         }
+     }

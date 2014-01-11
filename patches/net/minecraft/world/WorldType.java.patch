@@ -1,0 +1,23 @@
+--- ../src-base/minecraft/net/minecraft/world/WorldType.java
++++ ../src-work/minecraft/net/minecraft/world/WorldType.java
+@@ -19,6 +19,7 @@
+ import net.minecraft.world.gen.layer.GenLayerZoom;
+ import cpw.mods.fml.relauncher.Side;
+ import cpw.mods.fml.relauncher.SideOnly;
++import net.minecraftforge.common.util.EnumHelper; // MCPC+
+ 
+ public class WorldType
+ {
+@@ -59,6 +60,12 @@
+         this.canBeCreated = true;
+         this.worldTypeId = par1;
+         worldTypes[par1] = this;
++        // MCPC+ start - add worldtype for bukkit if it does not already exist
++        if (org.bukkit.WorldType.getByName(par2Str) == null)
++        {
++            EnumHelper.addBukkitWorldType(par2Str);
++        }
++        // MCPC+ end
+     }
+ 
+     public String getWorldTypeName()

@@ -1,0 +1,34 @@
+--- ../src-base/minecraft/net/minecraft/inventory/ContainerMerchant.java
++++ ../src-work/minecraft/net/minecraft/inventory/ContainerMerchant.java
+@@ -8,6 +8,8 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.world.World;
+ 
++import org.bukkit.craftbukkit.inventory.CraftInventoryView; // CraftBukkit
++
+ public class ContainerMerchant extends Container
+ {
+     // JAVADOC FIELD $$ field_75178_e
+@@ -17,6 +19,22 @@
+     private final World theWorld;
+     private static final String __OBFID = "CL_00001757";
+ 
++    // CraftBukkit start
++    private CraftInventoryView bukkitEntity = null;
++    private InventoryPlayer player;
++
++    @Override
++    public CraftInventoryView getBukkitView()
++    {
++        if (bukkitEntity == null)
++        {
++            bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), new org.bukkit.craftbukkit.inventory.CraftInventoryMerchant(this.getMerchantInventory()), this);
++        }
++
++        return bukkitEntity;
++    }
++    // CraftBukkit end
++
+     public ContainerMerchant(InventoryPlayer par1InventoryPlayer, IMerchant par2IMerchant, World par3World)
+     {
+         this.theMerchant = par2IMerchant;
