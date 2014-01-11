@@ -46,18 +46,23 @@
      }
  
      // JAVADOC METHOD $$ func_70901_n
-@@ -184,9 +194,18 @@
+@@ -184,9 +194,23 @@
          if (!this.worldObj.isRemote)
          {
              EntityPigZombie entitypigzombie = new EntityPigZombie(this.worldObj);
 +
-+            // CraftBukkit start
-+            if (CraftEventFactory.callPigZapEvent(this, par1EntityLightningBolt, entitypigzombie).isCancelled())
++            // MCPC+ start
++            if (par1EntityLightningBolt != null)
 +            {
-+                return;
-+            }
++                // CraftBukkit start
++                if (CraftEventFactory.callPigZapEvent(this, par1EntityLightningBolt, entitypigzombie).isCancelled())
++                {
++                    return;
++                }
 +
-+            // CraftBukkit end
++                // CraftBukkit end
++            }
++            // MCPC+ end
              entitypigzombie.setCurrentItemOrArmor(0, new ItemStack(Items.golden_sword));
              entitypigzombie.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
 -            this.worldObj.spawnEntityInWorld(entitypigzombie);

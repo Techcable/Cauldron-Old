@@ -72,3 +72,16 @@
      }
  
      // JAVADOC METHOD $$ func_70300_a
+@@ -200,4 +242,12 @@
+     {
+         return true;
+     }
++
++    // MCPC+ start
++    @Override
++    public boolean canUpdate()
++    {
++        return false;
++    }
++    // MCPC+ end
+ }

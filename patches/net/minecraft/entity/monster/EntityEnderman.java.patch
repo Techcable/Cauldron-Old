@@ -46,7 +46,7 @@
 -                        this.setCarryingData(this.worldObj.getBlockMetadata(k, i, j));
 -                        this.worldObj.func_147449_b(k, i, j, Blocks.air);
 +                        // CraftBukkit start - Pickup event
-+                        if (!CraftEventFactory.callEntityChangeBlockEvent(this, this.worldObj.getWorld().getBlockAt(i, j, k), org.bukkit.Material.AIR).isCancelled())
++                        if (this.worldObj.getWorld() == null || !CraftEventFactory.callEntityChangeBlockEvent(this, this.worldObj.getWorld().getBlockAt(i, j, k), org.bukkit.Material.AIR).isCancelled()) // MCPC+
 +                        {
 +                            this.func_146081_a(block);
 +                            this.setCarryingData(this.worldObj.getBlockMetadata(i, j, k));

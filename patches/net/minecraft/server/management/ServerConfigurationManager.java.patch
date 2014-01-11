@@ -1,6 +1,15 @@
 --- ../src-base/minecraft/net/minecraft/server/management/ServerConfigurationManager.java
 +++ ../src-work/minecraft/net/minecraft/server/management/ServerConfigurationManager.java
-@@ -61,9 +61,30 @@
+@@ -5,6 +5,8 @@
+ import com.mojang.authlib.GameProfile;
+ 
+ import cpw.mods.fml.common.FMLCommonHandler;
++import cpw.mods.fml.common.network.FMLEmbeddedChannel;
++import cpw.mods.fml.common.network.FMLOutboundHandler;
+ import cpw.mods.fml.relauncher.Side;
+ import cpw.mods.fml.relauncher.SideOnly;
+ import java.io.File;
+@@ -61,9 +63,34 @@
  import net.minecraft.world.WorldSettings;
  import net.minecraft.world.demo.DemoWorldManager;
  import net.minecraft.world.storage.IPlayerFileData;
@@ -26,12 +35,16 @@
 +import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 +import org.bukkit.util.Vector;
 +// CraftBukkit end
-+import net.minecraftforge.common.DimensionManager; // MCPC+
++// MCPC+ start
++import net.minecraftforge.common.DimensionManager;
++import net.minecraftforge.common.network.ForgeMessage;
++import net.minecraftforge.common.network.ForgeNetworkHandler;
++// MCPC+ end
 +
  public abstract class ServerConfigurationManager
  {
      private static final Logger field_148546_d = LogManager.getLogger();
-@@ -77,12 +98,12 @@
+@@ -77,12 +104,12 @@
      // JAVADOC FIELD $$ field_72414_i
      private final Set ops = new HashSet();
      // JAVADOC FIELD $$ field_72411_j
@@ -47,7 +60,7 @@
      // JAVADOC FIELD $$ field_72405_c
      protected int maxPlayers;
      protected int viewDistance;
-@@ -93,8 +114,16 @@
+@@ -93,8 +120,16 @@
      private int playerPingIndex;
      private static final String __OBFID = "CL_00001423";
  
@@ -64,7 +77,7 @@
          this.mcServer = par1MinecraftServer;
          this.bannedPlayers.setListActive(false);
          this.bannedIPs.setListActive(false);
-@@ -113,12 +142,24 @@
+@@ -113,12 +148,34 @@
              s = par1INetworkManager.getSocketAddress().toString();
          }
  
@@ -84,13 +97,23 @@
 +            maxPlayers = 60;
 +        }
 +
++        // MCPC+ - send DimensionRegisterMessage to client before attempting to login to a Bukkit dimension
++        if (DimensionManager.isBukkitDimension( par2EntityPlayerMP.dimension))
++        {
++            FMLEmbeddedChannel serverChannel = ForgeNetworkHandler.getServerChannel();
++            serverChannel.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.PLAYER);
++            serverChannel.attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(par2EntityPlayerMP);
++            serverChannel.writeOutbound(new ForgeMessage.DimensionRegisterMessage(par2EntityPlayerMP.dimension, worldserver.getWorld().getEnvironment().getId()));
++        }
++        // MCPC+ end
++
          nethandlerplayserver.func_147359_a(new S01PacketJoinGame(par2EntityPlayerMP.func_145782_y(), par2EntityPlayerMP.theItemInWorldManager.getGameType(), worldserver.getWorldInfo().isHardcoreModeEnabled(), worldserver.provider.dimensionId, worldserver.difficultySetting, this.getMaxPlayers(), worldserver.getWorldInfo().getTerrainType()));
 +        par2EntityPlayerMP.getBukkitEntity().sendSupportedChannels();
 +        // CraftBukkit end
          nethandlerplayserver.func_147359_a(new S3FPacketCustomPayload("MC|Brand", this.getServerInstance().getServerModName().getBytes(Charsets.UTF_8)));
          nethandlerplayserver.func_147359_a(new S05PacketSpawnPosition(chunkcoordinates.posX, chunkcoordinates.posY, chunkcoordinates.posZ));
          nethandlerplayserver.func_147359_a(new S39PacketPlayerAbilities(par2EntityPlayerMP.capabilities));
-@@ -127,9 +168,11 @@
+@@ -127,9 +184,11 @@
          par2EntityPlayerMP.func_147099_x().func_150884_b(par2EntityPlayerMP);
          this.func_96456_a((ServerScoreboard)worldserver.getScoreboard(), par2EntityPlayerMP);
          this.mcServer.func_147132_au();
@@ -102,7 +125,7 @@
          this.playerLoggedIn(par2EntityPlayerMP);
          nethandlerplayserver.func_147364_a(par2EntityPlayerMP.posX, par2EntityPlayerMP.posY, par2EntityPlayerMP.posZ, par2EntityPlayerMP.rotationYaw, par2EntityPlayerMP.rotationPitch);
          this.updateTimeAndWeatherForPlayer(par2EntityPlayerMP, worldserver);
-@@ -164,7 +207,7 @@
+@@ -164,7 +223,7 @@
          }
      }
  
@@ -111,7 +134,7 @@
      {
          HashSet hashset = new HashSet();
          Iterator iterator = par1ServerScoreboard.func_96525_g().iterator();
-@@ -198,6 +241,11 @@
+@@ -198,6 +257,11 @@
      // JAVADOC METHOD $$ func_72364_a
      public void setPlayerManager(WorldServer[] par1ArrayOfWorldServer)
      {
@@ -123,7 +146,7 @@
          this.playerNBTManagerObj = par1ArrayOfWorldServer[0].getSaveHandler().getSaveHandler();
      }
  
-@@ -254,17 +302,64 @@
+@@ -254,17 +318,64 @@
      // JAVADOC METHOD $$ func_72377_c
      public void playerLoggedIn(EntityPlayerMP par1EntityPlayerMP)
      {
@@ -193,7 +216,7 @@
      }
  
      // JAVADOC METHOD $$ func_72358_d
-@@ -274,24 +369,55 @@
+@@ -274,24 +385,55 @@
      }
  
      // JAVADOC METHOD $$ func_72367_e
@@ -261,7 +284,7 @@
      }
  
      public String func_148542_a(SocketAddress p_148542_1_, GameProfile p_148542_2_)
-@@ -337,6 +463,77 @@
+@@ -337,6 +479,77 @@
          }
      }
  
@@ -339,7 +362,7 @@
      public EntityPlayerMP func_148545_a(GameProfile p_148545_1_)
      {
          ArrayList arraylist = new ArrayList();
-@@ -373,27 +570,84 @@
+@@ -373,27 +586,84 @@
  
          return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
      }
@@ -429,7 +452,7 @@
          par1EntityPlayerMP.dimension = par2;
          Object object;
  
-@@ -407,51 +661,213 @@
+@@ -407,51 +677,214 @@
          }
  
          EntityPlayerMP entityplayermp1 = new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension), par1EntityPlayerMP.func_146103_bH(), (ItemInWorldManager)object);
@@ -533,9 +556,10 @@
 +        // MCPC+ - change dim for bukkit added dimensions
 +        if (DimensionManager.isBukkitDimension(actualDimension))
 +        {
-+            // TODO
-+            //Packet250CustomPayload[] pkt = ForgePacket.makePacketSet(new DimensionRegisterPacket(actualDimension, worldserver.getWorld().getEnvironment().getId()));
-+            //entityplayermp1.playerNetServerHandler.sendPacketToPlayer(pkt[0]);
++            FMLEmbeddedChannel serverChannel = ForgeNetworkHandler.getServerChannel();
++            serverChannel.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.PLAYER);
++            serverChannel.attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(entityplayermp1);
++            serverChannel.writeOutbound(new ForgeMessage.DimensionRegisterMessage(actualDimension, worldserver.getWorld().getEnvironment().getId()));
 +        }
 +        // MCPC+ end
 +        // CraftBukkit start
@@ -660,7 +684,7 @@
      public void transferPlayerToDimension(EntityPlayerMP par1EntityPlayerMP, int par2)
      {
          transferPlayerToDimension(par1EntityPlayerMP, par2, mcServer.worldServerForDimension(par2).getDefaultTeleporter());
-@@ -485,7 +901,10 @@
+@@ -485,7 +918,10 @@
      // JAVADOC METHOD $$ func_82448_a
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer)
      {
@@ -672,7 +696,7 @@
      }
  
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer, Teleporter teleporter)
-@@ -571,6 +990,192 @@
+@@ -571,6 +1007,192 @@
          par1Entity.setWorld(par4WorldServer);
      }
  
@@ -865,7 +889,7 @@
      // JAVADOC METHOD $$ func_72374_b
      public void sendPlayerInfoToAllPlayers()
      {
-@@ -579,11 +1184,36 @@
+@@ -579,11 +1201,36 @@
              this.playerPingIndex = 0;
          }
  
@@ -902,7 +926,7 @@
      }
  
      public void func_148540_a(Packet p_148540_1_)
-@@ -652,12 +1282,30 @@
+@@ -652,12 +1299,30 @@
      public void addOp(String par1Str)
      {
          this.ops.add(par1Str.toLowerCase());
@@ -933,7 +957,7 @@
      }
  
      // JAVADOC METHOD $$ func_72370_d
-@@ -833,8 +1481,16 @@
+@@ -833,8 +1498,16 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -951,7 +975,7 @@
              if (entityplayermp != p_148543_1_ && entityplayermp.dimension == p_148543_10_)
              {
                  double d4 = p_148543_2_ - entityplayermp.posX;
-@@ -891,9 +1547,12 @@
+@@ -891,9 +1564,12 @@
  
          if (par2WorldServer.isRaining())
          {
@@ -967,7 +991,7 @@
          }
      }
  
-@@ -901,7 +1560,7 @@
+@@ -901,7 +1577,7 @@
      public void syncPlayerInventory(EntityPlayerMP par1EntityPlayerMP)
      {
          par1EntityPlayerMP.sendContainerToPlayer(par1EntityPlayerMP.inventoryContainer);
@@ -976,7 +1000,19 @@
          par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S09PacketHeldItemChange(par1EntityPlayerMP.inventory.currentItem));
      }
  
-@@ -993,12 +1652,31 @@
+@@ -920,7 +1596,10 @@
+     // JAVADOC METHOD $$ func_72373_m
+     public String[] getAvailablePlayerDat()
+     {
+-        return this.mcServer.worldServers[0].getSaveHandler().getSaveHandler().getAvailablePlayerDat();
++        // MCPC+ start - don't crash if the overworld isn't loaded
++        List<WorldServer> worldServers = this.mcServer.worlds;
++        return worldServers.isEmpty() ? new String[0] : worldServers.get(0).getSaveHandler().getSaveHandler().getAvailablePlayerDat(); // CraftBukkit
++        // MCPC+ end
+     }
+ 
+     public void setWhiteListEnabled(boolean par1)
+@@ -993,12 +1672,31 @@
      // JAVADOC METHOD $$ func_72392_r
      public void removeAllPlayers()
      {

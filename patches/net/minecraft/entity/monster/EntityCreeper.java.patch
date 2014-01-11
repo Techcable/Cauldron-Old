@@ -81,17 +81,22 @@
      public boolean attackEntityAsMob(Entity par1Entity)
      {
          return true;
-@@ -224,9 +270,30 @@
+@@ -224,9 +270,35 @@
      public void onStruckByLightning(EntityLightningBolt par1EntityLightningBolt)
      {
          super.onStruckByLightning(par1EntityLightningBolt);
 -        this.dataWatcher.updateObject(17, Byte.valueOf((byte)1));
 +
-+        // CraftBukkit start
-+        if (CraftEventFactory.callCreeperPowerEvent(this, par1EntityLightningBolt, org.bukkit.event.entity.CreeperPowerEvent.PowerCause.LIGHTNING).isCancelled())
++        // MCPC+ start
++        if (par1EntityLightningBolt != null)
 +        {
-+            return;
++            // CraftBukkit start
++            if (CraftEventFactory.callCreeperPowerEvent(this, par1EntityLightningBolt, org.bukkit.event.entity.CreeperPowerEvent.PowerCause.LIGHTNING).isCancelled())
++            {
++                return;
++            }
 +        }
++        // MCPC+ end
 +
 +        this.setPowered(true);
      }
@@ -113,7 +118,7 @@
      // JAVADOC METHOD $$ func_70085_c
      protected boolean interact(EntityPlayer par1EntityPlayer)
      {
-@@ -253,17 +320,22 @@
+@@ -253,17 +325,22 @@
          if (!this.worldObj.isRemote)
          {
              boolean flag = this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing");

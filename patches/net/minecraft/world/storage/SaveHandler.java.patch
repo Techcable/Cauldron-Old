@@ -29,7 +29,37 @@
      private static final String __OBFID = "CL_00000585";
  
      public SaveHandler(File par1File, String par2Str, boolean par3)
-@@ -278,6 +286,14 @@
+@@ -69,7 +77,7 @@
+         catch (IOException ioexception)
+         {
+             ioexception.printStackTrace();
+-            throw new RuntimeException("Failed to check session lock, aborting");
++            throw new RuntimeException("Failed to check session lock for world " + this.worldDirectory + ", aborting"); // MCPC+
+         }
+     }
+ 
+@@ -91,7 +99,7 @@
+             {
+                 if (datainputstream.readLong() != this.initializationTime)
+                 {
+-                    throw new MinecraftException("The save is being accessed from another location, aborting");
++                    throw new MinecraftException("The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting"); // MCPC+
+                 }
+             }
+             finally
+@@ -101,7 +109,10 @@
+         }
+         catch (IOException ioexception)
+         {
+-            throw new MinecraftException("Failed to check session lock, aborting");
++            // MCPC+ start
++            ioexception.printStackTrace();
++            throw new MinecraftException("Failed to check session lock for world " + this.worldDirectory + ", aborting");
++            // MCPC+ end
+         }
+     }
+ 
+@@ -278,6 +289,14 @@
  
          if (nbttagcompound != null)
          {
@@ -44,7 +74,7 @@
              par1EntityPlayer.readFromNBT(nbttagcompound);
          }
  
-@@ -340,4 +356,80 @@
+@@ -340,4 +359,80 @@
      {
          return this.saveDirectoryName;
      }

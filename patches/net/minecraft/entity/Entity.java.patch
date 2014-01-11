@@ -613,14 +613,17 @@
          }
      }
  
-@@ -1963,12 +2350,45 @@
+@@ -1963,12 +2350,48 @@
      // JAVADOC METHOD $$ func_70077_a
      public void onStruckByLightning(EntityLightningBolt par1EntityLightningBolt)
      {
 -        this.dealFireDamage(5);
 +        // CraftBukkit start
 +        final org.bukkit.entity.Entity thisBukkitEntity = this.getBukkitEntity();
++        if (thisBukkitEntity == null) return; // MCPC+ - skip mod entities with no wrapper (TODO: create a wrapper)
++        if (par1EntityLightningBolt == null) return; // MCPC+ - skip null entities, see #392
 +        final org.bukkit.entity.Entity stormBukkitEntity = par1EntityLightningBolt.getBukkitEntity();
++        if (stormBukkitEntity == null) return; // MCPC+ - skip mod entities with no wrapper (TODO: create a wrapper)
 +        final PluginManager pluginManager = Bukkit.getPluginManager();
 +
 +        if (thisBukkitEntity instanceof Painting)
@@ -661,7 +664,7 @@
          }
      }
  
-@@ -2153,36 +2573,62 @@
+@@ -2153,36 +2576,62 @@
          {
              this.worldObj.theProfiler.startSection("changeDimension");
              MinecraftServer minecraftserver = MinecraftServer.getServer();
@@ -740,7 +743,7 @@
              }
  
              this.isDead = true;
-@@ -2192,7 +2638,6 @@
+@@ -2192,7 +2641,6 @@
              this.worldObj.theProfiler.endSection();
          }
      }

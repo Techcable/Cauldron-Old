@@ -10,7 +10,22 @@
  public final class ItemStack
  {
      public static final DecimalFormat field_111284_a = new DecimalFormat("#.###");
-@@ -131,12 +134,47 @@
+@@ -46,8 +49,13 @@
+     public NBTTagCompound stackTagCompound;
+     // JAVADOC FIELD $$ field_77991_e
+     int itemDamage;
++
++    // MCPC+ - due to a bug in Gson(https://code.google.com/p/google-gson/issues/detail?id=440), a stackoverflow 
++    //         can occur when gson attempts to resolve a field of a class that points to itself.
++    //         As a temporary workaround, we will prevent serialization for this object until the bug is fixed.
++    //         This fixes EE3's serialization of ItemStack.
+     // JAVADOC FIELD $$ field_82843_f
+-    private EntityItemFrame itemFrame;
++    private transient EntityItemFrame itemFrame;
+     private static final String __OBFID = "CL_00000043";
+ 
+     public ItemStack(Block par1Block)
+@@ -131,12 +139,47 @@
  
      public boolean tryPlaceItemIntoWorld(EntityPlayer par1EntityPlayer, World par2World, int par3, int par4, int par5, int par6, float par7, float par8, float par9)
      {
@@ -59,7 +74,7 @@
  
          return flag;
      }
-@@ -244,8 +282,22 @@
+@@ -244,8 +287,22 @@
      }
  
      // JAVADOC METHOD $$ func_96631_a
@@ -82,7 +97,7 @@
          if (!this.isItemStackDamageable())
          {
              return false;
-@@ -267,6 +319,22 @@
+@@ -267,6 +324,22 @@
  
                  par1 -= k;
  
@@ -105,7 +120,7 @@
                  if (par1 <= 0)
                  {
                      return false;
-@@ -306,6 +374,13 @@
+@@ -306,6 +379,13 @@
                          this.stackSize = 0;
                      }
  

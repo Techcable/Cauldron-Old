@@ -36,7 +36,7 @@
      public void func_149878_d(World p_149878_1_, int p_149878_2_, int p_149878_3_, int p_149878_4_, Random p_149878_5_)
      {
          if (!net.minecraftforge.event.terraingen.TerrainGen.saplingGrowTree(p_149878_1_, p_149878_5_, p_149878_2_, p_149878_3_, p_149878_4_)) return;
-@@ -188,7 +198,200 @@
+@@ -188,7 +198,206 @@
              }
          }
      }
@@ -45,6 +45,12 @@
 +    // CraftBukkit - added bonemeal, player and itemstack
 +    public void grow(World world, int i, int j, int k, Random random, boolean bonemeal, Player player, ItemStack itemstack)
 +    {
++        // MCPC+ start - delegate growth to subclass if overridden, mods @Override growTree() e.g. MFR rubber trees
++        if (this.getClass() != BlockSapling.class) {
++            this.func_149878_d(world, i, j, k, random);
++            return;
++        }
++        // MCPC+ end
 +        int l = world.getBlockMetadata(i, j, k);
 +
 +        if ((l & 8) == 0)
@@ -237,7 +243,7 @@
      public boolean func_149880_a(World p_149880_1_, int p_149880_2_, int p_149880_3_, int p_149880_4_, int p_149880_5_)
      {
          return p_149880_1_.func_147439_a(p_149880_2_, p_149880_3_, p_149880_4_) == this && (p_149880_1_.getBlockMetadata(p_149880_2_, p_149880_3_, p_149880_4_) & 7) == p_149880_5_;
-@@ -231,6 +434,15 @@
+@@ -231,6 +440,15 @@
  
      public void func_149853_b(World p_149853_1_, Random p_149853_2_, int p_149853_3_, int p_149853_4_, int p_149853_5_)
      {

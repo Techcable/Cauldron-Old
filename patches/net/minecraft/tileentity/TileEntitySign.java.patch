@@ -30,3 +30,16 @@
          return new S33PacketUpdateSign(this.field_145851_c, this.field_145848_d, this.field_145849_e, astring);
      }
  
+@@ -72,4 +84,12 @@
+     {
+         return this.field_145917_k;
+     }
++
++    // MCPC+ start
++    @Override
++    public boolean canUpdate()
++    {
++        return false;
++    }
++    // MCPC+ end
+ }

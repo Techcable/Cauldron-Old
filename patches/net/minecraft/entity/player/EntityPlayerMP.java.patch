@@ -475,7 +475,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -681,71 +913,143 @@
+@@ -681,71 +913,150 @@
              this.closeScreen();
          }
  
@@ -485,6 +485,7 @@
 +
 +        if (container == null)
 +        {
++            par1IInventory.closeChest(); // MCPC+ - prevent chest from being stuck in open state on clients
 +            return;
 +        }
 +
@@ -505,6 +506,7 @@
 +
 +        if (container == null)
 +        {
++            p_146093_1_.closeChest(); // MCPC+ - prevent chest from being stuck in open state on clients
 +            return;
 +        }
 +
@@ -525,6 +527,7 @@
 +
 +        if (container == null)
 +        {
++            par1EntityMinecartHopper.closeChest(); // MCPC+ - prevent chest from being stuck in open state on clients
 +            return;
 +        }
 +
@@ -545,6 +548,7 @@
 +
 +        if (container == null)
 +        {
++            p_146101_1_.closeChest(); // MCPC+ - prevent chests from being stuck in open state on clients
 +            return;
 +        }
 +
@@ -565,6 +569,7 @@
 +
 +        if (container == null)
 +        {
++            p_146102_1_.closeChest(); // MCPC+ - prevent chests from being stuck in open state on clients
 +            return;
 +        }
 +
@@ -585,6 +590,7 @@
 +
 +        if (container == null)
 +        {
++            p_146098_1_.closeChest(); // MCPC+ - prevent chests from being stuck in open state on clients
 +            return;
 +        }
 +
@@ -605,6 +611,7 @@
 +
 +        if (container == null)
 +        {
++            p_146104_1_.closeChest(); // MCPC+ - prevent chests from being stuck in open state on clients
 +            return;
 +        }
 +
@@ -635,7 +642,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
          InventoryMerchant inventorymerchant = ((ContainerMerchant)this.openContainer).getMerchantInventory();
-@@ -761,7 +1065,7 @@
+@@ -761,7 +1072,7 @@
                  merchantrecipelist.func_151391_a(packetbuffer);
                  this.playerNetServerHandler.func_147359_a(new S3FPacketCustomPayload("MC|TrList", packetbuffer));
              }
@@ -644,7 +651,7 @@
              {
                  field_147102_bM.error("Couldn\'t send trade list", ioexception);
              }
-@@ -770,14 +1074,24 @@
+@@ -770,14 +1081,25 @@
  
      public void displayGUIHorse(EntityHorse par1EntityHorse, IInventory par2IInventory)
      {
@@ -653,6 +660,7 @@
 +
 +        if (container == null)
 +        {
++            par2IInventory.closeChest(); // MCPC+ - prevent chests from being stuck in open state on clients
 +            return;
 +        }
 +
@@ -671,7 +679,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -803,6 +1117,14 @@
+@@ -803,6 +1125,14 @@
      {
          this.playerNetServerHandler.func_147359_a(new S30PacketWindowItems(par1Container.windowId, par2List));
          this.playerNetServerHandler.func_147359_a(new S2FPacketSetSlot(-1, -1, this.inventory.getItemStack()));
@@ -686,7 +694,7 @@
      }
  
      // JAVADOC METHOD $$ func_71112_a
-@@ -814,6 +1136,7 @@
+@@ -814,6 +1144,7 @@
      // JAVADOC METHOD $$ func_71053_j
      public void closeScreen()
      {
@@ -694,7 +702,7 @@
          this.playerNetServerHandler.func_147359_a(new S2EPacketCloseWindow(this.openContainer.windowId));
          this.closeContainer();
      }
-@@ -891,6 +1214,7 @@
+@@ -891,6 +1222,7 @@
      public void setPlayerHealthUpdated()
      {
          this.lastHealth = -1.0E8F;
@@ -702,7 +710,7 @@
      }
  
      public void func_146105_b(IChatComponent p_146105_1_)
-@@ -982,6 +1306,16 @@
+@@ -982,6 +1314,16 @@
          this.playerNetServerHandler.func_147359_a(new S2BPacketChangeGameState(3, (float)par1EnumGameType.getID()));
      }
  
@@ -719,7 +727,7 @@
      public void func_145747_a(IChatComponent p_145747_1_)
      {
          this.playerNetServerHandler.func_147359_a(new S02PacketChat(p_145747_1_));
-@@ -1049,6 +1383,114 @@
+@@ -1049,6 +1391,114 @@
          return this.field_147103_bO;
      }
  
@@ -805,7 +813,7 @@
 +        this.experience = 0;
 +        this.deathTime = 0;
 +        this.clearActivePotions(); // Should be remapped: removeAllEffects should be remapped to this.
-+        this.potionsNeedUpdate = true;
++        super.potionsNeedUpdate = true; // MCPC+ - change to super to temporarily workaround remapping bug with SpecialSource
 +        this.openContainer = this.inventoryContainer;
 +        this.attackingPlayer = null;
 +        this.entityLivingToAttack = null;

@@ -107,7 +107,34 @@
          if (par1NBTTagCompound.func_150297_b("CustomName", 8) && par1NBTTagCompound.getString("CustomName").length() > 0)
          {
              this.setCustomNameTag(par1NBTTagCompound.getString("CustomName"));
-@@ -560,6 +602,14 @@
+@@ -551,15 +593,41 @@
+                     this.entityAge = 0;
+                 }
+             }
++            else // MCPC+ start - Despawn entities when a player isn't in the world
++            {
++                if (this.worldObj.mcpcConfig.getBoolean("despawn-immediate", true) && this.canDespawn()) // Use flag for the assumption that being in another dimension entirely means no player is anywhere near
++                {
++                    this.despawn("No Player : Immediate");
++                }
++                else if (this.entityAge > 600 && this.rand.nextInt(800) == 0 && this.canDespawn()) // Otherwise, use the same logic as above
++                {
++                    this.despawn("No Player : Random Aged");
++                }
++            } // MCPC+ end
+         }
+     }
+ 
++    // MCPC+ start
++    private void despawn(String reason) {
++        this.setDead();
++        za.co.mcportcentral.MCPCHooks.logEntityDespawn(this, reason);
++    }
++    // MCPC+ end
++
+     protected void updateAITasks()
+     {
+         ++this.entityAge;
          this.worldObj.theProfiler.startSection("checkDespawn");
          this.despawnEntity();
          this.worldObj.theProfiler.endSection();
@@ -122,7 +149,7 @@
          this.worldObj.theProfiler.startSection("sensing");
          this.senses.clearSensingCache();
          this.worldObj.theProfiler.endSection();
-@@ -1052,6 +1102,14 @@
+@@ -1052,6 +1120,14 @@
      {
          if (this.getLeashed() && this.getLeashedToEntity() == par1EntityPlayer)
          {
@@ -137,7 +164,7 @@
              this.clearLeashed(true, !par1EntityPlayer.capabilities.isCreativeMode);
              return true;
          }
-@@ -1063,6 +1121,14 @@
+@@ -1063,6 +1139,14 @@
              {
                  if (!(this instanceof EntityTameable) || !((EntityTameable)this).isTamed())
                  {
@@ -152,7 +179,7 @@
                      this.setLeashedToEntity(par1EntityPlayer, true);
                      --itemstack.stackSize;
                      return true;
-@@ -1070,6 +1136,14 @@
+@@ -1070,6 +1154,14 @@
  
                  if (par1EntityPlayer.getCommandSenderName().equalsIgnoreCase(((EntityTameable)this).getOwnerName()))
                  {
@@ -167,7 +194,7 @@
                      this.setLeashedToEntity(par1EntityPlayer, true);
                      --itemstack.stackSize;
                      return true;
-@@ -1097,6 +1171,7 @@
+@@ -1097,6 +1189,7 @@
          {
              if (this.leashedToEntity == null || this.leashedToEntity.isDead)
              {
@@ -175,7 +202,7 @@
                  this.clearLeashed(true, true);
              }
          }
-@@ -1186,10 +1261,16 @@
+@@ -1186,10 +1279,16 @@
              }
              else
              {

@@ -94,7 +94,7 @@
          if (!(this instanceof WorldServerMulti)) //Forge: We fix the global mapStorage, which causes us to share scoreboards early. So don't associate the save data with the temporary scoreboard
          {
              scoreboardsavedata.func_96499_a(this.worldScoreboard);
-@@ -136,6 +195,144 @@
+@@ -136,6 +195,145 @@
          DimensionManager.setWorld(p_i45284_4_, this);
      }
  
@@ -120,7 +120,8 @@
 +        {
 +            if (!(result instanceof TileEntityChest))
 +            {
-+                result = fixTileEntity(i, j, k, type, result);
++                // MCPC+ - allow non-vanilla tile entities on chests for Terrafirmacraft, fixes #724
++                //result = fixTileEntity(i, j, k, type, result);
 +            }
 +        }
 +        else if (type == Blocks.furnace)
@@ -239,7 +240,7 @@
      // JAVADOC METHOD $$ func_72835_b
      public void tick()
      {
-@@ -160,12 +357,18 @@
+@@ -160,12 +358,18 @@
          }
  
          this.theProfiler.startSection("mobSpawner");
@@ -260,7 +261,7 @@
          this.theProfiler.endStartSection("chunkSource");
          this.chunkProvider.unloadQueuedChunks();
          int j = this.calculateSkylightSubtracted(1.0F);
-@@ -182,23 +385,39 @@
+@@ -182,23 +386,39 @@
              this.worldInfo.setWorldTime(this.worldInfo.getWorldTime() + 1L);
          }
  
@@ -300,7 +301,7 @@
      }
  
      // JAVADOC METHOD $$ func_73057_a
-@@ -219,7 +438,7 @@
+@@ -219,7 +439,7 @@
          {
              EntityPlayer entityplayer = (EntityPlayer)iterator.next();
  
@@ -309,7 +310,7 @@
              {
                  this.allPlayersSleeping = false;
                  break;
-@@ -247,7 +466,25 @@
+@@ -247,7 +467,25 @@
  
      private void resetRainAndThunder()
      {
@@ -336,7 +337,7 @@
      }
  
      public boolean areAllPlayersAsleep()
-@@ -255,19 +492,28 @@
+@@ -255,19 +493,28 @@
          if (this.allPlayersSleeping && !this.isRemote)
          {
              Iterator iterator = this.playerEntities.iterator();
@@ -368,7 +369,7 @@
              return false;
          }
          else
-@@ -310,27 +556,36 @@
+@@ -310,27 +557,37 @@
          super.func_147456_g();
          int i = 0;
          int j = 0;
@@ -393,6 +394,7 @@
 +            // If unloaded, or in procedd of being unloaded, drop it
 +            if ((!this.chunkExists(chunkX, chunkZ)) || (this.theChunkProviderServer.chunksToUnload.contains(chunkX, chunkZ)))
 +            {
++                activeChunkSet.remove(new ChunkCoordIntPair(chunkX, chunkZ)); // MCPC+ - vanilla compatibility
 +                iter.remove();
 +                continue;
 +            }
@@ -418,7 +420,7 @@
              {
                  chunk.func_150804_b(false);
              }
-@@ -366,12 +621,34 @@
+@@ -366,12 +623,34 @@
  
                  if (this.isBlockFreezableNaturally(j1 + k, l1 - 1, k1 + l))
                  {
@@ -455,7 +457,7 @@
                  }
  
                  if (this.isRaining())
-@@ -408,6 +685,7 @@
+@@ -408,6 +687,7 @@
                          if (block.func_149653_t())
                          {
                              ++i;
@@ -463,7 +465,16 @@
                              block.func_149674_a(this, j2 + k, l2 + extendedblockstorage.getYLocation(), k2 + l, this.rand);
                          }
                      }
-@@ -529,7 +807,17 @@
+@@ -495,7 +775,7 @@
+     // JAVADOC METHOD $$ func_72939_s
+     public void updateEntities()
+     {
+-        if (this.playerEntities.isEmpty() && getPersistentChunks().isEmpty())
++        if (this.playerEntities.isEmpty() && getPersistentChunks().isEmpty()) // MCPC+ Use Forge logic here
+         {
+             if (this.updateEntityTick++ >= 1200)
+             {
+@@ -529,7 +809,17 @@
          {
              if (i > 1000)
              {
@@ -482,7 +493,7 @@
              }
  
              this.theProfiler.startSection("cleaning");
-@@ -676,7 +964,36 @@
+@@ -676,7 +966,36 @@
      protected IChunkProvider createChunkProvider()
      {
          IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
@@ -520,7 +531,7 @@
          return this.theChunkProviderServer;
      }
  
-@@ -684,29 +1001,31 @@
+@@ -684,29 +1003,31 @@
      {
          ArrayList arraylist = new ArrayList();
  
@@ -566,7 +577,7 @@
          return arraylist;
      }
  
-@@ -760,6 +1079,29 @@
+@@ -760,6 +1081,29 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 0;
  
@@ -596,7 +607,7 @@
              if (chunkposition != null)
              {
                  i = chunkposition.field_151329_a;
-@@ -841,7 +1183,7 @@
+@@ -841,7 +1185,7 @@
      }
  
      // JAVADOC METHOD $$ func_104140_m
@@ -605,23 +616,28 @@
      {
          if (this.chunkProvider.canSave())
          {
-@@ -897,6 +1239,15 @@
+@@ -897,6 +1241,20 @@
      // JAVADOC METHOD $$ func_72942_c
      public boolean addWeatherEffect(Entity par1Entity)
      {
-+        // CraftBukkit start
-+        LightningStrikeEvent lightning = new LightningStrikeEvent(this.getWorld(), (org.bukkit.entity.LightningStrike) par1Entity.getBukkitEntity());
-+        this.getServer().getPluginManager().callEvent(lightning);
-+
-+        if (lightning.isCancelled())
++        // MCPC+ start - vanilla compatibility
++        if (par1Entity instanceof net.minecraft.entity.effect.EntityLightningBolt) 
 +        {
-+            return false;
++            // CraftBukkit start
++            LightningStrikeEvent lightning = new LightningStrikeEvent(this.getWorld(), (org.bukkit.entity.LightningStrike) par1Entity.getBukkitEntity());
++            this.getServer().getPluginManager().callEvent(lightning);
++
++            if (lightning.isCancelled())
++            {
++                return false;
++            }
++            // CraftBukkit end
 +        }
-+        // CraftBukkit end
++        // MCPC+ end
          if (super.addWeatherEffect(par1Entity))
          {
              this.mcServer.getConfigurationManager().func_148541_a(par1Entity.posX, par1Entity.posY, par1Entity.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(par1Entity));
-@@ -917,11 +1268,22 @@
+@@ -917,11 +1275,22 @@
      // JAVADOC METHOD $$ func_72885_a
      public Explosion newExplosion(Entity par1Entity, double par2, double par4, double par6, float par8, boolean par9, boolean par10)
      {
@@ -644,7 +660,7 @@
  
          if (!par10)
          {
-@@ -1002,6 +1364,7 @@
+@@ -1002,6 +1371,7 @@
          boolean flag = this.isRaining();
          super.updateWeather();
  
@@ -652,7 +668,7 @@
          if (this.prevRainingStrength != this.rainingStrength)
          {
              this.mcServer.getConfigurationManager().func_148537_a(new S2BPacketChangeGameState(7, this.rainingStrength), this.provider.dimensionId);
-@@ -1026,6 +1389,20 @@
+@@ -1026,6 +1396,20 @@
              this.mcServer.getConfigurationManager().func_148540_a(new S2BPacketChangeGameState(7, this.rainingStrength));
              this.mcServer.getConfigurationManager().func_148540_a(new S2BPacketChangeGameState(8, this.thunderingStrength));
          }
@@ -673,7 +689,7 @@
      }
  
      // JAVADOC METHOD $$ func_73046_m
-@@ -1070,20 +1447,48 @@
+@@ -1070,20 +1454,48 @@
          }
      }
  

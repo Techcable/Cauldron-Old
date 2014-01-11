@@ -55,11 +55,17 @@
          Collections.sort(this.recipes, new Comparator()
          {
              private static final String __OBFID = "CL_00000091";
-@@ -316,7 +341,16 @@
+@@ -316,7 +341,22 @@
                  i1 = 0;
              }
  
 -            return new ItemStack(itemstack.getItem(), 1, i1);
++            // MCPC+ start - vanilla compatibility
++            if (par1InventoryCrafting.resultInventory == null)
++            {
++                return new ItemStack(itemstack.getItem(), 1, j1);
++            }
++            // MCPC+ end
 +            // CraftBukkit start - Construct a dummy repair recipe
 +            ItemStack result = new ItemStack(itemstack.getItem(), k, i1);
 +            List<ItemStack> ingredients = new ArrayList<ItemStack>();
@@ -73,17 +79,22 @@
          }
          else
          {
-@@ -326,10 +360,15 @@
+@@ -326,10 +366,21 @@
  
                  if (irecipe.matches(par1InventoryCrafting, par2World))
                  {
--                    return irecipe.getCraftingResult(par1InventoryCrafting);
 +                    // CraftBukkit start - INVENTORY_PRE_CRAFT event
 +                    par1InventoryCrafting.currentRecipe = irecipe;
 +                    ItemStack result = irecipe.getCraftingResult(par1InventoryCrafting);
 +                    return CraftEventFactory.callPreCraftEvent(par1InventoryCrafting, result, lastCraftView, false);
 +                    // CraftBukkit end
++                }
++                // MCPC+ start - vanilla
++                else if (irecipe.matches(par1InventoryCrafting, par2World))
++                {
+                     return irecipe.getCraftingResult(par1InventoryCrafting);
                  }
++                // MCPC+ end
              }
  
 +            par1InventoryCrafting.currentRecipe = null; // CraftBukkit - Clear recipe when no recipe is found

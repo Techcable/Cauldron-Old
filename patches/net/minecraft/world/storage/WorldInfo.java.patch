@@ -1,6 +1,30 @@
 --- ../src-base/minecraft/net/minecraft/world/storage/WorldInfo.java
 +++ ../src-work/minecraft/net/minecraft/world/storage/WorldInfo.java
-@@ -307,6 +307,21 @@
+@@ -134,6 +134,7 @@
+         this.thunderTime = par1NBTTagCompound.getInteger("thunderTime");
+         this.thundering = par1NBTTagCompound.getBoolean("thundering");
+         this.hardcore = par1NBTTagCompound.getBoolean("hardcore");
++        this.dimension = par1NBTTagCompound.getInteger("dimension"); // MCPC+
+ 
+         if (par1NBTTagCompound.func_150297_b("initialized", 99))
+         {
+@@ -210,6 +211,7 @@
+         this.allowCommands = par1WorldInfo.allowCommands;
+         this.initialized = par1WorldInfo.initialized;
+         this.theGameRules = par1WorldInfo.theGameRules;
++        this.dimension = par1WorldInfo.dimension; // MCPC+
+     }
+ 
+     // JAVADOC METHOD $$ func_76066_a
+@@ -253,6 +255,7 @@
+         par1NBTTagCompound.setBoolean("allowCommands", this.allowCommands);
+         par1NBTTagCompound.setBoolean("initialized", this.initialized);
+         par1NBTTagCompound.setTag("GameRules", this.theGameRules.writeGameRulesToNBT());
++        par1NBTTagCompound.setInteger("dimension", this.dimension); // MCPC+
+ 
+         if (par2NBTTagCompound != null)
+         {
+@@ -307,6 +310,21 @@
          return this.playerTag;
      }
  

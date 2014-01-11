@@ -14,3 +14,16 @@
      @SideOnly(Side.CLIENT)
      public int func_145906_b()
      {
+@@ -66,4 +73,12 @@
+     {
+         return this.field_145909_j;
+     }
++
++    // MCPC+ start
++    @Override
++    public boolean canUpdate()
++    {
++        return false;
++    }
++    // MCPC+ end
+ }

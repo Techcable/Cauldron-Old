@@ -48,7 +48,18 @@
      // JAVADOC METHOD $$ func_75146_a
      protected Slot addSlotToContainer(Slot par1Slot)
      {
-@@ -177,6 +203,7 @@
+@@ -117,6 +143,10 @@
+ 
+     public Slot getSlot(int par1)
+     {
++        // MCPC+ start - vanilla compatibility. fixes NPE with ProjectRed's Item Stock Keeper
++        if (par1 < 0 || par1 >= this.inventorySlots.size())
++            return null;
++        // MCPC+ end
+         return (Slot)this.inventorySlots.get(par1);
+     }
+ 
+@@ -177,6 +207,7 @@
                      itemstack3 = inventoryplayer.getItemStack().copy();
                      i1 = inventoryplayer.getItemStack().stackSize;
                      Iterator iterator = this.field_94537_h.iterator();
@@ -56,7 +67,7 @@
  
                      while (iterator.hasNext())
                      {
-@@ -199,18 +226,55 @@
+@@ -199,18 +230,55 @@
                              }
  
                              i1 -= itemstack1.stackSize - j1;
@@ -117,7 +128,7 @@
                  }
  
                  this.func_94533_d();
-@@ -244,10 +308,17 @@
+@@ -244,10 +312,17 @@
  
                          if (par2 == 1)
                          {

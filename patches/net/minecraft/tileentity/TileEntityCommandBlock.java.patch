@@ -44,3 +44,16 @@
      private static final String __OBFID = "CL_00000347";
  
      public void func_145841_b(NBTTagCompound p_145841_1_)
+@@ -71,4 +40,12 @@
+     {
+         return this.field_145994_a;
+     }
++
++    // MCPC+ start
++    @Override
++    public boolean canUpdate()
++    {
++        return false;
++    }
++    // MCPC+ end
+ }
