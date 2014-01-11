@@ -110,7 +110,7 @@
     },
     {
       "name": "net.md-5:SpecialSource:1.7-SNAPSHOT",
-      "url" : "https://oss.sonatype.org/content/repositories/snapshots"
+      "url" : "https://raw.github.com/MinecraftPortCentral/mcpc-mvn-repo/master/snapshots"
     },
     {
       "name": "net.sourceforge.argo:argo:2.25",

@@ -23,24 +23,29 @@ configurations {
 apply plugin: 'maven'
 apply plugin: 'mcpc'
 
-repositories {
-    mavenLocal()
-    flatDir {
-        name "fileRepo"
-        dirs "repo"
-    }
-}
-
 minecraft {
     version = '1.7.2'
     mcpVersion = '9.01-pre'
     mainClass = 'cpw.mods.fml.relauncher.ServerLaunchWrapper'
     tweakClass = 'cpw.mods.fml.common.launcher.FMLTweaker'
     installerVersion = "1.4"
+    subprojects {
+        repositories {
+            mavenLocal()
+            maven {
+                name = "sonatype"
+                url = "https://oss.sonatype.org/content/repositories/snapshots/"
+            }
+            flatDir {
+                name "fileRepo"
+                dirs "repo"
+            }
+        }
+    }
 }
 
 group = 'net.minecraftforge'
-version = "1.0"
+version = "1.7.2-R0.3-forge997"
 
 jenkins {
     job = 'MCPC'
