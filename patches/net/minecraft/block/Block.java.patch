@@ -78,24 +78,6 @@
      @SideOnly(Side.CLIENT)
      protected String func_149641_N()
      {
-@@ -1645,7 +1677,7 @@
-      */
-     public boolean canBeReplacedByLeaves(IBlockAccess world, int x, int y, int z)
-     {
--        return !func_149730_j();
-+        return func_149730_j();
-     }
- 
-     /**
-@@ -1842,7 +1874,7 @@
-      *   Cacti checks if its a cacti, or if its sand
-      *   Nether types check for soul sand
-      *   Crops check for tilled soil
--     *   Caves check if it's a solid surface
-+     *   Caves check if it's a colid surface
-      *   Plains check if its grass or dirt
-      *   Water check if its still water
-      *
 @@ -2245,4 +2277,55 @@
                  return this.func_150495_a();
              }

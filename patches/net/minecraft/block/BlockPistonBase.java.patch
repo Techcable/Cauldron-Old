@@ -79,7 +79,7 @@
      {
          int i1 = p_150077_1_ + Facing.offsetsXForSide[p_150077_4_];
          int j1 = p_150077_2_ + Facing.offsetsYForSide[p_150077_4_];
-@@ -379,23 +420,23 @@
+@@ -379,7 +420,7 @@
              {
                  if (j1 <= 0 || j1 >= p_150077_0_.getHeight())
                  {
@@ -88,9 +88,7 @@
                  }
  
                  Block block = p_150077_0_.func_147439_a(i1, j1, k1);
- 
--                if (!block.isAir(p_150077_0_, i1, j1, k1))
-+                if (block.isAir(p_150077_0_, i1, j1, k1))
+@@ -388,14 +429,14 @@
                  {
                      if (!func_150080_a(block, p_150077_0_, i1, j1, k1, true))
                      {
@@ -116,12 +114,3 @@
          }
      }
  
-@@ -429,7 +470,7 @@
- 
-                 Block block = p_150079_1_.func_147439_a(i1, j1, k1);
- 
--                if (!block.isAir(p_150079_1_, i1, j1, k1))
-+                if (block.isAir(p_150079_1_, i1, j1, k1))
-                 {
-                     if (!func_150080_a(block, p_150079_1_, i1, j1, k1, true))
-                     {

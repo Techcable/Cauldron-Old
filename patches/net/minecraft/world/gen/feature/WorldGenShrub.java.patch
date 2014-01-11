@@ -9,7 +9,7 @@
  public class WorldGenShrub extends WorldGenTrees
  {
      private int field_150528_a;
-@@ -21,24 +23,31 @@
+@@ -21,11 +23,18 @@
  
      public boolean generate(World par1World, Random par2Random, int par3, int par4, int par5)
      {
@@ -25,12 +25,11 @@
          do
          {
 -            block = par1World.func_147439_a(par3, par4, par5);
--            if (!(block.isLeaves(par1World, par3, par4, par5) || block.isAir(par1World, par3, par4, par5)))
 +            block = par1World.getType(par3, par4, par5);
-+            if (block.isLeaves(par1World, par3, par4, par5) || block.isAir(par1World, par3, par4, par5))
+             if (!(block.isLeaves(par1World, par3, par4, par5) || block.isAir(par1World, par3, par4, par5)))
              {
                  break;
-             }
+@@ -33,12 +42,12 @@
              --par4;
          } while (par4 > 0);
  
