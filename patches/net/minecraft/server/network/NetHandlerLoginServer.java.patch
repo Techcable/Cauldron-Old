@@ -118,7 +118,7 @@
          else
          {
 -            this.field_147328_g = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
-+            (new Thread("User Authenticator #" + field_147331_b.incrementAndGet())).start(); // Spigot
++            (new ThreadPlayerLookupUUID(this, "User Authenticator #" + field_147331_b.incrementAndGet())).start(); // Spigot
          }
      }
  
