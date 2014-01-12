@@ -157,7 +157,7 @@
              }
  
              if (chunk == null)
-@@ -116,38 +180,80 @@
+@@ -116,38 +180,84 @@
                  {
                      try
                      {
@@ -182,10 +182,15 @@
  
 -            this.loadedChunkHashMap.add(k, chunk);
 -            this.loadedChunks.add(chunk);
+-            chunk.onChunkLoad();
+-            chunk.populateChunk(this, this, par1, par2);
 +            this.loadedChunkHashMap.put(LongHash.toLong(i, j), chunk); // CraftBukkit
 +            this.loadedChunks.add(chunk); // MCPC+ - vanilla compatibility
-             chunk.onChunkLoad();
--            chunk.populateChunk(this, this, par1, par2);
++
++            if (chunk != null)
++            {
++                chunk.onChunkLoad();
++            }
 +            // CraftBukkit start
 +            Server server = this.worldObj.getServer();
 +
@@ -247,7 +252,7 @@
      {
          if (this.currentChunkLoader == null)
          {
-@@ -157,6 +263,8 @@
+@@ -157,6 +267,8 @@
          {
              try
              {
@@ -256,7 +261,7 @@
                  Chunk chunk = this.currentChunkLoader.loadChunk(this.worldObj, par1, par2);
  
                  if (chunk != null)
-@@ -167,6 +275,7 @@
+@@ -167,6 +279,7 @@
                      {
                          this.currentChunkProvider.recreateStructures(par1, par2);
                      }
@@ -264,7 +269,7 @@
                  }
  
                  return chunk;
-@@ -180,7 +289,7 @@
+@@ -180,7 +293,7 @@
      }
  
      // JAVADOC METHOD $$ func_73243_a
@@ -273,7 +278,7 @@
      {
          if (this.currentChunkLoader != null)
          {
-@@ -196,7 +305,7 @@
+@@ -196,7 +309,7 @@
      }
  
      // JAVADOC METHOD $$ func_73242_b
@@ -282,7 +287,7 @@
      {
          if (this.currentChunkLoader != null)
          {
-@@ -204,15 +313,18 @@
+@@ -204,15 +317,18 @@
              {
                  par1Chunk.lastSaveTime = this.worldObj.getTotalWorldTime();
                  this.currentChunkLoader.saveChunk(this.worldObj, par1Chunk);
@@ -302,7 +307,7 @@
          }
      }
  
-@@ -228,6 +340,35 @@
+@@ -228,6 +344,35 @@
              if (this.currentChunkProvider != null)
              {
                  this.currentChunkProvider.populate(par1IChunkProvider, par2, par3);
@@ -338,7 +343,7 @@
                  GameRegistry.generateWorld(par2, par3, worldObj, currentChunkProvider, par1IChunkProvider);
                  chunk.setChunkModified();
              }
-@@ -238,10 +379,13 @@
+@@ -238,10 +383,13 @@
      public boolean saveChunks(boolean par1, IProgressUpdate par2IProgressUpdate)
      {
          int i = 0;
@@ -354,7 +359,7 @@
  
              if (par1)
              {
-@@ -278,23 +422,50 @@
+@@ -278,31 +426,60 @@
      {
          if (!this.worldObj.canNotSave)
          {
@@ -408,13 +413,16 @@
 -                    this.chunksToUnload.remove(olong);
 -                    this.loadedChunkHashMap.remove(olong.longValue());
 -                    this.loadedChunks.remove(chunk);
+-                    ForgeChunkManager.putDormantChunk(ChunkCoordIntPair.chunkXZ2Int(chunk.xPosition, chunk.zPosition), chunk);
+-                    if(loadedChunks.size() == 0 && ForgeChunkManager.getPersistentChunksFor(this.worldObj).size() == 0 && !DimensionManager.shouldLoadSpawn(this.worldObj.provider.dimensionId)){
 +                    // this.unloadQueue.remove(olong);
 +                    this.loadedChunkHashMap.remove(chunkcoordinates); // CraftBukkit
 +                    this.loadedChunks.remove(chunk); // MCPC+ - vanilla compatibility
-                     ForgeChunkManager.putDormantChunk(ChunkCoordIntPair.chunkXZ2Int(chunk.xPosition, chunk.zPosition), chunk);
-                     if(loadedChunks.size() == 0 && ForgeChunkManager.getPersistentChunksFor(this.worldObj).size() == 0 && !DimensionManager.shouldLoadSpawn(this.worldObj.provider.dimensionId)){
++                    ForgeChunkManager.putDormantChunk(chunkcoordinates, chunk);
++                    if(this.loadedChunkHashMap.size() == 0 && ForgeChunkManager.getPersistentChunksFor(this.worldObj).size() == 0 && !DimensionManager.shouldLoadSpawn(this.worldObj.provider.dimensionId)){
                          DimensionManager.unloadWorld(this.worldObj.provider.dimensionId);
-@@ -303,6 +474,8 @@
+                         return currentChunkProvider.unloadQueuedChunks();
+                     }
                  }
              }
  
@@ -423,7 +431,7 @@
              if (this.currentChunkLoader != null)
              {
                  this.currentChunkLoader.chunkTick();
-@@ -321,7 +494,8 @@
+@@ -321,7 +498,8 @@
      // JAVADOC METHOD $$ func_73148_d
      public String makeString()
      {
@@ -433,7 +441,7 @@
      }
  
      // JAVADOC METHOD $$ func_73155_a
-@@ -337,8 +511,32 @@
+@@ -337,8 +515,32 @@
  
      public int getLoadedChunkCount()
      {

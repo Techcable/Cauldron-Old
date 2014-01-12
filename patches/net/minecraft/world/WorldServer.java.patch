@@ -94,7 +94,7 @@
          if (!(this instanceof WorldServerMulti)) //Forge: We fix the global mapStorage, which causes us to share scoreboards early. So don't associate the save data with the temporary scoreboard
          {
              scoreboardsavedata.func_96499_a(this.worldScoreboard);
-@@ -136,6 +195,145 @@
+@@ -136,6 +195,30 @@
          DimensionManager.setWorld(p_i45284_4_, this);
      }
  
@@ -107,121 +107,6 @@
 +        this.theEntityTracker = null;
 +        this.thePlayerManager = null;
 +        this.worldTeleporter = null;
-+    }
-+
-+    // CraftBukkit start
-+    @Override
-+    public TileEntity func_147438_o(int i, int j, int k)
-+    {
-+        TileEntity result = super.func_147438_o(i, j, k);
-+        Block type = func_147439_a(i, j, k);
-+
-+        if (type == Blocks.chest)
-+        {
-+            if (!(result instanceof TileEntityChest))
-+            {
-+                // MCPC+ - allow non-vanilla tile entities on chests for Terrafirmacraft, fixes #724
-+                //result = fixTileEntity(i, j, k, type, result);
-+            }
-+        }
-+        else if (type == Blocks.furnace)
-+        {
-+            if (!(result instanceof TileEntityFurnace))
-+            {
-+                result = fixTileEntity(i, j, k, type, result);
-+            }
-+        }
-+        else if (type == Blocks.dropper)
-+        {
-+            if (!(result instanceof TileEntityDropper))
-+            {
-+                result = fixTileEntity(i, j, k, type, result);
-+            }
-+        }
-+        else if (type == Blocks.dispenser)
-+        {
-+            if (!(result instanceof TileEntityDispenser))
-+            {
-+                result = fixTileEntity(i, j, k, type, result);
-+            }
-+        }
-+        else if (type == Blocks.jukebox)
-+        {
-+            if (!(result instanceof BlockJukebox.TileEntityJukebox))
-+            {
-+                result = fixTileEntity(i, j, k, type, result);
-+            }
-+        }
-+        else if (type == Blocks.noteblock)
-+        {
-+            if (!(result instanceof TileEntityNote))
-+            {
-+                result = fixTileEntity(i, j, k, type, result);
-+            }
-+        }
-+        else if (type == Blocks.mob_spawner)
-+        {
-+            if (!(result instanceof TileEntityMobSpawner))
-+            {
-+                result = fixTileEntity(i, j, k, type, result);
-+            }
-+        }
-+        else if ((type == Blocks.standing_sign) || (type == Blocks.wall_sign))
-+        {
-+            if (!(result instanceof TileEntitySign))
-+            {
-+                result = fixTileEntity(i, j, k, type, result);
-+            }
-+        }
-+        else if (type == Blocks.ender_chest)
-+        {
-+            if (!(result instanceof TileEntityEnderChest))
-+            {
-+                result = fixTileEntity(i, j, k, type, result);
-+            }
-+        }
-+        else if (type == Blocks.brewing_stand)
-+        {
-+            if (!(result instanceof TileEntityBrewingStand))
-+            {
-+                result = fixTileEntity(i, j, k, type, result);
-+            }
-+        }
-+        else if (type == Blocks.beacon)
-+        {
-+            if (!(result instanceof TileEntityBeacon))
-+            {
-+                result = fixTileEntity(i, j, k, type, result);
-+            }
-+        }
-+        else if (type == Blocks.hopper)
-+        {
-+            if (!(result instanceof TileEntityHopper))
-+            {
-+                result = fixTileEntity(i, j, k, type, result);
-+            }
-+        }
-+
-+        return result;
-+    }
-+
-+    private TileEntity fixTileEntity(int x, int y, int z, Block type, TileEntity found)
-+    {
-+        this.getServer().getLogger().severe("Block at " + x + "," + y + "," + z + " is " + org.bukkit.Material.getMaterial(Block.func_149682_b(type)).toString() + " but has " + found + ". "
-+                                            + "Bukkit will attempt to fix this, but there may be additional damage that we cannot recover.");
-+
-+        if (type instanceof ITileEntityProvider)
-+        {
-+            TileEntity replacement = ((ITileEntityProvider) type).func_149915_a(this, this.getBlockMetadata(x, y, z));
-+            replacement.field_145850_b = this;
-+            this.func_147455_a(x, y, z, replacement);
-+            return replacement;
-+        }
-+        else
-+        {
-+            this.getServer().getLogger().severe("Don't know how to fix for this type... Can't do anything! :(");
-+            return found;
-+        }
 +    }
 +
 +    private boolean canSpawn(int x, int z)
@@ -240,7 +125,7 @@
      // JAVADOC METHOD $$ func_72835_b
      public void tick()
      {
-@@ -160,12 +358,18 @@
+@@ -160,12 +243,18 @@
          }
  
          this.theProfiler.startSection("mobSpawner");
@@ -254,14 +139,14 @@
 +            timings.mobSpawn.startTiming(); // Spigot
 +            this.animalSpawner.findChunksForSpawning(this, this.spawnHostileMobs && (this.ticksPerMonsterSpawns != 0 && time % this.ticksPerMonsterSpawns == 0L), this.spawnPeacefulMobs && (this.ticksPerAnimalSpawns != 0 && time % this.ticksPerAnimalSpawns == 0L), this.worldInfo.getWorldTotalTime() % 400L == 0L);
 +            timings.mobSpawn.stopTiming(); // Spigot
-+            // CraftBukkit end
          }
  
++        // CraftBukkit end
 +        timings.doChunkUnload.startTiming(); // Spigot
          this.theProfiler.endStartSection("chunkSource");
          this.chunkProvider.unloadQueuedChunks();
          int j = this.calculateSkylightSubtracted(1.0F);
-@@ -182,23 +386,39 @@
+@@ -182,23 +271,39 @@
              this.worldInfo.setWorldTime(this.worldInfo.getWorldTime() + 1L);
          }
  
@@ -301,7 +186,7 @@
      }
  
      // JAVADOC METHOD $$ func_73057_a
-@@ -219,7 +439,7 @@
+@@ -219,7 +324,7 @@
          {
              EntityPlayer entityplayer = (EntityPlayer)iterator.next();
  
@@ -310,7 +195,7 @@
              {
                  this.allPlayersSleeping = false;
                  break;
-@@ -247,7 +467,25 @@
+@@ -247,7 +352,26 @@
  
      private void resetRainAndThunder()
      {
@@ -334,10 +219,11 @@
 +        }
 +
 +        // CraftBukkit end
++        if (!weather.isCancelled() && !thunder.isCancelled()) provider.resetRainAndThunder(); // MCPC+
      }
  
      public boolean areAllPlayersAsleep()
-@@ -255,19 +493,28 @@
+@@ -255,19 +379,28 @@
          if (this.allPlayersSleeping && !this.isRemote)
          {
              Iterator iterator = this.playerEntities.iterator();
@@ -369,7 +255,7 @@
              return false;
          }
          else
-@@ -310,27 +557,37 @@
+@@ -310,27 +443,37 @@
          super.func_147456_g();
          int i = 0;
          int j = 0;
@@ -394,8 +280,8 @@
 +            // If unloaded, or in procedd of being unloaded, drop it
 +            if ((!this.chunkExists(chunkX, chunkZ)) || (this.theChunkProviderServer.chunksToUnload.contains(chunkX, chunkZ)))
 +            {
-+                activeChunkSet.remove(new ChunkCoordIntPair(chunkX, chunkZ)); // MCPC+ - vanilla compatibility
 +                iter.remove();
++                activeChunkSet.remove(new ChunkCoordIntPair(chunkX, chunkZ)); // MCPC+ - vanilla compatibility
 +                continue;
 +            }
  
@@ -420,7 +306,7 @@
              {
                  chunk.func_150804_b(false);
              }
-@@ -366,12 +623,34 @@
+@@ -366,12 +509,34 @@
  
                  if (this.isBlockFreezableNaturally(j1 + k, l1 - 1, k1 + l))
                  {
@@ -457,7 +343,7 @@
                  }
  
                  if (this.isRaining())
-@@ -408,6 +687,7 @@
+@@ -408,6 +573,7 @@
                          if (block.func_149653_t())
                          {
                              ++i;
@@ -465,7 +351,7 @@
                              block.func_149674_a(this, j2 + k, l2 + extendedblockstorage.getYLocation(), k2 + l, this.rand);
                          }
                      }
-@@ -495,7 +775,7 @@
+@@ -495,7 +661,7 @@
      // JAVADOC METHOD $$ func_72939_s
      public void updateEntities()
      {
@@ -474,7 +360,7 @@
          {
              if (this.updateEntityTick++ >= 1200)
              {
-@@ -529,7 +809,17 @@
+@@ -529,7 +695,17 @@
          {
              if (i > 1000)
              {
@@ -493,7 +379,7 @@
              }
  
              this.theProfiler.startSection("cleaning");
-@@ -676,7 +966,36 @@
+@@ -676,7 +852,36 @@
      protected IChunkProvider createChunkProvider()
      {
          IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
@@ -531,7 +417,7 @@
          return this.theChunkProviderServer;
      }
  
-@@ -684,29 +1003,31 @@
+@@ -684,29 +889,31 @@
      {
          ArrayList arraylist = new ArrayList();
  
@@ -577,7 +463,7 @@
          return arraylist;
      }
  
-@@ -760,6 +1081,29 @@
+@@ -760,6 +967,29 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 0;
  
@@ -607,7 +493,7 @@
              if (chunkposition != null)
              {
                  i = chunkposition.field_151329_a;
-@@ -841,7 +1185,7 @@
+@@ -841,7 +1071,7 @@
      }
  
      // JAVADOC METHOD $$ func_104140_m
@@ -616,7 +502,7 @@
      {
          if (this.chunkProvider.canSave())
          {
-@@ -897,6 +1241,20 @@
+@@ -897,6 +1127,20 @@
      // JAVADOC METHOD $$ func_72942_c
      public boolean addWeatherEffect(Entity par1Entity)
      {
@@ -637,7 +523,7 @@
          if (super.addWeatherEffect(par1Entity))
          {
              this.mcServer.getConfigurationManager().func_148541_a(par1Entity.posX, par1Entity.posY, par1Entity.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(par1Entity));
-@@ -917,11 +1275,22 @@
+@@ -917,11 +1161,22 @@
      // JAVADOC METHOD $$ func_72885_a
      public Explosion newExplosion(Entity par1Entity, double par2, double par4, double par6, float par8, boolean par9, boolean par10)
      {
@@ -660,7 +546,7 @@
  
          if (!par10)
          {
-@@ -1002,6 +1371,7 @@
+@@ -1002,6 +1257,7 @@
          boolean flag = this.isRaining();
          super.updateWeather();
  
@@ -668,7 +554,7 @@
          if (this.prevRainingStrength != this.rainingStrength)
          {
              this.mcServer.getConfigurationManager().func_148537_a(new S2BPacketChangeGameState(7, this.rainingStrength), this.provider.dimensionId);
-@@ -1026,6 +1396,20 @@
+@@ -1026,6 +1282,20 @@
              this.mcServer.getConfigurationManager().func_148540_a(new S2BPacketChangeGameState(7, this.rainingStrength));
              this.mcServer.getConfigurationManager().func_148540_a(new S2BPacketChangeGameState(8, this.thunderingStrength));
          }
@@ -689,7 +575,7 @@
      }
  
      // JAVADOC METHOD $$ func_73046_m
-@@ -1070,20 +1454,48 @@
+@@ -1070,20 +1340,48 @@
          }
      }
  
