@@ -1,14 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
 +++ ../src-work/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
-@@ -36,6 +36,7 @@
- 
- public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO
- {
-+    private java.util.LinkedHashMap<ChunkCoordIntPair, PendingChunk> pendingSaves = new java.util.LinkedHashMap<ChunkCoordIntPair, PendingChunk>(); // Spigot
-     private static final Logger field_151505_a = LogManager.getLogger();
-     private List chunksToRemove = new ArrayList();
-     private Set pendingAnvilChunksCoordinates = new HashSet();
-@@ -49,26 +50,66 @@
+@@ -49,9 +49,54 @@
          this.chunkSaveLocation = par1File;
      }
  
@@ -19,13 +11,16 @@
 +
 +        synchronized (this.syncLockObject)
 +        {
-+            // Spigot start
-+            if (pendingSaves.containsKey(chunkcoordintpair))
++            if (this.pendingAnvilChunksCoordinates.contains(chunkcoordintpair))
 +            {
-+                return true;
++                for (int k = 0; k < this.chunksToRemove.size(); ++k)
++                {
++                    if (((PendingChunk) this.chunksToRemove.get(k)).chunkCoordinate.equals(chunkcoordintpair))
++                    {
++                        return true;
++                    }
++                }
 +            }
-+
-+            // Spigot end
 +        }
 +
 +        return RegionFileCache.createOrLoadRegionFile(this.chunkSaveLocation, i, j).chunkExists(i & 31, j & 31);
@@ -61,31 +56,19 @@
          NBTTagCompound nbttagcompound = null;
          ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(par2, par3);
          Object object = this.syncLockObject;
- 
-         synchronized (this.syncLockObject)
-         {
--            if (this.pendingAnvilChunksCoordinates.contains(chunkcoordintpair))
-+            // Spigot start
-+            AnvilChunkLoader.PendingChunk pendingchunktosave = pendingSaves.get(chunkcoordintpair);
-+
-+            if (pendingchunktosave != null)
+@@ -62,9 +107,9 @@
              {
--                for (int k = 0; k < this.chunksToRemove.size(); ++k)
--                {
+                 for (int k = 0; k < this.chunksToRemove.size(); ++k)
+                 {
 -                    if (((AnvilChunkLoader.PendingChunk)this.chunksToRemove.get(k)).chunkCoordinate.equals(chunkcoordintpair))
--                    {
++                    if (((PendingChunk) this.chunksToRemove.get(k)).chunkCoordinate.equals(chunkcoordintpair))
+                     {
 -                        nbttagcompound = ((AnvilChunkLoader.PendingChunk)this.chunksToRemove.get(k)).nbtTags;
--                        break;
--                    }
--                }
-+                nbttagcompound = pendingchunktosave.nbtTags;
-             }
-+
-+            // Spigot end
-         }
- 
-         if (nbttagcompound == null)
-@@ -80,14 +121,20 @@
++                        nbttagcompound = ((PendingChunk) this.chunksToRemove.get(k)).nbtTags;
+                         break;
+                     }
+                 }
+@@ -80,14 +125,20 @@
                  return null;
              }
  
@@ -109,7 +92,7 @@
      {
          if (!par4NBTTagCompound.func_150297_b("Level", 10))
          {
-@@ -106,20 +153,51 @@
+@@ -106,20 +157,51 @@
              if (!chunk.isAtLocation(par2, par3))
              {
                  field_151505_a.error("Chunk file at " + par2 + "," + par3 + " is in the wrong location; relocating. (Expected " + par2 + ", " + par3 + ", got " + chunk.xPosition + ", " + chunk.zPosition + ")");
@@ -167,51 +150,55 @@
          try
          {
              NBTTagCompound nbttagcompound = new NBTTagCompound();
-@@ -141,20 +219,13 @@
- 
-         synchronized (this.syncLockObject)
-         {
--            if (this.pendingAnvilChunksCoordinates.contains(par1ChunkCoordIntPair))
-+            // Spigot start
-+            if (this.pendingSaves.put(par1ChunkCoordIntPair, new PendingChunk(par1ChunkCoordIntPair, par2NBTTagCompound)) != null)
+@@ -145,15 +227,15 @@
              {
--                for (int i = 0; i < this.chunksToRemove.size(); ++i)
--                {
+                 for (int i = 0; i < this.chunksToRemove.size(); ++i)
+                 {
 -                    if (((AnvilChunkLoader.PendingChunk)this.chunksToRemove.get(i)).chunkCoordinate.equals(par1ChunkCoordIntPair))
--                    {
++                    if (((PendingChunk) this.chunksToRemove.get(i)).chunkCoordinate.equals(par1ChunkCoordIntPair))
+                     {
 -                        this.chunksToRemove.set(i, new AnvilChunkLoader.PendingChunk(par1ChunkCoordIntPair, par2NBTTagCompound));
--                        return;
--                    }
--                }
-+                return;
++                        this.chunksToRemove.set(i, new PendingChunk(par1ChunkCoordIntPair, par2NBTTagCompound));
+                         return;
+                     }
+                 }
              }
  
 -            this.chunksToRemove.add(new AnvilChunkLoader.PendingChunk(par1ChunkCoordIntPair, par2NBTTagCompound));
--            this.pendingAnvilChunksCoordinates.add(par1ChunkCoordIntPair);
-+            // Spigot end
++            this.chunksToRemove.add(new PendingChunk(par1ChunkCoordIntPair, par2NBTTagCompound));
+             this.pendingAnvilChunksCoordinates.add(par1ChunkCoordIntPair);
              ThreadedFileIOBase.threadedIOInstance.queueIO(this);
          }
-     }
-@@ -167,13 +238,15 @@
+@@ -162,7 +244,7 @@
+     // JAVADOC METHOD $$ func_75814_c
+     public boolean writeNextIO()
+     {
+-        AnvilChunkLoader.PendingChunk pendingchunk = null;
++        PendingChunk pendingchunktosave = null;
+         Object object = this.syncLockObject;
  
          synchronized (this.syncLockObject)
-         {
--            if (this.chunksToRemove.isEmpty())
-+            // Spigot start
-+            if (this.pendingSaves.isEmpty())
-             {
+@@ -172,15 +254,15 @@
                  return false;
              }
  
 -            pendingchunk = (AnvilChunkLoader.PendingChunk)this.chunksToRemove.remove(0);
 -            this.pendingAnvilChunksCoordinates.remove(pendingchunk.chunkCoordinate);
-+            pendingchunk = this.pendingSaves.values().iterator().next();
-+            this.pendingSaves.remove(pendingchunk.chunkCoordinate);
-+            // Spigot end
++            pendingchunktosave = (PendingChunk) this.chunksToRemove.remove(0);
++            this.pendingAnvilChunksCoordinates.remove(pendingchunktosave.chunkCoordinate);
          }
  
-         if (pendingchunk != null)
-@@ -191,7 +264,7 @@
+-        if (pendingchunk != null)
++        if (pendingchunktosave != null)
+         {
+             try
+             {
+-                this.writeChunkNBTTags(pendingchunk);
++                this.writeChunkNBTTags(pendingchunktosave);
+             }
+             catch (Exception exception)
+             {
+@@ -191,7 +273,7 @@
          return true;
      }
  
@@ -220,7 +207,7 @@
      {
          DataOutputStream dataoutputstream = RegionFileCache.getChunkOutputStream(this.chunkSaveLocation, par1AnvilChunkLoaderPending.chunkCoordinate.chunkXPos, par1AnvilChunkLoaderPending.chunkCoordinate.chunkZPos);
          CompressedStreamTools.write(par1AnvilChunkLoaderPending.nbtTags, dataoutputstream);
-@@ -243,19 +316,19 @@
+@@ -243,19 +325,19 @@
  
                  if (extendedblockstorage.getBlockMSBArray() != null)
                  {
@@ -245,7 +232,7 @@
                  }
  
                  nbttaglist.appendTag(nbttagcompound1);
-@@ -386,6 +459,13 @@
+@@ -386,6 +468,13 @@
              chunk.setBiomeArray(par2NBTTagCompound.getByteArray("Biomes"));
          }
  
@@ -259,7 +246,7 @@
          NBTTagList nbttaglist1 = par2NBTTagCompound.func_150295_c("Entities", 10);
  
          if (nbttaglist1 != null)
-@@ -447,7 +527,7 @@
+@@ -447,7 +536,7 @@
              }
          }
  

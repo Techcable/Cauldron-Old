@@ -173,21 +173,12 @@
      }
  
      public void func_150805_f(int p_150805_1_, int p_150805_2_, int p_150805_3_)
-@@ -961,11 +1055,49 @@
+@@ -960,12 +1054,28 @@
+ 
          while (iterator.hasNext())
          {
-             TileEntity tileentity = (TileEntity)iterator.next();
-+
-+            // Spigot Start
-+            if (tileentity instanceof IInventory)
-+            {
-+                for (org.bukkit.craftbukkit.entity.CraftHumanEntity h : new ArrayList<org.bukkit.craftbukkit.entity.CraftHumanEntity>((List)((IInventory) tileentity).getViewers()))
-+                {
-+                    h.getHandle().closeScreen();
-+                }
-+            }
-+
-+            // Spigot End
+-            TileEntity tileentity = (TileEntity)iterator.next();
++            TileEntity tileentity = (TileEntity) iterator.next();
              this.worldObj.func_147457_a(tileentity);
          }
  
@@ -199,17 +190,6 @@
 +            while (iter.hasNext())
 +            {
 +                Entity entity = (Entity) iter.next();
-+
-+                // Spigot Start
-+                if (entity instanceof IInventory)
-+                {
-+                    for (org.bukkit.craftbukkit.entity.CraftHumanEntity h : new ArrayList<org.bukkit.craftbukkit.entity.CraftHumanEntity>((List)((IInventory) entity).getViewers()))
-+                    {
-+                        h.getHandle().closeScreen();
-+                    }
-+                }
-+
-+                // Spigot End
 +
 +                // Do not pass along players, as doing so can get them stuck outside of time.
 +                // (which for example disables inventory icon updates and prevents block breaking)
@@ -223,33 +203,7 @@
              this.worldObj.unloadEntities(this.entityLists[i]);
          }
          MinecraftForge.EVENT_BUS.post(new ChunkEvent.Unload(this));
-@@ -1131,7 +1263,7 @@
- 
-         this.field_150815_m = true;
- 
--        if (!this.field_150814_l && this.isTerrainPopulated)
-+        if (!this.field_150814_l && this.isTerrainPopulated && this.worldObj.spigotConfig.randomLightUpdates)   // Spigot - also use random light updates setting to determine if we should relight
-         {
-             this.func_150809_p();
-         }
-@@ -1139,7 +1271,15 @@
- 
-     public boolean func_150802_k()
-     {
--        return this.field_150815_m && this.isTerrainPopulated && this.field_150814_l;
-+        // Spigot Start
-+        /*
-+         * As of 1.7, Mojang added a check to make sure that only chunks which have been lit are sent to the client.
-+         * Unfortunately this interferes with our modified chunk ticking algorithm, which will only tick chunks distant from the player on a very infrequent basis.
-+         * We cannot unfortunately do this lighting stage during chunk gen as it appears to put a lot more noticeable load on the server, than when it is done at play time.
-+         * For now at least we will simply send all chunks, in accordance with pre 1.7 behaviour.
-+         */
-+        return true;
-+        // Spigot End
-     }
- 
-     // JAVADOC METHOD $$ func_76632_l
-@@ -1222,8 +1362,8 @@
+@@ -1222,8 +1332,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getMetadataArray();
@@ -260,7 +214,7 @@
              }
          }
  
-@@ -1232,8 +1372,8 @@
+@@ -1232,8 +1342,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getBlocklightArray();
@@ -271,7 +225,7 @@
              }
          }
  
-@@ -1244,8 +1384,8 @@
+@@ -1244,8 +1354,8 @@
                  if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
                  {
                      nibblearray = this.storageArrays[l].getSkylightArray();
@@ -282,7 +236,7 @@
                  }
              }
          }
-@@ -1267,8 +1407,8 @@
+@@ -1267,8 +1377,8 @@
                          nibblearray = this.storageArrays[l].createBlockMSBArray();
                      }
  
