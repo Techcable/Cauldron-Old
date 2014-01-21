@@ -32,6 +32,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
+import org.bukkit.UnsafeValues;
 import org.bukkit.Warning.WarningState;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
@@ -64,6 +65,7 @@ import org.bukkit.craftbukkit.scoreboard.CraftScoreboardManager;
 import org.bukkit.craftbukkit.updater.AutoUpdater;
 import org.bukkit.craftbukkit.updater.BukkitDLUpdaterService;
 import org.bukkit.craftbukkit.util.CraftIconCache;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.craftbukkit.util.DatFileFilter;
 import org.bukkit.craftbukkit.util.Versioning;
 import org.bukkit.entity.Player;
@@ -1366,7 +1368,7 @@ public final class CraftServer implements Server {
 
     public List<String> tabCompleteCommand(Player player, String message) {
         // Spigot Start
-        if ( !org.spigotmc.SpigotConfig.tabComplete )
+        if ( !org.spigotmc.SpigotConfig.tabComplete && !message.contains( " " ) )
         {
             return ImmutableList.of();
         }
@@ -1464,5 +1466,19 @@ public final class CraftServer implements Server {
         ByteBuf bytebuf1 = Base64.encode(bytebuf);
 
         return new CraftIconCache("data:image/png;base64," + bytebuf1.toString(Charsets.UTF_8));
+    }
+
+    public void setIdleTimeout(int threshold) {
+        console.func_143006_e(threshold); // Should be setIdleTimeout
+    }
+
+    public int getIdleTimeout() {
+        return console.func_143007_ar(); // Should be getIdleTimeout
+    }
+
+    @Deprecated
+    @Override
+    public UnsafeValues getUnsafe() {
+        return CraftMagicNumbers.INSTANCE;
     }
 }

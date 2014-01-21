@@ -63,7 +63,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     private boolean hasPlayedBefore = false;
     private final ConversationTracker conversationTracker = new ConversationTracker();
     private final Set<String> channels = new HashSet<String>();
-    private final Map<String, Player> hiddenPlayers = new MapMaker().softValues().makeMap();
+    private final Map<String, Player> hiddenPlayers = new MapMaker().weakValues().makeMap(); // Spigot - soft -> weak
     private int hash = 0;
     private double health = 20;
     private boolean scaledHealth = false;
@@ -1141,7 +1141,6 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     // Spigot start
     private final Player.Spigot spigot = new Player.Spigot()
     {
-
         @Override
         public boolean getCollidesWithEntities()
         {

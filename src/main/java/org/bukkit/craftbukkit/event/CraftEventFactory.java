@@ -86,6 +86,30 @@ public class CraftEventFactory {
     /**
      * Block place methods
      */
+    // MCPC+ start
+    public static BlockMultiPlaceEvent callBlockMultiPlaceEvent(net.minecraft.world.World world, net.minecraft.entity.player.EntityPlayer who, List<BlockState> blockStates, int clickedX, int clickedY, int clickedZ) {
+        CraftWorld craftWorld = world.getWorld();
+        CraftServer craftServer = world.getServer();
+
+        Player player = (who == null) ? null : (Player) who.getBukkitEntity();
+
+        Block blockClicked = craftWorld.getBlockAt(clickedX, clickedY, clickedZ);
+
+        boolean canBuild = true;
+        for (int i = 0; i < blockStates.size(); i++) {
+            if (!canBuild(craftWorld, player, blockStates.get(i).getX(), blockStates.get(i).getZ())) {
+                canBuild = false;
+                break;
+            }
+        }
+
+        BlockMultiPlaceEvent event = new BlockMultiPlaceEvent(blockStates, blockClicked, player.getItemInHand(), player, canBuild);
+        craftServer.getPluginManager().callEvent(event);
+
+        return event;
+    }
+    // MCPC+ end
+
     public static BlockPlaceEvent callBlockPlaceEvent(net.minecraft.world.World world, net.minecraft.entity.player.EntityPlayer who, BlockState replacedBlockState, int clickedX, int clickedY, int clickedZ) {
         CraftWorld craftWorld = world.getWorld();
         CraftServer craftServer = world.getServer();
@@ -333,8 +357,6 @@ public class CraftEventFactory {
 
         victim.expToDrop = event.getDroppedExp();
         // MCPC+ start - handle any drop changes from plugins
-        victim.calledDeathEvent = true;
-
         victim.capturedDrops.clear();
         for (org.bukkit.inventory.ItemStack stack : event.getDrops())
         {

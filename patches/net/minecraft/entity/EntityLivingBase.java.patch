@@ -55,7 +55,7 @@
      private int revengeTimer;
      private EntityLivingBase lastAttacker;
      // JAVADOC FIELD $$ field_142016_bo
-@@ -139,13 +148,19 @@
+@@ -139,13 +148,18 @@
      // JAVADOC FIELD $$ field_70773_bE
      private int jumpTicks;
      private float field_110151_bq;
@@ -63,7 +63,6 @@
 +    public int expToDrop;
 +    public int maxAirTicks = 300;
 +    // CraftBukkit end
-+    public boolean calledDeathEvent = false; // MCPC+
      private static final String __OBFID = "CL_00001549";
  
      public EntityLivingBase(World par1World)
@@ -76,7 +75,7 @@
          this.preventEntitySpawning = true;
          this.field_70770_ap = (float)(Math.random() + 1.0D) * 0.01F;
          this.setPosition(this.posX, this.posY, this.posZ);
-@@ -201,7 +216,18 @@
+@@ -201,7 +215,18 @@
              }
              else if (!this.worldObj.isRemote && this.fallDistance > 3.0F)
              {
@@ -96,7 +95,7 @@
              }
  
              block.func_149746_a(this.worldObj, i, j, k, this, this.fallDistance);
-@@ -263,7 +289,13 @@
+@@ -263,7 +288,13 @@
          }
          else
          {
@@ -111,7 +110,7 @@
          }
  
          if (this.isEntityAlive() && this.isWet())
-@@ -328,6 +360,22 @@
+@@ -328,6 +359,22 @@
          this.worldObj.theProfiler.endSection();
      }
  
@@ -134,7 +133,7 @@
      // JAVADOC METHOD $$ func_70631_g_
      public boolean isChild()
      {
-@@ -339,22 +387,21 @@
+@@ -339,22 +386,21 @@
      {
          ++this.deathTime;
  
@@ -166,7 +165,7 @@
              this.setDead();
  
              for (i = 0; i < 20; ++i)
-@@ -521,6 +568,23 @@
+@@ -521,6 +567,23 @@
              }
          }
  
@@ -190,7 +189,7 @@
          if (par1NBTTagCompound.func_150297_b("HealF", 99))
          {
              this.setHealth(par1NBTTagCompound.getFloat("HealF"));
-@@ -650,12 +714,14 @@
+@@ -650,12 +713,14 @@
  
      public boolean isPotionActive(int par1)
      {
@@ -207,7 +206,7 @@
      }
  
      // JAVADOC METHOD $$ func_70660_b
-@@ -752,23 +818,66 @@
+@@ -752,23 +817,66 @@
      }
  
      // JAVADOC METHOD $$ func_70691_i
@@ -275,7 +274,7 @@
          this.dataWatcher.updateObject(6, Float.valueOf(MathHelper.clamp_float(par1, 0.0F, this.getMaxHealth())));
      }
  
-@@ -806,9 +915,23 @@
+@@ -806,9 +914,23 @@
  
                  this.limbSwingAmount = 1.5F;
                  boolean flag = true;
@@ -300,40 +299,12 @@
                      if (par2 <= this.lastDamage)
                      {
                          return false;
-@@ -960,12 +1083,12 @@
-             capturedDrops.clear();
-             int j = 0;
- 
--            if (this.func_146066_aG() && this.worldObj.getGameRules().getGameRuleBooleanValue("doMobLoot"))
-+            if (!this.isChild() && this.worldObj.getGameRules().getGameRuleBooleanValue("doMobLoot"))
-             {
-                 this.dropFewItems(this.recentlyHit > 0, i);
-                 this.dropEquipment(this.recentlyHit > 0, i);
- 
--                if (this.recentlyHit > 0)
-+                /*if (this.recentlyHit > 0)   // CraftBukkit - move rare item drop call to dropDeathLoot
-                 {
-                     j = this.rand.nextInt(200) - i;
- 
-@@ -973,13 +1096,28 @@
-                     {
-                         this.dropRareDrop(j <= 0 ? 1 : 0);
-                     }
--                }
-+                }*/
-             }
--
-+            else // CraftBukkit
-+            {
-+                CraftEventFactory.callEntityDeathEvent(this); // CraftBukkit
-+            }
-+            
-             captureDrops = false;
+@@ -980,6 +1102,21 @@
  
              if (!ForgeHooks.onLivingDrops(this, par1DamageSource, capturedDrops, i, recentlyHit > 0, j))
              {
-+                // MCPC+ start - if death event has not been called, capture drops for plugins then fire event
-+                if (!this.calledDeathEvent)
++                // MCPC+ start - capture drops for plugins then fire event
++                if (this.capturedDrops.size() > 0)
 +                {
 +                    java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
 +                    for (EntityItem item : capturedDrops)
@@ -342,33 +313,15 @@
 +                    }
 +                    CraftEventFactory.callEntityDeathEvent(this, loot);
 +                }
++                else
++                {
++                    CraftEventFactory.callEntityDeathEvent(this);
++                }
 +                // MCPC+ end
                  for (EntityItem item : capturedDrops)
                  {
                      worldObj.spawnEntityInWorld(item);
-@@ -988,6 +1126,7 @@
-         }
- 
-         this.worldObj.setEntityState(this, (byte)3);
-+        this.calledDeathEvent = false;
-     }
- 
-     // JAVADOC METHOD $$ func_82160_b
-@@ -1029,6 +1168,13 @@
- 
-     protected void dropRareDrop(int par1) {}
- 
-+    // CraftBukkit start - Change return type to ItemStack
-+    protected ItemStack getRareDrop(int i)
-+    {
-+        return null;
-+    }
-+    // CraftBukkit end
-+
-     // JAVADOC METHOD $$ func_70628_a
-     protected void dropFewItems(boolean par1, int par2) {}
- 
-@@ -1056,11 +1202,31 @@
+@@ -1056,11 +1193,31 @@
          super.fall(par1);
          PotionEffect potioneffect = this.getActivePotionEffect(Potion.jump);
          float f1 = potioneffect != null ? (float)(potioneffect.getAmplifier() + 1) : 0.0F;
@@ -402,7 +355,7 @@
              this.attackEntityFrom(DamageSource.fall, (float)i);
              int j = MathHelper.floor_double(this.posX);
              int k = MathHelper.floor_double(this.posY - 0.20000000298023224D - (double)this.yOffset);
-@@ -1695,7 +1861,8 @@
+@@ -1695,7 +1852,8 @@
          {
              f3 = 1.0F;
              f2 = (float)Math.sqrt((double)f) * 3.0F;
@@ -412,7 +365,7 @@
          }
  
          if (this.swingProgress > 0.0F)
-@@ -1908,8 +2075,17 @@
+@@ -1908,8 +2066,17 @@
          {
              for (int i = 0; i < list.size(); ++i)
              {

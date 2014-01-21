@@ -28,7 +28,7 @@
          output = recipe.getRecipeOutput();
          width = recipe.recipeWidth;
          height = recipe.recipeHeight;
-@@ -261,4 +268,13 @@
+@@ -262,4 +269,13 @@
      {
          return this.input;
      }

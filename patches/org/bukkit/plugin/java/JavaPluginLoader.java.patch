@@ -16,16 +16,7 @@
  import java.io.File;
  import java.io.FileNotFoundException;
  import java.io.IOException;
-@@ -167,7 +177,7 @@
-                 loader = loaders0.get(description.getClassLoaderOf());
-                 loader.addURL(urls[0]);
-             } else {
--                loader = new PluginClassLoader(this, urls, getClass().getClassLoader(), null);
-+                loader = new PluginClassLoader(this, urls, getClass().getClassLoader(), description); // MCPC+ - pass description
-             }
- 
-             Class<?> jarClass = Class.forName(description.getMain(), true, loader);
-@@ -499,4 +509,44 @@
+@@ -388,4 +398,44 @@
              }
          }
      }

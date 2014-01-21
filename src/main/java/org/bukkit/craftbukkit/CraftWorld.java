@@ -24,7 +24,9 @@ import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.block.CraftBlock;
+import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.metadata.BlockMetadataStore;
@@ -355,11 +357,7 @@ public class CraftWorld implements World {
     }
 
     public boolean generateTree(Location loc, TreeType type) {
-        return generateTree(loc, type, world);
-    }
-
-    public boolean generateTree(Location loc, TreeType type, BlockChangeDelegate delegate) {
-        net.minecraft.block.BlockSapling.TreeGenerator gen;
+        net.minecraft.world.gen.feature.WorldGenerator gen;
         switch (type) {
         case BIG_TREE:
             gen = new net.minecraft.world.gen.feature.WorldGenBigTree(true);
@@ -409,7 +407,86 @@ public class CraftWorld implements World {
             break;
         }
 
-        return gen.generate(new CraftBlockChangeDelegate(delegate), rand, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+        return gen.generate(world, rand, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+    }
+
+    public boolean generateTree(Location loc, TreeType type, BlockChangeDelegate delegate) {
+        net.minecraft.world.gen.feature.WorldGenerator gen;
+        switch (type) {
+        case BIG_TREE:
+            gen = new net.minecraft.world.gen.feature.WorldGenBigTree(true);
+            break;
+        case BIRCH:
+            gen = new net.minecraft.world.gen.feature.WorldGenForest(true, false);
+            break;
+        case REDWOOD:
+            gen = new net.minecraft.world.gen.feature.WorldGenTaiga2(true);
+            break;
+        case TALL_REDWOOD:
+            gen = new net.minecraft.world.gen.feature.WorldGenTaiga1();
+            break;
+        case JUNGLE:
+            gen = new net.minecraft.world.gen.feature.WorldGenMegaJungle(true, 10, 20, 3, 3); // Magic values as in BlockSapling
+            break;
+        case SMALL_JUNGLE:
+            gen = new net.minecraft.world.gen.feature.WorldGenTrees(true, 4 + rand.nextInt(7), 3, 3, false);
+            break;
+        case JUNGLE_BUSH:
+            gen = new net.minecraft.world.gen.feature.WorldGenShrub(3, 0);
+            break;
+        case RED_MUSHROOM:
+            gen = new net.minecraft.world.gen.feature.WorldGenBigMushroom(1);
+            break;
+        case BROWN_MUSHROOM:
+            gen = new net.minecraft.world.gen.feature.WorldGenBigMushroom(0);
+            break;
+        case SWAMP:
+            gen = new net.minecraft.world.gen.feature.WorldGenSwamp();
+            break;
+        case ACACIA:
+            gen = new net.minecraft.world.gen.feature.WorldGenSavannaTree(true);
+            break;
+        case DARK_OAK:
+            gen = new net.minecraft.world.gen.feature.WorldGenCanopyTree(true);
+            break;
+        case MEGA_REDWOOD:
+            gen = new net.minecraft.world.gen.feature.WorldGenMegaPineTree(true, rand.nextBoolean());
+            break;
+        case TALL_BIRCH:
+            gen = new net.minecraft.world.gen.feature.WorldGenForest(true, true);
+            break;
+        case TREE:
+        default:
+            gen = new net.minecraft.world.gen.feature.WorldGenTrees(true);
+            break;
+        }
+
+        world.runningTreeGeneration = true;
+        world.captureBlockStates = true;
+        boolean grownTree = gen.generate(world, rand, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+        world.captureBlockStates = false;
+        world.runningTreeGeneration = false;
+        if (grownTree) { // Copy block data to delegate
+            for (BlockState blockstate : world.capturedBlockStates) {
+                int x = blockstate.getX();
+                int y = blockstate.getY();
+                int z = blockstate.getZ();
+                net.minecraft.block.Block oldBlock = world.func_147439_a(x, y, z); 
+                int newId = blockstate.getTypeId();
+                int data = blockstate.getRawData();
+                int flag = ((CraftBlockState)blockstate).getFlag();
+                System.out.println("coords = " + x + ", " + y + ", " + z + " with id " + newId + " with meta " + data);
+                delegate.setTypeIdAndData(x, y, z, newId, data);
+                net.minecraft.block.Block newBlock = world.func_147439_a(x, y, z); 
+                world.markAndNotifyBlock(x, y, z, null, oldBlock, newBlock, flag);
+            }
+            world.capturedBlockStates.clear();
+            return true;
+        }
+        else {
+            world.capturedBlockStates.clear();
+            return false;
+        }
     }
 
     public net.minecraft.tileentity.TileEntity getTileEntityAt(final int x, final int y, final int z) {

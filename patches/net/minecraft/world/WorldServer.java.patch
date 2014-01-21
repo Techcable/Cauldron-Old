@@ -4,7 +4,6 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
--public class WorldServer extends World
 +// CraftBukkit start
 +import net.minecraft.block.ITileEntityProvider;
 +import net.minecraft.block.BlockJukebox;
@@ -18,7 +17,7 @@
 +import org.bukkit.event.weather.ThunderChangeEvent;
 +import org.bukkit.event.weather.WeatherChangeEvent;
 +
-+public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
+ public class WorldServer extends World
  {
 +    // CraftBukkit end
 +

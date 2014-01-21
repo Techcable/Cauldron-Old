@@ -39,49 +39,7 @@
      protected float defaultPitch;
      // JAVADOC FIELD $$ field_70776_bF
      private Entity currentTarget;
-@@ -259,6 +266,8 @@
-     // JAVADOC METHOD $$ func_70628_a
-     protected void dropFewItems(boolean par1, int par2)
-     {
-+        // CraftBukkit start - Whole method
-+        List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
-         Item item = this.func_146068_u();
- 
-         if (item != null)
-@@ -270,11 +279,30 @@
-                 j += this.rand.nextInt(par2 + 1);
-             }
- 
--            for (int k = 0; k < j; ++k)
-+            if (j > 0)
-             {
--                this.func_145779_a(item, 1);
-+                loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(item), j));
-             }
-         }
-+
-+        // Determine rare item drops and add them to the loot
-+        if (this.recentlyHit > 0)
-+        {
-+            int k = this.rand.nextInt(200) - par2;
-+
-+            if (k < 5)
-+            {
-+                ItemStack itemstack = this.getRareDrop(k <= 0 ? 1 : 0);
-+
-+                if (itemstack != null)
-+                {
-+                    loot.add(org.bukkit.craftbukkit.inventory.CraftItemStack.asCraftMirror(itemstack));
-+                }
-+            }
-+        }
-+
-+        CraftEventFactory.callEntityDeathEvent(this, loot); // raise event even for those times when the entity does not drop loot
-+        // CraftBukkit end
-     }
- 
-     // JAVADOC METHOD $$ func_70014_b
-@@ -336,9 +364,23 @@
+@@ -336,9 +343,23 @@
      public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
      {
          super.readEntityFromNBT(par1NBTTagCompound);
@@ -107,7 +65,7 @@
          if (par1NBTTagCompound.func_150297_b("CustomName", 8) && par1NBTTagCompound.getString("CustomName").length() > 0)
          {
              this.setCustomNameTag(par1NBTTagCompound.getString("CustomName"));
-@@ -551,15 +593,41 @@
+@@ -551,15 +572,41 @@
                      this.entityAge = 0;
                  }
              }
@@ -149,7 +107,7 @@
          this.worldObj.theProfiler.startSection("sensing");
          this.senses.clearSensingCache();
          this.worldObj.theProfiler.endSection();
-@@ -1052,6 +1120,14 @@
+@@ -1052,6 +1099,14 @@
      {
          if (this.getLeashed() && this.getLeashedToEntity() == par1EntityPlayer)
          {
@@ -164,7 +122,7 @@
              this.clearLeashed(true, !par1EntityPlayer.capabilities.isCreativeMode);
              return true;
          }
-@@ -1063,6 +1139,14 @@
+@@ -1063,6 +1118,14 @@
              {
                  if (!(this instanceof EntityTameable) || !((EntityTameable)this).isTamed())
                  {
@@ -179,7 +137,7 @@
                      this.setLeashedToEntity(par1EntityPlayer, true);
                      --itemstack.stackSize;
                      return true;
-@@ -1070,6 +1154,14 @@
+@@ -1070,6 +1133,14 @@
  
                  if (par1EntityPlayer.getCommandSenderName().equalsIgnoreCase(((EntityTameable)this).getOwnerName()))
                  {
@@ -194,7 +152,7 @@
                      this.setLeashedToEntity(par1EntityPlayer, true);
                      --itemstack.stackSize;
                      return true;
-@@ -1097,6 +1189,7 @@
+@@ -1097,6 +1168,7 @@
          {
              if (this.leashedToEntity == null || this.leashedToEntity.isDead)
              {
@@ -202,7 +160,7 @@
                  this.clearLeashed(true, true);
              }
          }
-@@ -1186,10 +1279,16 @@
+@@ -1186,10 +1258,16 @@
              }
              else
              {

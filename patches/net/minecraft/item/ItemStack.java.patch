@@ -1,16 +1,28 @@
 --- ../src-base/minecraft/net/minecraft/item/ItemStack.java
 +++ ../src-work/minecraft/net/minecraft/item/ItemStack.java
-@@ -34,6 +34,9 @@
+@@ -10,6 +10,7 @@
+ import java.util.List;
+ import java.util.Random;
+ import java.util.Map.Entry;
++
+ import net.minecraft.block.Block;
+ import net.minecraft.enchantment.Enchantment;
+ import net.minecraft.enchantment.EnchantmentDurability;
+@@ -34,6 +35,13 @@
  import net.minecraft.world.World;
  import net.minecraftforge.event.ForgeEventFactory;
  
 +import org.bukkit.craftbukkit.util.CraftMagicNumbers; // CraftBukkit
 +import net.minecraft.entity.player.EntityPlayerMP; // Spigot
++// MCPC+ start
++import org.bukkit.block.BlockState;
++import org.bukkit.craftbukkit.block.CraftBlockState;
++// MCPC+ end
 +
  public final class ItemStack
  {
      public static final DecimalFormat field_111284_a = new DecimalFormat("#.###");
-@@ -46,8 +49,13 @@
+@@ -46,8 +54,14 @@
      public NBTTagCompound stackTagCompound;
      // JAVADOC FIELD $$ field_77991_e
      int itemDamage;
@@ -22,59 +34,96 @@
      // JAVADOC FIELD $$ field_82843_f
 -    private EntityItemFrame itemFrame;
 +    private transient EntityItemFrame itemFrame;
++    public static String currentPlayerName = ""; // MCPC+
      private static final String __OBFID = "CL_00000043";
  
      public ItemStack(Block par1Block)
-@@ -131,12 +139,47 @@
+@@ -131,12 +145,83 @@
  
      public boolean tryPlaceItemIntoWorld(EntityPlayer par1EntityPlayer, World par2World, int par3, int par4, int par5, int par6, float par7, float par8, float par9)
      {
 +        // MCPC+ start - handle all placement events here
++        currentPlayerName = par1EntityPlayer.getCommandSenderName();
 +        int meta = this.getItemDamage();
 +        int size = this.stackSize;
-+        par2World.captureBlocks = true;
++        NBTTagCompound nbt = null;
++        if (this.getTagCompound() != null)
++        {
++            nbt = (NBTTagCompound)this.getTagCompound().copy();
++        }
++
++        if (!(this.getItem() instanceof ItemDye && this.getItemDamage() == 15) && !(this.getItem() instanceof ItemBucket)) // if not bonemeal
++        {
++            par2World.captureBlockStates = true;
++        }
++
          boolean flag = this.getItem().onItemUse(this, par1EntityPlayer, par2World, par3, par4, par5, par6, par7, par8, par9);
-+        par2World.captureBlocks = false;
++        par2World.captureBlockStates = false;
++        currentPlayerName = "";
  
          if (flag)
          {
 -            par1EntityPlayer.addStat(StatList.objectUseStats[Item.func_150891_b(this.field_151002_e)], 1);
-+            boolean isCancelled = false;
-+            for (int i = 0; i < par2World.capturedBlocks.size(); i++)
++            org.bukkit.event.block.BlockPlaceEvent placeEvent = null;
++            if (par2World.capturedBlockStates.size() > 1) 
 +            {
-+                org.bukkit.event.block.BlockPlaceEvent placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(par2World, par1EntityPlayer, par2World.capturedBlocks.get(i), par3, par4, par5);
-+
-+                if (placeEvent.isCancelled() || !placeEvent.canBuild())
-+                {
-+                    isCancelled = true;
-+                    break;
-+                }
++                placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockMultiPlaceEvent(par2World, par1EntityPlayer, par2World.capturedBlockStates, par3, par4, par5);
++            } 
++            else if (par2World.capturedBlockStates.size() == 1)
++            {
++                placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(par2World, par1EntityPlayer, par2World.capturedBlockStates.get(0), par3, par4, par5);
 +            }
-+            if (isCancelled)
++            if (placeEvent != null && (placeEvent.isCancelled() || !placeEvent.canBuild()))
 +            {
 +                flag = false; // cancel placement
 +                // revert back all captured blocks
-+                for (int i = 0; i < par2World.capturedBlocks.size(); i++)
++                for (BlockState blockstate : par2World.capturedBlockStates)
 +                {
 +                    par2World.restoringBlockStates = true;
-+                    par2World.capturedBlocks.get(i).update(true, false); // restore blockstate
++                    blockstate.update(true, false); // restore blockstate
 +                    par2World.restoringBlockStates = false;
 +                }
 +                // make sure to restore stack after cancel
 +                this.setItemDamage(meta);
 +                this.stackSize = size;
++                if (nbt != null)
++                {
++                    this.setTagCompound(nbt);
++                }
 +            }
 +            else
 +            {
++                // drop items
++                for (int i = 0; i < par2World.capturedItems.size(); i++)
++                {
++                    par2World.spawnEntityInWorld(par2World.capturedItems.get(i));
++                }
++
++                for (BlockState blockstate : par2World.capturedBlockStates)
++                {
++                    int x = blockstate.getX();
++                    int y = blockstate.getY();
++                    int z = blockstate.getZ();
++                    int metadata = par2World.getBlockMetadata(x, y, z);
++                    int updateFlag = ((CraftBlockState)blockstate).getFlag();
++                    Block oldBlock = CraftMagicNumbers.getBlock(blockstate.getTypeId());
++                    Block newBlock = par2World.func_147439_a(x, y, z);
++                    if (newBlock != null && !(newBlock.hasTileEntity(metadata))) { // Containers get placed automatically
++                        newBlock.func_149726_b(par2World, x, y, z);
++                    }
++
++                    par2World.markAndNotifyBlock(x, y, z, null, oldBlock, newBlock, updateFlag);
++                }
 +                par1EntityPlayer.addStat(StatList.objectUseStats[Item.func_150891_b(this.field_151002_e)], 1);
 +            }
          }
-+        par2World.capturedBlocks.clear();
++        par2World.capturedBlockStates.clear();
++        par2World.capturedItems.clear();
 +        // MCPC+ end
  
          return flag;
      }
-@@ -244,8 +287,22 @@
+@@ -244,8 +329,22 @@
      }
  
      // JAVADOC METHOD $$ func_96631_a
@@ -97,7 +146,7 @@
          if (!this.isItemStackDamageable())
          {
              return false;
-@@ -267,6 +324,22 @@
+@@ -267,6 +366,22 @@
  
                  par1 -= k;
  
@@ -120,7 +169,7 @@
                  if (par1 <= 0)
                  {
                      return false;
-@@ -306,6 +379,13 @@
+@@ -306,6 +421,13 @@
                          this.stackSize = 0;
                      }
  
@@ -134,3 +183,11 @@
                      this.itemDamage = 0;
                  }
              }
+@@ -448,6 +570,7 @@
+     // JAVADOC METHOD $$ func_77982_d
+     public void setTagCompound(NBTTagCompound par1NBTTagCompound)
+     {
++        // MCPC+ - do not alter name of compound. Fixes Ars Magica 2 Spellbooks
+         this.stackTagCompound = par1NBTTagCompound;
+     }
+ 

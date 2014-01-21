@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/common/util/EnumHelper.java
 +++ ../src-work/minecraft/net/minecraftforge/common/util/EnumHelper.java
-@@ -20,7 +20,23 @@
+@@ -19,7 +19,23 @@
  import net.minecraft.world.EnumSkyBlock;
  import net.minecraft.world.gen.structure.StructureStrongholdPieces.Stronghold.Door;
  import net.minecraftforge.classloading.FMLForgePlugin;
@@ -24,14 +24,14 @@
  public class EnumHelper
  {
      private static Object reflectionFactory      = null;
-@@ -29,6 +45,7 @@
+@@ -28,6 +44,7 @@
      private static Method newFieldAccessor       = null;
      private static Method fieldAccessorSet       = null;
      private static boolean isSetup               = false;
 +    private static final Logger logger = LogManager.getLogger();
  
      //Some enums are decompiled with extra arguments, so lets check for that
-     private static Class[][] commonTypes =
+     @SuppressWarnings("rawtypes")
 @@ -48,6 +65,67 @@
          {ToolMaterial.class, int.class, int.class, float.class, float.class, int.class}
      }; 
@@ -100,7 +100,7 @@
      public static EnumAction addAction(String name)
      {
          return addEnum(EnumAction.class, name);
-@@ -271,6 +349,86 @@
+@@ -273,6 +351,86 @@
          }
      }
  

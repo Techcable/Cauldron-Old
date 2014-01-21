@@ -1,13 +1,10 @@
 --- ../src-base/minecraft/net/minecraft/entity/monster/EntityPigZombie.java
 +++ ../src-work/minecraft/net/minecraft/entity/monster/EntityPigZombie.java
-@@ -15,12 +15,17 @@
+@@ -15,12 +15,14 @@
  import net.minecraft.world.EnumDifficulty;
  import net.minecraft.world.World;
  
-+// CraftBukkit start
-+import org.bukkit.craftbukkit.inventory.CraftItemStack;
-+import org.bukkit.event.entity.EntityTargetEvent;
-+// CraftBukkit end
++import org.bukkit.event.entity.EntityTargetEvent; // CraftBukkit
 +
  public class EntityPigZombie extends EntityZombie
  {
@@ -19,7 +16,7 @@
      // JAVADOC FIELD $$ field_70838_e
      private int randomSoundDelay;
      private Entity field_110191_bu;
-@@ -132,6 +137,24 @@
+@@ -132,6 +134,24 @@
      // JAVADOC METHOD $$ func_70835_c
      private void becomeAngryAt(Entity par1Entity)
      {
@@ -44,71 +41,3 @@
          this.entityToAttack = par1Entity;
          this.angerLevel = 400 + this.rand.nextInt(400);
          this.randomSoundDelay = this.rand.nextInt(40);
-@@ -158,20 +181,40 @@
-     // JAVADOC METHOD $$ func_70628_a
-     protected void dropFewItems(boolean par1, int par2)
-     {
-+        // CraftBukkit start
-+        List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
-         int j = this.rand.nextInt(2 + par2);
--        int k;
- 
--        for (k = 0; k < j; ++k)
-+        if (j > 0)
-         {
--            this.func_145779_a(Items.rotten_flesh, 1);
-+            loot.add(CraftItemStack.asNewCraftStack(Items.rotten_flesh, j));
-         }
- 
-         j = this.rand.nextInt(2 + par2);
- 
--        for (k = 0; k < j; ++k)
-+        if (j > 0)
-         {
--            this.func_145779_a(Items.gold_nugget, 1);
-+            loot.add(CraftItemStack.asNewCraftStack(Items.gold_nugget, j));
-         }
-+
-+        // Determine rare item drops and add them to the loot
-+        if (this.recentlyHit > 0)
-+        {
-+            int k = this.rand.nextInt(200) - par2;
-+
-+            if (k < 5)
-+            {
-+                ItemStack itemstack = this.getRareDrop(k <= 0 ? 1 : 0);
-+
-+                if (itemstack != null)
-+                {
-+                    loot.add(CraftItemStack.asCraftMirror(itemstack));
-+                }
-+            }
-+        }
-+
-+        org.bukkit.craftbukkit.event.CraftEventFactory.callEntityDeathEvent(this, loot);
-+        // CraftBukkit end
-     }
- 
-     // JAVADOC METHOD $$ func_70085_c
-@@ -180,11 +223,20 @@
-         return false;
-     }
- 
-+    // MCPC+ start - vanilla compatibility
-     protected void dropRareDrop(int par1)
-     {
--        this.func_145779_a(Items.gold_ingot, 1);
-+        this.getRareDrop(par1);
-     }
-+    // MCPC+ end
- 
-+    // CraftBukkit start - Return rare dropped item instead of dropping it
-+    protected ItemStack getRareDrop(int i)
-+    {
-+        return new ItemStack(Items.gold_ingot, 1, 0);
-+    }
-+    // CraftBukkit end
-+
-     // JAVADOC METHOD $$ func_82164_bB
-     protected void addRandomArmor()
-     {

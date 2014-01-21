@@ -1,15 +1,26 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockMushroom.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockMushroom.java
-@@ -6,6 +6,16 @@
+@@ -1,11 +1,27 @@
+ package net.minecraft.block;
+ 
+ import java.util.Random;
++
++import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.init.Blocks;
++import net.minecraft.server.MinecraftServer;
+ import net.minecraft.world.World;
  import net.minecraft.world.gen.feature.WorldGenBigMushroom;
  import net.minecraftforge.common.util.ForgeDirection;
  
 +// CraftBukkit start
 +import java.util.ArrayList;
++
++import net.minecraft.item.ItemDye;
 +import net.minecraft.item.ItemStack;
 +import org.bukkit.Location;
 +import org.bukkit.TreeType;
 +import org.bukkit.block.BlockState;
++import org.bukkit.entity.Player;
 +import org.bukkit.event.block.BlockSpreadEvent;
 +import org.bukkit.event.world.StructureGrowEvent;
 +// CraftBukkit end
@@ -17,7 +28,7 @@
  public class BlockMushroom extends BlockBush implements IGrowable
  {
      private static final String __OBFID = "CL_00000272";
-@@ -19,7 +29,9 @@
+@@ -19,7 +35,9 @@
  
      public void func_149674_a(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
      {
@@ -28,7 +39,7 @@
          {
              byte b0 = 4;
              int l = 5;
-@@ -66,7 +78,19 @@
+@@ -66,7 +84,19 @@
  
              if (p_149674_1_.func_147437_c(i1, j1, k1) && this.func_149718_j(p_149674_1_, i1, j1, k1))
              {
@@ -49,111 +60,98 @@
              }
          }
      }
-@@ -94,30 +118,82 @@
+@@ -92,32 +122,89 @@
+         {
+             return false;
          }
-     }
+-    }
++    } 
  
--    public boolean func_149884_c(World p_149884_1_, int p_149884_2_, int p_149884_3_, int p_149884_4_, Random p_149884_5_)
-+    // MCPC+ start - wrapper for vanilla compatibility
-+    public boolean fertilizeMushroom(World world, int i, int j, int k, Random random)
-     {
--        int l = p_149884_1_.getBlockMetadata(p_149884_2_, p_149884_3_, p_149884_4_);
--        p_149884_1_.func_147468_f(p_149884_2_, p_149884_3_, p_149884_4_);
-+        return this.fertilizeMushroom(world, i, j, k, random, false, null, null);
-+    }
-+    // MCPC+ end    
-+
-+    // CraftBukkit - added bonemeal, player and itemstack
 +    /**
 +     * Fertilize the mushroom.
 +     */
-+    public boolean fertilizeMushroom(World par1World, int par2, int par3, int par4, Random par5Random, boolean bonemeal, org.bukkit.entity.Player player, ItemStack itemstack)
-+    {
-+        int l = par1World.getBlockMetadata(par2, par3, par4);
-+        par1World.func_147468_f(par2, par3, par4);
+     public boolean func_149884_c(World p_149884_1_, int p_149884_2_, int p_149884_3_, int p_149884_4_, Random p_149884_5_)
+     {
+         int l = p_149884_1_.getBlockMetadata(p_149884_2_, p_149884_3_, p_149884_4_);
+         p_149884_1_.func_147468_f(p_149884_2_, p_149884_3_, p_149884_4_);
 +        // CraftBukkit start
 +        boolean grown = false;
 +        StructureGrowEvent event = null;
-+        Location location = new Location(par1World.getWorld(), par2, par3, par4);
++        Location location = new Location(p_149884_1_.getWorld(), p_149884_2_, p_149884_3_, p_149884_4_);
          WorldGenBigMushroom worldgenbigmushroom = null;
++        TreeType treeType = null;
  
--        if (this == Blocks.brown_mushroom)
-+        // MCPC+ start - add support for Twilight Forest; CB only if non-null player, otherwise vanilla
-+        if (player != null)
++        // MCPC+ start - Refactor cb patch
++        EntityPlayerMP entityplayer = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(ItemStack.currentPlayerName);
++        Player player = entityplayer != null ? entityplayer.getBukkitEntity() : null;
++        ItemStack itemstack = null;
++        boolean bonemeal = false;
++        if (entityplayer != null && entityplayer.getItemInUse().getItem() != null)
++        {
++            bonemeal = (entityplayer.getItemInUse().getItem() instanceof ItemDye && entityplayer.getItemInUse().getItemDamage() == 15);
++            itemstack = entityplayer.getItemInUse();
++        }
++
+         if (this == Blocks.brown_mushroom)
          {
--            worldgenbigmushroom = new WorldGenBigMushroom(0);
-+            if (this == Blocks.brown_mushroom)
-+            {
-+                event = new StructureGrowEvent(location, TreeType.BROWN_MUSHROOM, bonemeal, player, new ArrayList<BlockState>());
-+                worldgenbigmushroom = new WorldGenBigMushroom(0);
-+            }
-+            else if (this == Blocks.red_mushroom)
-+            {
-+                event = new StructureGrowEvent(location, TreeType.RED_MUSHROOM, bonemeal, player, new ArrayList<BlockState>());
-+                worldgenbigmushroom = new WorldGenBigMushroom(1);
-+            }
-+
-+            if (worldgenbigmushroom != null && event != null)
-+            {
-+                grown = worldgenbigmushroom.grow(new org.bukkit.craftbukkit.CraftBlockChangeDelegate((org.bukkit.BlockChangeDelegate)par1World), par5Random, par2, par3, par4, event, itemstack, par1World.getWorld());
-+
-+                if (event.isFromBonemeal() && itemstack != null)
-+                {
-+                    --itemstack.stackSize;
-+                }
-+            }
-+
-+            if (!grown || event.isCancelled())
-+            {
-+                par1World.func_147465_d(par2, par3, par4, this, l, 3);
-+                return false;
-+            }
++            treeType = TreeType.BROWN_MUSHROOM;
+             worldgenbigmushroom = new WorldGenBigMushroom(0);
          }
--        else if (this == Blocks.red_mushroom)
--        {
--            worldgenbigmushroom = new WorldGenBigMushroom(1);
--        }
-+        else 
-+        { // do vanilla
-+            if (this == Blocks.brown_mushroom)
-+            {
-+                worldgenbigmushroom = new WorldGenBigMushroom(0);
-+            }
-+            else if (this == Blocks.red_mushroom)
-+            {
-+                worldgenbigmushroom = new WorldGenBigMushroom(1);
-+            }
+         else if (this == Blocks.red_mushroom)
+         {
++            treeType = TreeType.RED_MUSHROOM;
+             worldgenbigmushroom = new WorldGenBigMushroom(1);
+         }
  
 -        if (worldgenbigmushroom != null && worldgenbigmushroom.generate(p_149884_1_, p_149884_5_, p_149884_2_, p_149884_3_, p_149884_4_))
--        {
++        if (worldgenbigmushroom != null)
+         {
 -            return true;
-+            if (worldgenbigmushroom != null && worldgenbigmushroom.generate(par1World, par5Random, par2, par3, par4))
-+            {
-+                return true;
-+            }
-+            else
-+            {
-+                par1World.func_147465_d(par2, par3, par4, this, l, 3);
-+                return false;
-+            }
-         }
--        else
--        {
--            p_149884_1_.func_147465_d(p_149884_2_, p_149884_3_, p_149884_4_, this, l, 3);
--            return false;
 -        }
-+        // MCPC+ end        
+-        else
++            p_149884_1_.runningTreeGeneration = true;
++            p_149884_1_.captureBlockStates = true;
++            grown = worldgenbigmushroom.generate(p_149884_1_, p_149884_5_, p_149884_2_, p_149884_3_, p_149884_4_);
++            p_149884_1_.captureBlockStates = false;
++            p_149884_1_.runningTreeGeneration = false;
++            if (grown)
++            {
++                if (player != null)
++                {
++                    event = new StructureGrowEvent(location, treeType, bonemeal, player, p_149884_1_.capturedBlockStates);
++                    org.bukkit.Bukkit.getPluginManager().callEvent(event);
++                }
++
++                if (event != null && event.isCancelled())
++                {
++                    grown = false;
++                }
++                else
++                {
++                    for (BlockState blockstate : p_149884_1_.capturedBlockStates)
++                    {
++                        blockstate.update(true);
++                    }
++
++                    if (itemstack != null && itemstack.getItem() instanceof ItemDye && itemstack.getItemDamage() == 15)
++                    {
++                        --itemstack.stackSize;
++                    }
++                }
++            }
++        } 
++
++        if (!grown || event.isCancelled())
+         {
++            p_149884_1_.capturedBlockStates.clear();
+             p_149884_1_.func_147465_d(p_149884_2_, p_149884_3_, p_149884_4_, this, l, 3);
+             return false;
+         }
++        p_149884_1_.capturedBlockStates.clear();
++        // MCPC+ end
 +
 +        return true;
 +        // CraftBukkit end
      }
  
      public boolean func_149851_a(World p_149851_1_, int p_149851_2_, int p_149851_3_, int p_149851_4_, boolean p_149851_5_)
-@@ -132,6 +208,6 @@
- 
-     public void func_149853_b(World p_149853_1_, Random p_149853_2_, int p_149853_3_, int p_149853_4_, int p_149853_5_)
-     {
--        this.func_149884_c(p_149853_1_, p_149853_3_, p_149853_4_, p_149853_5_, p_149853_2_);
-+        this.fertilizeMushroom(p_149853_1_, p_149853_3_, p_149853_4_, p_149853_5_, p_149853_2_, false, null, null); // CraftBukkit - Add bonemeal, player, and itemstack
-     }
- }

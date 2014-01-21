@@ -11,10 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+
+import gnu.trove.map.hash.TObjectIntHashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.command.TicksPerSecondCommand;
 
@@ -208,7 +211,11 @@ public class SpigotConfig
 
     private static void replaceCommands()
     {
-        for ( String command : (List<String>) getList( "replace-commands", Arrays.asList( "setblock", "summon", "testforblock" ) ) )
+        if ( config.contains( "replace-commands" ) ) {
+            set( "commands.replace-commands", config.getStringList( "replace-commands" ) );
+            config.set( "replace-commands", null );
+        }
+        for ( String command : (List<String>) getList( "commands.replace-commands", Arrays.asList( "setblock", "summon", "testforblock", "tellraw" ) ) )
         {
             SimpleCommandMap.removeFallback( command );
             VanillaCommandWrapper.allowedCommands.add( command );
@@ -218,5 +225,32 @@ public class SpigotConfig
     public static boolean lateBind;
     private static void lateBind() {
         lateBind = getBoolean( "settings.late-bind", false );
+    }
+
+    public static boolean disableStatSaving;
+    public static TObjectIntHashMap<String> forcedStats = new TObjectIntHashMap<String>();
+    private static void stats()
+    {
+        disableStatSaving = getBoolean( "stats.disable-saving", false );
+
+        if ( !config.contains( "stats.forced-stats" ) ) {
+            config.createSection( "stats.forced-stats" );
+        }
+
+        ConfigurationSection section = config.getConfigurationSection( "stats.forced-stats" );
+        for ( String name : section.getKeys( true ) )
+        {
+            if ( section.isInt( name ) )
+            {
+                forcedStats.put( name, section.getInt( name ) );
+            }
+        }
+
+        if ( disableStatSaving && section.getInt( "achievement.openInventory", 0 ) < 1 )
+        {
+            Bukkit.getLogger().warning( "*** WARNING *** stats.disable-saving is true but stats.forced-stats.achievement.openInventory" +
+                    " isn't set to 1. Disabling stat saving without forcing the achievement may cause it to get stuck on the player's " +
+                    "screen." );
+        }
     }
 }

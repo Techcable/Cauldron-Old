@@ -14,7 +14,7 @@
  {
      // JAVADOC FIELD $$ field_77193_b
 -    private HashMap eligibleChunksForSpawning = new HashMap();
-+private LongObjectHashMap<Boolean> eligibleChunksForSpawning = new LongObjectHashMap<Boolean>(); // CraftBukkit - HashMap -> LongObjectHashMap
++    private LongObjectHashMap<Boolean> eligibleChunksForSpawning = new LongObjectHashMap<Boolean>(); // CraftBukkit - HashMap -> LongObjectHashMap
      private static final String __OBFID = "CL_00000152";
  
      protected static ChunkPosition func_151350_a(World p_151350_0_, int p_151350_1_, int p_151350_2_)
@@ -53,15 +53,16 @@
                      }
                  }
              }
-@@ -84,7 +98,32 @@
+@@ -84,22 +98,46 @@
              for (int k3 = 0; k3 < k; ++k3)
              {
                  EnumCreatureType enumcreaturetype = aenumcreaturetype[k3];
 +                // CraftBukkit start - Use per-world spawn limits
 +                int limit = enumcreaturetype.getMaxNumberOfCreature();
  
+-                if ((!enumcreaturetype.getPeacefulCreature() || par3) && (enumcreaturetype.getPeacefulCreature() || par2) && (!enumcreaturetype.getAnimal() || par4) && par1WorldServer.countEntities(enumcreaturetype, true) <= enumcreaturetype.getMaxNumberOfCreature() * this.eligibleChunksForSpawning.size() / 256)
 +                switch (enumcreaturetype)
-+                {
+                 {
 +                    case monster:
 +                        limit = par1WorldServer.getWorld().getMonsterSpawnLimit();
 +                        break;
@@ -83,10 +84,13 @@
 +
 +                // CraftBukkit end
 +
-                 if ((!enumcreaturetype.getPeacefulCreature() || par3) && (enumcreaturetype.getPeacefulCreature() || par2) && (!enumcreaturetype.getAnimal() || par4) && par1WorldServer.countEntities(enumcreaturetype, true) <= enumcreaturetype.getMaxNumberOfCreature() * this.eligibleChunksForSpawning.size() / 256)
-                 {
++                if ((!enumcreaturetype.getPeacefulCreature() || par3) && (enumcreaturetype.getPeacefulCreature() || par2) && (!enumcreaturetype.getAnimal() || par4) && par1WorldServer.countEntities(enumcreaturetype.getCreatureClass()) <= limit * eligibleChunksForSpawning.size() / 256)   // CraftBukkit - use per-world limits
++                {
                      Iterator iterator = this.eligibleChunksForSpawning.keySet().iterator();
-@@ -95,11 +134,13 @@
+-                    ArrayList<ChunkCoordIntPair> tmp = new ArrayList(eligibleChunksForSpawning.keySet());
+-                    Collections.shuffle(tmp);
+-                    iterator = tmp.iterator();
+                     label110:
  
                      while (iterator.hasNext())
                      {
@@ -103,7 +107,7 @@
                              int j1 = chunkposition.field_151329_a;
                              int k1 = chunkposition.field_151327_b;
                              int l1 = chunkposition.field_151328_c;
-@@ -172,11 +213,12 @@
+@@ -172,11 +210,12 @@
                                                              if (canSpawn == Result.ALLOW || (canSpawn == Result.DEFAULT && entityliving.getCanSpawnHere()))
                                                              {
                                                                  ++i2;
@@ -117,7 +121,7 @@
  
                                                                  if (j2 >= ForgeEventFactory.getMaxSpawnPackSize(entityliving))
                                                                  {
-@@ -270,8 +312,10 @@
+@@ -270,8 +309,10 @@
                              }
  
                              entityliving.setLocationAndAngles((double)f, (double)f1, (double)f2, par6Random.nextFloat() * 360.0F, 0.0F);

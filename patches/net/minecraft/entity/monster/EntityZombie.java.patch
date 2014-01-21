@@ -107,38 +107,3 @@
              }
          }
  
-@@ -356,20 +397,29 @@
-         return EnumCreatureAttribute.UNDEAD;
-     }
- 
-+    // MCPC+ start - vanilla compatibility
-     protected void dropRareDrop(int par1)
-     {
-+        this.getRareDrop(par1);
-+    }
-+    // MCPC+ end
-+
-+    // CraftBukkit start - Return rare dropped item instead of dropping it
-+    protected ItemStack getRareDrop(int i)
-+    {
-         switch (this.rand.nextInt(3))
-         {
-             case 0:
--                this.func_145779_a(Items.iron_ingot, 1);
--                break;
-+                return new ItemStack(Items.iron_ingot, 1, 0);
-             case 1:
--                this.func_145779_a(Items.carrot, 1);
--                break;
-+                return new ItemStack(Items.carrot, 1, 0);
-             case 2:
--                this.func_145779_a(Items.potato, 1);
-+                return new ItemStack(Items.potato, 1, 0);
-+            default:
-+                return null;
-         }
-     }
-+    // CraftBukkit end
- 
-     // JAVADOC METHOD $$ func_82164_bB
-     protected void addRandomArmor()

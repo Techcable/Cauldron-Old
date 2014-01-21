@@ -298,16 +298,13 @@ public class ActivationRange
         {
             isActive = false;
         }
-
+        int x = net.minecraft.util.MathHelper.floor_double( entity.posX );
+        int z = net.minecraft.util.MathHelper.floor_double( entity.posZ );
         // Make sure not on edge of unloaded chunk
-
-        int x = MathHelper.floor_double( entity.posX );
-        int z = MathHelper.floor_double( entity.posZ );
-        if (isActive && !entity.worldObj.doChunksNearChunkExist(x, 0, z, 16)) {
+        if ( isActive && !entity.worldObj.doChunksNearChunkExist( x, 0, z, 16 ) )
+        {
             isActive = false;
         }
-
-        // MCPC+ end
         SpigotTimings.checkIfActiveTimer.stopTiming();
         return isActive;
     }
