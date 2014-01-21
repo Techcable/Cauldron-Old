@@ -9,10 +9,12 @@ import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.Statistic.Type;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.craftbukkit.CraftStatistic;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.CraftBlock;
@@ -25,6 +27,7 @@ import org.bukkit.craftbukkit.util.CraftDamageSource;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.LivingEntity;
@@ -34,6 +37,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrownExpBottle;
 import org.bukkit.entity.ThrownPotion;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.*;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
@@ -794,6 +798,46 @@ public class CraftEventFactory {
         PlayerLeashEntityEvent event = new PlayerLeashEntityEvent(entity.getBukkitEntity(), leashHolder.getBukkitEntity(), (Player) player.getBukkitEntity());
         entity.worldObj.getServer().getPluginManager().callEvent(event);
         return event;
+    }
+
+    public static Cancellable handleStatisticsIncrease(EntityPlayer entityHuman, net.minecraft.stats.StatBase statistic, int current, int incrementation) {
+        Player player = ((EntityPlayerMP) entityHuman).getBukkitEntity();
+        Event event;
+        if (statistic instanceof net.minecraft.stats.Achievement) {
+            if (current != 0) {
+                return null;
+            }
+            event = new PlayerAchievementAwardedEvent(player, CraftStatistic.getBukkitAchievement((net.minecraft.stats.Achievement) statistic));
+        } else {
+            org.bukkit.Statistic stat = CraftStatistic.getBukkitStatistic(statistic);
+            switch (stat) {
+                case FALL_ONE_CM:
+                case BOAT_ONE_CM:
+                case CLIMB_ONE_CM:
+                case DIVE_ONE_CM:
+                case FLY_ONE_CM:
+                case HORSE_ONE_CM:
+                case MINECART_ONE_CM:
+                case PIG_ONE_CM:
+                case PLAY_ONE_TICK:
+                case SWIM_ONE_CM:
+                case WALK_ONE_CM:
+                    // Do not process event for these - too spammy
+                    return null;
+                default:
+            }
+            if (stat.getType() == Type.UNTYPED) {
+                event = new PlayerStatisticIncrementEvent(player, stat, current, current + incrementation);
+            } else if (stat.getType() == Type.ENTITY) {
+                EntityType entityType = CraftStatistic.getEntityTypeFromStatistic(statistic);
+                event = new PlayerStatisticIncrementEvent(player, stat, current, current + incrementation, entityType);
+            } else {
+                Material material = CraftStatistic.getMaterialFromStatistic(statistic);
+                event = new PlayerStatisticIncrementEvent(player, stat, current, current + incrementation, material);
+            }
+        }
+        entityHuman.worldObj.getServer().getPluginManager().callEvent(event);
+        return (Cancellable) event;
     }
 
     // MCPC+ start

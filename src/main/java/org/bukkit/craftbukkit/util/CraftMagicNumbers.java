@@ -1,12 +1,14 @@
 package org.bukkit.craftbukkit.util;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-
-import net.minecraft.nbt.NBTException;
-
+import org.bukkit.Achievement;
 import org.bukkit.Material;
+import org.bukkit.Statistic;
 import org.bukkit.UnsafeValues;
+import org.bukkit.craftbukkit.CraftStatistic;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.StringUtil;
@@ -95,7 +97,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
         {
             nmsStack.setTagCompound((net.minecraft.nbt.NBTTagCompound) net.minecraft.nbt.JsonToNBT.func_150315_a(arguments));
         }
-        catch (NBTException e)
+        catch (net.minecraft.nbt.NBTException e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -104,5 +106,27 @@ public final class CraftMagicNumbers implements UnsafeValues {
         stack.setItemMeta(CraftItemStack.getItemMeta(nmsStack));
 
         return stack;
+    }
+    @Override
+    public Statistic getStatisticFromInternalName(String name) {
+        return CraftStatistic.getBukkitStatisticByName(name);
+    }
+
+    @Override
+    public Achievement getAchievementFromInternalName(String name) {
+        return CraftStatistic.getBukkitAchievementByName(name);
+    }
+
+    @Override
+    public List<String> tabCompleteInternalStatisticOrAchievementName(String token, List<String> completions) {
+        List<String> matches = new ArrayList<String>();
+        Iterator iterator = net.minecraft.stats.StatList.allStats.iterator();
+        while (iterator.hasNext()) {
+            String statistic = ((net.minecraft.stats.StatBase) iterator.next()).statId;
+            if (statistic.startsWith(token)) {
+                matches.add(statistic);
+            }
+        }
+        return matches;
     }
 }
