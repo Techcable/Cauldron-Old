@@ -475,7 +475,6 @@ public class CraftWorld implements World {
                 int newId = blockstate.getTypeId();
                 int data = blockstate.getRawData();
                 int flag = ((CraftBlockState)blockstate).getFlag();
-                System.out.println("coords = " + x + ", " + y + ", " + z + " with id " + newId + " with meta " + data);
                 delegate.setTypeIdAndData(x, y, z, newId, data);
                 net.minecraft.block.Block newBlock = world.func_147439_a(x, y, z); 
                 world.markAndNotifyBlock(x, y, z, null, oldBlock, newBlock, flag);
