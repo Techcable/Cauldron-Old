@@ -54,7 +54,7 @@ public class CraftStatistic {
     private CraftStatistic() {}
 
     public static org.bukkit.Achievement getBukkitAchievement(net.minecraft.stats.Achievement achievement) {
-        return getBukkitAchievementByName(achievement.getDescription());
+        return getBukkitAchievementByName(achievement.statId);
     }
 
     public static org.bukkit.Achievement getBukkitAchievementByName(String name) {

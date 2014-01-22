@@ -8,18 +8,7 @@
      private static final String __OBFID = "CL_00000199";
  
      public static int func_149682_b(Block p_149682_0_)
-@@ -417,6 +418,10 @@
-         this.field_149787_q = this.func_149662_c();
-         this.field_149786_r = this.func_149662_c() ? 255 : 0;
-         this.field_149785_s = !p_i45394_1_.getCanBlockGrass();
-+        // MCPC+ start
-+        //org.bukkit.Material.addMaterial(CraftMagicNumbers.getId(this), true); // MCPC+ - many mods do not register blocks through GameRegistry so to be safe we need to add materials here
-+        this.isForgeBlock = (this.getClass().getName().length() > 3 && !this.getClass().getName().startsWith("net.minecraft.block")) ? true : false; // MCPC+
-+        // MCPC+ end
-     }
- 
-     public Block func_149672_a(Block.SoundType p_149672_1_)
-@@ -648,7 +653,7 @@
+@@ -648,7 +649,7 @@
  
      public void func_149690_a(World p_149690_1_, int p_149690_2_, int p_149690_3_, int p_149690_4_, int p_149690_5_, float p_149690_6_, int p_149690_7_)
      {
@@ -28,7 +17,7 @@
          {
              ArrayList<ItemStack> items = getDrops(p_149690_1_, p_149690_2_, p_149690_3_, p_149690_4_, p_149690_5_, p_149690_7_);
              p_149690_6_ = ForgeEventFactory.fireBlockHarvesting(items, p_149690_1_, this, p_149690_2_, p_149690_3_, p_149690_4_, p_149690_5_, p_149690_7_, p_149690_6_, false, harvesters.get());
-@@ -665,7 +670,7 @@
+@@ -665,7 +666,7 @@
  
      protected void func_149642_a(World p_149642_1_, int p_149642_2_, int p_149642_3_, int p_149642_4_, ItemStack p_149642_5_)
      {
@@ -37,7 +26,7 @@
          {
              float f = 0.7F;
              double d0 = (double)(p_149642_1_.rand.nextFloat() * f) + (double)(1.0F - f) * 0.5D;
-@@ -1123,6 +1128,30 @@
+@@ -1123,6 +1124,30 @@
          return this;
      }
  
