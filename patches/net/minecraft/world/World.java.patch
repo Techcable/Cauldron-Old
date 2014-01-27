@@ -978,7 +978,7 @@
 +            // Spigot end
 +            // CraftBukkit start - Don't tick entities in chunks queued for unload
 +            ChunkProviderServer chunkProviderServer = ((WorldServer) this).theChunkProviderServer;
-+            if (!isActiveBlockCoord(tileentity.field_145851_c, tileentity.field_145849_e)) continue; // MCPC+ don't tick inactive chunks
++            //if (!isActiveBlockCoord(tileentity.field_145851_c, tileentity.field_145849_e)) continue; // MCPC+ don't tick inactive chunks - disable temporarily
 +            if (chunkProviderServer.chunksToUnload.contains(tileentity.field_145851_c >> 4, tileentity.field_145849_e >> 4))
 +            {
 +                continue;

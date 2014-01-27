@@ -1,0 +1,15 @@
+--- ../src-base/minecraft/net/minecraft/tileentity/TileEntityFlowerPot.java
++++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityFlowerPot.java
+@@ -55,4 +55,12 @@
+     {
+         return this.field_145968_i;
+     }
++
++    // MCPC+ start
++    @Override
++    public boolean canUpdate()
++    {
++        return false;
++    }
++    // MCPC+ end
+ }
