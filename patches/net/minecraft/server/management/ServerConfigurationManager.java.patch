@@ -216,7 +216,7 @@
      }
  
      // JAVADOC METHOD $$ func_72358_d
-@@ -274,24 +385,55 @@
+@@ -274,24 +385,70 @@
      }
  
      // JAVADOC METHOD $$ func_72367_e
@@ -237,18 +237,24 @@
 +    {
 +        FMLCommonHandler.instance().firePlayerLoggedOut(entityplayermp);
 +        entityplayermp.triggerAchievement(StatList.leaveGameStat);
-+        // CraftBukkit start - Quitting must be before we do final save of data, in case plugins need to modify it
-+        org.bukkit.craftbukkit.event.CraftEventFactory.handleInventoryCloseEvent(entityplayermp);
-+        PlayerQuitEvent playerQuitEvent = new PlayerQuitEvent(entityplayermp.getBukkitEntity(), "\u00A7e" + entityplayermp.getCommandSenderName() + " left the game.");
-+        this.cserver.getPluginManager().callEvent(playerQuitEvent);
-+        entityplayermp.getBukkitEntity().disconnect(playerQuitEvent.getQuitMessage());
-+        // CraftBukkit end
++        // MCPC+ start - don't show quit messages for players that haven't actually connected
++        PlayerQuitEvent playerQuitEvent = null;
++        if (entityplayermp.playerNetServerHandler != null)
+         {
+-            worldserver.removePlayerEntityDangerously(par1EntityPlayerMP.ridingEntity);
++            // CraftBukkit start - Quitting must be before we do final save of data, in case plugins need to modify it
++            org.bukkit.craftbukkit.event.CraftEventFactory.handleInventoryCloseEvent(entityplayermp);
++            playerQuitEvent = new PlayerQuitEvent(entityplayermp.getBukkitEntity(), "\u00A7e" + entityplayermp.getCommandSenderName() + " left the game.");
++            this.cserver.getPluginManager().callEvent(playerQuitEvent);
++            entityplayermp.getBukkitEntity().disconnect(playerQuitEvent.getQuitMessage());
++            // CraftBukkit end
++        }
++        // MCPC+ end
 +        this.writePlayerData(entityplayermp);
 +        WorldServer worldserver = entityplayermp.getServerForPlayer();
 +
 +        if (entityplayermp.ridingEntity != null && !(entityplayermp.ridingEntity instanceof EntityPlayerMP))   // CraftBukkit - Don't remove players
-         {
--            worldserver.removePlayerEntityDangerously(par1EntityPlayerMP.ridingEntity);
++        {
 +            worldserver.removePlayerEntityDangerously(entityplayermp.ridingEntity);
              field_148546_d.debug("removing player mount");
          }
@@ -279,12 +285,21 @@
 +
 +        // This removes the scoreboard (and player reference) for the specific player in the manager
 +        this.cserver.getScoreboardManager().removePlayer(entityplayermp.getBukkitEntity());
-+        return playerQuitEvent.getQuitMessage();
++        // MCPC+ start
++        if (playerQuitEvent != null)
++        {
++            return playerQuitEvent.getQuitMessage();
++        }
++        else
++        {
++            return null;
++        }
++        // MCPC+ end
 +        // CraftBukkit end
      }
  
      public String func_148542_a(SocketAddress p_148542_1_, GameProfile p_148542_2_)
-@@ -337,6 +479,77 @@
+@@ -337,6 +494,77 @@
          }
      }
  
@@ -362,7 +377,7 @@
      public EntityPlayerMP func_148545_a(GameProfile p_148545_1_)
      {
          ArrayList arraylist = new ArrayList();
-@@ -373,27 +586,84 @@
+@@ -373,27 +601,84 @@
  
          return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
      }
@@ -452,7 +467,7 @@
          par1EntityPlayerMP.dimension = par2;
          Object object;
  
-@@ -407,51 +677,214 @@
+@@ -407,51 +692,214 @@
          }
  
          EntityPlayerMP entityplayermp1 = new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension), par1EntityPlayerMP.func_146103_bH(), (ItemInWorldManager)object);
@@ -684,7 +699,7 @@
      public void transferPlayerToDimension(EntityPlayerMP par1EntityPlayerMP, int par2)
      {
          transferPlayerToDimension(par1EntityPlayerMP, par2, mcServer.worldServerForDimension(par2).getDefaultTeleporter());
-@@ -485,7 +918,10 @@
+@@ -485,7 +933,10 @@
      // JAVADOC METHOD $$ func_82448_a
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer)
      {
@@ -696,7 +711,7 @@
      }
  
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer, Teleporter teleporter)
-@@ -571,6 +1007,192 @@
+@@ -571,6 +1022,192 @@
          par1Entity.setWorld(par4WorldServer);
      }
  
@@ -889,7 +904,7 @@
      // JAVADOC METHOD $$ func_72374_b
      public void sendPlayerInfoToAllPlayers()
      {
-@@ -579,11 +1201,36 @@
+@@ -579,11 +1216,36 @@
              this.playerPingIndex = 0;
          }
  
@@ -926,7 +941,7 @@
      }
  
      public void func_148540_a(Packet p_148540_1_)
-@@ -652,12 +1299,30 @@
+@@ -652,12 +1314,30 @@
      public void addOp(String par1Str)
      {
          this.ops.add(par1Str.toLowerCase());
@@ -957,7 +972,7 @@
      }
  
      // JAVADOC METHOD $$ func_72370_d
-@@ -833,8 +1498,16 @@
+@@ -833,8 +1513,16 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -975,7 +990,7 @@
              if (entityplayermp != p_148543_1_ && entityplayermp.dimension == p_148543_10_)
              {
                  double d4 = p_148543_2_ - entityplayermp.posX;
-@@ -891,9 +1564,12 @@
+@@ -891,9 +1579,12 @@
  
          if (par2WorldServer.isRaining())
          {
@@ -991,7 +1006,7 @@
          }
      }
  
-@@ -901,7 +1577,7 @@
+@@ -901,7 +1592,7 @@
      public void syncPlayerInventory(EntityPlayerMP par1EntityPlayerMP)
      {
          par1EntityPlayerMP.sendContainerToPlayer(par1EntityPlayerMP.inventoryContainer);
@@ -1000,7 +1015,7 @@
          par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S09PacketHeldItemChange(par1EntityPlayerMP.inventory.currentItem));
      }
  
-@@ -920,7 +1596,10 @@
+@@ -920,7 +1611,10 @@
      // JAVADOC METHOD $$ func_72373_m
      public String[] getAvailablePlayerDat()
      {
@@ -1012,7 +1027,7 @@
      }
  
      public void setWhiteListEnabled(boolean par1)
-@@ -993,12 +1672,31 @@
+@@ -993,12 +1687,31 @@
      // JAVADOC METHOD $$ func_72392_r
      public void removeAllPlayers()
      {

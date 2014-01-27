@@ -1,8 +1,8 @@
 --- ../src-base/minecraft/net/minecraft/entity/item/EntityXPOrb.java
 +++ ../src-work/minecraft/net/minecraft/entity/item/EntityXPOrb.java
-@@ -10,6 +10,11 @@
- import net.minecraft.util.MathHelper;
- import net.minecraft.world.World;
+@@ -12,6 +12,11 @@
+ import net.minecraftforge.common.MinecraftForge;
+ import net.minecraftforge.event.entity.player.PlayerPickupXpEvent;
  
 +// CraftBukkit start
 +import org.bukkit.craftbukkit.event.CraftEventFactory;
@@ -12,7 +12,7 @@
  public class EntityXPOrb extends Entity
  {
      // JAVADOC FIELD $$ field_70533_a
-@@ -20,7 +25,7 @@
+@@ -22,7 +27,7 @@
      // JAVADOC FIELD $$ field_70529_d
      private int xpOrbHealth = 5;
      // JAVADOC FIELD $$ field_70530_e
@@ -21,7 +21,7 @@
      // JAVADOC FIELD $$ field_80001_f
      private EntityPlayer closestPlayer;
      // JAVADOC FIELD $$ field_80002_g
-@@ -121,18 +126,27 @@
+@@ -123,18 +128,27 @@
  
          if (this.closestPlayer != null)
          {
@@ -59,7 +59,7 @@
              }
          }
  
-@@ -221,7 +235,7 @@
+@@ -224,7 +238,7 @@
                  par1EntityPlayer.xpCooldown = 2;
                  this.worldObj.playSoundAtEntity(par1EntityPlayer, "random.orb", 0.1F, 0.5F * ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.8F));
                  par1EntityPlayer.onItemPickup(this, 1);
@@ -68,7 +68,7 @@
                  this.setDead();
              }
          }
-@@ -243,6 +257,88 @@
+@@ -246,6 +260,88 @@
      // JAVADOC METHOD $$ func_70527_a
      public static int getXPSplit(int par0)
      {
