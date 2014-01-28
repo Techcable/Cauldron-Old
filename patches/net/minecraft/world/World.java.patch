@@ -563,7 +563,7 @@
 +    // MCPC+ start - Split off from original setBlock(int par1, int par2, int par3, int par4, int par5, int par6) method in order to directly send client and physic updates
 +    public void markAndNotifyBlock(int x, int y, int z, Chunk chunk, Block oldBlock, Block newBlock, int flag)
 +    {
-+        if ((flag & 2) != 0 && chunk != null && chunk.func_150802_k())
++        if ((flag & 2) != 0 /*&& chunk != null && chunk.func_150802_k()*/) // MCPC+ - fix blocks not showing up to players during place
 +        {
 +            this.func_147471_g(x, y, z);
 +        }
