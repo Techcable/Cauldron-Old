@@ -67,7 +67,7 @@
 +            }
 +            // MCPC+ end
 +            // CraftBukkit start - Construct a dummy repair recipe
-+            ItemStack result = new ItemStack(itemstack.getItem(), k, i1);
++            ItemStack result = new ItemStack(itemstack.getItem(), 1, j1);
 +            List<ItemStack> ingredients = new ArrayList<ItemStack>();
 +            ingredients.add(itemstack.copy());
 +            ingredients.add(itemstack1.copy());
@@ -79,9 +79,12 @@
          }
          else
          {
-@@ -326,10 +366,21 @@
+@@ -324,12 +364,23 @@
+             {
+                 IRecipe irecipe = (IRecipe)this.recipes.get(j);
  
-                 if (irecipe.matches(par1InventoryCrafting, par2World))
+-                if (irecipe.matches(par1InventoryCrafting, par2World))
++                if (irecipe.matches(par1InventoryCrafting, par2World) && par1InventoryCrafting.resultInventory != null) // MCPC+ - add null check for vanilla compatibility
                  {
 +                    // CraftBukkit start - INVENTORY_PRE_CRAFT event
 +                    par1InventoryCrafting.currentRecipe = irecipe;
