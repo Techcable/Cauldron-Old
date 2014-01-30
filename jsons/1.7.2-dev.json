@@ -125,6 +125,14 @@
       "url" : "http://repo.maven.apache.org/maven2"
     },
     {
+      "name": "org.xerial:sqlite-jdbc:3.7.2",
+      "url" : "http://repo.maven.apache.org/maven2"
+    },
+    {
+      "name": "mysql:mysql-connector-java:5.1.14",
+      "url" : "http://repo.maven.apache.org/maven2"
+    },
+    {
       "name": "org.lwjgl.lwjgl:lwjgl:2.9.0",
       "rules": [
         {

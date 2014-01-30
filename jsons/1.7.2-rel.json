@@ -147,6 +147,16 @@
       "serverreq":true
     },
     {
+      "name": "org.xerial:sqlite-jdbc:3.7.2",
+      "url" : "http://repo.maven.apache.org/maven2",
+      "serverreq":true
+    },
+    {
+      "name": "mysql:mysql-connector-java:5.1.14",
+      "url" : "http://repo.maven.apache.org/maven2",
+      "serverreq":true
+    },
+    {
       "name": "org.lwjgl.lwjgl:lwjgl:2.9.0",
       "rules": [
         {
