@@ -34,16 +34,15 @@
      // JAVADOC FIELD $$ field_82843_f
 -    private EntityItemFrame itemFrame;
 +    private transient EntityItemFrame itemFrame;
-+    public static String currentPlayerName = ""; // MCPC+
++    public static EntityPlayer currentPlayer; // MCPC+ - reference to current player calling onItemUse
      private static final String __OBFID = "CL_00000043";
  
      public ItemStack(Block par1Block)
-@@ -131,12 +145,83 @@
+@@ -131,12 +145,82 @@
  
      public boolean tryPlaceItemIntoWorld(EntityPlayer par1EntityPlayer, World par2World, int par3, int par4, int par5, int par6, float par7, float par8, float par9)
      {
 +        // MCPC+ start - handle all placement events here
-+        currentPlayerName = par1EntityPlayer.getCommandSenderName();
 +        int meta = this.getItemDamage();
 +        int size = this.stackSize;
 +        NBTTagCompound nbt = null;
@@ -56,10 +55,10 @@
 +        {
 +            par2World.captureBlockStates = true;
 +        }
-+
++        currentPlayer = par1EntityPlayer;
          boolean flag = this.getItem().onItemUse(this, par1EntityPlayer, par2World, par3, par4, par5, par6, par7, par8, par9);
 +        par2World.captureBlockStates = false;
-+        currentPlayerName = "";
++        currentPlayer = null;
  
          if (flag)
          {
@@ -123,7 +122,7 @@
  
          return flag;
      }
-@@ -244,8 +329,22 @@
+@@ -244,8 +328,22 @@
      }
  
      // JAVADOC METHOD $$ func_96631_a
@@ -146,7 +145,7 @@
          if (!this.isItemStackDamageable())
          {
              return false;
-@@ -267,6 +366,22 @@
+@@ -267,6 +365,22 @@
  
                  par1 -= k;
  
@@ -169,7 +168,7 @@
                  if (par1 <= 0)
                  {
                      return false;
-@@ -306,6 +421,13 @@
+@@ -306,6 +420,13 @@
                          this.stackSize = 0;
                      }
  
@@ -183,7 +182,7 @@
                      this.itemDamage = 0;
                  }
              }
-@@ -448,6 +570,7 @@
+@@ -448,6 +569,7 @@
      // JAVADOC METHOD $$ func_77982_d
      public void setTagCompound(NBTTagCompound par1NBTTagCompound)
      {
