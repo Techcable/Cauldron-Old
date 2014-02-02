@@ -98,7 +98,7 @@
 +        }
 +
 +        // MCPC+ - send DimensionRegisterMessage to client before attempting to login to a Bukkit dimension
-+        if (DimensionManager.isBukkitDimension( par2EntityPlayerMP.dimension))
++        if (DimensionManager.isBukkitDimension(par2EntityPlayerMP.dimension))
 +        {
 +            FMLEmbeddedChannel serverChannel = ForgeNetworkHandler.getServerChannel();
 +            serverChannel.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.PLAYER);

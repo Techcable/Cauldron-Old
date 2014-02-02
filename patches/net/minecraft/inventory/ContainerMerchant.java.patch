@@ -32,3 +32,11 @@
      public ContainerMerchant(InventoryPlayer par1InventoryPlayer, IMerchant par2IMerchant, World par3World)
      {
          this.theMerchant = par2IMerchant;
+@@ -25,6 +43,7 @@
+         this.addSlotToContainer(new Slot(this.merchantInventory, 0, 36, 53));
+         this.addSlotToContainer(new Slot(this.merchantInventory, 1, 62, 53));
+         this.addSlotToContainer(new SlotMerchantResult(par1InventoryPlayer.player, par2IMerchant, this.merchantInventory, 2, 120, 53));
++        this.player = par1InventoryPlayer; // CraftBukkit - save player
+         int i;
+ 
+         for (i = 0; i < 3; ++i)

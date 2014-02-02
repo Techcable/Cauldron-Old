@@ -254,7 +254,58 @@
              return false;
          }
          else
-@@ -366,12 +499,34 @@
+@@ -310,30 +443,32 @@
+         super.func_147456_g();
+         int i = 0;
+         int j = 0;
+-        Iterator iterator = this.activeChunkSet.iterator();
++        // Iterator iterator = this.activeChunkSet.iterator();
+ 
+-        doneChunks.retainAll(activeChunkSet);
+-        if (doneChunks.size() == activeChunkSet.size())
++        // Spigot start
++        for (gnu.trove.iterator.TLongShortIterator iter = activeChunkSet_CB.iterator(); iter.hasNext();)
+         {
+-            doneChunks.clear();
+-        }
++            iter.advance();
++            long chunkCoord = iter.key();
++            int chunkX = World.keyToX(chunkCoord);
++            int chunkZ = World.keyToZ(chunkCoord);
++            // If unloaded, or in process of being unloaded, drop it
++            if ((!this.chunkExists(chunkX, chunkZ)) || (this.theChunkProviderServer.chunksToUnload.contains(chunkX, chunkZ)))
++            {
++                activeChunkSet.remove(new ChunkCoordIntPair(chunkX, chunkZ)); // MCPC+ - vanilla compatibility
++                iter.remove();
++                continue;
++            }
++            // Spigot end
++            // ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) iterator.next();
++            int k = chunkX * 16;
++            int l = chunkZ * 16;
+ 
+-        final long startTime = System.nanoTime();
+-
+-        while (iterator.hasNext())
+-        {
+-            ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair)iterator.next();
+-            int k = chunkcoordintpair.chunkXPos * 16;
+-            int l = chunkcoordintpair.chunkZPos * 16;
+             this.theProfiler.startSection("getChunk");
+-            Chunk chunk = this.getChunkFromChunkCoords(chunkcoordintpair.chunkXPos, chunkcoordintpair.chunkZPos);
++            Chunk chunk = this.getChunkFromChunkCoords(chunkX, chunkZ);
+             this.func_147467_a(k, l, chunk);
+             this.theProfiler.endStartSection("tickChunk");
+-            //Limits and evenly distributes the lighting update time
+-            if (System.nanoTime() - startTime <= 4000000 && doneChunks.add(chunkcoordintpair))
+-            {
+-                chunk.func_150804_b(false);
+-            }
++            chunk.func_150804_b(false);
+             this.theProfiler.endStartSection("thunder");
+             int i1;
+             int j1;
+@@ -366,12 +501,34 @@
  
                  if (this.isBlockFreezableNaturally(j1 + k, l1 - 1, k1 + l))
                  {
@@ -291,7 +342,7 @@
                  }
  
                  if (this.isRaining())
-@@ -395,20 +550,20 @@
+@@ -395,20 +552,21 @@
  
                  if (extendedblockstorage != null && extendedblockstorage.getNeedsRandomTick())
                  {
@@ -315,11 +366,28 @@
                          {
                              ++i;
 -                            block.func_149674_a(this, j2 + k, l2 + extendedblockstorage.getYLocation(), k2 + l, this.rand);
++                            this.growthOdds = (iter.value() < 1) ? this.modifiedOdds : 100; // Spigot - grow fast if no players are in this chunk (value = player count)
 +                            block.func_149674_a(this, k2 + k, i3 + extendedblockstorage.getYLocation(), l2 + l, this.rand);
                          }
                      }
                  }
-@@ -495,7 +650,7 @@
+@@ -416,6 +574,15 @@
+ 
+             this.theProfiler.endSection();
+         }
++
++        // Spigot Start
++        if (spigotConfig.clearChunksOnTick)
++        {
++            activeChunkSet_CB.clear();
++            activeChunkSet.clear(); // MCPC+
++        }
++
++        // Spigot End
+     }
+ 
+     public boolean func_147477_a(int p_147477_1_, int p_147477_2_, int p_147477_3_, Block p_147477_4_)
+@@ -495,7 +662,7 @@
      // JAVADOC METHOD $$ func_72939_s
      public void updateEntities()
      {
@@ -328,7 +396,7 @@
          {
              if (this.updateEntityTick++ >= 1200)
              {
-@@ -529,7 +684,17 @@
+@@ -529,7 +696,17 @@
          {
              if (i > 1000)
              {
@@ -347,7 +415,7 @@
              }
  
              this.theProfiler.startSection("cleaning");
-@@ -676,7 +841,36 @@
+@@ -676,7 +853,36 @@
      protected IChunkProvider createChunkProvider()
      {
          IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
@@ -385,7 +453,7 @@
          return this.theChunkProviderServer;
      }
  
-@@ -684,29 +878,31 @@
+@@ -684,29 +890,31 @@
      {
          ArrayList arraylist = new ArrayList();
  
@@ -431,7 +499,7 @@
          return arraylist;
      }
  
-@@ -760,6 +956,29 @@
+@@ -760,6 +968,29 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 0;
  
@@ -461,7 +529,7 @@
              if (chunkposition != null)
              {
                  i = chunkposition.field_151329_a;
-@@ -841,7 +1060,7 @@
+@@ -841,7 +1072,7 @@
      }
  
      // JAVADOC METHOD $$ func_104140_m
@@ -470,7 +538,7 @@
      {
          if (this.chunkProvider.canSave())
          {
-@@ -897,6 +1116,20 @@
+@@ -897,6 +1128,20 @@
      // JAVADOC METHOD $$ func_72942_c
      public boolean addWeatherEffect(Entity par1Entity)
      {
@@ -491,7 +559,7 @@
          if (super.addWeatherEffect(par1Entity))
          {
              this.mcServer.getConfigurationManager().func_148541_a(par1Entity.posX, par1Entity.posY, par1Entity.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(par1Entity));
-@@ -917,11 +1150,22 @@
+@@ -917,11 +1162,22 @@
      // JAVADOC METHOD $$ func_72885_a
      public Explosion newExplosion(Entity par1Entity, double par2, double par4, double par6, float par8, boolean par9, boolean par10)
      {
@@ -514,7 +582,7 @@
  
          if (!par10)
          {
-@@ -1002,6 +1246,7 @@
+@@ -1002,6 +1258,7 @@
          boolean flag = this.isRaining();
          super.updateWeather();
  
@@ -522,7 +590,7 @@
          if (this.prevRainingStrength != this.rainingStrength)
          {
              this.mcServer.getConfigurationManager().func_148537_a(new S2BPacketChangeGameState(7, this.rainingStrength), this.provider.dimensionId);
-@@ -1026,6 +1271,20 @@
+@@ -1026,6 +1283,20 @@
              this.mcServer.getConfigurationManager().func_148540_a(new S2BPacketChangeGameState(7, this.rainingStrength));
              this.mcServer.getConfigurationManager().func_148540_a(new S2BPacketChangeGameState(8, this.thunderingStrength));
          }
@@ -543,7 +611,7 @@
      }
  
      // JAVADOC METHOD $$ func_73046_m
-@@ -1070,20 +1329,48 @@
+@@ -1070,20 +1341,48 @@
          }
      }
  

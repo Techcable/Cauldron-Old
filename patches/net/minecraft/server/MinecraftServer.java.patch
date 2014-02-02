@@ -570,7 +570,7 @@
          ++this.tickCounter;
  
          if (this.startProfiling)
-@@ -583,11 +811,23 @@
+@@ -583,11 +811,18 @@
              this.field_147147_p.func_151318_b().func_151330_a(agameprofile);
          }
  
@@ -580,23 +580,18 @@
              this.theProfiler.startSection("save");
              this.serverConfigManager.saveAllPlayerData();
 -            this.saveAllWorlds(true);
-+            // Spigot Start
-+            // We replace this with saving each individual world as this.saveChunks(...) is broken,
-+            // and causes the main thread to sleep for random amounts of time depending on chunk activity
-+            server.playerCommandState = true;
-+
-+            for (World world : worlds)
++            try
 +            {
-+                world.getWorld().save();
++                this.saveAllWorlds(true);
 +            }
-+
-+            server.playerCommandState = false;
-+            // this.saveChunks(true);
-+            // Spigot End
++            catch (MinecraftException e)
++            {
++                e.printStackTrace();
++            }
              this.theProfiler.endSection();
          }
  
-@@ -596,24 +836,51 @@
+@@ -596,24 +831,51 @@
          this.theProfiler.endSection();
          this.theProfiler.startSection("snooper");
  
@@ -650,7 +645,7 @@
          int i;
  
          Integer[] ids = DimensionManager.getIDs(this.tickCounter % 200 == 0);
-@@ -622,20 +889,21 @@
+@@ -622,20 +884,21 @@
              int id = ids[x];
              long j = System.nanoTime();
  
@@ -675,7 +670,7 @@
  
                  this.theProfiler.startSection("tick");
                  FMLCommonHandler.instance().onPreWorldTick(worldserver);
-@@ -647,7 +915,17 @@
+@@ -647,7 +910,17 @@
                  }
                  catch (Throwable throwable1)
                  {
@@ -694,7 +689,7 @@
                      worldserver.addWorldInfoToCrashReport(crashreport);
                      throw new ReportedException(crashreport);
                  }
-@@ -658,7 +936,17 @@
+@@ -658,7 +931,17 @@
                  }
                  catch (Throwable throwable)
                  {
@@ -713,7 +708,7 @@
                      worldserver.addWorldInfoToCrashReport(crashreport);
                      throw new ReportedException(crashreport);
                  }
-@@ -666,10 +954,12 @@
+@@ -666,10 +949,12 @@
                  FMLCommonHandler.instance().onPostWorldTick(worldserver);
                  this.theProfiler.endSection();
                  this.theProfiler.startSection("tracker");
@@ -727,7 +722,7 @@
  
              worldTickTimes.get(id)[this.tickCounter % 100] = System.nanoTime() - j;
          }
-@@ -677,16 +967,22 @@
+@@ -677,16 +962,22 @@
          this.theProfiler.endStartSection("dim_unloading");
          DimensionManager.unloadWorlds(worldTickTimes);
          this.theProfiler.endStartSection("connection");
@@ -750,7 +745,7 @@
          this.theProfiler.endSection();
      }
  
-@@ -722,6 +1018,13 @@
+@@ -722,6 +1013,13 @@
      // JAVADOC METHOD $$ func_71218_a
      public WorldServer worldServerForDimension(int par1)
      {
@@ -764,7 +759,7 @@
          WorldServer ret = DimensionManager.getWorld(par1);
          if (ret == null)
          {
-@@ -808,7 +1111,7 @@
+@@ -808,7 +1106,7 @@
      // JAVADOC METHOD $$ func_71248_a
      public List getPossibleCompletions(ICommandSender par1ICommandSender, String par2Str)
      {
@@ -773,7 +768,7 @@
  
          if (par2Str.startsWith("/"))
          {
-@@ -834,8 +1137,6 @@
+@@ -834,8 +1132,6 @@
                      }
                  }
              }
@@ -782,7 +777,7 @@
          }
          else
          {
-@@ -853,9 +1154,10 @@
+@@ -853,9 +1149,10 @@
                      arraylist.add(s2);
                  }
              }
@@ -795,7 +790,7 @@
      }
  
      // JAVADOC METHOD $$ func_71276_C
-@@ -1069,7 +1371,7 @@
+@@ -1069,7 +1366,7 @@
  
      public boolean isServerInOnlineMode()
      {
@@ -804,7 +799,7 @@
      }
  
      public void setOnlineMode(boolean par1)
-@@ -1161,7 +1463,7 @@
+@@ -1161,7 +1458,7 @@
  
      public NetworkSystem func_147137_ag()
      {
@@ -813,7 +808,7 @@
      }
  
      @SideOnly(Side.CLIENT)
-@@ -1292,8 +1594,11 @@
+@@ -1292,8 +1589,11 @@
      {
          Bootstrap.func_151354_b();
  
@@ -825,7 +820,7 @@
              boolean flag = !GraphicsEnvironment.isHeadless();
              String s = null;
              String s1 = ".";
-@@ -1389,16 +1694,32 @@
+@@ -1389,16 +1689,32 @@
              {
                  dedicatedserver.func_120011_ar();
              }
@@ -864,7 +859,7 @@
          }
          catch (Exception exception)
          {
-@@ -1406,6 +1727,156 @@
+@@ -1406,6 +1722,156 @@
          }
      }
  
@@ -1021,7 +1016,7 @@
      // JAVADOC METHOD $$ func_71244_g
      @SideOnly(Side.SERVER)
      public void logInfo(String par1Str)
-@@ -1434,19 +1905,77 @@
+@@ -1434,19 +1900,77 @@
          return this.motd;
      }
  
@@ -1105,7 +1100,7 @@
      }
  
      // JAVADOC METHOD $$ func_71239_B
-@@ -1502,4 +2031,11 @@
+@@ -1502,4 +2026,11 @@
      {
          this.isGamemodeForced = par1;
      }
