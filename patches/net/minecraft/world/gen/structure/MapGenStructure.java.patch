@@ -1,0 +1,21 @@
+--- ../src-base/minecraft/net/minecraft/world/gen/structure/MapGenStructure.java
++++ ../src-work/minecraft/net/minecraft/world/gen/structure/MapGenStructure.java
+@@ -243,8 +243,17 @@
+     {
+         if (this.field_143029_e == null)
+         {
+-            this.field_143029_e = (MapGenStructureData)par1World.perWorldStorage.loadData(MapGenStructureData.class, this.func_143025_a());
++            // Spigot Start
++            if (par1World.spigotConfig.saveStructureInfo && !this.func_143025_a().equals("Mineshaft"))
++            {
++                this.field_143029_e = (MapGenStructureData) par1World.loadItemData(MapGenStructureData.class, this.func_143025_a());
++            }
++            else
++            {
++                this.field_143029_e = new MapGenStructureData(this.func_143025_a());
++            }
+ 
++            // Spigot End
+             if (this.field_143029_e == null)
+             {
+                 this.field_143029_e = new MapGenStructureData(this.func_143025_a());
