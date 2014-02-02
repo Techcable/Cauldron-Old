@@ -143,7 +143,7 @@
 +            this.setPosition(position.posX + 0.5, position.posY, position.posZ + 0.5);
 +        }
 +
-+        this.dimension = ((WorldServer) this.worldObj).dimension;
++        this.dimension = ((WorldServer) this.worldObj).provider.dimensionId;
 +        this.theItemInWorldManager.setWorld((WorldServer) world);
 +    }
 +    // CraftBukkit end
@@ -693,11 +693,12 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -803,6 +1125,14 @@
+@@ -803,6 +1125,15 @@
      {
          this.playerNetServerHandler.func_147359_a(new S30PacketWindowItems(par1Container.windowId, par2List));
          this.playerNetServerHandler.func_147359_a(new S2FPacketSetSlot(-1, -1, this.inventory.getItemStack()));
 +
++        if (par1Container.getBukkitView() == null) return; // MCPC+ - allow vanilla mods to bypass
 +        // CraftBukkit start - Send a Set Slot to update the crafting result slot
 +        if (java.util.EnumSet.of(InventoryType.CRAFTING, InventoryType.WORKBENCH).contains(par1Container.getBukkitView().getType()))
 +        {
@@ -708,7 +709,7 @@
      }
  
      // JAVADOC METHOD $$ func_71112_a
-@@ -814,6 +1144,7 @@
+@@ -814,6 +1145,7 @@
      // JAVADOC METHOD $$ func_71053_j
      public void closeScreen()
      {
@@ -716,7 +717,7 @@
          this.playerNetServerHandler.func_147359_a(new S2EPacketCloseWindow(this.openContainer.windowId));
          this.closeContainer();
      }
-@@ -891,6 +1222,7 @@
+@@ -891,6 +1223,7 @@
      public void setPlayerHealthUpdated()
      {
          this.lastHealth = -1.0E8F;
@@ -724,7 +725,7 @@
      }
  
      public void func_146105_b(IChatComponent p_146105_1_)
-@@ -982,6 +1314,16 @@
+@@ -982,6 +1315,16 @@
          this.playerNetServerHandler.func_147359_a(new S2BPacketChangeGameState(3, (float)par1EnumGameType.getID()));
      }
  
@@ -741,7 +742,7 @@
      public void func_145747_a(IChatComponent p_145747_1_)
      {
          this.playerNetServerHandler.func_147359_a(new S02PacketChat(p_145747_1_));
-@@ -1049,6 +1391,114 @@
+@@ -1049,6 +1392,114 @@
          return this.field_147103_bO;
      }
  

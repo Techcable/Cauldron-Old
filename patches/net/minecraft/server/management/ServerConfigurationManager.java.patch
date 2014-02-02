@@ -456,9 +456,8 @@
          this.playerEntityList.remove(par1EntityPlayerMP);
          this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension).removePlayerEntityDangerously(par1EntityPlayerMP);
 -        ChunkCoordinates chunkcoordinates = par1EntityPlayerMP.getBedLocation(par2);
--        boolean flag1 = par1EntityPlayerMP.isSpawnForced(par2);
 +        ChunkCoordinates chunkcoordinates = par1EntityPlayerMP.getBedLocation();
-+        boolean flag1 = par1EntityPlayerMP.isSpawnForced();
+         boolean flag1 = par1EntityPlayerMP.isSpawnForced(par2);
 +        // MCPC+ start
 +        if (!canRespawnHere)
 +            par1EntityPlayerMP.dimension = par2;
