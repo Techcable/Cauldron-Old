@@ -12,6 +12,15 @@
  public class BlockPortal extends BlockBreakable
  {
      public static final int[][] field_150001_a = new int[][] {new int[0], {3, 1}, {2, 0}};
+@@ -29,7 +34,7 @@
+     {
+         super.func_149674_a(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, p_149674_5_);
+ 
+-        if (p_149674_1_.provider.isSurfaceWorld() && p_149674_1_.getGameRules().getGameRuleBooleanValue("doMobSpawning") && p_149674_5_.nextInt(2000) < p_149674_1_.difficultySetting.func_151525_a())
++        if (p_149674_1_.spigotConfig.enableZombiePigmenPortalSpawns && p_149674_1_.provider.isSurfaceWorld() && p_149674_1_.getGameRules().getGameRuleBooleanValue("doMobSpawning") && p_149674_5_.nextInt(2000) < p_149674_1_.difficultySetting.func_151525_a())   // Spigot
+         {
+             int l;
+ 
 @@ -104,13 +109,15 @@
  
          if (size.func_150860_b() && size.field_150864_e == 0)

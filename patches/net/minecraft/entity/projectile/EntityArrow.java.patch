@@ -1,11 +1,12 @@
 --- ../src-base/minecraft/net/minecraft/entity/projectile/EntityArrow.java
 +++ ../src-work/minecraft/net/minecraft/entity/projectile/EntityArrow.java
-@@ -23,6 +23,12 @@
+@@ -23,6 +23,13 @@
  import net.minecraft.util.Vec3;
  import net.minecraft.world.World;
  
 +// CraftBukkit start
 +import net.minecraft.entity.item.EntityItem;
++import org.bukkit.entity.LivingEntity;
 +import org.bukkit.event.entity.EntityCombustByEntityEvent;
 +import org.bukkit.event.player.PlayerPickupItemEvent;
 +// CraftBukkit end
@@ -13,7 +14,7 @@
  public class EntityArrow extends Entity implements IProjectile
  {
      private int field_145791_d = -1;
-@@ -30,7 +36,7 @@
+@@ -30,7 +37,7 @@
      private int field_145789_f = -1;
      private Block field_145790_g;
      private int inData;
@@ -22,7 +23,32 @@
      // JAVADOC FIELD $$ field_70251_a
      public int canBePickedUp;
      // JAVADOC FIELD $$ field_70249_b
-@@ -207,7 +213,7 @@
+@@ -41,7 +48,7 @@
+     private int ticksInAir;
+     private double damage = 2.0D;
+     // JAVADOC FIELD $$ field_70256_ap
+-    private int knockbackStrength;
++    public int knockbackStrength; // CraftBukkit - private -> public
+     private static final String __OBFID = "CL_00001715";
+ 
+     public EntityArrow(World par1World)
+@@ -65,6 +72,7 @@
+         super(par1World);
+         this.renderDistanceWeight = 10.0D;
+         this.shootingEntity = par2EntityLivingBase;
++        this.projectileSource = (LivingEntity) par2EntityLivingBase.getBukkitEntity(); // CraftBukkit
+ 
+         if (par2EntityLivingBase instanceof EntityPlayer)
+         {
+@@ -95,6 +103,7 @@
+         super(par1World);
+         this.renderDistanceWeight = 10.0D;
+         this.shootingEntity = par2EntityLivingBase;
++        this.projectileSource = (LivingEntity) par2EntityLivingBase.getBukkitEntity(); // CraftBukkit
+ 
+         if (par2EntityLivingBase instanceof EntityPlayer)
+         {
+@@ -207,7 +216,7 @@
              {
                  ++this.ticksInGround;
  
@@ -31,7 +57,7 @@
                  {
                      this.setDead();
                  }
-@@ -254,7 +260,7 @@
+@@ -254,7 +263,7 @@
  
                      if (movingobjectposition1 != null)
                      {
@@ -40,7 +66,7 @@
  
                          if (d1 < d0 || d0 == 0.0D)
                          {
-@@ -285,6 +291,8 @@
+@@ -285,6 +294,8 @@
  
              if (movingobjectposition != null)
              {
@@ -49,7 +75,7 @@
                  if (movingobjectposition.entityHit != null)
                  {
                      f2 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-@@ -306,13 +314,23 @@
+@@ -306,13 +317,23 @@
                          damagesource = DamageSource.causeArrowDamage(this, this.shootingEntity);
                      }
  
@@ -78,7 +104,16 @@
                          if (movingobjectposition.entityHit instanceof EntityLivingBase)
                          {
                              EntityLivingBase entitylivingbase = (EntityLivingBase)movingobjectposition.entityHit;
-@@ -498,6 +516,23 @@
+@@ -366,7 +387,7 @@
+                     this.field_145791_d = movingobjectposition.blockX;
+                     this.field_145792_e = movingobjectposition.blockY;
+                     this.field_145789_f = movingobjectposition.blockZ;
+-                    this.field_145790_g = block;
++                    this.field_145790_g = this.worldObj.func_147439_a(field_145791_d, field_145792_e, field_145789_f); // CraftBukkit - Get correct block for storage
+                     this.inData = this.worldObj.getBlockMetadata(this.field_145791_d, this.field_145792_e, this.field_145789_f);
+                     this.motionX = (double)((float)(movingobjectposition.hitVec.xCoord - this.posX));
+                     this.motionY = (double)((float)(movingobjectposition.hitVec.yCoord - this.posY));
+@@ -498,6 +519,23 @@
      {
          if (!this.worldObj.isRemote && this.inGround && this.arrowShake <= 0)
          {
@@ -102,7 +137,7 @@
              boolean flag = this.canBePickedUp == 1 || this.canBePickedUp == 2 && par1EntityPlayer.capabilities.isCreativeMode;
  
              if (this.canBePickedUp == 1 && !par1EntityPlayer.inventory.addItemStackToInventory(new ItemStack(Items.arrow, 1)))
-@@ -569,4 +604,11 @@
+@@ -569,4 +607,11 @@
          byte b0 = this.dataWatcher.getWatchableObjectByte(16);
          return (b0 & 1) != 0;
      }

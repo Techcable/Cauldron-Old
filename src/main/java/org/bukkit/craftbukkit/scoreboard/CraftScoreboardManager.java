@@ -32,6 +32,7 @@ public final class CraftScoreboardManager implements ScoreboardManager {
     }
 
     public CraftScoreboard getNewScoreboard() {
+        if (Thread.currentThread() != net.minecraft.server.MinecraftServer.getServer().primaryThread) throw new IllegalStateException("Asynchronous scoreboard creation"); // Spigot
         CraftScoreboard scoreboard = new CraftScoreboard(new net.minecraft.scoreboard.ServerScoreboard(server));
         scoreboards.add(scoreboard);
         return scoreboard;

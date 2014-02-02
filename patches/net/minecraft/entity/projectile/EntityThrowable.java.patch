@@ -11,7 +11,15 @@
      private int ticksInGround;
      private int ticksInAir;
      private static final String __OBFID = "CL_00001723";
-@@ -192,7 +192,7 @@
+@@ -52,6 +52,7 @@
+     {
+         super(par1World);
+         this.thrower = par2EntityLivingBase;
++        this.projectileSource = (org.bukkit.entity.LivingEntity) par2EntityLivingBase.getBukkitEntity(); // CraftBukkit
+         this.setSize(0.25F, 0.25F);
+         this.setLocationAndAngles(par2EntityLivingBase.posX, par2EntityLivingBase.posY + (double)par2EntityLivingBase.getEyeHeight(), par2EntityLivingBase.posZ, par2EntityLivingBase.rotationYaw, par2EntityLivingBase.rotationPitch);
+         this.posX -= (double)(MathHelper.cos(this.rotationYaw / 180.0F * (float)Math.PI) * 0.16F);
+@@ -192,7 +193,7 @@
  
                      if (movingobjectposition1 != null)
                      {
@@ -20,7 +28,7 @@
  
                          if (d1 < d0 || d0 == 0.0D)
                          {
-@@ -218,6 +218,14 @@
+@@ -218,6 +219,14 @@
              else
              {
                  this.onImpact(movingobjectposition);

@@ -96,12 +96,12 @@
 +    // Spigot start
 +    private static final int TPS = 20;
 +    private static final int TICK_TIME = 1000000000 / TPS;
-+    public static double currentTPS = 0;
-+    private static long catchupTime = 0;
++    public final double[] recentTps = new double[ 3 ];
 +    // Spigot end
 +    // MCPC+ start
 +    public static YamlConfiguration configuration;
 +    public static File configFile;
++    public static double currentTps = 0;
 +    public static boolean useJline = true;
 +    public static boolean useConsole = true;
 +    public static boolean callingForgeTick = false;
@@ -433,24 +433,39 @@
  
              for (int i = 0; i < this.worldServers.length; ++i)
              {
-@@ -412,50 +615,34 @@
-             if (this.startServer())
+@@ -405,6 +608,13 @@
+         this.serverRunning = false;
+     }
+ 
++    // Spigot Start
++    private static double calcTps(double avg, double exp, double tps)
++    {
++        return (avg * exp) + (tps * (1 - exp));
++    }
++    // Spigot End
++
+     public void run()
+     {
+         try
+@@ -413,49 +623,46 @@
              {
                  FMLCommonHandler.instance().handleServerStarted();
--                long i = getSystemTimeMillis();
+                 long i = getSystemTimeMillis();
 -                long l = 0L;
--                this.field_147147_p.func_151315_a(new ChatComponentText(this.motd));
--                this.field_147147_p.func_151321_a(new ServerStatusResponse.MinecraftProtocolVersionIdentifier("1.7.2", 4));
--                this.func_147138_a(this.field_147147_p);
--
--                while (this.serverRunning)
++                long j = 0L;
+                 this.field_147147_p.func_151315_a(new ChatComponentText(this.motd));
+                 this.field_147147_p.func_151321_a(new ServerStatusResponse.MinecraftProtocolVersionIdentifier("1.7.2", 4));
+                 this.func_147138_a(this.field_147147_p);
 +                // Spigot start
-+                for (long lastTick = 0L; this.serverRunning;)
++                Arrays.fill(recentTps, 20);
++                long lastTick = 0, catchupTime = 0, curTime, wait;
+ 
+                 while (this.serverRunning)
                  {
 -                    long j = getSystemTimeMillis();
 -                    long k = j - i;
-+                    long curTime = System.nanoTime();
-+                    long wait = TICK_TIME - (curTime - lastTick) - catchupTime;
++                    curTime = System.nanoTime();
++                    wait = TICK_TIME - (curTime - lastTick) - catchupTime;
  
 -                    if (k > 2000L && i - this.timeOfLastWarning >= 15000L)
 +                    if (wait > 0)
@@ -464,46 +479,48 @@
                      }
 -
 -                    if (k < 0L)
--                    {
++                    else
+                     {
 -                        field_147145_h.warn("Time ran backwards! Did the system time change?");
 -                        k = 0L;
--                    }
--
++                        catchupTime = Math.min(1000000000, Math.abs(wait));
+                     }
+ 
 -                    l += k;
 -                    i = j;
 -
 -                    if (this.worldServers[0].areAllPlayersAsleep())
--                    {
++                    if (MinecraftServer.currentTick++ % 100 == 0)
+                     {
 -                        this.tick();
 -                        l = 0L;
--                    }
-                     else
-                     {
++                        currentTps = 1E9 / (curTime - lastTick);
++                        recentTps[0] = calcTps(recentTps[0], 0.92, currentTps);   // 1/exp(5sec/1min)
++                        recentTps[1] = calcTps(recentTps[1], 0.9835, currentTps);   // 1/exp(5sec/5min)
++                        recentTps[2] = calcTps(recentTps[2], 0.9945, currentTps);   // 1/exp(5sec/15min)
+                     }
+-                    else
+-                    {
 -                        while (l > 50L)
 -                        {
 -                            l -= 50L;
 -                            this.tick();
 -                        }
-+                        catchupTime = Math.min(TICK_TIME * TPS, Math.abs(wait));
-                     }
+-                    }
  
 -                    Thread.sleep(1L);
--                    this.serverIsRunning = true;
-+                    currentTPS = (currentTPS * 0.95) + (1E9 / (curTime - lastTick) * 0.05);
 +                    lastTick = curTime;
-+                    MinecraftServer.currentTick++;
 +                    SpigotTimings.serverTickTimer.startTiming();
 +                    this.tick();
 +                    SpigotTimings.serverTickTimer.stopTiming();
-+                    org.spigotmc.CustomTimingsHandler.tick();
-+                    org.spigotmc.WatchdogThread.tick();
+                     this.serverIsRunning = true;
                  }
 +
 +                // Spigot end
                  FMLCommonHandler.instance().handleServerStopping();
              }
              else
-@@ -466,6 +653,14 @@
+@@ -466,6 +673,14 @@
          catch (Throwable throwable1)
          {
              field_147145_h.error("Encountered an unexpected exception", throwable1);
@@ -518,15 +535,15 @@
              CrashReport crashreport = null;
  
              if (throwable1 instanceof ReportedException)
-@@ -492,6 +687,7 @@
-         }
-         finally
-         {
-+            org.spigotmc.WatchdogThread.doStop(); // Spigot
-             try
-             {
-                 if (FMLCommonHandler.instance().shouldServerBeKilledQuietly())
-@@ -507,6 +703,16 @@
+@@ -498,6 +713,7 @@
+                 {
+                     return;
+                 }
++                org.spigotmc.WatchdogThread.doStop(); // Spigot
+                 this.stopServer();
+                 this.serverStopped = true;
+             }
+@@ -507,6 +723,16 @@
              }
              finally
              {
@@ -543,7 +560,7 @@
                  FMLCommonHandler.instance().handleServerStopped();
                  this.serverStopped = true;
                  this.systemExitNow();
-@@ -554,7 +760,9 @@
+@@ -554,7 +780,9 @@
      {
          long i = System.nanoTime();
          AxisAlignedBB.getAABBPool().cleanPool();
@@ -553,7 +570,7 @@
          ++this.tickCounter;
  
          if (this.startProfiling)
-@@ -583,11 +791,18 @@
+@@ -583,11 +811,23 @@
              this.field_147147_p.func_151318_b().func_151330_a(agameprofile);
          }
  
@@ -563,18 +580,23 @@
              this.theProfiler.startSection("save");
              this.serverConfigManager.saveAllPlayerData();
 -            this.saveAllWorlds(true);
-+            try
++            // Spigot Start
++            // We replace this with saving each individual world as this.saveChunks(...) is broken,
++            // and causes the main thread to sleep for random amounts of time depending on chunk activity
++            server.playerCommandState = true;
++
++            for (World world : worlds)
 +            {
-+                this.saveAllWorlds(true);
++                world.getWorld().save();
 +            }
-+            catch (MinecraftException e)
-+            {
-+                e.printStackTrace();
-+            }
++
++            server.playerCommandState = false;
++            // this.saveChunks(true);
++            // Spigot End
              this.theProfiler.endSection();
          }
  
-@@ -596,24 +811,51 @@
+@@ -596,24 +836,51 @@
          this.theProfiler.endSection();
          this.theProfiler.startSection("snooper");
  
@@ -628,7 +650,7 @@
          int i;
  
          Integer[] ids = DimensionManager.getIDs(this.tickCounter % 200 == 0);
-@@ -622,20 +864,21 @@
+@@ -622,20 +889,21 @@
              int id = ids[x];
              long j = System.nanoTime();
  
@@ -653,7 +675,45 @@
  
                  this.theProfiler.startSection("tick");
                  FMLCommonHandler.instance().onPreWorldTick(worldserver);
-@@ -666,10 +909,12 @@
+@@ -647,7 +915,17 @@
+                 }
+                 catch (Throwable throwable1)
+                 {
+-                    crashreport = CrashReport.makeCrashReport(throwable1, "Exception ticking world");
++                    // Spigot Start
++                    try
++                    {
++                        crashreport = CrashReport.makeCrashReport(throwable1, "Exception ticking world");
++                    }
++                    catch (Throwable t)
++                    {
++                        throw new RuntimeException("Error generating crash report", t);
++                    }
++    
++                    // Spigot End
+                     worldserver.addWorldInfoToCrashReport(crashreport);
+                     throw new ReportedException(crashreport);
+                 }
+@@ -658,7 +936,17 @@
+                 }
+                 catch (Throwable throwable)
+                 {
+-                    crashreport = CrashReport.makeCrashReport(throwable, "Exception ticking world entities");
++                    // Spigot Start
++                    try
++                    {
++                        crashreport = CrashReport.makeCrashReport(throwable, "Exception ticking world entities");
++                    }
++                    catch (Throwable t)
++                    {
++                        throw new RuntimeException("Error generating crash report", t);
++                    }
++    
++                    // Spigot End
+                     worldserver.addWorldInfoToCrashReport(crashreport);
+                     throw new ReportedException(crashreport);
+                 }
+@@ -666,10 +954,12 @@
                  FMLCommonHandler.instance().onPostWorldTick(worldserver);
                  this.theProfiler.endSection();
                  this.theProfiler.startSection("tracker");
@@ -667,7 +727,7 @@
  
              worldTickTimes.get(id)[this.tickCounter % 100] = System.nanoTime() - j;
          }
-@@ -677,16 +922,22 @@
+@@ -677,16 +967,22 @@
          this.theProfiler.endStartSection("dim_unloading");
          DimensionManager.unloadWorlds(worldTickTimes);
          this.theProfiler.endStartSection("connection");
@@ -690,7 +750,7 @@
          this.theProfiler.endSection();
      }
  
-@@ -722,6 +973,13 @@
+@@ -722,6 +1018,13 @@
      // JAVADOC METHOD $$ func_71218_a
      public WorldServer worldServerForDimension(int par1)
      {
@@ -704,7 +764,7 @@
          WorldServer ret = DimensionManager.getWorld(par1);
          if (ret == null)
          {
-@@ -808,7 +1066,7 @@
+@@ -808,7 +1111,7 @@
      // JAVADOC METHOD $$ func_71248_a
      public List getPossibleCompletions(ICommandSender par1ICommandSender, String par2Str)
      {
@@ -713,7 +773,7 @@
  
          if (par2Str.startsWith("/"))
          {
-@@ -834,8 +1092,6 @@
+@@ -834,8 +1137,6 @@
                      }
                  }
              }
@@ -722,7 +782,7 @@
          }
          else
          {
-@@ -853,9 +1109,10 @@
+@@ -853,9 +1154,10 @@
                      arraylist.add(s2);
                  }
              }
@@ -735,7 +795,7 @@
      }
  
      // JAVADOC METHOD $$ func_71276_C
-@@ -1069,7 +1326,7 @@
+@@ -1069,7 +1371,7 @@
  
      public boolean isServerInOnlineMode()
      {
@@ -744,7 +804,7 @@
      }
  
      public void setOnlineMode(boolean par1)
-@@ -1161,7 +1418,7 @@
+@@ -1161,7 +1463,7 @@
  
      public NetworkSystem func_147137_ag()
      {
@@ -753,7 +813,7 @@
      }
  
      @SideOnly(Side.CLIENT)
-@@ -1292,8 +1549,11 @@
+@@ -1292,8 +1594,11 @@
      {
          Bootstrap.func_151354_b();
  
@@ -765,7 +825,7 @@
              boolean flag = !GraphicsEnvironment.isHeadless();
              String s = null;
              String s1 = ".";
-@@ -1389,16 +1649,32 @@
+@@ -1389,16 +1694,32 @@
              {
                  dedicatedserver.func_120011_ar();
              }
@@ -804,7 +864,7 @@
          }
          catch (Exception exception)
          {
-@@ -1406,6 +1682,156 @@
+@@ -1406,6 +1727,156 @@
          }
      }
  
@@ -961,7 +1021,7 @@
      // JAVADOC METHOD $$ func_71244_g
      @SideOnly(Side.SERVER)
      public void logInfo(String par1Str)
-@@ -1434,19 +1860,77 @@
+@@ -1434,19 +1905,77 @@
          return this.motd;
      }
  
@@ -1045,7 +1105,7 @@
      }
  
      // JAVADOC METHOD $$ func_71239_B
-@@ -1502,4 +1986,11 @@
+@@ -1502,4 +2031,11 @@
      {
          this.isGamemodeForced = par1;
      }

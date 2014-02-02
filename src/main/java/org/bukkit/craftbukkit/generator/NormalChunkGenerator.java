@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
-import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.chunk.IChunkProvider; // MCPC+
 
 import org.bukkit.craftbukkit.CraftWorld;

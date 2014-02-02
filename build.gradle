@@ -45,7 +45,7 @@ minecraft {
 }
 
 group = 'net.minecraftforge'
-version = "1.7.2-R0.3-forge1019"
+version = "1.7.2-R0.3-forge1022"
 
 jenkins {
     job = 'MCPC'

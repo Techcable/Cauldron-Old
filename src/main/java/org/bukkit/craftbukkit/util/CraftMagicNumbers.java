@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+
 import org.bukkit.Achievement;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
@@ -99,7 +100,6 @@ public final class CraftMagicNumbers implements UnsafeValues {
         }
         catch (net.minecraft.nbt.NBTException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -107,6 +107,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
 
         return stack;
     }
+
     @Override
     public Statistic getStatisticFromInternalName(String name) {
         return CraftStatistic.getBukkitStatisticByName(name);

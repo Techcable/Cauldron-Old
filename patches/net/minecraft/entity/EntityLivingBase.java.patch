@@ -365,13 +365,25 @@
          }
  
          if (this.swingProgress > 0.0F)
-@@ -1908,8 +2066,17 @@
+@@ -1904,17 +2062,37 @@
+     {
+         List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
+ 
+-        if (list != null && !list.isEmpty())
++        if (this.canBeCollidedWith() && list != null && !list.isEmpty())   // Spigot: Add this.canBeCollidedWith() condition
          {
++            numCollisions -= worldObj.spigotConfig.maxCollisionsPerEntity; // Spigot
++
              for (int i = 0; i < list.size(); ++i)
              {
 -                Entity entity = (Entity)list.get(i);
-+                Entity entity = (Entity) list.get(i);
++                if (numCollisions > worldObj.spigotConfig.maxCollisionsPerEntity)
++                {
++                    break;    // Spigot
++                }
  
++                Entity entity = (Entity) list.get(i);
++
 +                // TODO better check now?
 +                // CraftBukkit start - Only handle mob (non-player) collisions every other tick
 +                if (entity instanceof EntityLivingBase && !(this instanceof EntityPlayerMP) && this.ticksExisted % 2 == 0)
@@ -383,4 +395,13 @@
 +
                  if (entity.canBePushed())
                  {
++                    entity.numCollisions++; // Spigot
++                    numCollisions++; // Spigot
                      this.collideWithEntity(entity);
+                 }
+             }
++
++            numCollisions = 0; // Spigot
+         }
+     }
+ 

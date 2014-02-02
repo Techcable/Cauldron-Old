@@ -181,7 +181,7 @@
      }
  
      @Override
-@@ -62,30 +211,248 @@
+@@ -62,30 +211,256 @@
          return findClass(name, true);
      }
  
@@ -216,6 +216,14 @@
 +                new MavenShade(relocations),
 +                null, false);
 +
++        // support for plugins that build in MCPC+ 1.7 dev
++        if (obfVersion.equals("v1_7_R1"))
++        {
++            jarMapping.loadMappings(
++                    new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/"+obfVersion+"/obf2numpkg.srg"))),
++                    new MavenShade(relocations),
++                    null, false);
++        }
 +        // resolve naming conflict in FML/CB
 +        jarMapping.methods.put("net/minecraft/server/"+obfVersion+"/PlayerConnection/getPlayer ()Lorg/bukkit/craftbukkit/"+getNativeVersion()+"/entity/CraftPlayer;", "getPlayerB");
 +

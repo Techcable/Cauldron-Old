@@ -130,6 +130,7 @@ public final class CraftServer implements Server {
     private final String serverName = "MCPC+";
     private final String serverVersion;
     private final String bukkitVersion = Versioning.getBukkitVersion();
+    private final Logger logger = Logger.getLogger("Minecraft");
     private final ServicesManager servicesManager = new SimpleServicesManager();
     private final CraftScheduler scheduler = new CraftScheduler();
     private final CraftSimpleCommandMap craftCommandMap = new CraftSimpleCommandMap(this); // MCPC+
@@ -159,7 +160,6 @@ public final class CraftServer implements Server {
     public CraftScoreboardManager scoreboardManager;
     public boolean playerCommandState;
     private boolean printSaveWarning;
-    private Logger logger;
     private CraftIconCache icon;
 
     private final class BooleanWrapper {
@@ -172,7 +172,6 @@ public final class CraftServer implements Server {
     }
 
     public CraftServer(net.minecraft.server.MinecraftServer console, net.minecraft.server.management.ServerConfigurationManager playerList) {
-        this.logger = Logger.getLogger("Minecraft");
         this.console = console;
         this.playerList = (net.minecraft.server.dedicated.DedicatedPlayerList) playerList;
         this.serverVersion = CraftServer.class.getPackage().getImplementationVersion();
@@ -842,11 +841,8 @@ public final class CraftServer implements Server {
 
     public World getWorld(String name) {
         Validate.notNull(name, "Name cannot be null");
-        if (getBukkitToForgeMapping(name.toLowerCase()) != null)
-            name = getBukkitToForgeMapping(name.toLowerCase());
-        name = name.toLowerCase();
-        World result = worlds.get(name);
-        return result;
+
+        return worlds.get(name.toLowerCase());
     }
 
     public World getWorld(UUID uid) {
@@ -1383,7 +1379,11 @@ public final class CraftServer implements Server {
             {
                 completions.addAll( bukkitCompletions );
             }
-            completions.addAll( org.spigotmc.VanillaCommandWrapper.complete( player, message ) );
+            List<String> vanillaCompletions = org.spigotmc.VanillaCommandWrapper.complete( player, message );
+            if ( vanillaCompletions != null )
+            {
+                completions.addAll( vanillaCompletions );
+            }
             // Spigot End
         } catch (CommandException ex) {
             player.sendMessage(ChatColor.RED + "An internal error occurred while attempting to tab-complete this command");

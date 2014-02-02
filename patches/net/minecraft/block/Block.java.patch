@@ -26,7 +26,7 @@
          {
              float f = 0.7F;
              double d0 = (double)(p_149642_1_.rand.nextFloat() * f) + (double)(1.0F - f) * 0.5D;
-@@ -1123,6 +1124,30 @@
+@@ -1124,6 +1125,30 @@
          return this;
      }
  

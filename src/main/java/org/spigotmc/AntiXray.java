@@ -53,27 +53,14 @@ public class AntiXray
     }
 
     /**
-     * Starts the timings handler, and then removes all non exposed ores from
-     * the chunk buffer.
-     */
-    public void obfuscateSync(int chunkX, int chunkY, int bitmask, byte[] buffer, net.minecraft.world.World world)
-    {
-        if ( world.spigotConfig.antiXray )
-        {
-            obfuscate.startTiming();
-            obfuscate( chunkX, chunkY, bitmask, buffer, world );
-            obfuscate.stopTiming();
-        }
-    }
-
-    /**
      * Removes all non exposed ores from the chunk buffer.
      */
-    public void obfuscate(int chunkX, int chunkY, int bitmask, byte[] buffer, net.minecraft.world.World world)
+    public void obfuscate(int chunkX, int chunkZ, int bitmask, byte[] buffer, net.minecraft.world.World world)
     {
         // If the world is marked as obfuscated
         if ( world.spigotConfig.antiXray )
         {
+            obfuscate.startTiming();
             // Initial radius to search around for air
             int initialRadius = 1;
             // Which block in the buffer we are looking at, anywhere from 0 to 16^4
@@ -83,7 +70,7 @@ public class AntiXray
 
             // Chunk corner X and Z blocks
             int startX = chunkX << 4;
-            int startZ = chunkY << 4;
+            int startZ = chunkZ << 4;
 
             // Chunks can have up to 16 sections
             for ( int i = 0; i < 16; i++ )
@@ -141,6 +128,7 @@ public class AntiXray
                     }
                 }
             }
+            obfuscate.stopTiming();
         }
     }
 
@@ -150,10 +138,10 @@ public class AntiXray
         if ( world.blockExists( x, y, z ) )
         {
             // Get block id
-            net.minecraft.block.Block block = world.func_147439_a(x, y, z);
+            net.minecraft.block.Block block = world.func_147439_a( x, y, z );
 
             // See if it needs update
-            if ( updateSelf && obfuscateBlocks[net.minecraft.block.Block.func_149682_b(block)] )
+            if ( updateSelf && obfuscateBlocks[net.minecraft.block.Block.func_149682_b( block )] )
             {
                 // Send the update
                 world.func_147471_g( x, y, z );
@@ -186,7 +174,7 @@ public class AntiXray
 
     private static boolean hasTransparentBlockAdjacent(net.minecraft.world.World world, int x, int y, int z, int radius)
     {
-        return !world.func_147439_a(x, y, z).func_149721_r() /* isSolidBlock */
+        return !world.func_147439_a( x, y, z ).func_149721_r() /* isSolidBlock */
                 || ( radius > 0
                 && ( hasTransparentBlockAdjacent( world, x + 1, y, z, radius - 1 )
                 || hasTransparentBlockAdjacent( world, x - 1, y, z, radius - 1 )

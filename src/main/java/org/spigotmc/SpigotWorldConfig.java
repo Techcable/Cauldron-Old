@@ -255,6 +255,27 @@ public class SpigotWorldConfig
     private void nerfSpawnerMobs()
     {
         nerfSpawnerMobs = getBoolean( "nerf-spawner-mobs", false );
-        log( "Nerfing mobs spawned from spawners " + nerfSpawnerMobs );
+        log( "Nerfing mobs spawned from spawners: " + nerfSpawnerMobs );
+    }
+
+    public boolean enableZombiePigmenPortalSpawns;
+    private void enableZombiePigmenPortalSpawns()
+    {
+        enableZombiePigmenPortalSpawns = getBoolean( "enable-zombie-pigmen-portal-spawns", true );
+        log( "Allow Zombie Pigmen to spawn from portal blocks: " + enableZombiePigmenPortalSpawns );
+    }
+
+    public int maxBulkChunk;
+    private void bulkChunkCount()
+    {
+        maxBulkChunk = getInt( "max-bulk-chunks", 5 );
+        log( "Sending up to " + maxBulkChunk + " chunks per packet" );
+    }
+
+    public int maxCollisionsPerEntity;
+    private void maxEntityCollision()
+    {
+        maxCollisionsPerEntity = getInt( "max-entity-collisions", 8 );
+        log( "Max Entity Collisions: " + maxCollisionsPerEntity );
     }
 }

@@ -21,12 +21,14 @@ import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Fish;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.SmallFireball;
 import org.bukkit.entity.Snowball;
+import org.bukkit.entity.ThrownExpBottle;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -271,8 +273,12 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
         return effects;
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends Projectile> T launchProjectile(Class<? extends T> projectile) {
+        return launchProjectile(projectile, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Projectile> T launchProjectile(Class<? extends T> projectile, Vector velocity) {
         net.minecraft.world.World world = ((CraftWorld) getWorld()).getHandle();
         net.minecraft.entity.Entity launch = null;
 
@@ -286,6 +292,10 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
             launch = new net.minecraft.entity.projectile.EntityArrow(world, getHandle(), 1);
         } else if (ThrownPotion.class.isAssignableFrom(projectile)) {
             launch = new net.minecraft.entity.projectile.EntityPotion(world, getHandle(), CraftItemStack.asNMSCopy(new ItemStack(Material.POTION, 1)));
+        } else if (ThrownExpBottle.class.isAssignableFrom(projectile)) {
+            launch = new net.minecraft.entity.item.EntityExpBottle(world, getHandle());
+        } else if (Fish.class.isAssignableFrom(projectile) && getHandle() instanceof net.minecraft.entity.player.EntityPlayer) {
+            launch = new net.minecraft.entity.projectile.EntityFishHook(world, (net.minecraft.entity.player.EntityPlayer) getHandle());
         } else if (Fireball.class.isAssignableFrom(projectile)) {
             Location location = getEyeLocation();
             Vector direction = location.getDirection().multiply(10);
@@ -298,10 +308,15 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
                 launch = new net.minecraft.entity.projectile.EntityLargeFireball(world, getHandle(), direction.getX(), direction.getY(), direction.getZ());
             }
 
+            ((net.minecraft.entity.projectile.EntityFireball) launch).projectileSource = this;
             launch.setLocationAndAngles(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
         }
 
         Validate.notNull(launch, "Projectile not supported");
+
+        if (velocity != null) {
+            ((T) launch.getBukkitEntity()).setVelocity(velocity);
+        }
 
         world.spawnEntityInWorld(launch);
         return (T) launch.getBukkitEntity();

@@ -63,7 +63,7 @@
      private double entityRiderPitchDelta;
      private double entityRiderYawDelta;
      // JAVADOC FIELD $$ field_70175_ag
-@@ -162,8 +198,9 @@
+@@ -162,8 +198,10 @@
      public int dimension;
      protected int teleportDirection;
      private boolean invulnerable;
@@ -71,10 +71,11 @@
 +    public UUID entityUniqueID; // CraftBukkit - protected -> public
      public Entity.EnumEntitySize myEntitySize;
 +    public boolean valid; // CraftBukkit
++    public org.bukkit.projectiles.ProjectileSource projectileSource; // CraftBukkit - For projectiles only
      private static final String __OBFID = "CL_00001533";
      /** Forge: Used to store custom data for each entity. */
      private NBTTagCompound customEntityData;
-@@ -171,6 +208,14 @@
+@@ -171,6 +209,14 @@
      public ArrayList<EntityItem> capturedDrops = new ArrayList<EntityItem>();
      private UUID persistentID;
  
@@ -89,7 +90,7 @@
      private HashMap<String, IExtendedEntityProperties> extendedProperties;
  
      public int func_145782_y()
-@@ -195,7 +240,7 @@
+@@ -195,7 +241,7 @@
          this.rand = new Random();
          this.fireResistance = 1;
          this.firstUpdate = true;
@@ -98,7 +99,7 @@
          this.myEntitySize = Entity.EnumEntitySize.SIZE_2;
          this.worldObj = par1World;
          this.setPosition(0.0D, 0.0D, 0.0D);
-@@ -203,8 +248,15 @@
+@@ -203,8 +249,15 @@
          if (par1World != null)
          {
              this.dimension = par1World.provider.dimensionId;
@@ -114,7 +115,7 @@
          this.dataWatcher = new DataWatcher(this);
          this.dataWatcher.addObject(0, Byte.valueOf((byte)0));
          this.dataWatcher.addObject(1, Short.valueOf((short)300));
-@@ -317,6 +369,41 @@
+@@ -317,6 +370,41 @@
      // JAVADOC METHOD $$ func_70101_b
      protected void setRotation(float par1, float par2)
      {
@@ -156,7 +157,7 @@
          this.rotationYaw = par1 % 360.0F;
          this.rotationPitch = par2 % 360.0F;
      }
-@@ -387,7 +474,7 @@
+@@ -387,7 +475,7 @@
  
              if (this.inPortal)
              {
@@ -165,7 +166,7 @@
                  {
                      if (this.ridingEntity == null && this.portalCounter++ >= i)
                      {
-@@ -503,7 +590,44 @@
+@@ -503,7 +591,44 @@
      {
          if (!this.isImmuneToFire)
          {
@@ -211,7 +212,7 @@
              this.setFire(15);
          }
      }
-@@ -543,6 +667,29 @@
+@@ -543,6 +668,29 @@
      // JAVADOC METHOD $$ func_70091_d
      public void moveEntity(double par1, double par3, double par5)
      {
@@ -241,7 +242,7 @@
          if (this.noClip)
          {
              this.boundingBox.offset(par1, par3, par5);
-@@ -807,6 +954,35 @@
+@@ -807,6 +955,35 @@
              d10 = this.posY - d4;
              d11 = this.posZ - d5;
  
@@ -277,7 +278,7 @@
              if (this.canTriggerWalking() && !flag && this.ridingEntity == null)
              {
                  int j1 = MathHelper.floor_double(this.posX);
-@@ -849,6 +1025,8 @@
+@@ -849,6 +1026,8 @@
                  }
              }
  
@@ -286,7 +287,7 @@
              try
              {
                  this.func_145775_I();
-@@ -860,7 +1038,8 @@
+@@ -860,7 +1039,8 @@
                  this.addEntityCrashInfo(crashreportcategory);
                  throw new ReportedException(crashreport);
              }
@@ -296,7 +297,7 @@
              boolean flag2 = this.isWet();
  
              if (this.worldObj.func_147470_e(this.boundingBox.contract(0.001D, 0.001D, 0.001D)))
-@@ -871,8 +1050,20 @@
+@@ -871,8 +1051,20 @@
                  {
                      ++this.fire;
  
@@ -318,7 +319,7 @@
                          this.setFire(8);
                      }
                  }
-@@ -890,6 +1081,8 @@
+@@ -890,6 +1082,8 @@
  
              this.worldObj.theProfiler.endSection();
          }
@@ -327,7 +328,7 @@
      }
  
      protected String func_145776_H()
-@@ -983,6 +1176,7 @@
+@@ -983,6 +1177,7 @@
      }
  
      // JAVADOC METHOD $$ func_70081_e
@@ -335,7 +336,7 @@
      protected void dealFireDamage(int par1)
      {
          if (!this.isImmuneToFire)
-@@ -990,7 +1184,16 @@
+@@ -990,7 +1185,16 @@
              this.attackEntityFrom(DamageSource.inFire, (float)par1);
          }
      }
@@ -352,7 +353,7 @@
      public final boolean isImmuneToFire()
      {
          return this.isImmuneToFire;
-@@ -1177,6 +1380,15 @@
+@@ -1177,6 +1381,15 @@
      // JAVADOC METHOD $$ func_70029_a
      public void setWorld(World par1World)
      {
@@ -368,7 +369,16 @@
          this.worldObj = par1World;
      }
  
-@@ -1392,6 +1604,20 @@
+@@ -1255,6 +1468,8 @@
+     // JAVADOC METHOD $$ func_70100_b_
+     public void onCollideWithPlayer(EntityPlayer par1EntityPlayer) {}
+ 
++    int numCollisions = 0; // Spigot
++
+     // JAVADOC METHOD $$ func_70108_f
+     public void applyEntityCollision(Entity par1Entity)
+     {
+@@ -1392,6 +1607,20 @@
          {
              par1NBTTagCompound.setTag("Pos", this.newDoubleNBTList(new double[] {this.posX, this.posY + (double)this.ySize, this.posZ}));
              par1NBTTagCompound.setTag("Motion", this.newDoubleNBTList(new double[] {this.motionX, this.motionY, this.motionZ}));
@@ -389,7 +399,7 @@
              par1NBTTagCompound.setTag("Rotation", this.newFloatNBTList(new float[] {this.rotationYaw, this.rotationPitch}));
              par1NBTTagCompound.setFloat("FallDistance", this.fallDistance);
              par1NBTTagCompound.setShort("Fire", (short)this.fire);
-@@ -1402,6 +1628,12 @@
+@@ -1402,6 +1631,12 @@
              par1NBTTagCompound.setInteger("PortalCooldown", this.timeUntilPortal);
              par1NBTTagCompound.setLong("UUIDMost", this.getUniqueID().getMostSignificantBits());
              par1NBTTagCompound.setLong("UUIDLeast", this.getUniqueID().getLeastSignificantBits());
@@ -402,7 +412,7 @@
              if (customEntityData != null)
              {
                  par1NBTTagCompound.setTag("ForgeData", customEntityData);
-@@ -1453,7 +1685,7 @@
+@@ -1453,7 +1688,7 @@
              this.motionX = nbttaglist1.func_150309_d(0);
              this.motionY = nbttaglist1.func_150309_d(1);
              this.motionZ = nbttaglist1.func_150309_d(2);
@@ -411,7 +421,7 @@
              if (Math.abs(this.motionX) > 10.0D)
              {
                  this.motionX = 0.0D;
-@@ -1468,7 +1700,7 @@
+@@ -1468,7 +1703,7 @@
              {
                  this.motionZ = 0.0D;
              }
@@ -420,7 +430,7 @@
              this.prevPosX = this.lastTickPosX = this.posX = nbttaglist.func_150309_d(0);
              this.prevPosY = this.lastTickPosY = this.posY = nbttaglist.func_150309_d(1);
              this.prevPosZ = this.lastTickPosZ = this.posZ = nbttaglist.func_150309_d(2);
-@@ -1519,6 +1751,72 @@
+@@ -1519,6 +1754,72 @@
              {
                  this.setPosition(this.posX, this.posY, this.posZ);
              }
@@ -493,7 +503,7 @@
          }
          catch (Throwable throwable)
          {
-@@ -1750,13 +2048,52 @@
+@@ -1750,13 +2051,52 @@
      // JAVADOC METHOD $$ func_70078_a
      public void mountEntity(Entity par1Entity)
      {
@@ -547,7 +557,7 @@
                  this.setLocationAndAngles(this.ridingEntity.posX, this.ridingEntity.boundingBox.minY + (double)this.ridingEntity.height, this.ridingEntity.posZ, this.rotationYaw, this.rotationPitch);
                  this.ridingEntity.riddenByEntity = null;
              }
-@@ -1765,13 +2102,63 @@
+@@ -1765,13 +2105,63 @@
          }
          else
          {
@@ -613,7 +623,7 @@
          }
      }
  
-@@ -1963,12 +2350,48 @@
+@@ -1963,12 +2353,48 @@
      // JAVADOC METHOD $$ func_70077_a
      public void onStruckByLightning(EntityLightningBolt par1EntityLightningBolt)
      {
@@ -664,7 +674,7 @@
          }
      }
  
-@@ -2153,36 +2576,62 @@
+@@ -2153,36 +2579,62 @@
          {
              this.worldObj.theProfiler.startSection("changeDimension");
              MinecraftServer minecraftserver = MinecraftServer.getServer();
@@ -743,7 +753,7 @@
              }
  
              this.isDead = true;
-@@ -2192,7 +2641,6 @@
+@@ -2192,7 +2644,6 @@
              this.worldObj.theProfiler.endSection();
          }
      }

@@ -18,7 +18,13 @@
      private static final String __OBFID = "CL_00001717";
  
      public EntityFireball(World par1World)
-@@ -68,15 +72,22 @@
+@@ -63,20 +67,28 @@
+     {
+         super(par1World);
+         this.shootingEntity = par2EntityLivingBase;
++        this.projectileSource = (org.bukkit.entity.LivingEntity) par2EntityLivingBase.getBukkitEntity(); // CraftBukkit
+         this.setSize(1.0F, 1.0F);
+         this.setLocationAndAngles(par2EntityLivingBase.posX, par2EntityLivingBase.posY, par2EntityLivingBase.posZ, par2EntityLivingBase.rotationYaw, par2EntityLivingBase.rotationPitch);
          this.setPosition(this.posX, this.posY, this.posZ);
          this.yOffset = 0.0F;
          this.motionX = this.motionY = this.motionZ = 0.0D;
@@ -48,7 +54,7 @@
      // JAVADOC METHOD $$ func_70071_h_
      public void onUpdate()
      {
-@@ -142,7 +153,7 @@
+@@ -142,7 +154,7 @@
  
                      if (movingobjectposition1 != null)
                      {
@@ -57,7 +63,7 @@
  
                          if (d1 < d0 || d0 == 0.0D)
                          {
-@@ -161,6 +172,14 @@
+@@ -161,6 +173,14 @@
              if (movingobjectposition != null)
              {
                  this.onImpact(movingobjectposition);
@@ -72,17 +78,19 @@
              }
  
              this.posX += this.motionX;
-@@ -232,7 +251,8 @@
+@@ -232,7 +252,10 @@
          par1NBTTagCompound.setShort("zTile", (short)this.field_145794_g);
          par1NBTTagCompound.setByte("inTile", (byte)Block.func_149682_b(this.field_145796_h));
          par1NBTTagCompound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
 -        par1NBTTagCompound.setTag("direction", this.newDoubleNBTList(new double[] {this.motionX, this.motionY, this.motionZ}));
 +        // CraftBukkit - Fix direction being mismapped to invalid variables
 +        par1NBTTagCompound.setTag("power", this.newDoubleNBTList(new double[] { this.accelerationX, this.accelerationY, this.accelerationZ}));
++        // Spigot - Support vanilla's direction tag
++        par1NBTTagCompound.setTag("direction", this.newDoubleNBTList(new double[] { this.motionX, this.motionY, this.motionZ}));
      }
  
      // JAVADOC METHOD $$ func_70037_a
-@@ -244,12 +264,14 @@
+@@ -244,8 +267,17 @@
          this.field_145796_h = Block.func_149729_e(par1NBTTagCompound.getByte("inTile") & 255);
          this.inGround = par1NBTTagCompound.getByte("inGround") == 1;
  
@@ -90,19 +98,18 @@
 +        // CraftBukkit start - direction -> power
 +        if (par1NBTTagCompound.func_150297_b("power", 9))
          {
--            NBTTagList nbttaglist = par1NBTTagCompound.func_150295_c("direction", 6);
--            this.motionX = nbttaglist.func_150309_d(0);
--            this.motionY = nbttaglist.func_150309_d(1);
--            this.motionZ = nbttaglist.func_150309_d(2);
 +            NBTTagList nbttaglist = par1NBTTagCompound.func_150295_c("power", 6);
 +            this.accelerationX = nbttaglist.func_150309_d(0);
 +            this.accelerationY = nbttaglist.func_150309_d(1);
 +            this.accelerationZ = nbttaglist.func_150309_d(2);
 +            // CraftBukkit end
-         }
-         else
-         {
-@@ -281,6 +303,16 @@
++        }
++        else if (par1NBTTagCompound.func_150297_b("direction", 9))     // Spigot - Support vanilla's direction tag
++        {
+             NBTTagList nbttaglist = par1NBTTagCompound.func_150295_c("direction", 6);
+             this.motionX = nbttaglist.func_150309_d(0);
+             this.motionY = nbttaglist.func_150309_d(1);
+@@ -281,6 +313,16 @@
  
              if (par1DamageSource.getEntity() != null)
              {

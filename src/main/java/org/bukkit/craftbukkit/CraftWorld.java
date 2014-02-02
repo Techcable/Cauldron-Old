@@ -323,7 +323,7 @@ public class CraftWorld implements World {
         Validate.notNull(velocity, "Can not spawn arrow with a null velocity");
 
         net.minecraft.entity.projectile.EntityArrow arrow = new net.minecraft.entity.projectile.EntityArrow(world);
-        arrow.setLocationAndAngles(loc.getX(), loc.getY(), loc.getZ(), loc.getPitch(), loc.getYaw());
+        arrow.setLocationAndAngles(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
         arrow.setThrowableHeading(velocity.getX(), velocity.getY(), velocity.getZ(), speed, spread);
         world.spawnEntityInWorld(arrow);
         return (Arrow) arrow.getBukkitEntity();
@@ -930,6 +930,9 @@ public class CraftWorld implements World {
             } else if (ThrownExpBottle.class.isAssignableFrom(clazz)) {
                 entity = new net.minecraft.entity.item.EntityExpBottle(world);
                 entity.setLocationAndAngles(x, y, z, 0, 0);
+            } else if (EnderPearl.class.isAssignableFrom(clazz)) {
+                entity = new net.minecraft.entity.item.EntityEnderPearl(world);
+                entity.setLocationAndAngles(x, y, z, 0, 0);
             } else if (ThrownPotion.class.isAssignableFrom(clazz)) {
                 entity = new net.minecraft.entity.projectile.EntityPotion(world, x, y, z, CraftItemStack.asNMSCopy(new ItemStack(org.bukkit.Material.POTION, 1)));
             } else if (Fireball.class.isAssignableFrom(clazz)) {
@@ -1041,7 +1044,7 @@ public class CraftWorld implements World {
             }
 
             if (entity != null) {
-                entity.setPositionAndRotation(x, y, z, pitch, yaw);
+                entity.setPositionAndRotation(x, y, z, yaw, pitch);
             }
         } else if (Hanging.class.isAssignableFrom(clazz)) {
             Block block = getBlockAt(location);
@@ -1090,13 +1093,10 @@ public class CraftWorld implements World {
             entity = new net.minecraft.entity.item.EntityXPOrb(world, x, y, z, 0);
         } else if (Weather.class.isAssignableFrom(clazz)) {
             // not sure what this can do
+            if (LightningStrike.class.isAssignableFrom(clazz)) {
             entity = new net.minecraft.entity.effect.EntityLightningBolt(world, x, y, z);
-        } else if (LightningStrike.class.isAssignableFrom(clazz)) {
             // what is this, I don't even
-        } else if (Fish.class.isAssignableFrom(clazz)) {
-            // this is not a fish, it's a bobber, and it's probably useless
-            entity = new net.minecraft.entity.projectile.EntityFishHook(world);
-            entity.setPositionAndRotation(x, y, z, pitch, yaw);
+            }
         } else if (Firework.class.isAssignableFrom(clazz)) {
             entity = new net.minecraft.entity.item.EntityFireworkRocket(world, x, y, z, null);
         }

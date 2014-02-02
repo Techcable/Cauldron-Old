@@ -118,7 +118,7 @@
                  return par2ItemStack;
              }
              // JAVADOC METHOD $$ func_82485_a
-@@ -171,8 +245,40 @@
+@@ -171,8 +245,42 @@
                  double d3 = random.nextGaussian() * 0.05D + (double)enumfacing.getFrontOffsetX();
                  double d4 = random.nextGaussian() * 0.05D + (double)enumfacing.getFrontOffsetY();
                  double d5 = random.nextGaussian() * 0.05D + (double)enumfacing.getFrontOffsetZ();
@@ -155,13 +155,15 @@
 +                    }
 +                }
 +
-+                world.spawnEntityInWorld(new EntitySmallFireball(world, d0, d1, d2, event.getVelocity().getX(), event.getVelocity().getY(), event.getVelocity().getZ()));
++                EntitySmallFireball entitysmallfireball = new EntitySmallFireball(world, d0, d1, d2, event.getVelocity().getX(), event.getVelocity().getY(), event.getVelocity().getZ());
++                entitysmallfireball.projectileSource = new org.bukkit.craftbukkit.projectiles.CraftBlockProjectileSource((TileEntityDispenser) par1IBlockSource.func_150835_j());
++                world.spawnEntityInWorld(entitysmallfireball);
 +                // par2ItemStack.splitStack(1); // Handled during event processing
 +                // CraftBukkit end
                  return par2ItemStack;
              }
              // JAVADOC METHOD $$ func_82485_a
-@@ -213,9 +319,41 @@
+@@ -213,9 +321,41 @@
                      d3 = 0.0D;
                  }
  
@@ -205,7 +207,7 @@
                  return par2ItemStack;
              }
              // JAVADOC METHOD $$ func_82485_a
-@@ -231,16 +369,67 @@
+@@ -231,16 +371,67 @@
              // JAVADOC METHOD $$ func_82487_b
              public ItemStack dispenseStack(IBlockSource par1IBlockSource, ItemStack par2ItemStack)
              {
@@ -276,7 +278,7 @@
                      return par2ItemStack;
                  }
                  else
-@@ -281,6 +470,36 @@
+@@ -281,6 +472,36 @@
                      item = Items.lava_bucket;
                  }
  
@@ -313,7 +315,7 @@
                  world.func_147468_f(i, j, k);
  
                  if (--par2ItemStack.stackSize == 0)
-@@ -308,16 +527,51 @@
+@@ -308,16 +529,51 @@
                  int i = par1IBlockSource.getXInt() + enumfacing.getFrontOffsetX();
                  int j = par1IBlockSource.getYInt() + enumfacing.getFrontOffsetY();
                  int k = par1IBlockSource.getZInt() + enumfacing.getFrontOffsetZ();
@@ -369,7 +371,7 @@
                  else if (world.func_147439_a(i, j, k) == Blocks.tnt)
                  {
                      Blocks.tnt.func_149664_b(world, i, j, k, 1);
-@@ -357,7 +611,36 @@
+@@ -357,7 +613,36 @@
                      int i = par1IBlockSource.getXInt() + enumfacing.getFrontOffsetX();
                      int j = par1IBlockSource.getYInt() + enumfacing.getFrontOffsetY();
                      int k = par1IBlockSource.getZInt() + enumfacing.getFrontOffsetZ();
@@ -406,7 +408,7 @@
                      if (ItemDye.func_150919_a(par2ItemStack, world, i, j, k))
                      {
                          if (!world.isRemote)
-@@ -401,9 +684,41 @@
+@@ -401,9 +686,41 @@
                  int i = par1IBlockSource.getXInt() + enumfacing.getFrontOffsetX();
                  int j = par1IBlockSource.getYInt() + enumfacing.getFrontOffsetY();
                  int k = par1IBlockSource.getZInt() + enumfacing.getFrontOffsetZ();

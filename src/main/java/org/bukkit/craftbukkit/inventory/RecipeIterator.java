@@ -6,23 +6,20 @@ import org.bukkit.inventory.Recipe;
 
 import za.co.mcportcentral.potion.CustomModRecipe; // MCPC+
 
-
 public class RecipeIterator implements Iterator<Recipe> {
     private final Iterator<net.minecraft.item.crafting.IRecipe> recipes;
-    private final Iterator<net.minecraft.item.ItemStack> smelting;
+    private final Iterator<net.minecraft.item.ItemStack> smeltingCustom;
+    private final Iterator<net.minecraft.item.ItemStack> smeltingVanilla;
     private Iterator<?> removeFrom = null;
 
     public RecipeIterator() {
         this.recipes = net.minecraft.item.crafting.CraftingManager.getInstance().getRecipeList().iterator();
-        this.smelting = net.minecraft.item.crafting.FurnaceRecipes.smelting().getSmeltingList().keySet().iterator();
+        this.smeltingCustom = net.minecraft.item.crafting.FurnaceRecipes.smelting().customRecipes.keySet().iterator();
+        this.smeltingVanilla = net.minecraft.item.crafting.FurnaceRecipes.smelting().smeltingList.keySet().iterator();
     }
 
     public boolean hasNext() {
-        if (recipes.hasNext()) {
-            return true;
-        } else {
-            return smelting.hasNext();
-        }
+        return recipes.hasNext() || smeltingCustom.hasNext() || smeltingVanilla.hasNext();
     }
 
     public Recipe next() {
@@ -38,8 +35,15 @@ public class RecipeIterator implements Iterator<Recipe> {
             }
             // MCPC+ end
         } else {
-            removeFrom = smelting;
-            net.minecraft.item.ItemStack item = smelting.next();
+            net.minecraft.item.ItemStack item;
+            if (smeltingCustom.hasNext()) {
+                removeFrom = smeltingCustom;
+                item = smeltingCustom.next();
+        } else {
+                removeFrom = smeltingVanilla;
+                item = smeltingVanilla.next();
+            }
+
             CraftItemStack stack = CraftItemStack.asCraftMirror(net.minecraft.item.crafting.FurnaceRecipes.smelting().func_151395_a(item));
 
             return new CraftFurnaceRecipe(stack, CraftItemStack.asCraftMirror(item));

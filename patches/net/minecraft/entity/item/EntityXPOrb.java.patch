@@ -16,7 +16,7 @@
      // JAVADOC FIELD $$ field_70529_d
      private int xpOrbHealth = 5;
      // JAVADOC FIELD $$ field_70530_e
--    private int xpValue;
+-    public int xpValue;
 +    public int xpValue; // CraftBukkit - private -> public
      // JAVADOC FIELD $$ field_80001_f
      private EntityPlayer closestPlayer;

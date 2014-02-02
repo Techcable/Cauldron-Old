@@ -19,7 +19,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.command.TicksPerSecondCommand;
 
 public class SpigotConfig
 {
@@ -137,11 +136,6 @@ public class SpigotConfig
         return config.getString( path, config.getString( path ) );
     }
 
-    private static void tpsCommand()
-    {
-        commands.put( "tps", new TicksPerSecondCommand( "tps" ) );
-    }
-
     public static boolean logCommands;
     private static void logCommands()
     {
@@ -252,5 +246,23 @@ public class SpigotConfig
                     " isn't set to 1. Disabling stat saving without forcing the achievement may cause it to get stuck on the player's " +
                     "screen." );
         }
+    }
+
+    private static void tpsCommand()
+    {
+        commands.put( "tps", new TicksPerSecondCommand( "tps" ) );
+    }
+
+    public static int playerSample;
+    private static void playerSample()
+    {
+        playerSample = getInt( "settings.sample-count", 12 );
+        System.out.println( "Server Ping Player Sample Count: " + playerSample );
+    }
+
+    public static int playerShuffle;
+    private static void playerShuffle()
+    {
+        playerShuffle = getInt( "settings.player-shuffle", 0 );
     }
 }

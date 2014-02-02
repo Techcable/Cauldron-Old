@@ -77,7 +77,7 @@ public class WatchdogThread extends Thread
                 
                 // MCPC+ start - add more logging info
                 log.log(Level.SEVERE, "The server is going slow. Last server tick was " + (currentTime - lastTick) + "ms ago");
-                double tps = Math.min(20, Math.round(net.minecraft.server.MinecraftServer.currentTPS * 10) / 10.0);
+                double tps = Math.min(20, Math.round(net.minecraft.server.MinecraftServer.currentTps * 10) / 10.0);
                 log.log(Level.SEVERE, "Last Tick: " + lastTick + " Current Time: " + currentTime + " Warning: " + warningTime + " Timeout: " + timeoutTime);
                 log.log(Level.SEVERE, "[TPS]: " + tps + " Server Tick #" + net.minecraft.server.MinecraftServer.getServer().getTickCounter());
                 log.log(Level.SEVERE, "Last recorded TPS: " + tps);
@@ -147,7 +147,7 @@ public class WatchdogThread extends Thread
                 lastWarning = System.currentTimeMillis();
                 // Print what the last server TPS was...
                 log.log(Level.WARNING, "The server is going slow. Last server tick was " + ((System.currentTimeMillis() - lastTick)) + "ms ago");
-                double tps = Math.min(20, Math.round(net.minecraft.server.MinecraftServer.currentTPS * 10) / 10.0);
+                double tps = Math.min(20, Math.round(net.minecraft.server.MinecraftServer.currentTps * 10) / 10.0);
                 log.log(Level.WARNING, "Last Tick: " + lastTick + " Current Time: " + currentTime + " Warning: " + warningTime + " Timeout: " + timeoutTime);
                 log.log(Level.WARNING, "[TPS]: " + tps + " Server Tick #" + net.minecraft.server.MinecraftServer.getServer().getTickCounter());
                 for (net.minecraft.world.WorldServer world : MinecraftServer.getServer().worlds)

@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/player/EntityPlayerMP.java
 +++ ../src-work/minecraft/net/minecraft/entity/player/EntityPlayerMP.java
-@@ -105,6 +105,20 @@
+@@ -105,10 +105,24 @@
  import net.minecraftforge.event.entity.player.PlayerDropsEvent;
  import net.minecraftforge.event.world.ChunkWatchEvent;
  
@@ -21,6 +21,11 @@
  public class EntityPlayerMP extends EntityPlayer implements ICrafting
  {
      private static final Logger field_147102_bM = LogManager.getLogger();
+-    private String translator = "en_US";
++    public String translator = "en_US"; // CraftBukkit - private -> public
+     // JAVADOC FIELD $$ field_71135_a
+     public NetHandlerPlayServer playerNetServerHandler;
+     // JAVADOC FIELD $$ field_71133_b
 @@ -132,8 +146,8 @@
      // JAVADOC FIELD $$ field_71147_cj
      private boolean wasHungry = true;
@@ -146,6 +151,15 @@
      // JAVADOC METHOD $$ func_82242_a
      public void addExperienceLevel(int par1)
      {
+@@ -261,7 +359,7 @@
+             ArrayList arraylist1 = new ArrayList();
+             Chunk chunk;
+ 
+-            while (iterator1.hasNext() && arraylist.size() < S26PacketMapChunkBulk.func_149258_c())
++            while (iterator1.hasNext() && arraylist.size() < this.worldObj.spigotConfig.maxBulkChunk)   // Spigot
+             {
+                 ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair)iterator1.next();
+ 
 @@ -273,9 +371,8 @@
  
                          if (chunk.func_150802_k())

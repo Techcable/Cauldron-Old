@@ -1,10 +1,12 @@
 package org.bukkit.craftbukkit.entity;
 
 
+import org.apache.commons.lang.Validate;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.projectiles.ProjectileSource;
 
 public class CraftArrow extends AbstractProjectile implements Arrow {
 
@@ -12,18 +14,34 @@ public class CraftArrow extends AbstractProjectile implements Arrow {
         super(server, entity);
     }
 
-    public LivingEntity getShooter() {
-        if (getHandle().shootingEntity != null) {
-            return (LivingEntity) getHandle().shootingEntity.getBukkitEntity();
-        }
-
-        return null;
+    public void setKnockbackStrength(int knockbackStrength) {
+        Validate.isTrue(knockbackStrength >= 0, "Knockback cannot be negative");
+        getHandle().setKnockbackStrength(knockbackStrength);
     }
 
-    public void setShooter(LivingEntity shooter) {
-        if (shooter instanceof CraftLivingEntity) {
+    public int getKnockbackStrength() {
+        return getHandle().knockbackStrength;
+    }
+
+    public boolean isCritical() {
+        return getHandle().getIsCritical();
+    }
+
+    public void setCritical(boolean critical) {
+        getHandle().setIsCritical(critical);
+    }
+
+    public ProjectileSource getShooter() {
+        return getHandle().projectileSource;
+    }
+
+    public void setShooter(ProjectileSource shooter) {
+        if (shooter instanceof LivingEntity) {
             getHandle().shootingEntity = ((CraftLivingEntity) shooter).getHandle();
+        } else {
+            getHandle().shootingEntity = null;
         }
+        getHandle().projectileSource = shooter;
     }
 
     @Override
@@ -38,6 +56,19 @@ public class CraftArrow extends AbstractProjectile implements Arrow {
 
     public EntityType getType() {
         return EntityType.ARROW;
+    }
+
+    @Deprecated
+    public LivingEntity _INVALID_getShooter() {
+        if (getHandle().shootingEntity == null) {
+            return null;
+        }
+        return (LivingEntity) getHandle().shootingEntity.getBukkitEntity();
+    }
+
+    @Deprecated
+    public void _INVALID_setShooter(LivingEntity shooter) {
+        getHandle().shootingEntity = ((CraftLivingEntity) shooter).getHandle();
     }
 
     // Spigot start

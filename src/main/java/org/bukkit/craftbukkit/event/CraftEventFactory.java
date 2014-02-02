@@ -14,8 +14,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.craftbukkit.CraftStatistic;
 import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.CraftStatistic;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.craftbukkit.block.CraftBlockState;
@@ -502,8 +502,10 @@ public class CraftEventFactory {
         if (!(source instanceof net.minecraft.util.EntityDamageSource)) {
             return false;
         }
-        // We don't need to check for null, since EntityDamageSource will always return an event
         EntityDamageEvent event = handleEntityDamageEvent(entity, source, damage);
+        if (event == null) {
+            return false;
+        }
         return event.isCancelled() || event.getDamage() == 0;
     }
 
