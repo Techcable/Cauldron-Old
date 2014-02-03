@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/cpw/mods/fml/common/network/handshake/NetworkDispatcher.java
++++ ../src-work/minecraft/cpw/mods/fml/common/network/handshake/NetworkDispatcher.java
+@@ -201,7 +201,7 @@
+         }
+         else
+         {
+-            FMLLog.info("Unexpected packet during modded negotiation - assuming vanilla or keepalives : %s", msg.getClass().getName());
++            //FMLLog.info("Unexpected packet during modded negotiation - assuming vanilla or keepalives : %s", msg.getClass().getName()); // MCPC+ - unneeded spam
+         }
+         return false;
+     }
