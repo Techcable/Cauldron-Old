@@ -235,7 +235,6 @@
 -        if (par1EntityPlayerMP.ridingEntity != null)
 +    public String disconnect(EntityPlayerMP entityplayermp)   // CraftBukkit - return string
 +    {
-+        FMLCommonHandler.instance().firePlayerLoggedOut(entityplayermp);
 +        entityplayermp.triggerAchievement(StatList.leaveGameStat);
 +        // MCPC+ start - don't show quit messages for players that haven't actually connected
 +        PlayerQuitEvent playerQuitEvent = null;
@@ -244,12 +243,13 @@
 -            worldserver.removePlayerEntityDangerously(par1EntityPlayerMP.ridingEntity);
 +            // CraftBukkit start - Quitting must be before we do final save of data, in case plugins need to modify it
 +            org.bukkit.craftbukkit.event.CraftEventFactory.handleInventoryCloseEvent(entityplayermp);
-+            playerQuitEvent = new PlayerQuitEvent(entityplayermp.getBukkitEntity(), "\u00A7e" + entityplayermp.getCommandSenderName() + " left the game.");
++            playerQuitEvent = new PlayerQuitEvent(this.cserver.getPlayer(entityplayermp), "\u00A7e" + entityplayermp.getCommandSenderName() + " left the game.");
 +            this.cserver.getPluginManager().callEvent(playerQuitEvent);
 +            entityplayermp.getBukkitEntity().disconnect(playerQuitEvent.getQuitMessage());
 +            // CraftBukkit end
 +        }
 +        // MCPC+ end
++        FMLCommonHandler.instance().firePlayerLoggedOut(entityplayermp);
 +        this.writePlayerData(entityplayermp);
 +        WorldServer worldserver = entityplayermp.getServerForPlayer();
 +

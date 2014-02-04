@@ -368,7 +368,7 @@ public final class CraftServer implements Server {
     }
 
     public Player getPlayer(final net.minecraft.entity.player.EntityPlayerMP entity) {
-        return entity.getBukkitEntity(); // MCPC+
+        return entity.playerNetServerHandler.getPlayerB();
     }
 
     public List<Player> matchPlayer(String partialName) {
