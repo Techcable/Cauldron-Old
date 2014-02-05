@@ -34,7 +34,8 @@
      private final PluginDescriptionFile description;
      private final File dataFolder;
      private final File file;
-     final JavaPlugin plugin;
+-    final JavaPlugin plugin;
++    JavaPlugin plugin; // MCPC+ - remove final
      private JavaPlugin pluginInit;
      private IllegalStateException pluginState;
 +    // MCPC+ start
@@ -65,11 +66,10 @@
      PluginClassLoader(final JavaPluginLoader loader, final ClassLoader parent, final PluginDescriptionFile description, final File dataFolder, final File file) throws InvalidPluginException, MalformedURLException {
          super(new URL[] {file.toURI().toURL()}, parent);
          Validate.notNull(loader, "Loader cannot be null");
-@@ -55,6 +95,115 @@
-         } catch (InstantiationException ex) {
-             throw new InvalidPluginException("Abnormal plugin type", ex);
-         }
-+
+@@ -34,6 +74,116 @@
+         this.dataFolder = dataFolder;
+         this.file = file;
+ 
 +        // MCPC+ start
 +
 +        String pluginName = this.description.getName();
@@ -84,10 +84,10 @@
 +        boolean remapNMS161 = MCPCConfig.getBoolean("plugin-settings.default.remap-nms-v1_6_R1", true);
 +        boolean remapNMS152 = MCPCConfig.getBoolean("plugin-settings.default.remap-nms-v1_5_R3", true);
 +        String remapNMSPre = MCPCConfig.getString("plugin-settings.default.remap-nms-pre", "false");
-+        boolean remapOBC172 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_7_R1", false);
-+        boolean remapOBC164 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R3", false);
-+        boolean remapOBC162 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R2", false);
-+        boolean remapOBC161 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R1", false);
++        boolean remapOBC172 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_7_R1", true);
++        boolean remapOBC164 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R3", true);
++        boolean remapOBC162 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R2", true);
++        boolean remapOBC161 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R1", true);
 +        boolean remapOBC152 = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-v1_5_R3", true);
 +        boolean remapOBCPre = MCPCConfig.getBoolean("plugin-settings.default.remap-obc-pre", false);
 +        boolean globalInherit = MCPCConfig.getBoolean("plugin-settings.default.global-inheritance", true);
@@ -106,6 +106,7 @@
 +        remapNMS161 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_6_R1", remapNMS161, false);
 +        remapNMS152 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_5_R3", remapNMS152, false);
 +        remapNMSPre = MCPCConfig.getString("plugin-settings."+pluginName+".remap-nms-pre", remapNMSPre, false);
++        remapOBC172 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_7_R1", remapOBC172, false);
 +        remapOBC164 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_6_R3", remapOBC164, false);
 +        remapOBC162 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_6_R2", remapOBC162, false);
 +        remapOBC161 = MCPCConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_6_R1", remapOBC161, false);
@@ -178,10 +179,11 @@
 +            remapperProcessor = null;
 +        }
 +        // MCPC+ end
-     }
- 
-     @Override
-@@ -62,30 +211,256 @@
++
+         try {
+             Class<?> jarClass;
+             try {
+@@ -62,30 +212,256 @@
          return findClass(name, true);
      }
  
@@ -225,7 +227,7 @@
 +                    null, false);
 +        }
 +        // resolve naming conflict in FML/CB
-+        jarMapping.methods.put("net/minecraft/server/"+obfVersion+"/PlayerConnection/getPlayer ()Lorg/bukkit/craftbukkit/"+getNativeVersion()+"/entity/CraftPlayer;", "getPlayerB");
++        jarMapping.methods.put("net/minecraft/server/"+obfVersion+"/PlayerConnection/getPlayer ()Lorg/bukkit/craftbukkit/entity/CraftPlayer;", "getPlayerB");
 +
 +        // remap bouncycastle to Forge's included copy, not the vanilla obfuscated copy (not in MCPC+), see #133
 +        //jarMapping.packages.put("net/minecraft/"+obfVersion+"/org/bouncycastle", "org/bouncycastle"); No longer needed
@@ -273,23 +275,23 @@
 +            }
 +
 +            if ((flags & F_REMAP_OBC172) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R1", org_bukkit_craftbukkit+"/"+getNativeVersion());
++                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R1", org_bukkit_craftbukkit);
 +            }
 +
 +            if ((flags & F_REMAP_OBC164) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R3", org_bukkit_craftbukkit+"/"+getNativeVersion());
++                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R3", org_bukkit_craftbukkit);
 +            }
 +
 +            if ((flags & F_REMAP_OBC162) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R2", org_bukkit_craftbukkit+"/"+getNativeVersion());
++                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R2", org_bukkit_craftbukkit);
 +            }
 +
 +            if ((flags & F_REMAP_OBC161) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R1", org_bukkit_craftbukkit+"/"+getNativeVersion());
++                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R1", org_bukkit_craftbukkit);
 +            }
 +
 +            if ((flags & F_REMAP_OBC152) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_5_R3", org_bukkit_craftbukkit+"/"+getNativeVersion());
++                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_5_R3", org_bukkit_craftbukkit);
 +            }
 +
 +            if ((flags & F_REMAP_OBCPRE) != 0) {
