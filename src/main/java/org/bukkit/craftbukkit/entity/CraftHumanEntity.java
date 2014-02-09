@@ -239,7 +239,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         String title = container.getBukkitView().getTitle();
         int size = container.getBukkitView().getTopInventory().getSize();
 
-        player.playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S2DPacketOpenWindow(container.windowId, windowType, title, size, true));
+        player.playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S2DPacketOpenWindow(container.windowId, windowType, title, size, true));
         getHandle().openContainer = container;
         getHandle().openContainer.addCraftingToCrafters(player);
     }
@@ -283,7 +283,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         if (((net.minecraft.entity.player.EntityPlayerMP) getHandle()).playerNetServerHandler == null) return;
         if (getHandle().openContainer != getHandle().inventoryContainer) {
             // fire INVENTORY_CLOSE if one already open
-            ((net.minecraft.entity.player.EntityPlayerMP)getHandle()).playerNetServerHandler.func_147356_a(new net.minecraft.network.play.client.C0DPacketCloseWindow(getHandle().openContainer.windowId));
+            ((net.minecraft.entity.player.EntityPlayerMP)getHandle()).playerNetServerHandler.processCloseWindow(new net.minecraft.network.play.client.C0DPacketCloseWindow(getHandle().openContainer.windowId));
         }
         net.minecraft.entity.player.EntityPlayerMP player = (net.minecraft.entity.player.EntityPlayerMP) getHandle();
         net.minecraft.inventory.Container container;
@@ -304,7 +304,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         int windowType = CraftContainer.getNotchInventoryType(type);
         String title = inventory.getTitle();
         int size = inventory.getTopInventory().getSize();
-        player.playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S2DPacketOpenWindow(container.windowId, windowType, title, size, false));
+        player.playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S2DPacketOpenWindow(container.windowId, windowType, title, size, false));
         player.openContainer = container;
         player.openContainer.addCraftingToCrafters(player);
     }

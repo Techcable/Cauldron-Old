@@ -24,25 +24,25 @@ public class CraftFurnace extends CraftBlockState implements Furnace {
         boolean result = super.update(force, applyPhysics);
 
         if (result) {
-            furnace.onInventoryChanged();
+            furnace.markDirty();
         }
 
         return result;
     }
 
     public short getBurnTime() {
-        return (short) furnace.field_145956_a;
+        return (short) furnace.furnaceBurnTime;
     }
 
     public void setBurnTime(short burnTime) {
-        furnace.field_145956_a = burnTime;
+        furnace.furnaceBurnTime = burnTime;
     }
 
     public short getCookTime() {
-        return (short) furnace.field_145961_j;
+        return (short) furnace.furnaceCookTime;
     }
 
     public void setCookTime(short cookTime) {
-        furnace.field_145961_j = cookTime;
+        furnace.furnaceCookTime = cookTime;
     }
 }

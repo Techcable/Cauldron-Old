@@ -109,7 +109,7 @@
                      this.field_145792_e = movingobjectposition.blockY;
                      this.field_145789_f = movingobjectposition.blockZ;
 -                    this.field_145790_g = block;
-+                    this.field_145790_g = this.worldObj.func_147439_a(field_145791_d, field_145792_e, field_145789_f); // CraftBukkit - Get correct block for storage
++                    this.field_145790_g = this.worldObj.getBlock(field_145791_d, field_145792_e, field_145789_f); // CraftBukkit - Get correct block for storage
                      this.inData = this.worldObj.getBlockMetadata(this.field_145791_d, this.field_145792_e, this.field_145789_f);
                      this.motionX = (double)((float)(movingobjectposition.hitVec.xCoord - this.posX));
                      this.motionY = (double)((float)(movingobjectposition.hitVec.yCoord - this.posY));

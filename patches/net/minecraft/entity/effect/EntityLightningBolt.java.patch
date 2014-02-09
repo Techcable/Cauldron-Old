@@ -39,13 +39,13 @@
              int j = MathHelper.floor_double(par4);
 @@ -36,7 +49,13 @@
  
-             if (par1World.func_147439_a(i, j, k).func_149688_o() == Material.field_151579_a && Blocks.fire.func_149742_c(par1World, i, j, k))
+             if (par1World.getBlock(i, j, k).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(par1World, i, j, k))
              {
--                par1World.func_147449_b(i, j, k, Blocks.fire);
+-                par1World.setBlock(i, j, k, Blocks.fire);
 +                // CraftBukkit start
 +                if (!CraftEventFactory.callBlockIgniteEvent(par1World, i, j, k, this).isCancelled())
 +                {
-+                    par1World.func_147449_b(i, j, k, Blocks.fire);
++                    par1World.setBlock(i, j, k, Blocks.fire);
 +                }
 +
 +                // CraftBukkit end
@@ -54,13 +54,13 @@
              for (i = 0; i < 4; ++i)
 @@ -47,7 +66,13 @@
  
-                 if (par1World.func_147439_a(j, k, l).func_149688_o() == Material.field_151579_a && Blocks.fire.func_149742_c(par1World, j, k, l))
+                 if (par1World.getBlock(j, k, l).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(par1World, j, k, l))
                  {
--                    par1World.func_147449_b(j, k, l, Blocks.fire);
+-                    par1World.setBlock(j, k, l, Blocks.fire);
 +                    // CraftBukkit start
 +                    if (!CraftEventFactory.callBlockIgniteEvent(par1World, j, k, l, this).isCancelled())
 +                    {
-+                        par1World.func_147449_b(j, k, l, Blocks.fire);
++                        par1World.setBlock(j, k, l, Blocks.fire);
 +                    }
 +
 +                    // CraftBukkit end
@@ -79,13 +79,13 @@
                      int j = MathHelper.floor_double(this.posY);
 @@ -86,13 +112,19 @@
  
-                     if (this.worldObj.func_147439_a(i, j, k).func_149688_o() == Material.field_151579_a && Blocks.fire.func_149742_c(this.worldObj, i, j, k))
+                     if (this.worldObj.getBlock(i, j, k).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(this.worldObj, i, j, k))
                      {
--                        this.worldObj.func_147449_b(i, j, k, Blocks.fire);
+-                        this.worldObj.setBlock(i, j, k, Blocks.fire);
 +                        // CraftBukkit start
 +                        if (!CraftEventFactory.callBlockIgniteEvent(worldObj, i, j, k, this).isCancelled())
 +                        {
-+                            this.worldObj.func_147449_b(i, j, k, Blocks.fire);
++                            this.worldObj.setBlock(i, j, k, Blocks.fire);
 +                        }
 +
 +                        // CraftBukkit end

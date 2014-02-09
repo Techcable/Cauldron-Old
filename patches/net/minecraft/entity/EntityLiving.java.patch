@@ -14,17 +14,7 @@
  public abstract class EntityLiving extends EntityLivingBase
  {
      // JAVADOC FIELD $$ field_70757_a
-@@ -50,19 +57,19 @@
-     private EntityJumpHelper jumpHelper;
-     private EntityBodyHelper bodyHelper;
-     private PathNavigate navigator;
--    public final EntityAITasks tasks;
--    public final EntityAITasks targetTasks;
-+    protected final EntityAITasks tasks;
-+    protected final EntityAITasks targetTasks;
-     // JAVADOC FIELD $$ field_70696_bz
-     private EntityLivingBase attackTarget;
-     private EntitySenses senses;
+@@ -58,11 +65,11 @@
      // JAVADOC FIELD $$ field_82182_bS
      private ItemStack[] equipment = new ItemStack[5];
      // JAVADOC FIELD $$ field_82174_bp
@@ -62,7 +52,7 @@
 +
 +        // CraftBukkit end
 +
-         if (par1NBTTagCompound.func_150297_b("CustomName", 8) && par1NBTTagCompound.getString("CustomName").length() > 0)
+         if (par1NBTTagCompound.hasKey("CustomName", 8) && par1NBTTagCompound.getString("CustomName").length() > 0)
          {
              this.setCustomNameTag(par1NBTTagCompound.getString("CustomName"));
 @@ -551,15 +572,41 @@
@@ -114,7 +104,7 @@
 +            // CraftBukkit start
 +            if (CraftEventFactory.callPlayerUnleashEntityEvent(this, par1EntityPlayer).isCancelled())
 +            {
-+                ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.func_147359_a(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
++                ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
 +                return false;
 +            }
 +
@@ -129,7 +119,7 @@
 +                    // CraftBukkit start
 +                    if (CraftEventFactory.callPlayerLeashEntityEvent(this, par1EntityPlayer, par1EntityPlayer).isCancelled())
 +                    {
-+                        ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.func_147359_a(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
++                        ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
 +                        return false;
 +                    }
 +
@@ -144,7 +134,7 @@
 +                    // CraftBukkit start
 +                    if (CraftEventFactory.callPlayerLeashEntityEvent(this, par1EntityPlayer, par1EntityPlayer).isCancelled())
 +                    {
-+                        ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.func_147359_a(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
++                        ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
 +                        return false;
 +                    }
 +
@@ -152,7 +142,7 @@
                      this.setLeashedToEntity(par1EntityPlayer, true);
                      --itemstack.stackSize;
                      return true;
-@@ -1097,6 +1168,7 @@
+@@ -1098,6 +1169,7 @@
          {
              if (this.leashedToEntity == null || this.leashedToEntity.isDead)
              {
@@ -160,7 +150,7 @@
                  this.clearLeashed(true, true);
              }
          }
-@@ -1186,10 +1258,16 @@
+@@ -1187,10 +1259,16 @@
              }
              else
              {

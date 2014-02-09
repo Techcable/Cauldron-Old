@@ -19,8 +19,8 @@ public class CraftSign extends CraftBlockState implements Sign {
             return;
         }
         // Spigot end
-        lines = new String[sign.field_145915_a.length];
-        System.arraycopy(sign.field_145915_a, 0, lines, 0, lines.length);
+        lines = new String[sign.signText.length];
+        System.arraycopy(sign.signText, 0, lines, 0, lines.length);
     }
 
     public String[] getLines() {
@@ -42,12 +42,12 @@ public class CraftSign extends CraftBlockState implements Sign {
         if (result && sign != null) { // Spigot, add null check
             for(int i = 0; i < 4; i++) {
                 if(lines[i] != null) {
-                    sign.field_145915_a[i] = lines[i];
+                    sign.signText[i] = lines[i];
                 } else {
-                    sign.field_145915_a[i] = "";
+                    sign.signText[i] = "";
                 }
             }
-            sign.onInventoryChanged();
+            sign.markDirty();
         }
 
         return result;

@@ -55,7 +55,7 @@
 +        }
 +
 +        EntityPlayerMP player = (EntityPlayerMP) super.crafters.get(0); // TODO: Is this _always_ correct? Seems like it.
-+        player.playerNetServerHandler.func_147359_a(new S2FPacketSetSlot(player.openContainer.windowId, 0, craftResult));
++        player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, 0, craftResult));
 +        // CraftBukkit end
      }
  
@@ -69,7 +69,7 @@
 +            return true;    // CraftBukkit
 +        }
 +
-         return this.worldObj.func_147439_a(this.posX, this.posY, this.posZ) != Blocks.crafting_table ? false : par1EntityPlayer.getDistanceSq((double)this.posX + 0.5D, (double)this.posY + 0.5D, (double)this.posZ + 0.5D) <= 64.0D;
+         return this.worldObj.getBlock(this.posX, this.posY, this.posZ) != Blocks.crafting_table ? false : par1EntityPlayer.getDistanceSq((double)this.posX + 0.5D, (double)this.posY + 0.5D, (double)this.posZ + 0.5D) <= 64.0D;
      }
  
 @@ -145,4 +179,18 @@

@@ -35,7 +35,7 @@ public class CraftJukebox extends CraftBlockState implements Jukebox {
         } else {
             jukebox.func_145857_a(new net.minecraft.item.ItemStack(CraftMagicNumbers.getItem(record), 1));
         }
-        jukebox.onInventoryChanged();
+        jukebox.markDirty();
         if (record == Material.AIR) {
             world.getHandle().setBlockMetadataWithNotify(getX(), getY(), getZ(), 0, 3);
         } else {

@@ -14,6 +14,6 @@
 +
 +                    // CraftBukkit end
 +
-                     if (par2World.func_147439_a(i, j, k) == Blocks.snow_layer)
+                     if (par2World.getBlock(i, j, k) == Blocks.snow_layer)
                      {
                          --j;

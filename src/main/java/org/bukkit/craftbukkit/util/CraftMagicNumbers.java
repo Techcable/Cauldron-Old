@@ -33,34 +33,34 @@ public final class CraftMagicNumbers implements UnsafeValues {
     @Deprecated
     // A bad method for bad magic.
     public static int getId(net.minecraft.block.Block block) {
-        return net.minecraft.block.Block.func_149682_b(block);
+        return net.minecraft.block.Block.getIdFromBlock(block);
     }
 
     public static Material getMaterial(net.minecraft.block.Block block) {
-        return Material.getMaterial(net.minecraft.block.Block.func_149682_b(block));
+        return Material.getMaterial(net.minecraft.block.Block.getIdFromBlock(block));
     }
 
     public static net.minecraft.item.Item getItem(Material material) {
         // TODO: Don't use ID
-        net.minecraft.item.Item item = net.minecraft.item.Item.func_150899_d(material.getId());
+        net.minecraft.item.Item item = net.minecraft.item.Item.getItemById(material.getId());
         return item;
     }
 
     @Deprecated
     // A bad method for bad magic.
     public static net.minecraft.item.Item getItem(int id) {
-        return net.minecraft.item.Item.func_150899_d(id);
+        return net.minecraft.item.Item.getItemById(id);
     }
 
     @Deprecated
     // A bad method for bad magic.
     public static int getId(net.minecraft.item.Item item) {
-        return net.minecraft.item.Item.func_150891_b(item);
+        return net.minecraft.item.Item.getIdFromItem(item);
     }
 
     public static Material getMaterial(net.minecraft.item.Item item) {
         // TODO: Don't use ID
-        Material material = Material.getMaterial(net.minecraft.item.Item.func_150891_b(item));
+        Material material = Material.getMaterial(net.minecraft.item.Item.getIdFromItem(item));
 
         if (material == null) {
             return Material.AIR;
@@ -71,7 +71,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
 
     public static net.minecraft.block.Block getBlock(Material material) {
         // TODO: Don't use ID
-        net.minecraft.block.Block block = net.minecraft.block.Block.func_149729_e(material.getId());
+        net.minecraft.block.Block block = net.minecraft.block.Block.getBlockById(material.getId());
 
         if (block == null) {
             return net.minecraft.init.Blocks.air;
@@ -82,12 +82,12 @@ public final class CraftMagicNumbers implements UnsafeValues {
 
     @Override
     public Material getMaterialFromInternalName(String name) {
-        return getMaterial((net.minecraft.item.Item) net.minecraft.item.Item.field_150901_e.getObject(name));
+        return getMaterial((net.minecraft.item.Item) net.minecraft.item.Item.itemRegistry.getObject(name));
     }
 
     @Override
     public List<String> tabCompleteInternalMaterialName(String token, List<String> completions) {
-        return StringUtil.copyPartialMatches(token, net.minecraft.item.Item.field_150901_e.func_148742_b(), completions);
+        return StringUtil.copyPartialMatches(token, net.minecraft.item.Item.itemRegistry.getKeys(), completions);
     }
 
     @Override

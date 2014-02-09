@@ -58,7 +58,7 @@
 +
  public abstract class MinecraftServer implements ICommandSender, Runnable, IPlayerUsage
  {
-     private static final Logger field_147145_h = LogManager.getLogger();
+     private static final Logger logger = LogManager.getLogger();
      // JAVADOC FIELD $$ field_71309_l
      private static MinecraftServer mcServer;
 -    private final ISaveFormat anvilConverterForAnvilFile;
@@ -158,7 +158,7 @@
 +            }
 +            catch (IOException ex)
 +            {
-+                field_147145_h.warn((String) null, ex);
++                logger.warn((String) null, ex);
 +            }
 +        }
 +        za.co.mcportcentral.MCPCHooks.enableThreadContentionMonitoring();
@@ -314,7 +314,7 @@
 +        CraftBlock.dumpMaterials(); // MCPC+
 +        // MCPC+ start
 +        SideTransformer.allowInvalidSide = true;
-+        for (Object obj : TileEntity.field_145853_j.entrySet())
++        for (Object obj : TileEntity.classToNameMap.entrySet())
 +        {
 +            Map.Entry<Class<? extends TileEntity>, String> tileEntry = (Map.Entry<Class<? extends TileEntity>, String>)obj;
 +            if (tileEntry.getKey() == null)
@@ -338,7 +338,7 @@
          this.setUserMessage("menu.generatingTerrain");
          byte b0 = 0;
 +        // MCPC+ start - we now handle CraftBukkit's keepSpawnInMemory logic in DimensionManager. Prevents crashes with mods such as DivineRPG and speeds up server startup time by a ton.
-         field_147145_h.info("Preparing start region for level " + b0);
+         logger.info("Preparing start region for level " + b0);
          WorldServer worldserver = this.worldServers[b0];
          ChunkCoordinates chunkcoordinates = worldserver.getSpawnPoint();
 +        boolean before = worldserver.theChunkProviderServer.loadChunkOnProvideRequest;
@@ -383,7 +383,7 @@
                  if (worldserver != null)
                  {
 @@ -339,14 +530,11 @@
-                         field_147145_h.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/" + worldserver.provider.getDimensionName());
+                         logger.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/" + worldserver.provider.getDimensionName());
                      }
  
 -                    try
@@ -392,7 +392,7 @@
 -                    }
 -                    catch (MinecraftException minecraftexception)
 -                    {
--                        field_147145_h.warn(minecraftexception.getMessage());
+-                        logger.warn(minecraftexception.getMessage());
 -                    }
 +                    worldserver.saveAllChunks(true, (IProgressUpdate) null);
 +                    worldserver.flush();
@@ -404,7 +404,7 @@
          }
 @@ -359,6 +547,14 @@
          {
-             field_147145_h.info("Stopping server");
+             logger.info("Stopping server");
  
 +            // CraftBukkit start
 +            if (this.server != null)
@@ -416,24 +416,39 @@
 +
              if (this.func_147137_ag() != null)
              {
-                 this.func_147137_ag().func_151268_b();
-@@ -372,7 +568,14 @@
+                 this.func_147137_ag().terminateEndpoints();
+@@ -372,19 +568,21 @@
              }
  
-             field_147145_h.info("Saving worlds");
+             logger.info("Saving worlds");
 -            this.saveAllWorlds(false);
+-
+-            for (int i = 0; i < this.worldServers.length; ++i)
 +            try
-+            {
+             {
+-                WorldServer worldserver = this.worldServers[i];
+-                MinecraftForge.EVENT_BUS.post(new WorldEvent.Unload(worldserver));
+-                worldserver.flush();
 +                this.saveAllWorlds(false);
-+            }
+             }
 +            catch (MinecraftException e)
 +            {
 +                e.printStackTrace();
 +            }
  
-             for (int i = 0; i < this.worldServers.length; ++i)
+-            WorldServer[] tmp = worldServers;
+-            for (WorldServer world : tmp)
++            for (int i = 0; i < this.worlds.size(); ++i)
              {
-@@ -405,6 +608,13 @@
+-                DimensionManager.setWorld(world.provider.dimensionId, null);
++                WorldServer worldserver = this.worlds.get(i);
++                MinecraftForge.EVENT_BUS.post(new WorldEvent.Unload(worldserver));
++                // worldserver.flush();
++                DimensionManager.setWorld(worldserver.provider.dimensionId, (WorldServer)null);
+             }
+ 
+             if (this.usageSnooper.isSnooperRunning())
+@@ -405,6 +603,13 @@
          this.serverRunning = false;
      }
  
@@ -447,7 +462,7 @@
      public void run()
      {
          try
-@@ -413,49 +623,47 @@
+@@ -413,49 +618,47 @@
              {
                  FMLCommonHandler.instance().handleServerStarted();
                  long i = getSystemTimeMillis();
@@ -471,7 +486,7 @@
 -                    if (k > 2000L && i - this.timeOfLastWarning >= 15000L)
 +                    if (wait > 0)
                      {
--                        field_147145_h.warn("Can\'t keep up! Did the system time change, or is the server overloaded? Running {}ms behind, skipping {} tick(s)", new Object[] {Long.valueOf(k), Long.valueOf(k / 50L)});
+-                        logger.warn("Can\'t keep up! Did the system time change, or is the server overloaded? Running {}ms behind, skipping {} tick(s)", new Object[] {Long.valueOf(k), Long.valueOf(k / 50L)});
 -                        k = 2000L;
 -                        this.timeOfLastWarning = i;
 +                        Thread.sleep(wait / 1000000);
@@ -482,7 +497,7 @@
 -                    if (k < 0L)
 +                    else
                      {
--                        field_147145_h.warn("Time ran backwards! Did the system time change?");
+-                        logger.warn("Time ran backwards! Did the system time change?");
 -                        k = 0L;
 +                        catchupTime = Math.min(1000000000, Math.abs(wait));
                      }
@@ -521,22 +536,22 @@
                  FMLCommonHandler.instance().handleServerStopping();
              }
              else
-@@ -466,6 +674,14 @@
+@@ -466,6 +669,14 @@
          catch (Throwable throwable1)
          {
-             field_147145_h.error("Encountered an unexpected exception", throwable1);
+             logger.error("Encountered an unexpected exception", throwable1);
 +
 +            // Spigot Start
 +            if (throwable1.getCause() != null)
 +            {
-+                field_147145_h.error("\tCause of unexpected exception was", throwable1.getCause());
++                logger.error("\tCause of unexpected exception was", throwable1.getCause());
 +            }
 +
 +            // Spigot End
              CrashReport crashreport = null;
  
              if (throwable1 instanceof ReportedException)
-@@ -498,6 +714,7 @@
+@@ -498,6 +709,7 @@
                  {
                      return;
                  }
@@ -544,7 +559,7 @@
                  this.stopServer();
                  this.serverStopped = true;
              }
-@@ -507,6 +724,16 @@
+@@ -507,6 +719,16 @@
              }
              finally
              {
@@ -561,7 +576,7 @@
                  FMLCommonHandler.instance().handleServerStopped();
                  this.serverStopped = true;
                  this.systemExitNow();
-@@ -554,7 +781,9 @@
+@@ -554,7 +776,9 @@
      {
          long i = System.nanoTime();
          AxisAlignedBB.getAABBPool().cleanPool();
@@ -571,7 +586,7 @@
          ++this.tickCounter;
  
          if (this.startProfiling)
-@@ -583,11 +812,18 @@
+@@ -583,11 +807,18 @@
              this.field_147147_p.func_151318_b().func_151330_a(agameprofile);
          }
  
@@ -592,7 +607,7 @@
              this.theProfiler.endSection();
          }
  
-@@ -596,24 +832,51 @@
+@@ -596,24 +827,51 @@
          this.theProfiler.endSection();
          this.theProfiler.startSection("snooper");
  
@@ -639,14 +654,14 @@
 +            for (int i = 0; i < this.getConfigurationManager().playerEntityList.size(); ++i)
 +            {
 +                EntityPlayerMP entityplayermp = (EntityPlayerMP) this.getConfigurationManager().playerEntityList.get(i);
-+                entityplayermp.playerNetServerHandler.func_147359_a(new S03PacketTimeUpdate(entityplayermp.worldObj.getTotalWorldTime(), entityplayermp.getPlayerTime(), entityplayermp.worldObj.getGameRules().getGameRuleBooleanValue("doDaylightCycle"))); // Add support for per player time
++                entityplayermp.playerNetServerHandler.sendPacket(new S03PacketTimeUpdate(entityplayermp.worldObj.getTotalWorldTime(), entityplayermp.getPlayerTime(), entityplayermp.worldObj.getGameRules().getGameRuleBooleanValue("doDaylightCycle"))); // Add support for per player time
 +            }
 +        }
 +
          int i;
  
          Integer[] ids = DimensionManager.getIDs(this.tickCounter % 200 == 0);
-@@ -622,20 +885,21 @@
+@@ -622,20 +880,21 @@
              int id = ids[x];
              long j = System.nanoTime();
  
@@ -664,14 +679,14 @@
                  if (this.tickCounter % 20 == 0)
                  {
                      this.theProfiler.startSection("timeSync");
-                     this.serverConfigManager.func_148537_a(new S03PacketTimeUpdate(worldserver.getTotalWorldTime(), worldserver.getWorldTime(), worldserver.getGameRules().getGameRuleBooleanValue("doDaylightCycle")), worldserver.provider.dimensionId);
+                     this.serverConfigManager.sendPacketToAllPlayersInDimension(new S03PacketTimeUpdate(worldserver.getTotalWorldTime(), worldserver.getWorldTime(), worldserver.getGameRules().getGameRuleBooleanValue("doDaylightCycle")), worldserver.provider.dimensionId);
                      this.theProfiler.endSection();
                  }
 +                // CraftBukkit end */
  
                  this.theProfiler.startSection("tick");
                  FMLCommonHandler.instance().onPreWorldTick(worldserver);
-@@ -647,7 +911,17 @@
+@@ -647,7 +906,17 @@
                  }
                  catch (Throwable throwable1)
                  {
@@ -690,7 +705,7 @@
                      worldserver.addWorldInfoToCrashReport(crashreport);
                      throw new ReportedException(crashreport);
                  }
-@@ -658,7 +932,17 @@
+@@ -658,7 +927,17 @@
                  }
                  catch (Throwable throwable)
                  {
@@ -709,7 +724,7 @@
                      worldserver.addWorldInfoToCrashReport(crashreport);
                      throw new ReportedException(crashreport);
                  }
-@@ -666,10 +950,12 @@
+@@ -666,10 +945,12 @@
                  FMLCommonHandler.instance().onPostWorldTick(worldserver);
                  this.theProfiler.endSection();
                  this.theProfiler.startSection("tracker");
@@ -723,12 +738,12 @@
  
              worldTickTimes.get(id)[this.tickCounter % 100] = System.nanoTime() - j;
          }
-@@ -677,16 +963,22 @@
+@@ -677,16 +958,22 @@
          this.theProfiler.endStartSection("dim_unloading");
          DimensionManager.unloadWorlds(worldTickTimes);
          this.theProfiler.endStartSection("connection");
 +        SpigotTimings.connectionTimer.startTiming(); // Spigot
-         this.func_147137_ag().func_151269_c();
+         this.func_147137_ag().networkTick();
 +        SpigotTimings.connectionTimer.stopTiming(); // Spigot
          this.theProfiler.endStartSection("players");
 +        SpigotTimings.playerListTimer.startTiming(); // Spigot
@@ -746,7 +761,7 @@
          this.theProfiler.endSection();
      }
  
-@@ -722,6 +1014,13 @@
+@@ -722,6 +1009,13 @@
      // JAVADOC METHOD $$ func_71218_a
      public WorldServer worldServerForDimension(int par1)
      {
@@ -760,7 +775,7 @@
          WorldServer ret = DimensionManager.getWorld(par1);
          if (ret == null)
          {
-@@ -808,7 +1107,7 @@
+@@ -808,7 +1102,7 @@
      // JAVADOC METHOD $$ func_71248_a
      public List getPossibleCompletions(ICommandSender par1ICommandSender, String par2Str)
      {
@@ -769,7 +784,7 @@
  
          if (par2Str.startsWith("/"))
          {
-@@ -834,8 +1133,6 @@
+@@ -834,8 +1128,6 @@
                      }
                  }
              }
@@ -778,7 +793,7 @@
          }
          else
          {
-@@ -853,9 +1150,10 @@
+@@ -853,9 +1145,10 @@
                      arraylist.add(s2);
                  }
              }
@@ -791,7 +806,7 @@
      }
  
      // JAVADOC METHOD $$ func_71276_C
-@@ -1069,7 +1367,7 @@
+@@ -1070,7 +1363,7 @@
  
      public boolean isServerInOnlineMode()
      {
@@ -800,7 +815,7 @@
      }
  
      public void setOnlineMode(boolean par1)
-@@ -1161,7 +1459,7 @@
+@@ -1162,7 +1455,7 @@
  
      public NetworkSystem func_147137_ag()
      {
@@ -809,7 +824,7 @@
      }
  
      @SideOnly(Side.CLIENT)
-@@ -1292,8 +1590,11 @@
+@@ -1293,8 +1586,11 @@
      {
          Bootstrap.func_151354_b();
  
@@ -821,9 +836,9 @@
              boolean flag = !GraphicsEnvironment.isHeadless();
              String s = null;
              String s1 = ".";
-@@ -1389,16 +1690,32 @@
+@@ -1390,16 +1686,32 @@
              {
-                 dedicatedserver.func_120011_ar();
+                 dedicatedserver.setGuiEnabled();
              }
 +            // */
 +            DedicatedServer dedicatedserver = new DedicatedServer(options);
@@ -860,7 +875,7 @@
          }
          catch (Exception exception)
          {
-@@ -1406,6 +1723,156 @@
+@@ -1407,6 +1719,156 @@
          }
      }
  
@@ -963,14 +978,14 @@
 +        try {
 +            options = parser.parse(args);
 +        } catch (joptsimple.OptionException ex) {
-+            field_147145_h.log(org.apache.logging.log4j.Level.ERROR, ex.getLocalizedMessage());
++            logger.log(org.apache.logging.log4j.Level.ERROR, ex.getLocalizedMessage());
 +        }
 +
 +        if ((options == null) || (options.has("?"))) {
 +            try {
 +                parser.printHelpOn(System.out);
 +            } catch (IOException ex) {
-+                field_147145_h.log(org.apache.logging.log4j.Level.ERROR, ex);
++                logger.log(org.apache.logging.log4j.Level.ERROR, ex);
 +            }
 +        } else {
 +            try {
@@ -1002,7 +1017,7 @@
 +                try {
 +                    configuration.save(configFile);
 +                } catch (IOException ex) {
-+                    field_147145_h.log(org.apache.logging.log4j.Level.ERROR, "Could not save " + configFile, ex);
++                    logger.log(org.apache.logging.log4j.Level.ERROR, "Could not save " + configFile, ex);
 +                }
 +
 +                return options;
@@ -1017,14 +1032,7 @@
      // JAVADOC METHOD $$ func_71244_g
      @SideOnly(Side.SERVER)
      public void logInfo(String par1Str)
-@@ -1434,19 +1901,77 @@
-         return this.motd;
-     }
- 
--    // JAVADOC METHOD $$ func_71258_A
-+    /**
-+     * Used by RCon's Query in the form of "MajorServerMod 1.2.3: MyPlugin 1.3; AnotherPlugin 2.1; AndSoForth 1.0".
-+     */
+@@ -1439,16 +1901,71 @@
      @SideOnly(Side.SERVER)
      public String getPlugins()
      {
@@ -1057,28 +1065,28 @@
 +        // CraftBukkit end
      }
  
+     // JAVADOC METHOD $$ func_71252_i
      @SideOnly(Side.SERVER)
--    public String executeCommand(String par1Str)
-+    // CraftBukkit start
-+    public String executeCommand(final String par1Str)   // final parameter
+-    public String handleRConCommand(String par1Str)
++    public String handleRConCommand(final String par1Str)
      {
--        RConConsoleSource.consoleBuffer.resetLog();
--        this.commandManager.executeCommand(RConConsoleSource.consoleBuffer, par1Str);
--        return RConConsoleSource.consoleBuffer.getChatBuffer();
+-        RConConsoleSource.instance.resetLog();
+-        this.commandManager.executeCommand(RConConsoleSource.instance, par1Str);
+-        return RConConsoleSource.instance.getLogContents();
 +        Waitable<String> waitable = new Waitable<String>()
 +        {
 +            @Override
 +            protected String evaluate()
 +            {
-+                RConConsoleSource.consoleBuffer.resetLog();
++                RConConsoleSource.instance.resetLog();
 +                // Event changes start
 +                RemoteServerCommandEvent event = new RemoteServerCommandEvent(MinecraftServer.this.remoteConsole, par1Str);
 +                MinecraftServer.this.server.getPluginManager().callEvent(event);
 +                // Event changes end
-+                ServerCommand servercommand = new ServerCommand(event.getCommand(), RConConsoleSource.consoleBuffer);
++                ServerCommand servercommand = new ServerCommand(event.getCommand(), RConConsoleSource.instance);
 +                MinecraftServer.this.server.dispatchServerCommand(MinecraftServer.this.remoteConsole, servercommand); // CraftBukkit
 +                // this.n.a(RemoteControlCommandListener.instance, s);
-+                return RConConsoleSource.consoleBuffer.getChatBuffer();
++                return RConConsoleSource.instance.getLogContents();
 +            }
 +        };
 +        processQueue.add(waitable);
@@ -1101,7 +1109,7 @@
      }
  
      // JAVADOC METHOD $$ func_71239_B
-@@ -1502,4 +2027,11 @@
+@@ -1504,4 +2021,11 @@
      {
          this.isGamemodeForced = par1;
      }
@@ -1109,7 +1117,7 @@
 +    // CraftBukkit start
 +    public static Logger getLogger()
 +    {
-+        return field_147145_h;
++        return logger;
 +    }
 +    // CraftBukkit end
  }

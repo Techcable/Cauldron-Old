@@ -76,7 +76,7 @@ public class CraftEntityEquipment implements EntityEquipment {
     }
 
     private ItemStack getEquipment(int slot) {
-        return CraftItemStack.asBukkitCopy(entity.getHandle().getCurrentItemOrArmor(slot));
+        return CraftItemStack.asBukkitCopy(entity.getHandle().getEquipmentInSlot(slot));
     }
 
     private void setEquipment(int slot, ItemStack stack) {

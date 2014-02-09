@@ -11,36 +11,36 @@ import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 
 public class CraftNoteBlock extends CraftBlockState implements NoteBlock {
     private final CraftWorld world;
-    private final net.minecraft.tileentity.TileEntityNote note;
+    private final net.minecraft.tileentity.TileEntityNote tileNote;
 
     public CraftNoteBlock(final Block block) {
         super(block);
 
         world = (CraftWorld) block.getWorld();
-        note = (net.minecraft.tileentity.TileEntityNote) world.getTileEntityAt(getX(), getY(), getZ());
+        tileNote = (net.minecraft.tileentity.TileEntityNote) world.getTileEntityAt(getX(), getY(), getZ());
     }
 
     public Note getNote() {
-        return new Note(note.field_145879_a);
+        return new Note(tileNote.note);
     }
 
     public byte getRawNote() {
-        return note.field_145879_a;
+        return tileNote.note;
     }
 
     public void setNote(Note n) {
-        note.field_145879_a = n.getId();
+        tileNote.note = n.getId();
     }
 
     public void setRawNote(byte n) {
-        note.field_145879_a = n;
+        tileNote.note = n;
     }
 
     public boolean play() {
         Block block = getBlock();
 
         if (block.getType() == Material.NOTE_BLOCK) {
-            note.func_145878_a(world.getHandle(), getX(), getY(), getZ());
+            tileNote.triggerNote(world.getHandle(), getX(), getY(), getZ());
             return true;
         } else {
             return false;
@@ -52,7 +52,7 @@ public class CraftNoteBlock extends CraftBlockState implements NoteBlock {
         Block block = getBlock();
 
         if (block.getType() == Material.NOTE_BLOCK) {
-            world.getHandle().func_147452_c(getX(), getY(), getZ(), CraftMagicNumbers.getBlock(block), instrument, note);
+            world.getHandle().addBlockEvent(getX(), getY(), getZ(), CraftMagicNumbers.getBlock(block), instrument, note);
             return true;
         } else {
             return false;
@@ -64,7 +64,7 @@ public class CraftNoteBlock extends CraftBlockState implements NoteBlock {
         Block block = getBlock();
 
         if (block.getType() == Material.NOTE_BLOCK) {
-            world.getHandle().func_147452_c(getX(), getY(), getZ(), CraftMagicNumbers.getBlock(block), instrument.getType(), note.getId());
+            world.getHandle().addBlockEvent(getX(), getY(), getZ(), CraftMagicNumbers.getBlock(block), instrument.getType(), note.getId());
             return true;
         } else {
             return false;

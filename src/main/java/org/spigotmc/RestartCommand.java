@@ -39,8 +39,8 @@ public class RestartCommand extends Command
                 // Kick all players
                 for ( net.minecraft.entity.player.EntityPlayerMP p : (List< net.minecraft.entity.player.EntityPlayerMP>) net.minecraft.server.MinecraftServer.getServer().getConfigurationManager().playerEntityList )
                 {
-                    p.playerNetServerHandler.func_147360_c(SpigotConfig.restartMessage);
-                    p.playerNetServerHandler.field_147371_a.func_150724_d();
+                    p.playerNetServerHandler.kickPlayerFromServer(SpigotConfig.restartMessage);
+                    p.playerNetServerHandler.netManager.isChannelOpen();
                 }
                 // Give the socket a chance to send the packets
                 try
@@ -50,7 +50,7 @@ public class RestartCommand extends Command
                 {
                 }
                 // Close the socket so we can rebind with the new process
-                net.minecraft.server.MinecraftServer.getServer().func_147137_ag().func_151268_b();
+                net.minecraft.server.MinecraftServer.getServer().func_147137_ag().terminateEndpoints();
 
                 // Give time for it to kick in
                 try

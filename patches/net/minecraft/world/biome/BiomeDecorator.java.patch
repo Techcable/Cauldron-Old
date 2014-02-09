@@ -48,8 +48,8 @@
              k = this.chunk_X + this.randomGenerator.nextInt(16) + 8;
              l = this.chunk_Z + this.randomGenerator.nextInt(16) + 8;
  
--            for (i1 = this.randomGenerator.nextInt(this.currentWorld.getHeightValue(k, l) * 2); i1 > 0 && this.currentWorld.func_147437_c(k, i1 - 1, l); --i1)
-+            for (i1 = this.randomGenerator.nextInt(this.getHighestBlockYAt(k, l) * 2); i1 > 0 && this.currentWorld.func_147437_c(k, i1 - 1, l); --i1)    // Spigot
+-            for (i1 = this.randomGenerator.nextInt(this.currentWorld.getHeightValue(k, l) * 2); i1 > 0 && this.currentWorld.isAirBlock(k, i1 - 1, l); --i1)
++            for (i1 = this.randomGenerator.nextInt(this.getHighestBlockYAt(k, l) * 2); i1 > 0 && this.currentWorld.isAirBlock(k, i1 - 1, l); --i1)    // Spigot
              {
                  ;
              }

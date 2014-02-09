@@ -2,7 +2,7 @@
 +++ ../src-work/minecraft/net/minecraft/item/ItemFireball.java
 @@ -62,6 +62,18 @@
              {
-                 if (par3World.func_147439_a(par4, par5, par6).func_149688_o() == Material.field_151579_a)
+                 if (par3World.getBlock(par4, par5, par6).getMaterial() == Material.air)
                  {
 +                    // CraftBukkit start
 +                    if (org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(par3World, par4, par5, par6, org.bukkit.event.block.BlockIgniteEvent.IgniteCause.FIREBALL, par2EntityPlayer).isCancelled())
@@ -17,5 +17,5 @@
 +
 +                    // CraftBukkit end
                      par3World.playSoundEffect((double)par4 + 0.5D, (double)par5 + 0.5D, (double)par6 + 0.5D, "fire.ignite", 1.0F, itemRand.nextFloat() * 0.4F + 0.8F);
-                     par3World.func_147449_b(par4, par5, par6, Blocks.fire);
+                     par3World.setBlock(par4, par5, par6, Blocks.fire);
                  }

@@ -1,17 +1,16 @@
 --- ../src-base/minecraft/net/minecraft/network/play/client/C01PacketChatMessage.java
 +++ ../src-work/minecraft/net/minecraft/network/play/client/C01PacketChatMessage.java
-@@ -48,8 +48,33 @@
-         return this.field_149440_a;
+@@ -57,4 +57,34 @@
+     {
+         this.processPacket((INetHandlerPlayServer)p_148833_1_);
      }
- 
--    public void func_148833_a(INetHandler p_148833_1_)
++
 +    // CraftBukkit start - make chat async
 +    @Override
-+    public boolean func_148836_a()
-     {
--        this.func_148833_a((INetHandlerPlayServer)p_148833_1_);
++    public boolean hasPriority()
++    {
 +        return !this.field_149440_a.startsWith("/");
-     }
++    }
 +    // CraftBukkit end
 +
 +    // Spigot Start
@@ -19,7 +18,7 @@
 +                new com.google.common.util.concurrent.ThreadFactoryBuilder().setDaemon(true).setNameFormat("Async Chat Thread - #%d").build());
 +    public void func_148833_a(final INetHandler p_148833_1_)
 +    {
-+        if (func_148836_a())
++        if (hasPriority())
 +        {
 +            executors.submit(new Runnable()
 +            {

@@ -29,7 +29,7 @@ public class CraftInventory implements Inventory {
     }
 
     public String getName() {
-        return getInventory().func_145825_b();
+        return getInventory().getInventoryName();
     }
 
     public ItemStack getItem(int index) {
@@ -408,7 +408,7 @@ public class CraftInventory implements Inventory {
     }
 
     public String getTitle() {
-        return inventory.func_145825_b();
+        return inventory.getInventoryName();
     }
 
     public InventoryType getType() {

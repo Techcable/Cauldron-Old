@@ -17,7 +17,7 @@
              if (i <= 0)
              {
 -                this.worldObj.newExplosion(this, this.posX, this.posY + (double)this.getEyeHeight(), this.posZ, 7.0F, false, this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing"));
--                this.worldObj.func_82739_e(1013, (int)this.posX, (int)this.posY, (int)this.posZ, 0);
+-                this.worldObj.playBroadcastSound(1013, (int)this.posX, (int)this.posY, (int)this.posZ, 0);
 +                // CraftBukkit start
 +                ExplosionPrimeEvent event = new ExplosionPrimeEvent(this.getBukkitEntity(), 7.0F, false);
 +                this.worldObj.getServer().getPluginManager().callEvent(event);
@@ -29,7 +29,7 @@
 +
 +                // CraftBukkit end
 +                this.worldObj.newExplosion(this, this.posX, this.posY + (double) this.getEyeHeight(), this.posZ, 7.0F, false, this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing"));
-+                this.worldObj.func_82739_e(1013, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
++                this.worldObj.playBroadcastSound(1013, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
              }
  
              this.func_82215_s(i);
@@ -59,7 +59,7 @@
      // JAVADOC METHOD $$ func_70628_a
      protected void dropFewItems(boolean par1, int par2)
      {
--        this.func_145779_a(Items.nether_star, 1);
+-        this.dropItem(Items.nether_star, 1);
 +        // CraftBukkit start
 +        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
 +        loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(Items.nether_star), 1));

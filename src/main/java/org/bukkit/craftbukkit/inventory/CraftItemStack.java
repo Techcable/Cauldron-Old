@@ -193,7 +193,7 @@ public final class CraftItemStack extends ItemStack {
         int size = list.tagCount();
 
         for (int i = 0; i < size; i++) {
-            net.minecraft.nbt.NBTTagCompound tag = (net.minecraft.nbt.NBTTagCompound) list.func_150305_b(i);
+            net.minecraft.nbt.NBTTagCompound tag = (net.minecraft.nbt.NBTTagCompound) list.getCompoundTagAt(i);
             short id = tag.getShort(ENCHANTMENTS_ID.NBT);
             if (id == ench.getId()) {
                 tag.setShort(ENCHANTMENTS_LVL.NBT, (short) level);
@@ -245,7 +245,7 @@ public final class CraftItemStack extends ItemStack {
         int size = list.tagCount();
 
         for (int i = 0; i < size; i++) {
-            net.minecraft.nbt.NBTTagCompound enchantment = (net.minecraft.nbt.NBTTagCompound) list.func_150305_b(i);
+            net.minecraft.nbt.NBTTagCompound enchantment = (net.minecraft.nbt.NBTTagCompound) list.getCompoundTagAt(i);
             int id = 0xffff & enchantment.getShort(ENCHANTMENTS_ID.NBT);
             if (id == ench.getId()) {
                 index = i;
@@ -269,7 +269,7 @@ public final class CraftItemStack extends ItemStack {
         listCopy = new net.minecraft.nbt.NBTTagList();
         for (int i = 0; i < size; i++) {
             if (i != index) {
-                listCopy.appendTag(list.func_150305_b(i));
+                listCopy.appendTag(list.getCompoundTagAt(i));
             }
         }
         handle.stackTagCompound.setTag(ENCHANTMENTS.NBT, listCopy);
@@ -292,8 +292,8 @@ public final class CraftItemStack extends ItemStack {
         ImmutableMap.Builder<Enchantment, Integer> result = ImmutableMap.builder();
 
         for (int i = 0; i < list.tagCount(); i++) {
-            int id = 0xffff & ((net.minecraft.nbt.NBTTagCompound) list.func_150305_b(i)).getShort(ENCHANTMENTS_ID.NBT);
-            int level = 0xffff & ((net.minecraft.nbt.NBTTagCompound) list.func_150305_b(i)).getShort(ENCHANTMENTS_LVL.NBT);
+            int id = 0xffff & ((net.minecraft.nbt.NBTTagCompound) list.getCompoundTagAt(i)).getShort(ENCHANTMENTS_ID.NBT);
+            int level = 0xffff & ((net.minecraft.nbt.NBTTagCompound) list.getCompoundTagAt(i)).getShort(ENCHANTMENTS_LVL.NBT);
 
             result.put(Enchantment.getById(id), level);
         }

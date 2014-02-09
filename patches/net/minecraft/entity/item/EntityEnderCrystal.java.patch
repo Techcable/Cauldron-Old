@@ -11,13 +11,13 @@
      // JAVADOC FIELD $$ field_70261_a
 @@ -59,7 +61,13 @@
  
-         if (this.worldObj.provider instanceof WorldProviderEnd && this.worldObj.func_147439_a(i, j, k) != Blocks.fire)
+         if (this.worldObj.provider instanceof WorldProviderEnd && this.worldObj.getBlock(i, j, k) != Blocks.fire)
          {
--            this.worldObj.func_147449_b(i, j, k, Blocks.fire);
+-            this.worldObj.setBlock(i, j, k, Blocks.fire);
 +            // CraftBukkit start
 +            if (!CraftEventFactory.callBlockIgniteEvent(this.worldObj, i, j, k, this).isCancelled())
 +            {
-+                this.worldObj.func_147449_b(i, j, k, Blocks.fire);
++                this.worldObj.setBlock(i, j, k, Blocks.fire);
 +            }
 +
 +            // CraftBukkit end

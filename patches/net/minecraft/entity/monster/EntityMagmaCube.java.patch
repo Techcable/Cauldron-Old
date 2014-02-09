@@ -6,7 +6,7 @@
      {
 +        // CraftBukkit start - Whole method
 +        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
-         Item item = this.func_146068_u();
+         Item item = this.getDropItem();
  
          if (item != null && this.getSlimeSize() > 1)
 @@ -78,11 +80,14 @@
@@ -16,7 +16,7 @@
 -            for (int k = 0; k < j; ++k)
 +            if (j > 0)
              {
--                this.func_145779_a(item, 1);
+-                this.dropItem(item, 1);
 +                loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(item), j));
              }
          }

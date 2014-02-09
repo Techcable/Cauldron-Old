@@ -9,7 +9,7 @@
  public class BlockLever extends Block
  {
      private static final String __OBFID = "CL_00000264";
-@@ -270,6 +272,19 @@
+@@ -281,6 +283,19 @@
              int i1 = p_149727_1_.getBlockMetadata(p_149727_2_, p_149727_3_, p_149727_4_);
              int j1 = i1 & 7;
              int k1 = 8 - (i1 & 8);
@@ -28,4 +28,4 @@
 +            // CraftBukkit end
              p_149727_1_.setBlockMetadataWithNotify(p_149727_2_, p_149727_3_, p_149727_4_, j1 + k1, 3);
              p_149727_1_.playSoundEffect((double)p_149727_2_ + 0.5D, (double)p_149727_3_ + 0.5D, (double)p_149727_4_ + 0.5D, "random.click", 0.3F, k1 > 0 ? 0.6F : 0.5F);
-             p_149727_1_.func_147459_d(p_149727_2_, p_149727_3_, p_149727_4_, this);
+             p_149727_1_.notifyBlocksOfNeighborChange(p_149727_2_, p_149727_3_, p_149727_4_, this);

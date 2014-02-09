@@ -29,13 +29,13 @@
              else
 @@ -69,7 +80,13 @@
  
-                 if (this.worldObj.func_147437_c(i, j, k))
+                 if (this.worldObj.isAirBlock(i, j, k))
                  {
--                    this.worldObj.func_147449_b(i, j, k, Blocks.fire);
+-                    this.worldObj.setBlock(i, j, k, Blocks.fire);
 +                    // CraftBukkit start
 +                    if (!org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(worldObj, i, j, k, this).isCancelled())
 +                    {
-+                        this.worldObj.func_147449_b(i, j, k, Blocks.fire);
++                        this.worldObj.setBlock(i, j, k, Blocks.fire);
 +                    }
 +
 +                    // CraftBukkit end

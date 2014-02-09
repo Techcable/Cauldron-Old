@@ -450,7 +450,7 @@ public final class CraftServer implements Server {
 
     // NOTE: Temporary calls through to server.properies until its replaced
     private String getConfigString(String variable, String defaultValue) {
-        return this.console.getPropertyManager().getProperty(variable, defaultValue);
+        return this.console.getPropertyManager().getStringProperty(variable, defaultValue);
     }
 
     private int getConfigInt(String variable, int defaultValue) {
@@ -583,13 +583,13 @@ public final class CraftServer implements Server {
 
         boolean animals = config.getBooleanProperty("spawn-animals", console.getCanSpawnAnimals());
         boolean monsters = config.getBooleanProperty("spawn-monsters", console.worlds.get(0).difficultySetting != net.minecraft.world.EnumDifficulty.PEACEFUL);
-        net.minecraft.world.EnumDifficulty difficulty = net.minecraft.world.EnumDifficulty.func_151523_a(config.getIntProperty("difficulty", console.worlds.get(0).difficultySetting.ordinal()));
+        net.minecraft.world.EnumDifficulty difficulty = net.minecraft.world.EnumDifficulty.getDifficultyEnum(config.getIntProperty("difficulty", console.worlds.get(0).difficultySetting.ordinal()));
 
         online.value = config.getBooleanProperty("online-mode", console.isServerInOnlineMode());
         console.setCanSpawnAnimals(config.getBooleanProperty("spawn-animals", console.getCanSpawnAnimals()));
         console.setAllowPvp(config.getBooleanProperty("pvp", console.isPVPEnabled()));
         console.setAllowFlight(config.getBooleanProperty("allow-flight", console.isFlightAllowed()));
-        console.setMOTD(config.getProperty("motd", console.getMOTD()));
+        console.setMOTD(config.getStringProperty("motd", console.getMOTD()));
         monsterSpawn = configuration.getInt("spawn-limits.monsters");
         animalSpawn = configuration.getInt("spawn-limits.animals");
         waterAnimalSpawn = configuration.getInt("spawn-limits.water-animals");

@@ -13,7 +13,7 @@
 +
  public class EntityZombie extends EntityMob
  {
-     protected static final IAttribute field_110186_bp = (new RangedAttribute("zombie.spawnReinforcements", 0.0D, 0.0D, 1.0D)).func_111117_a("Spawn Reinforcements Chance");
+     protected static final IAttribute field_110186_bp = (new RangedAttribute("zombie.spawnReinforcements", 0.0D, 0.0D, 1.0D)).setDescription("Spawn Reinforcements Chance");
 @@ -53,6 +60,7 @@
      private boolean field_146076_bu = false;
      private float field_146074_bv = -1.0F;

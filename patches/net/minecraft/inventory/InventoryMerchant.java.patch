@@ -54,7 +54,7 @@
      private static final String __OBFID = "CL_00001756";
  
      public InventoryMerchant(EntityPlayer par1EntityPlayer, IMerchant par2IMerchant)
-@@ -131,7 +171,7 @@
+@@ -133,7 +173,7 @@
      // JAVADOC METHOD $$ func_70297_j_
      public int getInventoryStackLimit()
      {

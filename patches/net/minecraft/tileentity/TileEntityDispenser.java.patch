@@ -63,7 +63,7 @@
                  i = k;
              }
          }
-@@ -182,7 +224,7 @@
+@@ -184,7 +226,7 @@
      // JAVADOC METHOD $$ func_70297_j_
      public int getInventoryStackLimit()
      {
@@ -72,7 +72,7 @@
      }
  
      // JAVADOC METHOD $$ func_70300_a
-@@ -200,4 +242,12 @@
+@@ -202,4 +244,12 @@
      {
          return true;
      }

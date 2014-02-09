@@ -42,6 +42,6 @@
 +
 +                // CraftBukkit end
 +
-                 if (!entity.func_145773_az())
+                 if (!entity.doesEntityNotTriggerPressurePlate())
                  {
                      return 15;

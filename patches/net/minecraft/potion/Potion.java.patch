@@ -38,7 +38,7 @@
              }
          }
          else if (this.id == wither.id)
-@@ -149,35 +156,43 @@
+@@ -149,13 +156,20 @@
          }
          else
          {
@@ -54,40 +54,27 @@
 +        applyInstantEffect(par1EntityLivingBase, par2EntityLivingBase, par3, par4, null);
 +    }
 +
-+    public void applyInstantEffect(EntityLivingBase entityliving, EntityLivingBase entitylivingbase1, int i, double d0, EntityPotion potion)
++    public void applyInstantEffect(EntityLivingBase par1EntityLivingBase, EntityLivingBase par2EntityLivingBase, int par3, double par4, EntityPotion potion)
 +    {
 +        // CraftBukkit end
          int j;
  
--        if ((this.id != heal.id || par2EntityLivingBase.isEntityUndead()) && (this.id != harm.id || !par2EntityLivingBase.isEntityUndead()))
-+        if ((this.id != heal.id || entitylivingbase1.isEntityUndead()) && (this.id != harm.id || !entitylivingbase1.isEntityUndead()))
-         {
--            if (this.id == harm.id && !par2EntityLivingBase.isEntityUndead() || this.id == heal.id && par2EntityLivingBase.isEntityUndead())
-+            if (this.id == harm.id && !entitylivingbase1.isEntityUndead() || this.id == heal.id && entitylivingbase1.isEntityUndead())
-             {
--                j = (int)(par4 * (double)(6 << par3) + 0.5D);
-+                j = (int)(d0 * (double)(6 << i) + 0.5D);
- 
--                if (par1EntityLivingBase == null)
-+                if (entityliving == null)
-                 {
--                    par2EntityLivingBase.attackEntityFrom(DamageSource.magic, (float)j);
-+                    entitylivingbase1.attackEntityFrom(DamageSource.magic, (float) j);
+         if ((this.id != heal.id || par2EntityLivingBase.isEntityUndead()) && (this.id != harm.id || !par2EntityLivingBase.isEntityUndead()))
+@@ -170,14 +184,15 @@
                  }
                  else
                  {
 -                    par2EntityLivingBase.attackEntityFrom(DamageSource.causeIndirectMagicDamage(par2EntityLivingBase, par1EntityLivingBase), (float)j);
 +                    // CraftBukkit - The "damager" needs to be the potion
-+                    entitylivingbase1.attackEntityFrom(DamageSource.causeIndirectMagicDamage(potion != null ? potion : entitylivingbase1, entityliving), (float) j);
++                    par2EntityLivingBase.attackEntityFrom(DamageSource.causeIndirectMagicDamage(potion != null ? potion : par2EntityLivingBase, par1EntityLivingBase), (float)j);
                  }
              }
          }
          else
          {
--            j = (int)(par4 * (double)(4 << par3) + 0.5D);
+             j = (int)(par4 * (double)(4 << par3) + 0.5D);
 -            par2EntityLivingBase.heal((float)j);
-+            j = (int)(d0 * (double)(4 << i) + 0.5D);
-+            entitylivingbase1.heal((float) j, RegainReason.MAGIC); // CraftBukkit
++            par2EntityLivingBase.heal((float)j, RegainReason.MAGIC); // CraftBukkit
          }
      }
  

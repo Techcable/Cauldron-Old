@@ -11,7 +11,7 @@
  
  public class BlockCake extends Block
  {
-@@ -104,7 +108,17 @@
+@@ -113,7 +117,17 @@
      {
          if (p_150036_5_.canEat(false))
          {
@@ -25,7 +25,7 @@
 +                p_150036_5_.getFoodStats().addStats(event.getFoodLevel() - oldFoodLevel, 0.1F);
 +            }
 +
-+            ((EntityPlayerMP) p_150036_5_).playerNetServerHandler.func_147359_a(new S06PacketUpdateHealth(((EntityPlayerMP) p_150036_5_).getBukkitEntity().getScaledHealth(), p_150036_5_.getFoodStats().foodLevel, p_150036_5_.getFoodStats().foodSaturationLevel));
++            ((EntityPlayerMP) p_150036_5_).playerNetServerHandler.sendPacket(new S06PacketUpdateHealth(((EntityPlayerMP) p_150036_5_).getBukkitEntity().getScaledHealth(), p_150036_5_.getFoodStats().foodLevel, p_150036_5_.getFoodStats().foodSaturationLevel));
 +            // CraftBukkit end
              int l = p_150036_1_.getBlockMetadata(p_150036_2_, p_150036_3_, p_150036_4_) + 1;
  

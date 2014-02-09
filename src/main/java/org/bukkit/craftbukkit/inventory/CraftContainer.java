@@ -84,7 +84,7 @@ public class CraftContainer extends net.minecraft.inventory.Container {
                 setupSlots(top, bottom);
             }
             int size = getSize();
-            player.getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S2DPacketOpenWindow(this.windowId, type, cachedTitle, size, true));
+            player.getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S2DPacketOpenWindow(this.windowId, type, cachedTitle, size, true));
             player.updateInventory();
         }
         return true;

@@ -37,7 +37,7 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
     public void setHeldItemSlot(int slot) {
         Validate.isTrue(slot >= 0 && slot < net.minecraft.entity.player.InventoryPlayer.getHotbarSize(), "Slot is not between 0 and 8 inclusive");
         this.getInventory().currentItem = slot;
-        ((CraftPlayer) this.getHolder()).getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S09PacketHeldItemChange(slot));
+        ((CraftPlayer) this.getHolder()).getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S09PacketHeldItemChange(slot));
     }
 
     public ItemStack getHelmet() {

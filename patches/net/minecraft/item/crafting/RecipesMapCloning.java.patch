@@ -1,10 +1,9 @@
 --- ../src-base/minecraft/net/minecraft/item/crafting/RecipesMapCloning.java
 +++ ../src-work/minecraft/net/minecraft/item/crafting/RecipesMapCloning.java
-@@ -4,11 +4,17 @@
- import net.minecraft.inventory.InventoryCrafting;
+@@ -5,10 +5,17 @@
  import net.minecraft.item.ItemStack;
  import net.minecraft.world.World;
--
+ 
 -public class RecipesMapCloning implements IRecipe
 +public class RecipesMapCloning extends ShapelessRecipes implements IRecipe   // CraftBukkit - added extends
  {

@@ -24,17 +24,17 @@ public class CraftBrewingStand extends CraftBlockState implements BrewingStand {
         boolean result = super.update(force, applyPhysics);
 
         if (result) {
-            brewingStand.onInventoryChanged();
+            brewingStand.markDirty();
         }
 
         return result;
     }
 
     public int getBrewingTime() {
-        return brewingStand.field_145946_k;
+        return brewingStand.brewTime;
     }
 
     public void setBrewingTime(int brewTime) {
-        brewingStand.field_145946_k = brewTime;
+        brewingStand.brewTime = brewTime;
     }
 }

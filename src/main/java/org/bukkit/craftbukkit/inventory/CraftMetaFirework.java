@@ -86,11 +86,11 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
             return;
         }
 
-        net.minecraft.nbt.NBTTagList fireworkEffects = fireworks.func_150295_c(EXPLOSIONS.NBT, 10);
+        net.minecraft.nbt.NBTTagList fireworkEffects = fireworks.getTagList(EXPLOSIONS.NBT, 10);
         List<FireworkEffect> effects = this.effects = new ArrayList<FireworkEffect>(fireworkEffects.tagCount());
 
         for (int i = 0; i < fireworkEffects.tagCount(); i++) {
-            effects.add(getEffect((net.minecraft.nbt.NBTTagCompound) fireworkEffects.func_150305_b(i)));
+            effects.add(getEffect((net.minecraft.nbt.NBTTagCompound) fireworkEffects.getCompoundTagAt(i)));
         }
     }
 

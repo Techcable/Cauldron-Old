@@ -44,7 +44,7 @@ public class RecipeIterator implements Iterator<Recipe> {
                 item = smeltingVanilla.next();
             }
 
-            CraftItemStack stack = CraftItemStack.asCraftMirror(net.minecraft.item.crafting.FurnaceRecipes.smelting().func_151395_a(item));
+            CraftItemStack stack = CraftItemStack.asCraftMirror(net.minecraft.item.crafting.FurnaceRecipes.smelting().getSmeltingResult(item));
 
             return new CraftFurnaceRecipe(stack, CraftItemStack.asCraftMirror(item));
         }

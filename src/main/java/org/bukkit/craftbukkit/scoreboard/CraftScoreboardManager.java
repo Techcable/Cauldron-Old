@@ -68,16 +68,16 @@ public final class CraftScoreboardManager implements ScoreboardManager {
         for (int i = 0; i < 3; ++i) {
             net.minecraft.scoreboard.ScoreObjective scoreboardobjective = oldboard.func_96539_a(i);
             if (scoreboardobjective != null && !removed.contains(scoreboardobjective)) {
-                entityplayer.playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S3BPacketScoreboardObjective(scoreboardobjective, 1));
+                entityplayer.playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S3BPacketScoreboardObjective(scoreboardobjective, 1));
                 removed.add(scoreboardobjective);
             }
         }
 
         // Old team tracking
-        Iterator<?> iterator = oldboard.func_96525_g().iterator();
+        Iterator<?> iterator = oldboard.getTeams().iterator();
         while (iterator.hasNext()) {
             net.minecraft.scoreboard.ScorePlayerTeam scoreboardteam = (net.minecraft.scoreboard.ScorePlayerTeam) iterator.next();
-            entityplayer.playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S3EPacketTeams(scoreboardteam, 1));
+            entityplayer.playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S3EPacketTeams(scoreboardteam, 1));
         }
 
         // The above is the reverse of the below method.

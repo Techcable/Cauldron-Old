@@ -16,13 +16,13 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
     CraftTeam(CraftScoreboard scoreboard, net.minecraft.scoreboard.ScorePlayerTeam team) {
         super(scoreboard);
         this.team = team;
-        scoreboard.teams.put(team.func_96661_b(), this);
+        scoreboard.teams.put(team.getRegisteredName(), this);
     }
 
     public String getName() throws IllegalStateException {
         CraftScoreboard scoreboard = checkState();
 
-        return team.func_96661_b();
+        return team.getRegisteredName();
     }
 
     public String getDisplayName() throws IllegalStateException {
@@ -111,7 +111,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
         Validate.notNull(player, "OfflinePlayer cannot be null");
         CraftScoreboard scoreboard = checkState();
 
-        scoreboard.board.func_151392_a(player.getName(), team.func_96661_b());
+        scoreboard.board.func_151392_a(player.getName(), team.getRegisteredName());
     }
 
     public boolean removePlayer(OfflinePlayer player) throws IllegalStateException, IllegalArgumentException {
@@ -137,8 +137,8 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
     public void unregister() throws IllegalStateException {
         CraftScoreboard scoreboard = checkState();
 
-        scoreboard.board.func_96511_d(team);
-        scoreboard.teams.remove(team.func_96661_b());
+        scoreboard.board.removeTeam(team);
+        scoreboard.teams.remove(team.getRegisteredName());
         setUnregistered();
     }
 }

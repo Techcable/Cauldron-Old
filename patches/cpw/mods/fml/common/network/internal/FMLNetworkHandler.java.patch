@@ -26,7 +26,7 @@
 +                {
 +                    if (remoteGuiContainer.getBukkitView() == null)
 +                    {
-+                        TileEntity te = entityPlayer.worldObj.func_147438_o(x, y, z);
++                        TileEntity te = entityPlayer.worldObj.getTileEntity(x, y, z);
 +                        if (te != null && te instanceof IInventory)
 +                        {
 +                            IInventory teInv = (IInventory)te;
@@ -46,6 +46,6 @@
 +                    }
 +                }
 +                // MCPC+ end
-                 entityPlayerMP.incrementWindowID();
+                 entityPlayerMP.getNextWindowId();
                  entityPlayerMP.closeContainer();
                  int windowId = entityPlayerMP.currentWindowId;

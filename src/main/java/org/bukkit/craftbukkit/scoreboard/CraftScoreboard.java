@@ -25,7 +25,7 @@ public final class CraftScoreboard implements org.bukkit.scoreboard.Scoreboard {
         for (net.minecraft.scoreboard.ScoreObjective objective : (Iterable<net.minecraft.scoreboard.ScoreObjective>) board.getScoreObjectives()) {
             new CraftObjective(this, objective); // It adds itself to map
         }
-        for (net.minecraft.scoreboard.ScorePlayerTeam team : (Iterable<net.minecraft.scoreboard.ScorePlayerTeam>) board.func_96525_g()) {
+        for (net.minecraft.scoreboard.ScorePlayerTeam team : (Iterable<net.minecraft.scoreboard.ScorePlayerTeam>) board.getTeams()) {
             new CraftTeam(this, team); // It adds itself to map
         }
     }
@@ -37,7 +37,7 @@ public final class CraftScoreboard implements org.bukkit.scoreboard.Scoreboard {
         Validate.isTrue(board.getObjective(name) == null, "An objective of name '" + name + "' already exists");
 
         CraftCriteria craftCriteria = CraftCriteria.getFromBukkit(criteria);
-        net.minecraft.scoreboard.ScoreObjective objective = board.func_96535_a(name, craftCriteria.criteria);
+        net.minecraft.scoreboard.ScoreObjective objective = board.addScoreObjective(name, craftCriteria.criteria);
         return new CraftObjective(this, objective);
     }
 
@@ -91,7 +91,7 @@ public final class CraftScoreboard implements org.bukkit.scoreboard.Scoreboard {
         Validate.notNull(player, "OfflinePlayer cannot be null");
 
         net.minecraft.scoreboard.ScorePlayerTeam team = board.getPlayersTeam(player.getName());
-        return team == null ? null : teams.get(team.func_96661_b());
+        return team == null ? null : teams.get(team.getRegisteredName());
     }
 
     public Team getTeam(String teamName) throws IllegalArgumentException {
@@ -107,7 +107,7 @@ public final class CraftScoreboard implements org.bukkit.scoreboard.Scoreboard {
     public Team registerNewTeam(String name) throws IllegalArgumentException {
         Validate.notNull(name, "Team name cannot be null");
         Validate.isTrue(name.length() <= 16, "Team name '" + name + "' is longer than the limit of 16 characters");
-        Validate.isTrue(board.func_96508_e(name) == null, "Team name '" + name + "' is already in use");
+        Validate.isTrue(board.getTeam(name) == null, "Team name '" + name + "' is already in use");
 
         return new CraftTeam(this, board.createTeam(name));
     }

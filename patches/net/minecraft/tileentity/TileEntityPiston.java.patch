@@ -1,14 +1,14 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntityPiston.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityPiston.java
-@@ -140,6 +140,11 @@
+@@ -145,6 +145,11 @@
  
-     public void func_145845_h()
+     public void updateEntity()
      {
-+        if (this.field_145850_b == null)
++        if (this.worldObj == null)
 +        {
 +            return;    // CraftBukkit
 +        }
 +
-         this.field_145870_n = this.field_145873_m;
+         this.lastProgress = this.progress;
  
-         if (this.field_145870_n >= 1.0F)
+         if (this.lastProgress >= 1.0F)

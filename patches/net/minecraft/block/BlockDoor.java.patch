@@ -9,15 +9,15 @@
  public class BlockDoor extends Block
  {
      @SideOnly(Side.CLIENT)
-@@ -329,15 +331,32 @@
+@@ -339,15 +341,32 @@
                  {
-                     this.func_149697_b(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_, l, 0);
+                     this.dropBlockAsItem(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_, l, 0);
                  }
 +
 +                // CraftBukkit start
              }
 -            else
-+            else if (p_149695_5_.func_149744_f())
++            else if (p_149695_5_.canProvidePower())
              {
 -                boolean flag1 = p_149695_1_.isBlockIndirectlyGettingPowered(p_149695_2_, p_149695_3_, p_149695_4_) || p_149695_1_.isBlockIndirectlyGettingPowered(p_149695_2_, p_149695_3_ + 1, p_149695_4_);
 +                org.bukkit.World bworld = p_149695_1_.getWorld();
@@ -26,7 +26,7 @@
 +                int power = bukkitBlock.getBlockPower();
 +                int powerTop = blockTop.getBlockPower();
  
--                if ((flag1 || p_149695_5_.func_149744_f()) && p_149695_5_ != this)
+-                if ((flag1 || p_149695_5_.canProvidePower()) && p_149695_5_ != this)
 +                if (powerTop > power)
                  {
 -                    this.func_150014_a(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_, flag1);

@@ -90,24 +90,24 @@
 -    protected Chunk checkedReadChunkFromNBT(World par1World, int par2, int par3, NBTTagCompound par4NBTTagCompound)
 +    protected Object[] checkedReadChunkFromNBT_CB(World par1World, int par2, int par3, NBTTagCompound par4NBTTagCompound) // CraftBukkit - return Chunk -> Object[]
      {
-         if (!par4NBTTagCompound.func_150297_b("Level", 10))
+         if (!par4NBTTagCompound.hasKey("Level", 10))
          {
 @@ -106,20 +157,51 @@
              if (!chunk.isAtLocation(par2, par3))
              {
-                 field_151505_a.error("Chunk file at " + par2 + "," + par3 + " is in the wrong location; relocating. (Expected " + par2 + ", " + par3 + ", got " + chunk.xPosition + ", " + chunk.zPosition + ")");
+                 logger.error("Chunk file at " + par2 + "," + par3 + " is in the wrong location; relocating. (Expected " + par2 + ", " + par3 + ", got " + chunk.xPosition + ", " + chunk.zPosition + ")");
 -                par4NBTTagCompound.setInteger("xPos", par2);
 -                par4NBTTagCompound.setInteger("zPos", par3);
 +                par4NBTTagCompound.getCompoundTag("Level").setInteger("xPos", par2); // CraftBukkit - .getCompound("Level")
 +                par4NBTTagCompound.getCompoundTag("Level").setInteger("zPos", par3); // CraftBukkit - .getCompound("Level")
 +                // CraftBukkit start - Have to move tile entities since we don't load them at this stage
-+                NBTTagList tileEntities = par4NBTTagCompound.getCompoundTag("Level").func_150295_c("TileEntities", 10);
++                NBTTagList tileEntities = par4NBTTagCompound.getCompoundTag("Level").getTagList("TileEntities", 10);
 +
 +                if (tileEntities != null)
 +                {
 +                    for (int te = 0; te < tileEntities.tagCount(); te++)
 +                    {
-+                        NBTTagCompound tileEntity = (NBTTagCompound) tileEntities.func_150305_b(te);
++                        NBTTagCompound tileEntity = (NBTTagCompound) tileEntities.getCompoundTagAt(te);
 +                        int x = tileEntity.getInteger("x") - chunk.xPosition * 16;
 +                        int z = tileEntity.getInteger("z") - chunk.zPosition * 16;
 +                        tileEntity.setInteger("x", par2 * 16 + x);
@@ -243,7 +243,7 @@
 +    public void loadEntities(Chunk chunk, NBTTagCompound par2NBTTagCompound, World par1World)
 +    {
 +        // CraftBukkit end
-         NBTTagList nbttaglist1 = par2NBTTagCompound.func_150295_c("Entities", 10);
+         NBTTagList nbttaglist1 = par2NBTTagCompound.getTagList("Entities", 10);
  
          if (nbttaglist1 != null)
 @@ -447,7 +536,7 @@

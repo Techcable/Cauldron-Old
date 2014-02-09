@@ -224,11 +224,11 @@ class CraftMetaItem implements ItemMeta, Repairable {
             }
 
             if (display.hasKey(LORE.NBT)) {
-                net.minecraft.nbt.NBTTagList list = display.func_150295_c(LORE.NBT, 8);
+                net.minecraft.nbt.NBTTagList list = display.getTagList(LORE.NBT, 8);
                 lore = new ArrayList<String>(list.tagCount());
 
                 for (int index = 0; index < list.tagCount(); index++) {
-                    String line = list.func_150307_f(index);
+                    String line = list.getStringTagAt(index);
                     lore.add(line);
                 }
             }
@@ -243,13 +243,13 @@ class CraftMetaItem implements ItemMeta, Repairable {
 
         if (tag.getTag(ATTRIBUTES.NBT) instanceof net.minecraft.nbt.NBTTagList) {
             net.minecraft.nbt.NBTTagList save = null;
-            net.minecraft.nbt.NBTTagList nbttaglist = tag.func_150295_c(ATTRIBUTES.NBT, 10);
+            net.minecraft.nbt.NBTTagList nbttaglist = tag.getTagList(ATTRIBUTES.NBT, 10);
 
             for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-                if (!(nbttaglist.func_150305_b(i) instanceof net.minecraft.nbt.NBTTagCompound)) {
+                if (!(nbttaglist.getCompoundTagAt(i) instanceof net.minecraft.nbt.NBTTagCompound)) {
                     continue;
                 }
-                net.minecraft.nbt.NBTTagCompound nbttagcompound = (net.minecraft.nbt.NBTTagCompound) nbttaglist.func_150305_b(i);
+                net.minecraft.nbt.NBTTagCompound nbttagcompound = (net.minecraft.nbt.NBTTagCompound) nbttaglist.getCompoundTagAt(i);
 
                 if (!(nbttagcompound.getTag(ATTRIBUTES_UUID_HIGH.NBT) instanceof net.minecraft.nbt.NBTTagLong)) {
                     continue;
@@ -295,12 +295,12 @@ class CraftMetaItem implements ItemMeta, Repairable {
             return null;
         }
 
-        net.minecraft.nbt.NBTTagList ench = tag.func_150295_c(key.NBT, 10);
+        net.minecraft.nbt.NBTTagList ench = tag.getTagList(key.NBT, 10);
         Map<Enchantment, Integer> enchantments = new HashMap<Enchantment, Integer>(ench.tagCount());
 
         for (int i = 0; i < ench.tagCount(); i++) {
-            int id = 0xffff & ((net.minecraft.nbt.NBTTagCompound) ench.func_150305_b(i)).getShort(ENCHANTMENTS_ID.NBT);
-            int level = 0xffff & ((net.minecraft.nbt.NBTTagCompound) ench.func_150305_b(i)).getShort(ENCHANTMENTS_LVL.NBT);
+            int id = 0xffff & ((net.minecraft.nbt.NBTTagCompound) ench.getCompoundTagAt(i)).getShort(ENCHANTMENTS_ID.NBT);
+            int level = 0xffff & ((net.minecraft.nbt.NBTTagCompound) ench.getCompoundTagAt(i)).getShort(ENCHANTMENTS_LVL.NBT);
 
             enchantments.put(Enchantment.getById(id), level);
         }

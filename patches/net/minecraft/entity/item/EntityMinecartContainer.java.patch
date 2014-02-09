@@ -63,7 +63,7 @@
      public EntityMinecartContainer(World par1World)
      {
          super(par1World);
-@@ -157,6 +206,13 @@
+@@ -158,6 +207,13 @@
      // JAVADOC METHOD $$ func_71027_c
      public void travelToDimension(int par1)
      {

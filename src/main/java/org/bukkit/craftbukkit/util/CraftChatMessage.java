@@ -18,7 +18,7 @@ public final class CraftChatMessage {
         static {
             Builder<Character, net.minecraft.util.EnumChatFormatting> builder = ImmutableMap.builder();
             for (net.minecraft.util.EnumChatFormatting format : net.minecraft.util.EnumChatFormatting.values()) {
-                builder.put(Character.toLowerCase(format.func_96298_a()), format);
+                builder.put(Character.toLowerCase(format.getFormattingCode()), format);
             }
             formatMap = builder.build();
         }
@@ -51,28 +51,28 @@ public final class CraftChatMessage {
                     net.minecraft.util.EnumChatFormatting format = formatMap.get(match.toLowerCase().charAt(1));
                     if (format == net.minecraft.util.EnumChatFormatting.RESET) {
                         modifier = new net.minecraft.util.ChatStyle();
-                    } else if (format.func_96301_b()) {
+                    } else if (format.isFancyStyling()) {
                         switch (format) {
                         case BOLD:
-                            modifier.func_150227_a(Boolean.TRUE);
+                            modifier.setBold(Boolean.TRUE);
                             break;
                         case ITALIC:
-                            modifier.func_150217_b(Boolean.TRUE);
+                            modifier.setItalic(Boolean.TRUE);
                             break;
                         case STRIKETHROUGH:
-                            modifier.func_150225_c(Boolean.TRUE);
+                            modifier.setStrikethrough(Boolean.TRUE);
                             break;
                         case UNDERLINE:
-                            modifier.func_150228_d(Boolean.TRUE);
+                            modifier.setUnderlined(Boolean.TRUE);
                             break;
                         case OBFUSCATED:
-                            modifier.func_150237_e(Boolean.TRUE);
+                            modifier.setObfuscated(Boolean.TRUE);
                             break;
                         default:
                             throw new AssertionError("Unexpected message format");
                         }
                     } else { // Color resets formatting
-                        modifier = new net.minecraft.util.ChatStyle().func_150238_a(format);
+                        modifier = new net.minecraft.util.ChatStyle().setColor(format);
                     }
                     break;
                 case 2:
@@ -82,9 +82,9 @@ public final class CraftChatMessage {
                     if ( !( match.startsWith( "http://" ) || match.startsWith( "https://" ) ) ) {
                         match = "http://" + match;
                     }
-                    modifier.func_150241_a(new net.minecraft.event.ClickEvent(net.minecraft.event.ClickEvent.Action.OPEN_URL, match)); // Should be setChatClickable
+                    modifier.setChatClickEvent(new net.minecraft.event.ClickEvent(net.minecraft.event.ClickEvent.Action.OPEN_URL, match)); // Should be setChatClickable
                     appendNewComponent(matcher.end(groupId));
-                    modifier.func_150241_a((net.minecraft.event.ClickEvent) null);
+                    modifier.setChatClickEvent((net.minecraft.event.ClickEvent) null);
                 }
                 currentIndex = matcher.end(groupId);
             }
@@ -100,14 +100,14 @@ public final class CraftChatMessage {
             if (index <= currentIndex) {
                 return;
             }
-            net.minecraft.util.IChatComponent addition = new net.minecraft.util.ChatComponentText(message.substring(currentIndex, index)).func_150255_a(modifier);
+            net.minecraft.util.IChatComponent addition = new net.minecraft.util.ChatComponentText(message.substring(currentIndex, index)).setChatStyle(modifier);
             currentIndex = index;
-            modifier = modifier.func_150232_l();
+            modifier = modifier.createShallowCopy();
             if (currentChatComponent == null) {
                 currentChatComponent = new net.minecraft.util.ChatComponentText("");
                 list.add(currentChatComponent);
             }
-            currentChatComponent.func_150257_a(addition);
+            currentChatComponent.appendSibling(addition);
         }
 
         private net.minecraft.util.IChatComponent[] getOutput() {

@@ -84,7 +84,7 @@
 +                if (this instanceof EntityPlayerMP)
 +                {
 +                    this.worldObj.playAuxSFXAtEntity((EntityPlayer) this, 2006, i, j, k, MathHelper.ceiling_float_int(this.fallDistance - 3.0F));
-+                    ((EntityPlayerMP) this).playerNetServerHandler.func_147359_a(new S28PacketEffect(2006, i, j, k, MathHelper.ceiling_float_int(this.fallDistance - 3.0F), false));
++                    ((EntityPlayerMP) this).playerNetServerHandler.sendPacket(new S28PacketEffect(2006, i, j, k, MathHelper.ceiling_float_int(this.fallDistance - 3.0F), false));
 +                }
 +                else
 +                {
@@ -94,7 +94,7 @@
 +                // CraftBukkit end
              }
  
-             block.func_149746_a(this.worldObj, i, j, k, this, this.fallDistance);
+             block.onFallenUpon(this.worldObj, i, j, k, this, this.fallDistance);
 @@ -263,7 +288,13 @@
          }
          else
@@ -176,17 +176,17 @@
 +
 +            if (nbtbase.getId() == 5)
 +            {
-+                this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute((double)((NBTTagFloat) nbtbase).func_150291_c());
++                this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue((double)((NBTTagFloat) nbtbase).func_150291_c());
 +            }
 +            else if (nbtbase.getId() == 3)
 +            {
-+                this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute((double)((NBTTagInt) nbtbase).func_150287_d());
++                this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue((double)((NBTTagInt) nbtbase).func_150287_d());
 +            }
 +        }
 +
 +        // CraftBukkit end
 +
-         if (par1NBTTagCompound.func_150297_b("HealF", 99))
+         if (par1NBTTagCompound.hasKey("HealF", 99))
          {
              this.setHealth(par1NBTTagCompound.getFloat("HealF"));
 @@ -650,12 +713,14 @@

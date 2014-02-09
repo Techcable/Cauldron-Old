@@ -74,7 +74,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     public void setMaxHealth(double amount) {
         Validate.isTrue(amount > 0, "Max health must be greater than 0");
 
-        getHandle().getEntityAttribute(net.minecraft.entity.SharedMonsterAttributes.maxHealth).setAttribute(amount);
+        getHandle().getEntityAttribute(net.minecraft.entity.SharedMonsterAttributes.maxHealth).setBaseValue(amount);
 
         if (getHealth() > amount) {
             setHealth(amount);

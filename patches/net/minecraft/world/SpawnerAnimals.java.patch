@@ -104,9 +104,9 @@
 -                            ChunkPosition chunkposition = func_151350_a(par1WorldServer, chunkcoordintpair1.chunkXPos, chunkcoordintpair1.chunkZPos);
 +                            ChunkPosition chunkposition = func_151350_a(par1WorldServer, LongHash.msw(key), LongHash.lsw(key));
 +                            // CraftBukkit end
-                             int j1 = chunkposition.field_151329_a;
-                             int k1 = chunkposition.field_151327_b;
-                             int l1 = chunkposition.field_151328_c;
+                             int j1 = chunkposition.chunkPosX;
+                             int k1 = chunkposition.chunkPosY;
+                             int l1 = chunkposition.chunkPosZ;
 @@ -172,11 +210,12 @@
                                                              if (canSpawn == Result.ALLOW || (canSpawn == Result.DEFAULT && entityliving.getCanSpawnHere()))
                                                              {

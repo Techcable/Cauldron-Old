@@ -29,11 +29,11 @@
 +        // CraftBukkit start - Rearranged the method (super call to end, drop to dropDeathLoot)
          if (par1DamageSource.getEntity() instanceof EntitySkeleton)
          {
-             int i = Item.func_150891_b(Items.record_13);
-             int j = Item.func_150891_b(Items.record_wait);
+             int i = Item.getIdFromItem(Items.record_13);
+             int j = Item.getIdFromItem(Items.record_wait);
              int k = i + this.rand.nextInt(j - i + 1);
--            this.func_145779_a(Item.func_150899_d(k), 1);
-+            // this.func_145779_a(Item.func_150899_d(k), 1); // CraftBukkit
+-            this.dropItem(Item.getItemById(k), 1);
++            // this.dropItem(Item.getItemById(k), 1); // CraftBukkit
 +            this.record = k;
          }
 +
@@ -49,7 +49,7 @@
 +     */
 +    protected void dropFewItems(boolean flag, int i)
 +    {
-+        Item j = this.func_146068_u();
++        Item j = this.getDropItem();
 +        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
 +
 +        if (j != null)

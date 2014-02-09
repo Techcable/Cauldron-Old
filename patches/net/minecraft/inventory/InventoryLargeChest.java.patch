@@ -68,7 +68,7 @@
      private static final String __OBFID = "CL_00001507";
  
      public InventoryLargeChest(String par1Str, IInventory par2IInventory, IInventory par3IInventory)
-@@ -87,7 +138,7 @@
+@@ -89,7 +140,7 @@
      // JAVADOC METHOD $$ func_70297_j_
      public int getInventoryStackLimit()
      {

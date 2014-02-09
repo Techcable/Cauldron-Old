@@ -25,19 +25,19 @@
          {
              if (this.isBurning())
              {
--                this.func_145779_a(Items.cooked_porkchop, 1);
+-                this.dropItem(Items.cooked_porkchop, 1);
 +                loot.add(new org.bukkit.inventory.ItemStack(CraftMagicNumbers.getMaterial(Items.cooked_porkchop), j));
              }
              else
              {
--                this.func_145779_a(Items.porkchop, 1);
+-                this.dropItem(Items.porkchop, 1);
 +                loot.add(new org.bukkit.inventory.ItemStack(CraftMagicNumbers.getMaterial(Items.porkchop), j));
              }
          }
  
          if (this.getSaddled())
          {
--            this.func_145779_a(Items.saddle, 1);
+-            this.dropItem(Items.saddle, 1);
 +            loot.add(new org.bukkit.inventory.ItemStack(CraftMagicNumbers.getMaterial(Items.saddle), 1));
          }
 +

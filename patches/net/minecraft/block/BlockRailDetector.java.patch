@@ -9,7 +9,7 @@
  public class BlockRailDetector extends BlockRailBase
  {
      @SideOnly(Side.CLIENT)
-@@ -86,6 +88,17 @@
+@@ -90,6 +92,17 @@
              flag1 = true;
          }
  

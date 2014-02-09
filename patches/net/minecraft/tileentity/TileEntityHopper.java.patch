@@ -52,33 +52,12 @@
 +    // CraftBukkit end
      private static final String __OBFID = "CL_00000359";
  
-     public void func_145839_a(NBTTagCompound p_145839_1_)
-@@ -212,12 +253,19 @@
- 
-                 if (flag)
-                 {
--                    this.func_145896_c(8);
-+                    this.func_145896_c(field_145850_b.spigotConfig.hopperTransfer); // Spigot
-                     this.onInventoryChanged();
-                     return true;
-                 }
-             }
- 
-+            // Spigot start
-+            if (!this.func_145888_j())
-+            {
-+                this.func_145896_c(field_145850_b.spigotConfig.hopperCheck);
-+            }
-+
-+            // Spigot end
-             return false;
-         }
-         else
-@@ -241,11 +289,44 @@
+     public void readFromNBT(NBTTagCompound p_145839_1_)
+@@ -243,11 +284,44 @@
                  if (this.getStackInSlot(i) != null)
                  {
                      ItemStack itemstack = this.getStackInSlot(i).copy();
--                    ItemStack itemstack1 = func_145889_a(iinventory, this.decrStackSize(i, 1), Facing.oppositeSide[BlockHopper.func_149918_b(this.func_145832_p())]);
+-                    ItemStack itemstack1 = func_145889_a(iinventory, this.decrStackSize(i, 1), Facing.oppositeSide[BlockHopper.getDirectionFromMetadata(this.getBlockMetadata())]);
 +                    // CraftBukkit start - Call event when pushing items into other inventories
 +                    CraftItemStack oitemstack = CraftItemStack.asCraftMirror(this.decrStackSize(i, 1));
 +                    Inventory destinationInventory;
@@ -94,23 +73,23 @@
 +                    }
 +
 +                    InventoryMoveItemEvent event = new InventoryMoveItemEvent(this.getOwner().getInventory(), oitemstack.clone(), destinationInventory, true);
-+                    this.func_145831_w().getServer().getPluginManager().callEvent(event);
++                    this.getWorldObj().getServer().getPluginManager().callEvent(event);
 +
 +                    if (event.isCancelled())
 +                    {
 +                        this.setInventorySlotContents(i, itemstack);
-+                        this.func_145896_c(field_145850_b.spigotConfig.hopperTransfer); // Spigot
++                        this.func_145896_c(worldObj.spigotConfig.hopperTransfer); // Spigot
 +                        return false;
 +                    }
 +
-+                    ItemStack itemstack1 = func_145889_a(iinventory, CraftItemStack.asNMSCopy(event.getItem()), Facing.oppositeSide[BlockHopper.func_149918_b(this.func_145832_p())]);
++                    ItemStack itemstack1 = func_145889_a(iinventory, CraftItemStack.asNMSCopy(event.getItem()), Facing.oppositeSide[BlockHopper.getDirectionFromMetadata(this.getBlockMetadata())]);
 +
                      if (itemstack1 == null || itemstack1.stackSize == 0)
                      {
--                        iinventory.onInventoryChanged();
+-                        iinventory.markDirty();
 +                        if (event.getItem().equals(oitemstack))
 +                        {
-+                            iinventory.onInventoryChanged();
++                            iinventory.markDirty();
 +                        }
 +                        else
 +                        {
@@ -121,7 +100,7 @@
                          return true;
                      }
  
-@@ -311,11 +392,53 @@
+@@ -313,11 +387,53 @@
          if (itemstack != null && func_145890_b(p_145892_1_, itemstack, p_145892_2_, p_145892_3_))
          {
              ItemStack itemstack1 = itemstack.copy();
@@ -141,7 +120,7 @@
 +            }
 +
 +            InventoryMoveItemEvent event = new InventoryMoveItemEvent(sourceInventory, oitemstack.clone(), p_145892_0_.getOwner().getInventory(), false);
-+            p_145892_0_.func_145831_w().getServer().getPluginManager().callEvent(event);
++            p_145892_0_.getWorldObj().getServer().getPluginManager().callEvent(event);
 +
 +            if (event.isCancelled())
 +            {
@@ -149,11 +128,11 @@
 +
 +                if (p_145892_0_ instanceof TileEntityHopper)
 +                {
-+                    ((TileEntityHopper) p_145892_0_).func_145896_c(p_145892_0_.func_145831_w().spigotConfig.hopperTransfer); // Spigot
++                    ((TileEntityHopper) p_145892_0_).func_145896_c(p_145892_0_.getWorldObj().spigotConfig.hopperTransfer); // Spigot
 +                }
 +                else if (p_145892_0_ instanceof EntityMinecartHopper)
 +                {
-+                    ((EntityMinecartHopper) p_145892_0_).setDisplayTileData(p_145892_0_.func_145831_w().spigotConfig.hopperTransfer / 2); // Spigot
++                    ((EntityMinecartHopper) p_145892_0_).setDisplayTileData(p_145892_0_.getWorldObj().spigotConfig.hopperTransfer / 2); // Spigot
 +                }
 +
 +                return false;
@@ -163,10 +142,10 @@
 +
              if (itemstack2 == null || itemstack2.stackSize == 0)
              {
--                p_145892_1_.onInventoryChanged();
+-                p_145892_1_.markDirty();
 +                if (event.getItem().equals(oitemstack))
 +                {
-+                    p_145892_1_.onInventoryChanged();
++                    p_145892_1_.markDirty();
 +                }
 +                else
 +                {
@@ -177,7 +156,7 @@
                  return true;
              }
  
-@@ -335,6 +458,16 @@
+@@ -337,6 +453,16 @@
          }
          else
          {
@@ -193,13 +172,4 @@
 +            // CraftBukkit end
              ItemStack itemstack = p_145898_1_.getEntityItem().copy();
              ItemStack itemstack1 = func_145889_a(p_145898_0_, itemstack, -1);
- 
-@@ -432,7 +565,7 @@
-             {
-                 if (p_145899_0_ instanceof TileEntityHopper)
-                 {
--                    ((TileEntityHopper)p_145899_0_).func_145896_c(8);
-+                    ((TileEntityHopper) p_145899_0_).func_145896_c(((TileEntityHopper) p_145899_0_).field_145850_b.spigotConfig.hopperTransfer); // Spigot
-                     p_145899_0_.onInventoryChanged();
-                 }
  

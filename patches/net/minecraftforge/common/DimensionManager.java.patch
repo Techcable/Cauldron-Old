@@ -118,7 +118,7 @@
 +            }
 +            // MCPC+ end
              MinecraftServer.getServer().worldTickTimes.put(id, new long[100]);
-             FMLLog.info("Loading dimension %d (%s) (%s)", id, world.getWorldInfo().getWorldName(), world.getMinecraftServer());
+             FMLLog.info("Loading dimension %d (%s) (%s)", id, world.getWorldInfo().getWorldName(), world.func_73046_m());
          }
          else
          {
@@ -215,7 +215,7 @@
 +            throw new RuntimeException("Cannot Hotload Dim: Overworld is not Loaded!");
 +        }
 +
-+        MinecraftServer mcServer = overworld.getMinecraftServer();
++        MinecraftServer mcServer = overworld.func_73046_m();
 +
 +        String worldType;
 +        String name;

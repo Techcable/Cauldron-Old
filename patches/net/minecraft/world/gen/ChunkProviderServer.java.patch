@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/gen/ChunkProviderServer.java
 +++ ../src-work/minecraft/net/minecraft/world/gen/ChunkProviderServer.java
-@@ -23,29 +23,50 @@
+@@ -23,29 +23,49 @@
  import net.minecraft.world.chunk.Chunk;
  import net.minecraft.world.chunk.EmptyChunk;
  import net.minecraft.world.chunk.IChunkProvider;
@@ -29,8 +29,7 @@
 +
  public class ChunkProviderServer implements IChunkProvider
  {
-     private static final Logger field_147417_b = LogManager.getLogger();
-+    // CraftBukkit start - private -> public
+     private static final Logger logger = LogManager.getLogger();
      // JAVADOC FIELD $$ field_73248_b
 -    private Set chunksToUnload = new HashSet();
 -    private Chunk defaultEmptyChunk;
@@ -58,7 +57,7 @@
          this.defaultEmptyChunk = new EmptyChunk(par1WorldServer, 0, 0);
          this.worldObj = par1WorldServer;
          this.currentChunkLoader = par2IChunkLoader;
-@@ -55,7 +76,7 @@
+@@ -55,7 +75,7 @@
      // JAVADOC METHOD $$ func_73149_a
      public boolean chunkExists(int par1, int par2)
      {
@@ -67,7 +66,7 @@
      }
  
      // JAVADOC METHOD $$ func_73241_b
-@@ -68,21 +89,40 @@
+@@ -68,21 +88,40 @@
              int l = par2 * 16 + 8 - chunkcoordinates.posZ;
              short short1 = 128;
  
@@ -111,7 +110,7 @@
  
          while (iterator.hasNext())
          {
-@@ -94,16 +134,40 @@
+@@ -94,16 +133,40 @@
      // JAVADOC METHOD $$ func_73158_c
      public Chunk loadChunk(int par1, int par2)
      {
@@ -157,7 +156,7 @@
              }
  
              if (chunk == null)
-@@ -116,38 +180,84 @@
+@@ -116,38 +179,84 @@
                  {
                      try
                      {
@@ -235,8 +234,8 @@
 +
 +        if (par1 != chunk.xPosition || par2 != chunk.zPosition)
 +        {
-+            field_147417_b.error("Chunk (" + chunk.xPosition + ", " + chunk.zPosition + ") stored at  (" + par1 + ", " + par2 + ") in world '" + worldObj.getWorld().getName() + "'");
-+            field_147417_b.error(chunk.getClass().getName());
++            logger.error("Chunk (" + chunk.xPosition + ", " + chunk.zPosition + ") stored at  (" + par1 + ", " + par2 + ") in world '" + worldObj.getWorld().getName() + "'");
++            logger.error(chunk.getClass().getName());
 +            Throwable ex = new Throwable();
 +            ex.fillInStackTrace();
 +            ex.printStackTrace();
@@ -252,7 +251,7 @@
      {
          if (this.currentChunkLoader == null)
          {
-@@ -157,6 +267,8 @@
+@@ -157,6 +266,8 @@
          {
              try
              {
@@ -261,7 +260,7 @@
                  Chunk chunk = this.currentChunkLoader.loadChunk(this.worldObj, par1, par2);
  
                  if (chunk != null)
-@@ -167,6 +279,7 @@
+@@ -167,6 +278,7 @@
                      {
                          this.currentChunkProvider.recreateStructures(par1, par2);
                      }
@@ -269,7 +268,7 @@
                  }
  
                  return chunk;
-@@ -180,7 +293,7 @@
+@@ -180,7 +292,7 @@
      }
  
      // JAVADOC METHOD $$ func_73243_a
@@ -278,7 +277,7 @@
      {
          if (this.currentChunkLoader != null)
          {
-@@ -196,7 +309,7 @@
+@@ -196,7 +308,7 @@
      }
  
      // JAVADOC METHOD $$ func_73242_b
@@ -287,7 +286,7 @@
      {
          if (this.currentChunkLoader != null)
          {
-@@ -204,15 +317,18 @@
+@@ -204,15 +316,18 @@
              {
                  par1Chunk.lastSaveTime = this.worldObj.getTotalWorldTime();
                  this.currentChunkLoader.saveChunk(this.worldObj, par1Chunk);
@@ -296,23 +295,23 @@
 -            catch (IOException ioexception)
 +            catch (Exception ioexception)
              {
-                 field_147417_b.error("Couldn\'t save chunk", ioexception);
+                 logger.error("Couldn\'t save chunk", ioexception);
              }
 +            /* Remove extra exception
              catch (MinecraftException minecraftexception)
              {
-                 field_147417_b.error("Couldn\'t save chunk; already in use by another instance of Minecraft?", minecraftexception);
+                 logger.error("Couldn\'t save chunk; already in use by another instance of Minecraft?", minecraftexception);
              }
 +            // CraftBukkit end */
          }
      }
  
-@@ -228,6 +344,35 @@
+@@ -228,6 +343,35 @@
              if (this.currentChunkProvider != null)
              {
                  this.currentChunkProvider.populate(par1IChunkProvider, par2, par3);
 +                // CraftBukkit start
-+                BlockSand.field_149832_M = true;
++                BlockSand.fallInstantly = true;
 +                Random random = new Random();
 +                random.setSeed(worldObj.getSeed());
 +                long xRand = random.nextLong() / 2L * 2L + 1L;
@@ -337,13 +336,13 @@
 +                    }
 +                }
 +
-+                BlockSand.field_149832_M = false;
++                BlockSand.fallInstantly = false;
 +                this.worldObj.getServer().getPluginManager().callEvent(new org.bukkit.event.world.ChunkPopulateEvent(chunk.bukkitChunk));
 +                // CraftBukkit end
                  GameRegistry.generateWorld(par2, par3, worldObj, currentChunkProvider, par1IChunkProvider);
                  chunk.setChunkModified();
              }
-@@ -238,10 +383,13 @@
+@@ -238,10 +382,13 @@
      public boolean saveChunks(boolean par1, IProgressUpdate par2IProgressUpdate)
      {
          int i = 0;
@@ -359,9 +358,9 @@
  
              if (par1)
              {
-@@ -278,31 +426,60 @@
+@@ -278,31 +425,60 @@
      {
-         if (!this.worldObj.canNotSave)
+         if (!this.worldObj.levelSaving)
          {
 -            for (ChunkCoordIntPair forced : this.worldObj.getPersistentChunks().keySet())
 +            // MCPC+ start - remove any chunk that has a ticket associated with it
@@ -431,7 +430,7 @@
              if (this.currentChunkLoader != null)
              {
                  this.currentChunkLoader.chunkTick();
-@@ -321,7 +498,8 @@
+@@ -321,7 +497,8 @@
      // JAVADOC METHOD $$ func_73148_d
      public String makeString()
      {
@@ -441,7 +440,7 @@
      }
  
      // JAVADOC METHOD $$ func_73155_a
-@@ -337,8 +515,32 @@
+@@ -337,8 +514,32 @@
  
      public int getLoadedChunkCount()
      {

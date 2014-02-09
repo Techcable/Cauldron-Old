@@ -20,10 +20,10 @@
              if (!this.isDead && !this.onValidSurface())
              {
 +                // CraftBukkit start
-+                Material material = this.worldObj.func_147439_a((int) this.posX, (int) this.posY, (int) this.posZ).func_149688_o();
++                Material material = this.worldObj.getBlock((int) this.posX, (int) this.posY, (int) this.posZ).getMaterial();
 +                HangingBreakEvent.RemoveCause cause;
 +
-+                if (!material.equals(Material.field_151579_a))
++                if (!material.equals(Material.air))
 +                {
 +                    // TODO: This feels insufficient to catch 100% of suffocation cases
 +                    cause = HangingBreakEvent.RemoveCause.OBSTRUCTION;

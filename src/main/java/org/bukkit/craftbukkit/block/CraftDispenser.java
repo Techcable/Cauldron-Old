@@ -53,7 +53,7 @@ public class CraftDispenser extends CraftBlockState implements Dispenser {
         boolean result = super.update(force, applyPhysics);
 
         if (result) {
-            dispenser.onInventoryChanged();
+            dispenser.markDirty();
         }
 
         return result;

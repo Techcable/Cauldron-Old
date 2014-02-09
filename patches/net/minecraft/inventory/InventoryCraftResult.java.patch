@@ -43,7 +43,7 @@
      private static final String __OBFID = "CL_00001760";
  
      // JAVADOC METHOD $$ func_70302_i_
-@@ -70,7 +101,7 @@
+@@ -72,7 +103,7 @@
      // JAVADOC METHOD $$ func_70297_j_
      public int getInventoryStackLimit()
      {

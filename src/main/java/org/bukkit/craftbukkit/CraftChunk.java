@@ -100,15 +100,15 @@ public class CraftChunk implements Chunk {
     public BlockState[] getTileEntities() {
         int index = 0;
         net.minecraft.world.chunk.Chunk chunk = getHandle();
-        BlockState[] entities = new BlockState[chunk.field_150816_i.size()];
+        BlockState[] entities = new BlockState[chunk.chunkTileEntityMap.size()];
 
-        for (Object obj : chunk.field_150816_i.keySet().toArray()) {
+        for (Object obj : chunk.chunkTileEntityMap.keySet().toArray()) {
             if (!(obj instanceof net.minecraft.world.ChunkPosition)) {
                 continue;
             }
 
             net.minecraft.world.ChunkPosition position = (net.minecraft.world.ChunkPosition) obj;
-            entities[index++] = worldServer.getWorld().getBlockAt(position.field_151329_a + (chunk.xPosition << 4), position.field_151327_b, position.field_151328_c + (chunk.zPosition << 4)).getState();
+            entities[index++] = worldServer.getWorld().getBlockAt(position.chunkPosX + (chunk.xPosition << 4), position.chunkPosY, position.chunkPosZ + (chunk.zPosition << 4)).getState();
         }
         return entities;
     }

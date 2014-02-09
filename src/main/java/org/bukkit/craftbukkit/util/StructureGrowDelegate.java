@@ -58,7 +58,7 @@ public class StructureGrowDelegate implements BlockChangeDelegate {
     public boolean isEmpty(int x, int y, int z) {
         for (BlockState state : blocks) {
             if (state.getX() == x && state.getY() == y && state.getZ() == z) {
-                return net.minecraft.block.Block.func_149729_e(state.getTypeId()) == net.minecraft.init.Blocks.air;
+                return net.minecraft.block.Block.getBlockById(state.getTypeId()) == net.minecraft.init.Blocks.air;
             }
         }
 

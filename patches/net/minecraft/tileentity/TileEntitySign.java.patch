@@ -1,36 +1,36 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntitySign.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntitySign.java
-@@ -11,7 +11,7 @@
- {
-     public String[] field_145915_a = new String[] {"", "", "", ""};
-     public int field_145918_i = -1;
+@@ -13,7 +13,7 @@
+     public String[] signText = new String[] {"", "", "", ""};
+     // JAVADOC FIELD $$ field_145918_i
+     public int lineBeingEdited = -1;
 -    private boolean field_145916_j = true;
 +    public boolean field_145916_j = true; // CraftBukkit - private -> public
      private EntityPlayer field_145917_k;
      private static final String __OBFID = "CL_00000363";
  
-@@ -43,7 +43,19 @@
-     public Packet func_145844_m()
+@@ -46,7 +46,19 @@
+     public Packet getDescriptionPacket()
      {
          String[] astring = new String[4];
--        System.arraycopy(this.field_145915_a, 0, astring, 0, 4);
+-        System.arraycopy(this.signText, 0, astring, 0, 4);
 +
 +        // CraftBukkit start - Limit sign text to 15 chars per line
 +        for (int i = 0; i < 4; ++i)
 +        {
-+            astring[i] = this.field_145915_a[i];
++            astring[i] = this.signText[i];
 +
-+            if (this.field_145915_a[i].length() > 15)
++            if (this.signText[i].length() > 15)
 +            {
-+                astring[i] = this.field_145915_a[i].substring(0, 15);
++                astring[i] = this.signText[i].substring(0, 15);
 +            }
 +        }
 +
 +        // CraftBukkit end
-         return new S33PacketUpdateSign(this.field_145851_c, this.field_145848_d, this.field_145849_e, astring);
+         return new S33PacketUpdateSign(this.xCoord, this.yCoord, this.zCoord, astring);
      }
  
-@@ -72,4 +84,12 @@
+@@ -76,4 +88,12 @@
      {
          return this.field_145917_k;
      }

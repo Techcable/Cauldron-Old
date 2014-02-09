@@ -109,10 +109,10 @@
 -        try
 +        if (!org.spigotmc.SpigotConfig.lateBind)
          {
--            this.func_147137_ag().func_151265_a(inetaddress, this.getServerPort());
+-            this.func_147137_ag().addLanEndpoint(inetaddress, this.getServerPort());
 +            try
 +            {
-+                this.func_147137_ag().func_151265_a(inetaddress, this.getServerPort());
++                this.func_147137_ag().addLanEndpoint(inetaddress, this.getServerPort());
 +            }
 +            catch (Throwable ioexception)     // CraftBukkit - IOException -> Throwable
 +            {
@@ -159,7 +159,7 @@
 +        {
 +            try
 +            {
-+                this.func_147137_ag().func_151265_a(inetaddress, this.getServerPort());
++                this.func_147137_ag().addLanEndpoint(inetaddress, this.getServerPort());
 +            }
 +            catch (Throwable ioexception)     // CraftBukkit - IOException -> Throwable
 +            {
@@ -184,12 +184,12 @@
 +        if (this.server.getBukkitSpawnRadius() > -1)
 +        {
 +            field_155771_h.info("'settings.spawn-radius' in bukkit.yml has been moved to 'spawn-protection' in server.properties. I will move your config for you.");
-+            this.settings.properties.remove("spawn-protection");
++            this.settings.serverProperties.remove("spawn-protection");
 +            this.settings.getIntProperty("spawn-protection", this.server.getBukkitSpawnRadius());
 +            this.server.removeBukkitSpawnRadius();
 +            this.settings.saveProperties();
 +        }
-+        allowPlayerLogins = true; // MCPC+ - server is ready, allow player logins
++
          return FMLCommonHandler.instance().handleServerStarting(this);
      }
  

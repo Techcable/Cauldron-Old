@@ -36,8 +36,8 @@ public class CraftBlock implements Block {
     private final int y;
     private final int z;
     // MCPC+ start - add support for custom biomes
-    private static final Biome[] BIOME_MAPPING = new Biome[net.minecraft.world.biome.BiomeGenBase.biomeList.length];
-    private static final net.minecraft.world.biome.BiomeGenBase[] BIOMEBASE_MAPPING = new net.minecraft.world.biome.BiomeGenBase[net.minecraft.world.biome.BiomeGenBase.biomeList.length];
+    private static final Biome[] BIOME_MAPPING = new Biome[net.minecraft.world.biome.BiomeGenBase.getBiomeGenArray().length];
+    private static final net.minecraft.world.biome.BiomeGenBase[] BIOMEBASE_MAPPING = new net.minecraft.world.biome.BiomeGenBase[net.minecraft.world.biome.BiomeGenBase.getBiomeGenArray().length];
     // MCPC+ end
     
     public CraftBlock(CraftChunk chunk, int x, int y, int z) {
@@ -126,11 +126,11 @@ public class CraftBlock implements Block {
 
     public boolean setTypeIdAndData(final int type, final byte data, final boolean applyPhysics) {
         if (applyPhysics) {
-            return chunk.getHandle().worldObj.func_147465_d(x, y, z, getNMSBlock(type), data, 3);
+            return chunk.getHandle().worldObj.setBlock(x, y, z, getNMSBlock(type), data, 3);
         } else {
-            boolean success = chunk.getHandle().worldObj.func_147465_d(x, y, z, getNMSBlock(type), data, 2);
+            boolean success = chunk.getHandle().worldObj.setBlock(x, y, z, getNMSBlock(type), data, 2);
             if (success) {
-                chunk.getHandle().worldObj.func_147471_g(x, y, z);
+                chunk.getHandle().worldObj.markBlockForUpdate(x, y, z);
             }
             return success;
         }
@@ -143,7 +143,7 @@ public class CraftBlock implements Block {
     @Deprecated
     @Override
     public int getTypeId() {
-        return CraftMagicNumbers.getId(chunk.getHandle().func_150810_a(this.x & 0xF, this.y & 0xFF, this.z & 0xF));
+        return CraftMagicNumbers.getId(chunk.getHandle().getBlock(this.x & 0xF, this.y & 0xFF, this.z & 0xF));
     }
 
     public byte getLightLevel() {
@@ -248,7 +248,7 @@ public class CraftBlock implements Block {
         // MCPC+ start - if null, check for TE that implements IInventory
         if (material == null)
         {
-            TileEntity te = ((CraftWorld)this.getWorld()).getHandle().func_147438_o(this.getX(), this.getY(), this.getZ());
+            TileEntity te = ((CraftWorld)this.getWorld()).getHandle().getTileEntity(this.getX(), this.getY(), this.getZ());
             if (te != null && te instanceof IInventory)
             {
                 // In order to allow plugins to properly grab the container location, we must pass a class that extends CraftBlockState and implements InventoryHolder.
@@ -292,7 +292,7 @@ public class CraftBlock implements Block {
             return new CraftBeacon(this);
         default:
             // MCPC+ start
-            TileEntity te = ((CraftWorld)this.getWorld()).getHandle().func_147438_o(this.getX(), this.getY(), this.getZ());
+            TileEntity te = ((CraftWorld)this.getWorld()).getHandle().getTileEntity(this.getX(), this.getY(), this.getZ());
             if (te != null && te instanceof IInventory)
             {
                 // In order to allow plugins to properly grab the container location, we must pass a class that extends CraftBlockState and implements InventoryHolder.
@@ -395,7 +395,7 @@ public class CraftBlock implements Block {
         //return getType() == Material.AIR;
         if (getType() == Material.AIR) return true;
         if (!(getWorld() instanceof CraftWorld)) return false;
-        return ((CraftWorld) getWorld()).getHandle().func_147437_c(getX(), getY(), getZ());
+        return ((CraftWorld) getWorld()).getHandle().isAirBlock(getX(), getY(), getZ());
         // MCPC+ end
     }
 
@@ -404,13 +404,13 @@ public class CraftBlock implements Block {
     }
 
     public PistonMoveReaction getPistonMoveReaction() {
-        return PistonMoveReaction.getById(getNMSBlock().func_149688_o().getMaterialMobility());
+        return PistonMoveReaction.getById(getNMSBlock().getMaterial().getMaterialMobility());
     }
 
     private boolean itemCausesDrops(ItemStack item) {
         net.minecraft.block.Block block = this.getNMSBlock();
-        net.minecraft.item.Item itemType = item != null ? net.minecraft.item.Item.func_150899_d(item.getTypeId()) : null;
-        return block != null && (block.func_149688_o().isToolNotRequired() || (itemType != null && itemType.func_150897_b(block)));
+        net.minecraft.item.Item itemType = item != null ? net.minecraft.item.Item.getItemById(item.getTypeId()) : null;
+        return block != null && (block.getMaterial().isToolNotRequired() || (itemType != null && itemType.func_150897_b(block)));
     }
 
     public boolean breakNaturally() {
@@ -420,7 +420,7 @@ public class CraftBlock implements Block {
         boolean result = false;
 
         if (block != null && block != net.minecraft.init.Blocks.air) {
-            block.func_149690_a(chunk.getHandle().worldObj, x, y, z, data, 1.0F, 0);
+            block.dropBlockAsItemWithChance(chunk.getHandle().worldObj, x, y, z, data, 1.0F, 0);
             result = true;
         }
 
@@ -443,14 +443,14 @@ public class CraftBlock implements Block {
         if (block != net.minecraft.init.Blocks.air) {
             byte data = getData();
             // based on nms.Block.dropNaturally
-            int count = block.func_149679_a(0, chunk.getHandle().worldObj.rand);
+            int count = block.quantityDroppedWithBonus(0, chunk.getHandle().worldObj.rand);
             for (int i = 0; i < count; ++i) {
-                net.minecraft.item.Item item = block.func_149650_a(data, chunk.getHandle().worldObj.rand, 0);
+                net.minecraft.item.Item item = block.getItemDropped(data, chunk.getHandle().worldObj.rand, 0);
                 if (item != null) {
                     // Skulls are special, their data is based on the tile entity
                     if (net.minecraft.init.Blocks.skull == block) {
-                        net.minecraft.item.ItemStack nmsStack = new net.minecraft.item.ItemStack(item, 1, block.func_149643_k(chunk.getHandle().worldObj, x, y, z));
-                        net.minecraft.tileentity.TileEntitySkull tileentityskull = (net.minecraft.tileentity.TileEntitySkull) chunk.getHandle().worldObj.func_147438_o(x, y, z);
+                        net.minecraft.item.ItemStack nmsStack = new net.minecraft.item.ItemStack(item, 1, block.getDamageValue(chunk.getHandle().worldObj, x, y, z));
+                        net.minecraft.tileentity.TileEntitySkull tileentityskull = (net.minecraft.tileentity.TileEntitySkull) chunk.getHandle().worldObj.getTileEntity(x, y, z);
 
                         if (tileentityskull.func_145904_a() == 3 && tileentityskull.func_145907_c() != null && tileentityskull.func_145907_c().length() > 0) {
                             nmsStack.setTagCompound(new net.minecraft.nbt.NBTTagCompound());
@@ -465,7 +465,7 @@ public class CraftBlock implements Block {
                             drops.add(new ItemStack(Material.INK_SACK, 1, (short) 3));
                         }
                     } else {
-                        drops.add(new ItemStack(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(item), 1, (short) block.func_149692_a(data)));
+                        drops.add(new ItemStack(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(item), 1, (short) block.damageDropped(data)));
                     }
                 }
             }
@@ -508,23 +508,23 @@ public class CraftBlock implements Block {
         BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.extremeHillsEdge.biomeID] = Biome.SMALL_MOUNTAINS;
         BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.jungle.biomeID] = Biome.JUNGLE;
         BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.jungleHills.biomeID] = Biome.JUNGLE_HILLS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150574_L.biomeID] = Biome.JUNGLE_EDGE;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150575_M.biomeID] = Biome.DEEP_OCEAN;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150576_N.biomeID] = Biome.STONE_BEACH;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150577_O.biomeID] = Biome.COLD_BEACH;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150583_P.biomeID] = Biome.BIRCH_FOREST;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150582_Q.biomeID] = Biome.BIRCH_FOREST_HILLS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150585_R.biomeID] = Biome.ROOFED_FOREST;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150584_S.biomeID] = Biome.COLD_TAIGA;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150579_T.biomeID] = Biome.COLD_TAIGA_HILLS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150578_U.biomeID] = Biome.MEGA_TAIGA;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150581_V.biomeID] = Biome.MEGA_TAIGA_HILLS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150580_W.biomeID] = Biome.EXTREME_HILLS_PLUS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150588_X.biomeID] = Biome.SAVANNA;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150587_Y.biomeID] = Biome.SAVANNA_PLATEAU;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150589_Z.biomeID] = Biome.MESA;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150607_aa.biomeID] = Biome.MESA_PLATEAU_FOREST;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150608_ab.biomeID] = Biome.MESA_PLATEAU;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.jungleEdge.biomeID] = Biome.JUNGLE_EDGE;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.deepOcean.biomeID] = Biome.DEEP_OCEAN;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.stoneBeach.biomeID] = Biome.STONE_BEACH;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.coldBeach.biomeID] = Biome.COLD_BEACH;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.birchForest.biomeID] = Biome.BIRCH_FOREST;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.birchForestHills.biomeID] = Biome.BIRCH_FOREST_HILLS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.roofedForest.biomeID] = Biome.ROOFED_FOREST;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.coldTaiga.biomeID] = Biome.COLD_TAIGA;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.coldTaigaHills.biomeID] = Biome.COLD_TAIGA_HILLS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.megaTaiga.biomeID] = Biome.MEGA_TAIGA;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.megaTaigaHills.biomeID] = Biome.MEGA_TAIGA_HILLS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.extremeHillsPlus.biomeID] = Biome.EXTREME_HILLS_PLUS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.savanna.biomeID] = Biome.SAVANNA;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.savannaPlateau.biomeID] = Biome.SAVANNA_PLATEAU;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mesa.biomeID] = Biome.MESA;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mesaPlateau_F.biomeID] = Biome.MESA_PLATEAU_FOREST;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mesaPlateau.biomeID] = Biome.MESA_PLATEAU;
 
         // Extended Biomes
         BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.plains.biomeID + 128] = Biome.SUNFLOWER_PLAINS;
@@ -534,37 +534,37 @@ public class CraftBlock implements Block {
         BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.swampland.biomeID + 128] = Biome.SWAMPLAND_MOUNTAINS;
         BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.icePlains.biomeID + 128] = Biome.ICE_PLAINS_SPIKES;
         BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.jungle.biomeID + 128] = Biome.JUNGLE_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150574_L.biomeID + 128] = Biome.JUNGLE_EDGE_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150584_S.biomeID + 128] = Biome.COLD_TAIGA_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150588_X.biomeID + 128] = Biome.SAVANNA_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150587_Y.biomeID + 128] = Biome.SAVANNA_PLATEAU_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150589_Z.biomeID + 128] = Biome.MESA_BRYCE;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150607_aa.biomeID + 128] = Biome.MESA_PLATEAU_FOREST_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150608_ab.biomeID + 128] = Biome.MESA_PLATEAU_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150583_P.biomeID + 128] = Biome.BIRCH_FOREST_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150582_Q.biomeID + 128] = Biome.BIRCH_FOREST_HILLS_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150585_R.biomeID + 128] = Biome.ROOFED_FOREST_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150578_U.biomeID + 128] = Biome.MEGA_SPRUCE_TAIGA;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.jungleEdge.biomeID + 128] = Biome.JUNGLE_EDGE_MOUNTAINS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.coldTaiga.biomeID + 128] = Biome.COLD_TAIGA_MOUNTAINS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.savanna.biomeID + 128] = Biome.SAVANNA_MOUNTAINS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.savannaPlateau.biomeID + 128] = Biome.SAVANNA_PLATEAU_MOUNTAINS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mesa.biomeID + 128] = Biome.MESA_BRYCE;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mesaPlateau_F.biomeID + 128] = Biome.MESA_PLATEAU_FOREST_MOUNTAINS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mesaPlateau.biomeID + 128] = Biome.MESA_PLATEAU_MOUNTAINS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.birchForest.biomeID + 128] = Biome.BIRCH_FOREST_MOUNTAINS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.birchForestHills.biomeID + 128] = Biome.BIRCH_FOREST_HILLS_MOUNTAINS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.roofedForest.biomeID + 128] = Biome.ROOFED_FOREST_MOUNTAINS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.megaTaiga.biomeID + 128] = Biome.MEGA_SPRUCE_TAIGA;
         BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.extremeHills.biomeID + 128] = Biome.EXTREME_HILLS_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150580_W.biomeID + 128] = Biome.EXTREME_HILLS_PLUS_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.field_150581_V.biomeID + 128] = Biome.MEGA_SPRUCE_TAIGA_HILLS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.extremeHillsPlus.biomeID + 128] = Biome.EXTREME_HILLS_PLUS_MOUNTAINS;
+        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.megaTaigaHills.biomeID + 128] = Biome.MEGA_SPRUCE_TAIGA_HILLS;
 
         /* Sanity check - we should have a record for each record in the BiomeBase.a table */
         /* Helps avoid missed biomes when we upgrade bukkit to new code with new biomes */
         for (int i = 0; i < BIOME_MAPPING.length; i++) {
-            if ((net.minecraft.world.biome.BiomeGenBase.func_150568_d(i) != null) && (BIOME_MAPPING[i] == null)) {
+            if ((net.minecraft.world.biome.BiomeGenBase.getBiome(i) != null) && (BIOME_MAPPING[i] == null)) {
                 // MCPC+ start - add support for mod biomes
                 //throw new IllegalArgumentException("Missing Biome mapping for BiomeBase[" + i + "]");
-                String name = net.minecraft.world.biome.BiomeGenBase.func_150568_d(i).biomeName;
-                int id = net.minecraft.world.biome.BiomeGenBase.func_150568_d(i).biomeID;
+                String name = net.minecraft.world.biome.BiomeGenBase.getBiome(i).biomeName;
+                int id = net.minecraft.world.biome.BiomeGenBase.getBiome(i).biomeID;
 
-                System.out.println("Adding biome mapping " + net.minecraft.world.biome.BiomeGenBase.func_150568_d(i).biomeID + " " + name + " at BiomeBase[" + i + "]");
+                System.out.println("Adding biome mapping " + net.minecraft.world.biome.BiomeGenBase.getBiome(i).biomeID + " " + name + " at BiomeBase[" + i + "]");
                 net.minecraftforge.common.util.EnumHelper.addBukkitBiome(name); // Forge
-                BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.func_150568_d(i).biomeID] = ((Biome) Enum.valueOf(Biome.class, name));
+                BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.getBiome(i).biomeID] = ((Biome) Enum.valueOf(Biome.class, name));
                 // MCPC+ end           
             }
             if (BIOME_MAPPING[i] != null) {  /* Build reverse mapping for setBiome */
-                BIOMEBASE_MAPPING[BIOME_MAPPING[i].ordinal()] = net.minecraft.world.biome.BiomeGenBase.func_150568_d(i);
+                BIOMEBASE_MAPPING[BIOME_MAPPING[i].ordinal()] = net.minecraft.world.biome.BiomeGenBase.getBiome(i);
             }
         }
     }

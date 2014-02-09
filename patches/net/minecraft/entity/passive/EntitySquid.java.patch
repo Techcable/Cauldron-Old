@@ -33,7 +33,7 @@
 +    /* CraftBukkit start - Delegate to Entity to use existing inWater value
      public boolean isInWater()
      {
-         return this.worldObj.handleMaterialAcceleration(this.boundingBox.expand(0.0D, -0.6000000238418579D, 0.0D), Material.field_151586_h, this);
+         return this.worldObj.handleMaterialAcceleration(this.boundingBox.expand(0.0D, -0.6000000238418579D, 0.0D), Material.water, this);
      }
 +    // CraftBukkit end */
  

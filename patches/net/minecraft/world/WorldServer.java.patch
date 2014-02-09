@@ -21,7 +21,7 @@
  {
 +    // CraftBukkit end
 +
-     private static final Logger field_147491_a = LogManager.getLogger();
+     private static final Logger logger = LogManager.getLogger();
      private final MinecraftServer mcServer;
 -    private final EntityTracker theEntityTracker;
 +    public EntityTracker theEntityTracker; // CraftBukkit - private final -> public
@@ -309,10 +309,10 @@
  
                  if (this.isBlockFreezableNaturally(j1 + k, l1 - 1, k1 + l))
                  {
--                    this.func_147449_b(j1 + k, l1 - 1, k1 + l, Blocks.ice);
+-                    this.setBlock(j1 + k, l1 - 1, k1 + l, Blocks.ice);
 +                    // CraftBukkit start
 +                    BlockState blockState = this.getWorld().getBlockAt(j1 + k, l1 - 1, k1 + l).getState();
-+                    blockState.setTypeId(Block.func_149682_b(Blocks.ice));
++                    blockState.setTypeId(Block.getIdFromBlock(Blocks.ice));
 +                    BlockFormEvent iceBlockForm = new BlockFormEvent(blockState.getBlock(), blockState);
 +                    this.getServer().getPluginManager().callEvent(iceBlockForm);
 +
@@ -326,10 +326,10 @@
  
                  if (this.isRaining() && this.func_147478_e(j1 + k, l1, k1 + l, true))
                  {
--                    this.func_147449_b(j1 + k, l1, k1 + l, Blocks.snow_layer);
+-                    this.setBlock(j1 + k, l1, k1 + l, Blocks.snow_layer);
 +                    // CraftBukkit start
 +                    BlockState blockState = this.getWorld().getBlockAt(j1 + k, l1, k1 + l).getState();
-+                    blockState.setTypeId(Block.func_149682_b(Blocks.snow_layer));
++                    blockState.setTypeId(Block.getIdFromBlock(Blocks.snow_layer));
 +                    BlockFormEvent snow = new BlockFormEvent(blockState.getBlock(), blockState);
 +                    this.getServer().getPluginManager().callEvent(snow);
 +
@@ -359,15 +359,15 @@
 +                        int l2 = j2 >> 8 & 15;
 +                        int i3 = j2 >> 16 & 15;
                          ++j;
--                        Block block = extendedblockstorage.func_150819_a(j2, l2, k2);
-+                        Block block = extendedblockstorage.func_150819_a(k2, i3, l2);
+-                        Block block = extendedblockstorage.getBlockByExtId(j2, l2, k2);
++                        Block block = extendedblockstorage.getBlockByExtId(k2, i3, l2);
  
-                         if (block.func_149653_t())
+                         if (block.getTickRandomly())
                          {
                              ++i;
--                            block.func_149674_a(this, j2 + k, l2 + extendedblockstorage.getYLocation(), k2 + l, this.rand);
+-                            block.updateTick(this, j2 + k, l2 + extendedblockstorage.getYLocation(), k2 + l, this.rand);
 +                            this.growthOdds = (iter.value() < 1) ? this.modifiedOdds : 100; // Spigot - grow fast if no players are in this chunk (value = player count)
-+                            block.func_149674_a(this, k2 + k, i3 + extendedblockstorage.getYLocation(), l2 + l, this.rand);
++                            block.updateTick(this, k2 + k, i3 + extendedblockstorage.getYLocation(), l2 + l, this.rand);
                          }
                      }
                  }
@@ -386,8 +386,8 @@
 +        // Spigot End
      }
  
-     public boolean func_147477_a(int p_147477_1_, int p_147477_2_, int p_147477_3_, Block p_147477_4_)
-@@ -495,7 +662,7 @@
+     // JAVADOC METHOD $$ func_147477_a
+@@ -497,7 +664,7 @@
      // JAVADOC METHOD $$ func_72939_s
      public void updateEntities()
      {
@@ -396,7 +396,7 @@
          {
              if (this.updateEntityTick++ >= 1200)
              {
-@@ -529,7 +696,17 @@
+@@ -531,7 +698,17 @@
          {
              if (i > 1000)
              {
@@ -415,7 +415,7 @@
              }
  
              this.theProfiler.startSection("cleaning");
-@@ -676,7 +853,36 @@
+@@ -678,7 +855,36 @@
      protected IChunkProvider createChunkProvider()
      {
          IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
@@ -453,7 +453,7 @@
          return this.theChunkProviderServer;
      }
  
-@@ -684,29 +890,31 @@
+@@ -686,29 +892,31 @@
      {
          ArrayList arraylist = new ArrayList();
  
@@ -470,21 +470,21 @@
 +
 +                if (chunk == null)
                  {
--                    for(Object obj : chunk.field_150816_i.values())
+-                    for(Object obj : chunk.chunkTileEntityMap.values())
 +                    continue;
 +                }
 +
-+                for (Object te : chunk.field_150816_i.values())
++                for (Object te : chunk.chunkTileEntityMap.values())
 +                {
 +                    TileEntity tileentity = (TileEntity) te;
 +
-+                    if ((tileentity.field_145851_c >= p_147486_1_) && (tileentity.field_145848_d >= p_147486_2_) && (tileentity.field_145849_e >= p_147486_3_) && (tileentity.field_145851_c < p_147486_4_) && (tileentity.field_145848_d < p_147486_5_) && (tileentity.field_145849_e < p_147486_6_))
++                    if ((tileentity.xCoord >= p_147486_1_) && (tileentity.yCoord >= p_147486_2_) && (tileentity.zCoord >= p_147486_3_) && (tileentity.xCoord < p_147486_4_) && (tileentity.yCoord < p_147486_5_) && (tileentity.zCoord < p_147486_6_))
                      {
 -                        TileEntity entity = (TileEntity)obj;
--                        if (!entity.func_145837_r())
+-                        if (!entity.isInvalid())
 -                        {
--                            if (entity.field_145851_c >= p_147486_1_ && entity.field_145848_d >= p_147486_2_ && entity.field_145849_e >= p_147486_3_ &&
--                                entity.field_145851_c <= p_147486_4_ && entity.field_145848_d <= p_147486_5_ && entity.field_145849_e <= p_147486_6_)
+-                            if (entity.xCoord >= p_147486_1_ && entity.yCoord >= p_147486_2_ && entity.zCoord >= p_147486_3_ &&
+-                                entity.xCoord <= p_147486_4_ && entity.yCoord <= p_147486_5_ && entity.zCoord <= p_147486_6_)
 -                            {
 -                                arraylist.add(entity);
 -                            }
@@ -499,7 +499,7 @@
          return arraylist;
      }
  
-@@ -760,6 +968,29 @@
+@@ -762,6 +970,29 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 0;
  
@@ -528,17 +528,8 @@
 +
              if (chunkposition != null)
              {
-                 i = chunkposition.field_151329_a;
-@@ -841,7 +1072,7 @@
-     }
- 
-     // JAVADOC METHOD $$ func_104140_m
--    public void saveChunkData()
-+    public void saveChunkData() 
-     {
-         if (this.chunkProvider.canSave())
-         {
-@@ -897,6 +1128,20 @@
+                 i = chunkposition.chunkPosX;
+@@ -899,6 +1130,20 @@
      // JAVADOC METHOD $$ func_72942_c
      public boolean addWeatherEffect(Entity par1Entity)
      {
@@ -558,8 +549,8 @@
 +        // MCPC+ end
          if (super.addWeatherEffect(par1Entity))
          {
-             this.mcServer.getConfigurationManager().func_148541_a(par1Entity.posX, par1Entity.posY, par1Entity.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(par1Entity));
-@@ -917,11 +1162,22 @@
+             this.mcServer.getConfigurationManager().sendToAllNear(par1Entity.posX, par1Entity.posY, par1Entity.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(par1Entity));
+@@ -919,11 +1164,22 @@
      // JAVADOC METHOD $$ func_72885_a
      public Explosion newExplosion(Entity par1Entity, double par2, double par4, double par6, float par8, boolean par9, boolean par10)
      {
@@ -582,17 +573,17 @@
  
          if (!par10)
          {
-@@ -1002,6 +1258,7 @@
+@@ -1005,6 +1261,7 @@
          boolean flag = this.isRaining();
          super.updateWeather();
  
 +        /* CraftBukkit start
          if (this.prevRainingStrength != this.rainingStrength)
          {
-             this.mcServer.getConfigurationManager().func_148537_a(new S2BPacketChangeGameState(7, this.rainingStrength), this.provider.dimensionId);
-@@ -1026,6 +1283,20 @@
-             this.mcServer.getConfigurationManager().func_148540_a(new S2BPacketChangeGameState(7, this.rainingStrength));
-             this.mcServer.getConfigurationManager().func_148540_a(new S2BPacketChangeGameState(8, this.thunderingStrength));
+             this.mcServer.getConfigurationManager().sendPacketToAllPlayersInDimension(new S2BPacketChangeGameState(7, this.rainingStrength), this.provider.dimensionId);
+@@ -1029,6 +1286,20 @@
+             this.mcServer.getConfigurationManager().sendPacketToAllPlayers(new S2BPacketChangeGameState(7, this.rainingStrength));
+             this.mcServer.getConfigurationManager().sendPacketToAllPlayers(new S2BPacketChangeGameState(8, this.thunderingStrength));
          }
 +        // */
 +        if (flag != this.isRaining())
@@ -610,8 +601,8 @@
 +        }
      }
  
-     // JAVADOC METHOD $$ func_73046_m
-@@ -1070,20 +1341,48 @@
+     public MinecraftServer func_73046_m()
+@@ -1072,20 +1343,48 @@
          }
      }
  
@@ -643,27 +634,27 @@
 +    // CraftBukkit start - Compatibility methods for BlockChangeDelegate
 +    public boolean setRawTypeId(int x, int y, int z, int typeId)
 +    {
-+        return this.func_147465_d(x, y, z, Block.func_149729_e(typeId), 0, 4);
++        return this.setBlock(x, y, z, Block.getBlockById(typeId), 0, 4);
 +    }
 +
 +    public boolean setRawTypeIdAndData(int x, int y, int z, int typeId, int data)
 +    {
-+        return this.func_147465_d(x, y, z, Block.func_149729_e(typeId), data, 4);
++        return this.setBlock(x, y, z, Block.getBlockById(typeId), data, 4);
 +    }
 +
 +    public boolean setTypeId(int x, int y, int z, int typeId)
 +    {
-+        return this.func_147465_d(x, y, z, Block.func_149729_e(typeId), 0, 3);
++        return this.setBlock(x, y, z, Block.getBlockById(typeId), 0, 3);
 +    }
 +
 +    public boolean setTypeIdAndData(int x, int y, int z, int typeId, int data)
 +    {
-+        return this.func_147465_d(x, y, z, Block.func_149729_e(typeId), data, 3);
++        return this.setBlock(x, y, z, Block.getBlockById(typeId), data, 3);
 +    }
 +
 +    public int getTypeId(int x, int y, int z)
 +    {
-+        return Block.func_149682_b(func_147439_a(x, y, z));
++        return Block.getIdFromBlock(getBlock(x, y, z));
 +    }
 +    // CraftBukkit end
  }

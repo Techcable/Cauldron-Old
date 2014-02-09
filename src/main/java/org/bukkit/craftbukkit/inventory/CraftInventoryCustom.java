@@ -69,7 +69,7 @@ public class CraftInventoryCustom extends CraftInventory {
                 result = CraftItemStack.copyNMSStack(stack, j);
                 stack.stackSize -= j;
             }
-            this.onInventoryChanged();
+            this.markDirty();
             return result;
         }
 
@@ -94,7 +94,7 @@ public class CraftInventoryCustom extends CraftInventory {
             }
         }
 
-        public String func_145825_b() {
+        public String getInventoryName() {
             return title;
         }
 
@@ -106,7 +106,7 @@ public class CraftInventoryCustom extends CraftInventory {
             maxStack = size;
         }
 
-        public void onInventoryChanged() {}
+        public void markDirty() {}
 
         public boolean isUseableByPlayer(net.minecraft.entity.player.EntityPlayer entityhuman) {
             return true;
@@ -132,15 +132,15 @@ public class CraftInventoryCustom extends CraftInventory {
             return type;
         }
 
-        public void closeChest() {}
+        public void closeInventory() {}
 
         public InventoryHolder getOwner() {
             return owner;
         }
 
-        public void openChest() {}
+        public void openInventory() {}
 
-        public boolean func_145818_k_() {
+        public boolean hasCustomInventoryName() {
             return false;
         }
 

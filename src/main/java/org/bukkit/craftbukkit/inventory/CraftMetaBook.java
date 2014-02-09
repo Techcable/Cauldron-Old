@@ -51,11 +51,11 @@ class CraftMetaBook extends CraftMetaItem implements BookMeta {
         }
 
         if (tag.hasKey(BOOK_PAGES.NBT)) {
-            net.minecraft.nbt.NBTTagList pages = tag.func_150295_c(BOOK_PAGES.NBT, 8);
+            net.minecraft.nbt.NBTTagList pages = tag.getTagList(BOOK_PAGES.NBT, 8);
             String[] pageArray = new String[pages.tagCount()];
 
             for (int i = 0; i < pages.tagCount(); i++) {
-                String page = pages.func_150307_f(i);
+                String page = pages.getStringTagAt(i);
                 pageArray[i] = page;
             }
 

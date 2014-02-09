@@ -9,9 +9,9 @@
  public class BlockDragonEgg extends Block
  {
      private static final String __OBFID = "CL_00000232";
-@@ -43,7 +45,8 @@
+@@ -46,7 +48,8 @@
  
-             if (!BlockFalling.field_149832_M && p_150018_1_.checkChunksExist(p_150018_2_ - b0, p_150018_3_ - b0, p_150018_4_ - b0, p_150018_2_ + b0, p_150018_3_ + b0, p_150018_4_ + b0))
+             if (!BlockFalling.fallInstantly && p_150018_1_.checkChunksExist(p_150018_2_ - b0, p_150018_3_ - b0, p_150018_4_ - b0, p_150018_2_ + b0, p_150018_3_ + b0, p_150018_4_ + b0))
              {
 -                EntityFallingBlock entityfallingblock = new EntityFallingBlock(p_150018_1_, (double)((float)p_150018_2_ + 0.5F), (double)((float)p_150018_3_ + 0.5F), (double)((float)p_150018_4_ + 0.5F), this);
 +                // CraftBukkit - added data
@@ -19,9 +19,9 @@
                  p_150018_1_.spawnEntityInWorld(entityfallingblock);
              }
              else
-@@ -86,6 +89,22 @@
+@@ -91,6 +94,22 @@
  
-                 if (p_150019_1_.func_147439_a(i1, j1, k1).field_149764_J == Material.field_151579_a)
+                 if (p_150019_1_.getBlock(i1, j1, k1).blockMaterial == Material.air)
                  {
 +                    // CraftBukkit start
 +                    org.bukkit.block.Block from = p_150019_1_.getWorld().getBlockAt(p_150019_2_, p_150019_3_, p_150019_4_);
@@ -41,4 +41,4 @@
 +
                      if (!p_150019_1_.isRemote)
                      {
-                         p_150019_1_.func_147465_d(i1, j1, k1, this, p_150019_1_.getBlockMetadata(p_150019_2_, p_150019_3_, p_150019_4_), 2);
+                         p_150019_1_.setBlock(i1, j1, k1, this, p_150019_1_.getBlockMetadata(p_150019_2_, p_150019_3_, p_150019_4_), 2);

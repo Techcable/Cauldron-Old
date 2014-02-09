@@ -72,7 +72,7 @@ class ThreadPlayerLookupUUID extends Thread
     private void fireLoginEvents() throws Exception
     {
         // CraftBukkit start
-        if (!this.field_151292_a.field_147333_a.func_150724_d())
+        if (!this.field_151292_a.field_147333_a.isChannelOpen())
         {
             return;
         }

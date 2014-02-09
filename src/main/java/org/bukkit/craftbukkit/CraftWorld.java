@@ -228,9 +228,9 @@ public class CraftWorld implements World {
         // This flags 65 blocks distributed across all the sections of the chunk, so that everything is sent, including biomes
         int height = getMaxHeight() / 16;
         for (int idx = 0; idx < 64; idx++) {
-            world.func_147471_g(px + (idx / height), ((idx % height) * 16), pz);
+            world.markBlockForUpdate(px + (idx / height), ((idx % height) * 16), pz);
         }
-        world.func_147471_g(px + 15, (height * 16) - 1, pz + 15);
+        world.markBlockForUpdate(px + 15, (height * 16) - 1, pz + 15);
 
         return true;
     }
@@ -300,7 +300,7 @@ public class CraftWorld implements World {
         Validate.notNull(item, "Cannot drop a Null item.");
         Validate.isTrue(item.getTypeId() != 0, "Cannot drop AIR.");
         net.minecraft.entity.item.EntityItem entity = new net.minecraft.entity.item.EntityItem(world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
-        entity.field_145804_b = 10;
+        entity.delayBeforeCanPickup = 10;
         world.spawnEntityInWorld(entity);
         // TODO this is inconsistent with how Entity.getBukkitEntity() works.
         // However, this entity is not at the moment backed by a server entity class so it may be left.
@@ -471,12 +471,12 @@ public class CraftWorld implements World {
                 int x = blockstate.getX();
                 int y = blockstate.getY();
                 int z = blockstate.getZ();
-                net.minecraft.block.Block oldBlock = world.func_147439_a(x, y, z); 
+                net.minecraft.block.Block oldBlock = world.getBlock(x, y, z); 
                 int newId = blockstate.getTypeId();
                 int data = blockstate.getRawData();
                 int flag = ((CraftBlockState)blockstate).getFlag();
                 delegate.setTypeIdAndData(x, y, z, newId, data);
-                net.minecraft.block.Block newBlock = world.func_147439_a(x, y, z); 
+                net.minecraft.block.Block newBlock = world.getBlock(x, y, z); 
                 world.markAndNotifyBlock(x, y, z, null, oldBlock, newBlock, flag);
             }
             world.capturedBlockStates.clear();
@@ -489,7 +489,7 @@ public class CraftWorld implements World {
     }
 
     public net.minecraft.tileentity.TileEntity getTileEntityAt(final int x, final int y, final int z) {
-        return world.func_147438_o(x, y, z);
+        return world.getTileEntity(x, y, z);
     }
 
     public String getName() {
@@ -534,7 +534,7 @@ public class CraftWorld implements World {
             CraftPlayer cp = (CraftPlayer) p;
             if (cp.getHandle().playerNetServerHandler == null) continue;
 
-            cp.getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S03PacketTimeUpdate(cp.getHandle().worldObj.getTotalWorldTime(), cp.getHandle().getPlayerTime(), cp.getHandle().worldObj.getGameRules().getGameRuleBooleanValue("doDaylightCycle")));
+            cp.getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S03PacketTimeUpdate(cp.getHandle().worldObj.getTotalWorldTime(), cp.getHandle().getPlayerTime(), cp.getHandle().worldObj.getGameRules().getGameRuleBooleanValue("doDaylightCycle")));
         }
     }
 
@@ -735,27 +735,27 @@ public class CraftWorld implements World {
     public void save() {
         this.server.checkSaveState();
         try {
-            boolean oldSave = world.canNotSave;
+            boolean oldSave = world.levelSaving;
 
-            world.canNotSave = false;
+            world.levelSaving = false;
             world.saveAllChunks(true, null);
 
-            world.canNotSave = oldSave;
+            world.levelSaving = oldSave;
         } catch (net.minecraft.world.MinecraftException ex) {
             ex.printStackTrace();
         }
     }
 
     public boolean isAutoSave() {
-        return !world.canNotSave;
+        return !world.levelSaving;
     }
 
     public void setAutoSave(boolean value) {
-        world.canNotSave = !value;
+        world.levelSaving = !value;
     }
 
     public void setDifficulty(Difficulty difficulty) {
-        this.getHandle().difficultySetting = net.minecraft.world.EnumDifficulty.func_151523_a(difficulty.getValue());
+        this.getHandle().difficultySetting = net.minecraft.world.EnumDifficulty.getDifficultyEnum(difficulty.getValue());
     }
 
     public Difficulty getDifficulty() {
@@ -883,7 +883,7 @@ public class CraftWorld implements World {
         double y = location.getBlockY() + 0.5;
         double z = location.getBlockZ() + 0.5;
 
-        net.minecraft.entity.item.EntityFallingBlock entity = new net.minecraft.entity.item.EntityFallingBlock(world, x, y, z, net.minecraft.block.Block.func_149729_e(material.getId()), data);
+        net.minecraft.entity.item.EntityFallingBlock entity = new net.minecraft.entity.item.EntityFallingBlock(world, x, y, z, net.minecraft.block.Block.getBlockById(material.getId()), data);
         entity.field_145812_b = 1; // ticksLived
 
         world.addEntity(entity, SpawnReason.CUSTOM);
@@ -918,7 +918,7 @@ public class CraftWorld implements World {
             int type = world.getTypeId((int) x, (int) y, (int) z);
             int data = world.getBlockMetadata((int) x, (int) y, (int) z);
 
-            entity = new net.minecraft.entity.item.EntityFallingBlock(world, x + 0.5, y + 0.5, z + 0.5, net.minecraft.block.Block.func_149729_e(type), data);
+            entity = new net.minecraft.entity.item.EntityFallingBlock(world, x + 0.5, y + 0.5, z + 0.5, net.minecraft.block.Block.getBlockById(type), data);
         } else if (Projectile.class.isAssignableFrom(clazz)) {
             if (Snowball.class.isAssignableFrom(clazz)) {
                 entity = new net.minecraft.entity.projectile.EntitySnowball(world, x, y, z);
@@ -1393,7 +1393,7 @@ public class CraftWorld implements World {
                 distance = (int) player.getLocation().distanceSquared( location );
                 if ( distance <= radius )
                 {
-                    ( (CraftPlayer) player ).getHandle().playerNetServerHandler.func_147359_a( packet );
+                    ( (CraftPlayer) player ).getHandle().playerNetServerHandler.sendPacket( packet );
                 }
             }
         }

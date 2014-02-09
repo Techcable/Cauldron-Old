@@ -307,7 +307,7 @@ public class MCPCHooks
                 writer.name("loadedChunks").value(world.theChunkProviderServer.loadedChunkHashMap.size());
                 writer.name("activeChunks").value(world.activeChunkSet.size());
                 writer.name("entities").value(world.loadedEntityList.size());
-                writer.name("tiles").value(world.field_147482_g.size());
+                writer.name("tiles").value(world.loadedTileEntityList.size());
 
                 TObjectIntHashMap<ChunkCoordIntPair> chunkEntityCounts = new TObjectIntHashMap<ChunkCoordIntPair>();
                 TObjectIntHashMap<Class> classEntityCounts = new TObjectIntHashMap<Class>();
@@ -338,22 +338,22 @@ public class MCPCHooks
                 TObjectIntHashMap<ChunkCoordIntPair> chunkTileCounts = new TObjectIntHashMap<ChunkCoordIntPair>();
                 TObjectIntHashMap<Class> classTileCounts = new TObjectIntHashMap<Class>();
                 writer.name("tiles").beginArray();
-                for (int i = 0; i < world.field_147482_g.size(); i++)
+                for (int i = 0; i < world.loadedTileEntityList.size(); i++)
                 {
-                    TileEntity tile = (TileEntity) world.field_147482_g.get(i);
+                    TileEntity tile = (TileEntity) world.loadedTileEntityList.get(i);
                     if (logAll)
                     {
                         writer.beginObject();
                         writer.name("type").value(tile.getClass().toString());
-                        writer.name("x").value(tile.field_145851_c);
-                        writer.name("y").value(tile.field_145848_d);
-                        writer.name("z").value(tile.field_145849_e);
-                        writer.name("isInvalid").value(tile.func_145837_r());
+                        writer.name("x").value(tile.xCoord);
+                        writer.name("y").value(tile.yCoord);
+                        writer.name("z").value(tile.zCoord);
+                        writer.name("isInvalid").value(tile.isInvalid());
                         writer.name("canUpdate").value(tile.canUpdate());
-                        writer.name("block").value("" + tile.func_145838_q());
+                        writer.name("block").value("" + tile.getBlockType());
                         writer.endObject();
                     }
-                    ChunkCoordIntPair chunkCoords = new ChunkCoordIntPair(tile.field_145851_c >> 4, tile.field_145849_e >> 4);
+                    ChunkCoordIntPair chunkCoords = new ChunkCoordIntPair(tile.xCoord >> 4, tile.zCoord >> 4);
                     chunkTileCounts.adjustOrPutValue(chunkCoords, 1, 1);
                     classTileCounts.adjustOrPutValue(tile.getClass(), 1, 1);
                 }

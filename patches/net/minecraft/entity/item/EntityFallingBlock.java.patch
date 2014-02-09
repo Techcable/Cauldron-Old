@@ -20,9 +20,9 @@
  
                  if (this.field_145812_b == 1)
                  {
--                    if (this.worldObj.func_147439_a(i, j, k) != this.field_145811_e)
+-                    if (this.worldObj.getBlock(i, j, k) != this.field_145811_e)
 +                    // CraftBukkit - compare data and call event
-+                    if (this.field_145812_b != 1 || this.worldObj.func_147439_a(i, j, k) != this.field_145811_e || this.worldObj.getBlockMetadata(i, j, k) != this.field_145814_a || CraftEventFactory.callEntityChangeBlockEvent(this, i, j, k, Blocks.air, 0).isCancelled())
++                    if (this.field_145812_b != 1 || this.worldObj.getBlock(i, j, k) != this.field_145811_e || this.worldObj.getBlockMetadata(i, j, k) != this.field_145814_a || CraftEventFactory.callEntityChangeBlockEvent(this, i, j, k, Blocks.air, 0).isCancelled())
                      {
                          this.setDead();
                          return;
@@ -30,16 +30,16 @@
                      {
                          this.setDead();
  
--                        if (!this.field_145808_f && this.worldObj.func_147472_a(this.field_145811_e, i, j, k, true, 1, (Entity)null, (ItemStack)null) && !BlockFalling.func_149831_e(this.worldObj, i, j - 1, k) && this.worldObj.func_147465_d(i, j, k, this.field_145811_e, this.field_145814_a, 3))
+-                        if (!this.field_145808_f && this.worldObj.canPlaceEntityOnSide(this.field_145811_e, i, j, k, true, 1, (Entity)null, (ItemStack)null) && !BlockFalling.func_149831_e(this.worldObj, i, j - 1, k) && this.worldObj.setBlock(i, j, k, this.field_145811_e, this.field_145814_a, 3))
 +                        // CraftBukkit start
-+                        if (!this.field_145808_f && this.worldObj.func_147472_a(this.field_145811_e, i, j, k, true, 1, (Entity) null, (ItemStack) null) && !BlockFalling.func_149831_e(this.worldObj, i, j - 1, k) /* mimic the false conditions of setTypeIdAndData */ && i >= -30000000 && k >= -30000000 && i < 30000000 && k < 30000000 && j > 0 && j < 256 && !(this.worldObj.func_147439_a(i, j, k) == this.field_145811_e && this.worldObj.getBlockMetadata(i, j, k) == this.field_145814_a))
++                        if (!this.field_145808_f && this.worldObj.canPlaceEntityOnSide(this.field_145811_e, i, j, k, true, 1, (Entity) null, (ItemStack) null) && !BlockFalling.func_149831_e(this.worldObj, i, j - 1, k) /* mimic the false conditions of setTypeIdAndData */ && i >= -30000000 && k >= -30000000 && i < 30000000 && k < 30000000 && j > 0 && j < 256 && !(this.worldObj.getBlock(i, j, k) == this.field_145811_e && this.worldObj.getBlockMetadata(i, j, k) == this.field_145814_a))
                          {
 +                            if (CraftEventFactory.callEntityChangeBlockEvent(this, i, j, k, this.field_145811_e, this.field_145814_a).isCancelled())
 +                            {
 +                                return;
 +                            }
 +
-+                            this.worldObj.func_147465_d(i, j, k, this.field_145811_e, this.field_145814_a, 3);
++                            this.worldObj.setBlock(i, j, k, this.field_145811_e, this.field_145814_a, 3);
 +                            // CraftBukkit end
 +
                              if (this.field_145811_e instanceof BlockFalling)

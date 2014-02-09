@@ -53,7 +53,7 @@
              if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
 @@ -85,23 +93,52 @@
  
-                     if (material == Material.field_151586_h && l == 0)
+                     if (material == Material.water && l == 0)
                      {
 +                        // CraftBukkit start
 +                        PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(par3EntityPlayer, i, j, k, -1, par1ItemStack, Items.water_bucket);
@@ -64,12 +64,12 @@
 +                        }
 +
 +                        // CraftBukkit end
-                         par2World.func_147468_f(i, j, k);
+                         par2World.setBlockToAir(i, j, k);
 -                        return this.func_150910_a(par1ItemStack, par3EntityPlayer, Items.water_bucket);
 +                        return this.func_150910_a(par1ItemStack, par3EntityPlayer, Items.water_bucket, event.getItemStack()); // CraftBukkit - added Event stack
                      }
  
-                     if (material == Material.field_151587_i && l == 0)
+                     if (material == Material.lava && l == 0)
                      {
 +                        // CraftBukkit start
 +                        PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(par3EntityPlayer, i, j, k, -1, par1ItemStack, Items.lava_bucket);
@@ -80,7 +80,7 @@
 +                        }
 +
 +                        // CraftBukkit end
-                         par2World.func_147468_f(i, j, k);
+                         par2World.setBlockToAir(i, j, k);
 -                        return this.func_150910_a(par1ItemStack, par3EntityPlayer, Items.lava_bucket);
 +                        return this.func_150910_a(par1ItemStack, par3EntityPlayer, Items.lava_bucket, event.getItemStack()); // CraftBukkit - added Event stack
                      }

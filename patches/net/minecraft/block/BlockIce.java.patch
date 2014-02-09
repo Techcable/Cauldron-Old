@@ -1,8 +1,8 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockIce.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockIce.java
-@@ -80,6 +80,14 @@
+@@ -85,6 +85,14 @@
      {
-         if (p_149674_1_.getSavedLightValue(EnumSkyBlock.Block, p_149674_2_, p_149674_3_, p_149674_4_) > 11 - this.func_149717_k())
+         if (p_149674_1_.getSavedLightValue(EnumSkyBlock.Block, p_149674_2_, p_149674_3_, p_149674_4_) > 11 - this.getLightOpacity())
          {
 +            // CraftBukkit start
 +            if (org.bukkit.craftbukkit.event.CraftEventFactory.callBlockFadeEvent(p_149674_1_.getWorld().getBlockAt(p_149674_2_, p_149674_3_, p_149674_4_), Blocks.water).isCancelled())
@@ -14,4 +14,4 @@
 +
              if (p_149674_1_.provider.isHellWorld)
              {
-                 p_149674_1_.func_147468_f(p_149674_2_, p_149674_3_, p_149674_4_);
+                 p_149674_1_.setBlockToAir(p_149674_2_, p_149674_3_, p_149674_4_);

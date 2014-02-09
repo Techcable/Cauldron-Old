@@ -1,32 +1,32 @@
 --- ../src-base/minecraft/net/minecraft/block/Block.java
 +++ ../src-work/minecraft/net/minecraft/block/Block.java
-@@ -122,6 +122,7 @@
-     private String field_149770_b;
+@@ -144,6 +144,7 @@
+     private String unlocalizedName;
      @SideOnly(Side.CLIENT)
-     protected IIcon field_149761_L;
+     protected IIcon blockIcon;
 +    public boolean isForgeBlock; // MCPC+
      private static final String __OBFID = "CL_00000199";
  
-     public static int func_149682_b(Block p_149682_0_)
-@@ -648,7 +649,7 @@
- 
-     public void func_149690_a(World p_149690_1_, int p_149690_2_, int p_149690_3_, int p_149690_4_, int p_149690_5_, float p_149690_6_, int p_149690_7_)
+     public static int getIdFromBlock(Block p_149682_0_)
+@@ -706,7 +707,7 @@
+     // JAVADOC METHOD $$ func_149690_a
+     public void dropBlockAsItemWithChance(World p_149690_1_, int p_149690_2_, int p_149690_3_, int p_149690_4_, int p_149690_5_, float p_149690_6_, int p_149690_7_)
      {
 -        if (!p_149690_1_.isRemote)
 +        if (!p_149690_1_.isRemote && !p_149690_1_.restoringBlockStates) // MCPC+ do not drop items while restoring blockstates, prevents item dupe
          {
              ArrayList<ItemStack> items = getDrops(p_149690_1_, p_149690_2_, p_149690_3_, p_149690_4_, p_149690_5_, p_149690_7_);
              p_149690_6_ = ForgeEventFactory.fireBlockHarvesting(items, p_149690_1_, this, p_149690_2_, p_149690_3_, p_149690_4_, p_149690_5_, p_149690_7_, p_149690_6_, false, harvesters.get());
-@@ -665,7 +666,7 @@
- 
-     protected void func_149642_a(World p_149642_1_, int p_149642_2_, int p_149642_3_, int p_149642_4_, ItemStack p_149642_5_)
+@@ -724,7 +725,7 @@
+     // JAVADOC METHOD $$ func_149642_a
+     protected void dropBlockAsItem(World p_149642_1_, int p_149642_2_, int p_149642_3_, int p_149642_4_, ItemStack p_149642_5_)
      {
 -        if (!p_149642_1_.isRemote && p_149642_1_.getGameRules().getGameRuleBooleanValue("doTileDrops"))
 +        if (!p_149642_1_.isRemote && p_149642_1_.getGameRules().getGameRuleBooleanValue("doTileDrops") && !p_149642_1_.restoringBlockStates) // MCPC+ do not drop items while restoring blockstates, prevents item dupe)
          {
              float f = 0.7F;
              double d0 = (double)(p_149642_1_.rand.nextFloat() * f) + (double)(1.0F - f) * 0.5D;
-@@ -1124,6 +1125,30 @@
+@@ -1237,6 +1238,30 @@
          return this;
      }
  
@@ -55,5 +55,5 @@
 +    // Spigot end
 +
      @SideOnly(Side.CLIENT)
-     protected String func_149641_N()
+     protected String getTextureName()
      {

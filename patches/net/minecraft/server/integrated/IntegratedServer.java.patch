@@ -19,11 +19,11 @@
 -    protected boolean startServer() throws IOException
 +    protected boolean startServer() throws java.net.UnknownHostException // MCPC+
      {
-         field_147148_h.info("Starting integrated minecraft server version 1.7.2");
+         logger.info("Starting integrated minecraft server version 1.7.2");
          this.setOnlineMode(false);
 @@ -106,7 +108,15 @@
          {
-             field_147148_h.info("Saving and pausing game...");
+             logger.info("Saving and pausing game...");
              this.getConfigurationManager().saveAllPlayerData();
 -            this.saveAllWorlds(false);
 +            try

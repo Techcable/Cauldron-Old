@@ -22,7 +22,7 @@ public class BlockStateListPopulator {
 
     public void setTypeAndData(int x, int y, int z, net.minecraft.block.Block block, int data, int light) {
         BlockState state = world.getBlockAt(x, y, z).getState();
-        state.setTypeId(net.minecraft.block.Block.func_149682_b(block));
+        state.setTypeId(net.minecraft.block.Block.getIdFromBlock(block));
         state.setRawData((byte) data);
         list.add(state);
     }
@@ -38,7 +38,7 @@ public class BlockStateListPopulator {
 
     public void setType(int x, int y, int z, net.minecraft.block.Block block) {
         BlockState state = world.getBlockAt(x, y, z).getState();
-        state.setTypeId(net.minecraft.block.Block.func_149682_b(block));
+        state.setTypeId(net.minecraft.block.Block.getIdFromBlock(block));
         list.add(state);
     }
 

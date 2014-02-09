@@ -8,9 +8,9 @@
  
  public class BlockHopper extends BlockContainer
  {
-@@ -210,7 +211,7 @@
+@@ -223,7 +224,7 @@
  
-     public static int func_149918_b(int p_149918_0_)
+     public static int getDirectionFromMetadata(int p_149918_0_)
      {
 -        return p_149918_0_ & 7;
 +        return Math.min(p_149918_0_ & 7, 5); // CraftBukkit - Fix AIOOBE in callers

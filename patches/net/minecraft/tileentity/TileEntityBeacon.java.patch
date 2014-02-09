@@ -11,10 +11,10 @@
 +
  public class TileEntityBeacon extends TileEntity implements IInventory
  {
-     public static final Potion[][] field_146009_a = new Potion[][] {{Potion.moveSpeed, Potion.digSpeed}, {Potion.resistance, Potion.jump}, {Potion.damageBoost}, {Potion.regeneration}};
-@@ -31,6 +36,35 @@
-     private int field_146010_n;
-     private ItemStack field_146011_o;
+     // JAVADOC FIELD $$ field_146009_a
+@@ -36,6 +41,35 @@
+     // JAVADOC FIELD $$ field_146011_o
+     private ItemStack payment;
      private String field_146008_p;
 +    // CraftBukkit start
 +    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
@@ -22,7 +22,7 @@
 +
 +    public ItemStack[] getContents()
 +    {
-+        return new ItemStack[] { this.field_146011_o };
++        return new ItemStack[] { this.payment };
 +    }
 +
 +    public void onOpen(CraftHumanEntity who)
@@ -47,8 +47,8 @@
 +    // CraftBukkit end
      private static final String __OBFID = "CL_00000339";
  
-     public void func_145845_h()
-@@ -349,7 +383,7 @@
+     public void updateEntity()
+@@ -360,7 +394,7 @@
      // JAVADOC METHOD $$ func_70297_j_
      public int getInventoryStackLimit()
      {

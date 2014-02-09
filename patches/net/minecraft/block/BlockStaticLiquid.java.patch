@@ -9,7 +9,7 @@
  public class BlockStaticLiquid extends BlockLiquid
  {
      private static final String __OBFID = "CL_00000315";
-@@ -43,6 +45,11 @@
+@@ -46,6 +48,11 @@
          {
              int l = p_149674_5_.nextInt(3);
              int i1;
@@ -21,12 +21,12 @@
  
              for (i1 = 0; i1 < l; ++i1)
              {
-@@ -55,6 +62,16 @@
+@@ -58,6 +65,16 @@
                  {
-                     if (this.func_149817_o(p_149674_1_, p_149674_2_ - 1, p_149674_3_, p_149674_4_) || this.func_149817_o(p_149674_1_, p_149674_2_ + 1, p_149674_3_, p_149674_4_) || this.func_149817_o(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ - 1) || this.func_149817_o(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ + 1) || this.func_149817_o(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_) || this.func_149817_o(p_149674_1_, p_149674_2_, p_149674_3_ + 1, p_149674_4_))
+                     if (this.isFlammable(p_149674_1_, p_149674_2_ - 1, p_149674_3_, p_149674_4_) || this.isFlammable(p_149674_1_, p_149674_2_ + 1, p_149674_3_, p_149674_4_) || this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ - 1) || this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ + 1) || this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_) || this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_ + 1, p_149674_4_))
                      {
 +                        // CraftBukkit start - Prevent lava putting something on fire
-+                        if (p_149674_1_.func_147439_a(p_149674_2_, p_149674_3_, p_149674_4_) != Blocks.fire)
++                        if (p_149674_1_.getBlock(p_149674_2_, p_149674_3_, p_149674_4_) != Blocks.fire)
 +                        {
 +                            if (CraftEventFactory.callBlockIgniteEvent(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, x, y, z).isCancelled())
 +                            {
@@ -35,15 +35,15 @@
 +                        }
 +
 +                        // CraftBukkit end
-                         p_149674_1_.func_147449_b(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.fire);
+                         p_149674_1_.setBlock(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.fire);
                          return;
                      }
-@@ -77,6 +94,16 @@
+@@ -80,6 +97,16 @@
  
-                     if (p_149674_1_.func_147437_c(p_149674_2_, p_149674_3_ + 1, p_149674_4_) && this.func_149817_o(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_))
+                     if (p_149674_1_.isAirBlock(p_149674_2_, p_149674_3_ + 1, p_149674_4_) && this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_))
                      {
 +                        // CraftBukkit start - Prevent lava putting something on fire
-+                        if (p_149674_1_.func_147439_a(p_149674_2_, p_149674_3_ + 1, p_149674_4_) != Blocks.fire)
++                        if (p_149674_1_.getBlock(p_149674_2_, p_149674_3_ + 1, p_149674_4_) != Blocks.fire)
 +                        {
 +                            if (CraftEventFactory.callBlockIgniteEvent(p_149674_1_, p_149674_2_, p_149674_3_ + 1, p_149674_4_, x, y, z).isCancelled())
 +                            {
@@ -52,6 +52,6 @@
 +                        }
 +
 +                        // CraftBukkit end
-                         p_149674_1_.func_147449_b(p_149674_2_, p_149674_3_ + 1, p_149674_4_, Blocks.fire);
+                         p_149674_1_.setBlock(p_149674_2_, p_149674_3_ + 1, p_149674_4_, Blocks.fire);
                      }
                  }

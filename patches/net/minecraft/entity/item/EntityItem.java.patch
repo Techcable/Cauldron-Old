@@ -11,7 +11,7 @@
 +
  public class EntityItem extends Entity
  {
-     private static final Logger field_145803_d = LogManager.getLogger();
+     private static final Logger logger = LogManager.getLogger();
 @@ -34,6 +39,7 @@
      private String field_145802_g;
      // JAVADOC FIELD $$ field_70290_d
@@ -50,7 +50,7 @@
 +        super.onUpdate();
 +        // CraftBukkit start - Use wall time for pickup and despawn timers
 +        int elapsedTicks = MinecraftServer.currentTick - this.lastTick;
-+        this.field_145804_b -= elapsedTicks;
++        this.delayBeforeCanPickup -= elapsedTicks;
 +        this.age += elapsedTicks;
 +        this.lastTick = MinecraftServer.currentTick;
 +        // CraftBukkit end
@@ -71,12 +71,12 @@
 +        this.moveEntity(this.motionX, this.motionY, this.motionZ);
 +        boolean flag = (int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ;
  
--            if (this.field_145804_b > 0)
+-            if (this.delayBeforeCanPickup > 0)
 +        if ((flag && this.ticksExisted % 5 == 0) || forceUpdate) // MCPC+ - if forced
 +        {
-+            if (this.worldObj.func_147439_a(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).func_149688_o() == Material.field_151587_i)
++            if (this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() == Material.lava)
              {
--                --this.field_145804_b;
+-                --this.delayBeforeCanPickup;
 +                this.motionY = 0.20000000298023224D;
 +                this.motionX = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
 +                this.motionZ = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
@@ -94,7 +94,7 @@
 -            if (flag || this.ticksExisted % 25 == 0)
 +            if (forceUpdate && !this.worldObj.isRemote) // MCPC+ - if forced
              {
--                if (this.worldObj.func_147439_a(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).func_149688_o() == Material.field_151587_i)
+-                if (this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() == Material.lava)
 -                {
 -                    this.motionY = 0.20000000298023224D;
 -                    this.motionX = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
@@ -115,11 +115,11 @@
  
 -            if (this.onGround)
 -            {
--                f = this.worldObj.func_147439_a(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.boundingBox.minY) - 1, MathHelper.floor_double(this.posZ)).field_149765_K * 0.98F;
+-                f = this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.boundingBox.minY) - 1, MathHelper.floor_double(this.posZ)).slipperiness * 0.98F;
 -            }
 +        if (this.onGround)
 +        {
-+            f = this.worldObj.func_147439_a(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.boundingBox.minY) - 1, MathHelper.floor_double(this.posZ)).field_149765_K * 0.98F;
++            f = this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.boundingBox.minY) - 1, MathHelper.floor_double(this.posZ)).slipperiness * 0.98F;
 +        }
  
 -            this.motionX *= (double)f;
@@ -208,13 +208,13 @@
              else
              {
 -                itemstack1.stackSize += itemstack.stackSize;
--                par1EntityItem.field_145804_b = Math.max(par1EntityItem.field_145804_b, this.field_145804_b);
+-                par1EntityItem.delayBeforeCanPickup = Math.max(par1EntityItem.delayBeforeCanPickup, this.delayBeforeCanPickup);
 -                par1EntityItem.age = Math.min(par1EntityItem.age, this.age);
 -                par1EntityItem.setEntityItemStack(itemstack1);
 -                this.setDead();
 +                // Spigot start
 +                itemstack.stackSize += itemstack1.stackSize;
-+                this.field_145804_b = Math.max(par1EntityItem.field_145804_b, this.field_145804_b);
++                this.delayBeforeCanPickup = Math.max(par1EntityItem.delayBeforeCanPickup, this.delayBeforeCanPickup);
 +                this.age = Math.min(par1EntityItem.age, this.age);
 +                this.setEntityItemStack(itemstack);
 +                par1EntityItem.setDead();
@@ -259,7 +259,7 @@
 +            int canHold = par1EntityPlayer.inventory.canHold(itemstack);
 +            int remaining = itemstack.stackSize - canHold;
 +
-+            if (this.field_145804_b <= 0 && canHold > 0)
++            if (this.delayBeforeCanPickup <= 0 && canHold > 0)
 +            {
 +                itemstack.stackSize = canHold;
 +                // MCPC+ start - rename to cbEvent to fix naming collision
@@ -275,11 +275,11 @@
 +                // MCPC+ end
 +
 +                // Possibly < 0; fix here so we do not have to modify code below
-+                this.field_145804_b = 0;
++                this.delayBeforeCanPickup = 0;
 +            }
 +
 +            // CraftBukkit end
 +
-             if (this.field_145804_b <= 0 && (this.field_145802_g == null || lifespan - this.age <= 200 || this.field_145802_g.equals(par1EntityPlayer.getCommandSenderName())) && (event.getResult() == Result.ALLOW || i <= 0 || par1EntityPlayer.inventory.addItemStackToInventory(itemstack)))
+             if (this.delayBeforeCanPickup <= 0 && (this.field_145802_g == null || lifespan - this.age <= 200 || this.field_145802_g.equals(par1EntityPlayer.getCommandSenderName())) && (event.getResult() == Result.ALLOW || i <= 0 || par1EntityPlayer.inventory.addItemStackToInventory(itemstack)))
              {
-                 if (itemstack.getItem() == Item.func_150898_a(Blocks.log))
+                 if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log))

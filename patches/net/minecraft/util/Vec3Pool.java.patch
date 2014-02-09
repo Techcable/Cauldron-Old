@@ -13,17 +13,17 @@
 +    private Vec3 alloclisthead = null;
 +    private int total_size = 0;
 +    // CraftBukkit end
+     // JAVADOC FIELD $$ field_72347_d
      private int nextFreeSpace;
      private int maximumSizeSinceLastTruncation;
-     private int resetCount;
-@@ -23,57 +30,109 @@
+@@ -24,57 +31,109 @@
      }
  
      // JAVADOC METHOD $$ func_72345_a
 -    public Vec3 getVecFromPool(double par1, double par3, double par5)
 +    public final Vec3 getVecFromPool(double par1, double par3, double par5)   // CraftBukkit - Add final
      {
--        if (this.func_82589_e())
+-        if (this.skipCache())
 +        if (this.resetCount == 0)
          {
 -            return new Vec3(this, par1, par3, par5);
@@ -93,7 +93,7 @@
      // JAVADOC METHOD $$ func_72343_a
      public void clear()
      {
--        if (!this.func_82589_e())
+-        if (!this.skipCache())
 +        if (this.nextFreeSpace > this.maximumSizeSinceLastTruncation)
          {
 -            if (this.nextFreeSpace > this.maximumSizeSinceLastTruncation)
@@ -151,8 +151,8 @@
      }
  
      @SideOnly(Side.CLIENT)
-@@ -82,13 +141,13 @@
-         if (!this.func_82589_e())
+@@ -83,14 +142,14 @@
+         if (!this.skipCache())
          {
              this.nextFreeSpace = 0;
 -            this.vec3Cache.clear();
@@ -160,10 +160,11 @@
          }
      }
  
+     // JAVADOC METHOD $$ func_82591_c
      public int getPoolSize()
      {
 -        return this.vec3Cache.size();
 +        return this.total_size; // CraftBukkit
      }
  
-     public int func_82590_d()
+     // JAVADOC METHOD $$ func_82590_d

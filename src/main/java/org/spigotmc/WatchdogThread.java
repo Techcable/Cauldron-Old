@@ -90,7 +90,7 @@ public class WatchdogThread extends Thread
                     log.log(Level.SEVERE, "  Dimension:" + world.provider.dimensionId);
                     log.log(Level.SEVERE,
                             "  Loaded Chunks: " + world.theChunkProviderServer.loadedChunkHashMap.size() + " Active Chunks: " + world.activeChunkSet.size()
-                                    + " Entities: " + world.loadedEntityList.size() + " Tile Entities: " + world.field_147482_g.size());
+                                    + " Entities: " + world.loadedEntityList.size() + " Tile Entities: " + world.loadedTileEntityList.size());
                     log.log(Level.SEVERE, "  Entities Last Tick: " + world.entitiesTicked);
                     log.log(Level.SEVERE, "  Tiles Last Tick: " + world.tilesTicked);
                 }
@@ -156,7 +156,7 @@ public class WatchdogThread extends Thread
                     log.log(Level.WARNING, "  Loaded Chunks: " + world.theChunkProviderServer.loadedChunkHashMap.size() +
                             " Active Chunks: " + world.activeChunkSet.size() +
                             " Entities: " + world.loadedEntityList.size() +
-                            " Tile Entities: " + world.field_147482_g.size());
+                            " Tile Entities: " + world.loadedTileEntityList.size());
                     log.log(Level.WARNING, "  Entities Last Tick: " + world.entitiesTicked);
                     log.log(Level.WARNING, "  Tiles Last Tick: " + world.tilesTicked);
                 }

@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntityBrewingStand.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityBrewingStand.java
-@@ -15,17 +15,55 @@
+@@ -15,19 +15,57 @@
  import net.minecraftforge.common.MinecraftForge;
  import net.minecraftforge.event.brewing.PotionBrewedEvent;
  
@@ -15,12 +15,14 @@
  {
      private static final int[] field_145941_a = new int[] {3};
      private static final int[] field_145947_i = new int[] {0, 1, 2};
--    private ItemStack[] field_145945_j = new ItemStack[4];
--    private int field_145946_k;
-+    public ItemStack[] field_145945_j = new ItemStack[4]; // CraftBukkit - private -> public
-+    public int field_145946_k; // CraftBukkit - private -> public
-     private int field_145943_l;
-     private Item field_145944_m;
+     // JAVADOC FIELD $$ field_145945_j
+-    private ItemStack[] brewingItemStacks = new ItemStack[4];
+-    private int brewTime;
++    public ItemStack[] brewingItemStacks = new ItemStack[4]; // CraftBukkit - private -> public
++    public int brewTime; // CraftBukkit - private -> public
+     // JAVADOC FIELD $$ field_145943_l
+     private int filledSlots;
+     private Item ingredientID;
      private String field_145942_n;
 +    private int lastTick = MinecraftServer.currentTick; // CraftBukkit
      private static final String __OBFID = "CL_00000345";
@@ -46,7 +48,7 @@
 +
 +    public ItemStack[] getContents()
 +    {
-+        return this.field_145945_j;
++        return this.brewingItemStacks;
 +    }
 +
 +    public void setMaxStackSize(int size)
@@ -55,37 +57,37 @@
 +    }
 +    // CraftBukkit end
 +
-     public String func_145825_b()
+     // JAVADOC METHOD $$ func_145825_b
+     public String getInventoryName()
      {
-         return this.func_145818_k_() ? this.field_145942_n : "container.brewing";
-@@ -49,12 +87,17 @@
+@@ -53,12 +91,17 @@
  
-     public void func_145845_h()
+     public void updateEntity()
      {
 +        // CraftBukkit start - Use wall time instead of ticks for brewing
 +        int elapsedTicks = MinecraftServer.currentTick - this.lastTick;
 +        this.lastTick = MinecraftServer.currentTick;
 +
-         if (this.field_145946_k > 0)
+         if (this.brewTime > 0)
          {
--            --this.field_145946_k;
-+            this.field_145946_k -= elapsedTicks;
+-            --this.brewTime;
++            this.brewTime -= elapsedTicks;
  
--            if (this.field_145946_k == 0)
-+            if (this.field_145946_k <= 0)   // == -> <=
+-            if (this.brewTime == 0)
++            if (this.brewTime <= 0)   // == -> <=
              {
 +                // CraftBukkit end
-                 this.func_145940_l();
-                 this.onInventoryChanged();
+                 this.brewPotions();
+                 this.markDirty();
              }
-@@ -144,6 +187,20 @@
+@@ -148,6 +191,20 @@
          {
-             ItemStack itemstack = this.field_145945_j[3];
+             ItemStack itemstack = this.brewingItemStacks[3];
  
 +            // CraftBukkit start
 +            if (getOwner() != null)
 +            {
-+                BrewEvent event = new BrewEvent(field_145850_b.getWorld().getBlockAt(field_145851_c, field_145848_d, field_145849_e), (org.bukkit.inventory.BrewerInventory) this.getOwner().getInventory());
++                BrewEvent event = new BrewEvent(worldObj.getWorld().getBlockAt(xCoord, yCoord, zCoord), (org.bukkit.inventory.BrewerInventory) this.getOwner().getInventory());
 +                org.bukkit.Bukkit.getPluginManager().callEvent(event);
 +
 +                if (event.isCancelled())
@@ -98,8 +100,8 @@
 +
              for (int i = 0; i < 3; ++i)
              {
-                 if (this.field_145945_j[i] != null && this.field_145945_j[i].getItem() instanceof ItemPotion)
-@@ -287,7 +344,7 @@
+                 if (this.brewingItemStacks[i] != null && this.brewingItemStacks[i].getItem() instanceof ItemPotion)
+@@ -291,7 +348,7 @@
      // JAVADOC METHOD $$ func_70297_j_
      public int getInventoryStackLimit()
      {

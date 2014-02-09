@@ -20,7 +20,7 @@
      {
          this.func_151393_a(Blocks.iron_ore, new ItemStack(Items.iron_ingot), 0.7F);
          this.func_151393_a(Blocks.gold_ore, new ItemStack(Items.gold_ingot), 1.0F);
-@@ -78,16 +79,37 @@
+@@ -78,17 +79,38 @@
          this.experienceList.put(p_151394_2_, Float.valueOf(p_151394_3_));
      }
  
@@ -31,7 +31,8 @@
 +    }
 +    // CraftBukkit end
 +
-     public ItemStack func_151395_a(ItemStack p_151395_1_)
+     // JAVADOC METHOD $$ func_151395_a
+     public ItemStack getSmeltingResult(ItemStack p_151395_1_)
      {
 -        Iterator iterator = this.smeltingList.entrySet().iterator();
 +        // CraftBukkit start

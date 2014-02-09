@@ -60,7 +60,7 @@
 +
          if (par1 && (this.rand.nextInt(3) == 0 || this.rand.nextInt(1 + par2) > 0))
          {
--            this.func_145779_a(Items.spider_eye, 1);
+-            this.dropItem(Items.spider_eye, 1);
 +            loot.add(new org.bukkit.inventory.ItemStack(CraftMagicNumbers.getMaterial(Items.spider_eye), 1));
          }
 +

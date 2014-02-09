@@ -42,7 +42,7 @@
 +            par2ItemStack.stackSize++;
 +            // Chain to handler for new item
 +            ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
-+            IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.field_149943_a.getObject(eventStack.getItem());
++            IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.dispenseBehaviorRegistry.getObject(eventStack.getItem());
 +
 +            if (ibehaviordispenseitem != IBehaviorDispenseItem.itemDispenseBehaviorProvider && ibehaviordispenseitem != this)
 +            {
@@ -52,7 +52,7 @@
 +        }
 +
 +        iprojectile.setThrowableHeading(event.getVelocity().getX(), event.getVelocity().getY(), event.getVelocity().getZ(), this.func_82500_b(), this.func_82498_a());
-+        ((Entity) iprojectile).projectileSource = new org.bukkit.craftbukkit.projectiles.CraftBlockProjectileSource((TileEntityDispenser) par1IBlockSource.func_150835_j());
++        ((Entity) iprojectile).projectileSource = new org.bukkit.craftbukkit.projectiles.CraftBlockProjectileSource((TileEntityDispenser) par1IBlockSource.getBlockTileEntity());
 +        // CraftBukkit end
 +        world.spawnEntityInWorld((Entity) iprojectile);
 +        // itemstack.a(1); // CraftBukkit - Handled during event processing

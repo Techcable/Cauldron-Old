@@ -15,7 +15,7 @@
      private static final String __OBFID = "CL_00001650";
 @@ -63,7 +69,7 @@
  
-         if (this.worldObj.getBiomeGenForCoords(i, k).func_150564_a(i, j, k) > 1.0F)
+         if (this.worldObj.getBiomeGenForCoords(i, k).getFloatTemperature(i, j, k) > 1.0F)
          {
 -            this.attackEntityFrom(DamageSource.onFire, 1.0F);
 +            this.attackEntityFrom(CraftEventFactory.MELTING, 1.0F); // CraftBukkit - DamageSource.BURN -> CraftEventFactory.MELTING
@@ -24,9 +24,9 @@
          for (int l = 0; l < 4; ++l)
 @@ -74,7 +80,18 @@
  
-             if (this.worldObj.func_147439_a(i, j, k).func_149688_o() == Material.field_151579_a && this.worldObj.getBiomeGenForCoords(i, k).func_150564_a(i, j, k) < 0.8F && Blocks.snow_layer.func_149742_c(this.worldObj, i, j, k))
+             if (this.worldObj.getBlock(i, j, k).getMaterial() == Material.air && this.worldObj.getBiomeGenForCoords(i, k).getFloatTemperature(i, j, k) < 0.8F && Blocks.snow_layer.canPlaceBlockAt(this.worldObj, i, j, k))
              {
--                this.worldObj.func_147449_b(i, j, k, Blocks.snow_layer);
+-                this.worldObj.setBlock(i, j, k, Blocks.snow_layer);
 +                // CraftBukkit start
 +                org.bukkit.block.BlockState blockState = this.worldObj.getWorld().getBlockAt(i, j, k).getState();
 +                blockState.setType(CraftMagicNumbers.getMaterial(Blocks.snow_layer));
@@ -53,7 +53,7 @@
 -        for (int k = 0; k < j; ++k)
 +        if (j > 0)
          {
--            this.func_145779_a(Items.snowball, 1);
+-            this.dropItem(Items.snowball, 1);
 +            loot.add(new org.bukkit.inventory.ItemStack(CraftMagicNumbers.getMaterial(Items.snowball), j));
          }
 +

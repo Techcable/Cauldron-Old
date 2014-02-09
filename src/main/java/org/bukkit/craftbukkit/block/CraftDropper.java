@@ -38,7 +38,7 @@ public class CraftDropper extends CraftBlockState implements Dropper {
         boolean result = super.update(force, applyPhysics);
 
         if (result) {
-            dropper.onInventoryChanged();
+            dropper.markDirty();
         }
 
         return result;

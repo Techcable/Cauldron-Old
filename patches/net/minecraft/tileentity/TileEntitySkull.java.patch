@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntitySkull.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntitySkull.java
-@@ -56,6 +56,13 @@
+@@ -57,6 +57,13 @@
          this.field_145910_i = p_145903_1_;
      }
  
@@ -14,7 +14,7 @@
      @SideOnly(Side.CLIENT)
      public int func_145906_b()
      {
-@@ -66,4 +73,12 @@
+@@ -67,4 +74,12 @@
      {
          return this.field_145909_j;
      }

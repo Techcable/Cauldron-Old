@@ -9,13 +9,13 @@
  public class BlockSign extends BlockContainer
  {
      private Class field_149968_a;
-@@ -163,6 +165,17 @@
+@@ -172,6 +174,17 @@
          }
  
-         super.func_149695_a(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_, p_149695_5_);
+         super.onNeighborBlockChange(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_, p_149695_5_);
 +
 +        // CraftBukkit start
-+        if (p_149695_5_ != null && p_149695_5_.func_149744_f())
++        if (p_149695_5_ != null && p_149695_5_.canProvidePower())
 +        {
 +            org.bukkit.block.Block bukkitBlock = p_149695_1_.getWorld().getBlockAt(p_149695_2_, p_149695_3_, p_149695_4_);
 +            int power = bukkitBlock.getBlockPower();
@@ -26,4 +26,4 @@
 +        // CraftBukkit end
      }
  
-     @SideOnly(Side.CLIENT)
+     // JAVADOC METHOD $$ func_149694_d

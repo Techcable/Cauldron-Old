@@ -2,7 +2,7 @@
 +++ ../src-work/minecraft/net/minecraft/item/ItemEmptyMap.java
 @@ -28,6 +28,7 @@
          mapdata.zCenter = (int)(Math.round(par3EntityPlayer.posZ / (double)i) * (long)i);
-         mapdata.dimension = (byte)par2World.provider.dimensionId;
+         mapdata.dimension = par2World.provider.dimensionId;
          mapdata.markDirty();
 +        org.bukkit.craftbukkit.event.CraftEventFactory.callEvent(new org.bukkit.event.server.MapInitializeEvent(mapdata.mapView)); // CraftBukkit
          --par1ItemStack.stackSize;

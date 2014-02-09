@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntity.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntity.java
-@@ -22,18 +22,22 @@
+@@ -22,15 +22,18 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -9,30 +9,34 @@
 +
  public class TileEntity
  {
-     private static final Logger field_145852_a = LogManager.getLogger();
-     private static Map field_145855_i = new HashMap();
--    private static Map field_145853_j = new HashMap();
--    protected World field_145850_b;
-+    public static Map field_145853_j = new HashMap(); // MCPC+ - private -> public
-+    public World field_145850_b; // CraftBukkit - protected -> public
-     public int field_145851_c;
-     public int field_145848_d;
-     public int field_145849_e;
-     protected boolean field_145846_f;
-     public int field_145847_g = -1;
-     public Block field_145854_h;
+     private static final Logger logger = LogManager.getLogger();
+     // JAVADOC FIELD $$ field_145855_i
+     private static Map nameToClassMap = new HashMap();
+     // JAVADOC FIELD $$ field_145853_j
+-    private static Map classToNameMap = new HashMap();
++    public static Map classToNameMap = new HashMap(); // MCPC+ - private -> public
+     // JAVADOC FIELD $$ field_145850_b
+-    protected World worldObj;
++    public World worldObj; // CraftBukkit - protected -> public
+     public int xCoord;
+     public int yCoord;
+     public int zCoord;
+@@ -38,6 +41,7 @@
+     public int blockMetadata = -1;
+     // JAVADOC FIELD $$ field_145854_h
+     public Block blockType;
 +    public CustomTimingsHandler tickTimer = org.bukkit.craftbukkit.SpigotTimings.getTileEntityTimings(this); // Spigot
      private static final String __OBFID = "CL_00000340";
  
-     public static void func_145826_a(Class p_145826_0_, String p_145826_1_)
-@@ -283,6 +287,20 @@
-         func_145826_a(TileEntityFlowerPot.class, "FlowerPot");
+     // JAVADOC METHOD $$ func_145826_a
+@@ -300,6 +304,20 @@
+         addMapping(TileEntityFlowerPot.class, "FlowerPot");
      }
  
 +    // CraftBukkit start
 +    public InventoryHolder getOwner()
 +    {
-+        org.bukkit.block.BlockState state = field_145850_b.getWorld().getBlockAt(field_145851_c, field_145848_d, field_145849_e).getState();
++        org.bukkit.block.BlockState state = worldObj.getWorld().getBlockAt(xCoord, yCoord, zCoord).getState();
 +
 +        if (state instanceof InventoryHolder)
 +        {

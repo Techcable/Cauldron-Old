@@ -134,7 +134,7 @@
 +            for (int i1 = this.affectedBlockPositions.size() - 1; i1 >= 0; i1--)
 +            {
 +                ChunkPosition cpos = (ChunkPosition) this.affectedBlockPositions.get(i1);
-+                org.bukkit.block.Block bblock = bworld.getBlockAt(cpos.field_151329_a, cpos.field_151327_b, cpos.field_151328_c);
++                org.bukkit.block.Block bblock = bworld.getBlockAt(cpos.chunkPosX, cpos.chunkPosY, cpos.chunkPosZ);
 +
 +                if (bblock.getType() != org.bukkit.Material.AIR)
 +                {
@@ -164,23 +164,23 @@
              while (iterator.hasNext())
 @@ -213,7 +315,8 @@
                  {
-                     if (block.func_149659_a(this))
+                     if (block.canDropFromExplosion(this))
                      {
--                        block.func_149690_a(this.worldObj, i, j, k, this.worldObj.getBlockMetadata(i, j, k), 1.0F / this.explosionSize, 0);
+-                        block.dropBlockAsItemWithChance(this.worldObj, i, j, k, this.worldObj.getBlockMetadata(i, j, k), 1.0F / this.explosionSize, 0);
 +                        // CraftBukkit - add yield
-+                        block.func_149690_a(this.worldObj, i, j, k, this.worldObj.getBlockMetadata(i, j, k), event.getYield(), 0);
++                        block.dropBlockAsItemWithChance(this.worldObj, i, j, k, this.worldObj.getBlockMetadata(i, j, k), event.getYield(), 0);
                      }
  
                      block.onBlockExploded(this.worldObj, i, j, k, this);
 @@ -236,7 +339,13 @@
  
-                 if (block.func_149688_o() == Material.field_151579_a && block1.func_149730_j() && this.explosionRNG.nextInt(3) == 0)
+                 if (block.getMaterial() == Material.air && block1.func_149730_j() && this.explosionRNG.nextInt(3) == 0)
                  {
--                    this.worldObj.func_147449_b(i, j, k, Blocks.fire);
+-                    this.worldObj.setBlock(i, j, k, Blocks.fire);
 +                    // CraftBukkit start - Ignition by explosion
 +                    if (!org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(this.worldObj, i, j, k, this).isCancelled())
 +                    {
-+                        this.worldObj.func_147449_b(i, j, k, Blocks.fire);
++                        this.worldObj.setBlock(i, j, k, Blocks.fire);
 +                    }
 +
 +                    // CraftBukkit end

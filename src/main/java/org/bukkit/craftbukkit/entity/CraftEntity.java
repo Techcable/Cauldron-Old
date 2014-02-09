@@ -47,7 +47,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                 // This case is never hit in vanilla
                 //else { return new CraftHumanEntity(server, (net.minecraft.entity.player.EntityPlayer) entity); }
                 else {
-                    return new CraftFakePlayer(server, FakePlayerFactory.get(DimensionManager.getWorld(entity.worldObj.provider.dimensionId), ((net.minecraft.entity.player.EntityPlayer) entity).func_146103_bH()));
+                    return new CraftFakePlayer(server, FakePlayerFactory.get(DimensionManager.getWorld(entity.worldObj.provider.dimensionId), ((net.minecraft.entity.player.EntityPlayer) entity).getGameProfile()));
                 }
                 // MCPC+ end
             }
@@ -440,7 +440,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
     }
 
     public int getEntityId() {
-        return entity.func_145782_y();
+        return entity.getEntityId();
     }
 
     public int getFireTicks() {

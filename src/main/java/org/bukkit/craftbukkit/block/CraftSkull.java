@@ -186,7 +186,7 @@ public class CraftSkull extends CraftBlockState implements Skull {
         if (result) {
             skull.func_145905_a(getSkullType(skullType), player);
             skull.func_145903_a(rotation);
-            skull.onInventoryChanged();
+            skull.markDirty();
         }
 
         return result;

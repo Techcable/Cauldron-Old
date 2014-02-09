@@ -54,7 +54,7 @@
 +            this.addStats(event.getFoodLevel() - oldFoodLevel, p_151686_1_.func_150906_h(p_151686_2_));
 +        }
 +
-+        ((EntityPlayerMP) entityplayer).playerNetServerHandler.func_147359_a(new S06PacketUpdateHealth(((EntityPlayerMP) entityplayer).getBukkitEntity().getScaledHealth(), entityplayer.getFoodStats().foodLevel, entityplayer.getFoodStats().foodSaturationLevel));
++        ((EntityPlayerMP) entityplayer).playerNetServerHandler.sendPacket(new S06PacketUpdateHealth(((EntityPlayerMP) entityplayer).getBukkitEntity().getScaledHealth(), entityplayer.getFoodStats().foodLevel, entityplayer.getFoodStats().foodSaturationLevel));
 +        // CraftBukkit end
      }
  
@@ -72,7 +72,7 @@
 +                    this.foodLevel = event.getFoodLevel();
 +                }
 +
-+                ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.func_147359_a(new S06PacketUpdateHealth(((EntityPlayerMP) par1EntityPlayer).getBukkitEntity().getScaledHealth(), this.foodLevel, this.foodSaturationLevel));
++                ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.sendPacket(new S06PacketUpdateHealth(((EntityPlayerMP) par1EntityPlayer).getBukkitEntity().getScaledHealth(), this.foodLevel, this.foodSaturationLevel));
 +                // CraftBukkit end
              }
          }

@@ -67,9 +67,9 @@ public class ContainerEnchantTableInventory extends InventoryBasic   // CraftBuk
     /**
      * Called when an the contents of an Inventory change, usually
      */
-    public void onInventoryChanged()
+    public void markDirty()
     {
-        super.onInventoryChanged();
+        super.markDirty();
         this.container.onCraftMatrixChanged((IInventory) this);
     }
 }

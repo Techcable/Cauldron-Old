@@ -1,29 +1,29 @@
 --- ../src-base/minecraft/net/minecraft/network/NetworkManager.java
 +++ ../src-work/minecraft/net/minecraft/network/NetworkManager.java
-@@ -51,7 +51,8 @@
-     private final Queue field_150748_i = Queues.newConcurrentLinkedQueue();
-     private final Queue field_150745_j = Queues.newConcurrentLinkedQueue();
-     private Channel field_150746_k;
--    private SocketAddress field_150743_l;
-+    public SocketAddress field_150743_l; // Spigot
+@@ -56,7 +56,8 @@
+     // JAVADOC FIELD $$ field_150746_k
+     private Channel channel;
+     // JAVADOC FIELD $$ field_150743_l
+-    private SocketAddress socketAddress;
++    public SocketAddress socketAddress; // Spigot
 +    public String spoofedUUID; // Spigot
-     private INetHandler field_150744_m;
-     private EnumConnectionState field_150741_n;
-     private IChatComponent field_150742_o;
-@@ -194,7 +195,15 @@
+     // JAVADOC FIELD $$ field_150744_m
+     private INetHandler netHandler;
+     // JAVADOC FIELD $$ field_150741_n
+@@ -207,7 +208,15 @@
          {
-             for (int i = 1000; !this.field_150748_i.isEmpty() && i >= 0; --i)
+             for (int i = 1000; !this.receivedPacketsQueue.isEmpty() && i >= 0; --i)
              {
--                Packet packet = (Packet)this.field_150748_i.poll();
-+                Packet packet = (Packet) this.field_150748_i.poll();
+-                Packet packet = (Packet)this.receivedPacketsQueue.poll();
++                Packet packet = (Packet) this.receivedPacketsQueue.poll();
 +
 +                // CraftBukkit start
-+                if (!this.func_150724_d() || !this.field_150746_k.config().isAutoRead())   // Should be isConnected
++                if (!this.isChannelOpen() || !this.channel.config().isAutoRead())   // Should be isConnected
 +                {
 +                    continue;
 +                }
 +
 +                // CraftBukkit end
-                 packet.func_148833_a(this.field_150744_m);
+                 packet.processPacket(this.netHandler);
              }
  

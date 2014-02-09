@@ -20,8 +20,8 @@
 -        for (k = 0; k < j; ++k)
 +        if (j > 0)
          {
--            this.func_145778_a(Item.func_150898_a(Blocks.red_flower), 1, 0.0F);
-+            loot.add(CraftItemStack.asNewCraftStack(Item.func_150898_a(Blocks.red_flower), j));
+-            this.func_145778_a(Item.getItemFromBlock(Blocks.red_flower), 1, 0.0F);
++            loot.add(CraftItemStack.asNewCraftStack(Item.getItemFromBlock(Blocks.red_flower), j));
          }
  
          k = 3 + this.rand.nextInt(3);
@@ -29,7 +29,7 @@
 -        for (int l = 0; l < k; ++l)
 +        if (k > 0)
          {
--            this.func_145779_a(Items.iron_ingot, 1);
+-            this.dropItem(Items.iron_ingot, 1);
 +            loot.add(CraftItemStack.asNewCraftStack(Items.iron_ingot, k));
          }
 +

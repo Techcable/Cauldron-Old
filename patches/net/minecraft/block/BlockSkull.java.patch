@@ -12,68 +12,42 @@
  public class BlockSkull extends BlockContainer
  {
      private static final String __OBFID = "CL_00000307";
-@@ -109,6 +114,25 @@
-         return p_149692_1_;
-     }
- 
-+    // CraftBukkit start - Special case dropping so we can get info from the tile entity
-+    public void func_149690_a(World p_149690_1_, int p_149690_2_, int p_149690_3_, int p_149690_4_, int p_149690_5_, float p_149690_6_, int p_149690_7_)
-+    {
-+        if (p_149690_1_.rand.nextFloat() < p_149690_6_)
-+        {
-+            ItemStack itemstack = new ItemStack(Items.skull, 1, this.func_149643_k(p_149690_1_, p_149690_2_, p_149690_3_, p_149690_4_));
-+            TileEntitySkull tileentityskull = (TileEntitySkull) p_149690_1_.func_147438_o(p_149690_2_, p_149690_3_, p_149690_4_);
-+
-+            if (tileentityskull.func_145904_a() == 3 && tileentityskull.func_145907_c() != null && tileentityskull.func_145907_c().length() > 0)
-+            {
-+                itemstack.setTagCompound(new NBTTagCompound());
-+                itemstack.getTagCompound().setString("SkullOwner", tileentityskull.func_145907_c());
-+            }
-+
-+            this.func_149642_a(p_149690_1_, p_149690_2_, p_149690_3_, p_149690_4_, itemstack);
-+        }
-+    }
-+    // CraftBukkit end
-+
-     public void func_149681_a(World p_149681_1_, int p_149681_2_, int p_149681_3_, int p_149681_4_, int p_149681_5_, EntityPlayer p_149681_6_)
-     {
-         if (p_149681_6_.capabilities.isCreativeMode)
-@@ -117,7 +141,7 @@
+@@ -128,7 +133,7 @@
              p_149681_1_.setBlockMetadataWithNotify(p_149681_2_, p_149681_3_, p_149681_4_, p_149681_5_, 4);
          }
  
--        this.func_149697_b(p_149681_1_, p_149681_2_, p_149681_3_, p_149681_4_, p_149681_5_, 0);
-+        //this.func_149697_b(p_149681_1_, p_149681_2_, p_149681_3_, p_149681_4_, p_149681_5_, 0); // MCPC+ - disable Forge's drops for now, use CB drop instead
+-        this.dropBlockAsItem(p_149681_1_, p_149681_2_, p_149681_3_, p_149681_4_, p_149681_5_, 0);
++        //this.dropBlockAsItem(p_149681_1_, p_149681_2_, p_149681_3_, p_149681_4_, p_149681_5_, 0); // MCPC+ - disable Forge's drops for now, use CB drop instead
  
-         super.func_149681_a(p_149681_1_, p_149681_2_, p_149681_3_, p_149681_4_, p_149681_5_, p_149681_6_);
+         super.onBlockHarvested(p_149681_1_, p_149681_2_, p_149681_3_, p_149681_4_, p_149681_5_, p_149681_6_);
      }
-@@ -170,16 +194,18 @@
+@@ -181,16 +186,18 @@
              {
-                 if (p_149965_1_.func_147439_a(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l) == Blocks.soul_sand && p_149965_1_.func_147439_a(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 1) == Blocks.soul_sand && p_149965_1_.func_147439_a(p_149965_2_, p_149965_3_ - 2, p_149965_4_ + l + 1) == Blocks.soul_sand && p_149965_1_.func_147439_a(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 2) == Blocks.soul_sand && this.func_149966_a(p_149965_1_, p_149965_2_, p_149965_3_, p_149965_4_ + l, 1) && this.func_149966_a(p_149965_1_, p_149965_2_, p_149965_3_, p_149965_4_ + l + 1, 1) && this.func_149966_a(p_149965_1_, p_149965_2_, p_149965_3_, p_149965_4_ + l + 2, 1))
+                 if (p_149965_1_.getBlock(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l) == Blocks.soul_sand && p_149965_1_.getBlock(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 1) == Blocks.soul_sand && p_149965_1_.getBlock(p_149965_2_, p_149965_3_ - 2, p_149965_4_ + l + 1) == Blocks.soul_sand && p_149965_1_.getBlock(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 2) == Blocks.soul_sand && this.func_149966_a(p_149965_1_, p_149965_2_, p_149965_3_, p_149965_4_ + l, 1) && this.func_149966_a(p_149965_1_, p_149965_2_, p_149965_3_, p_149965_4_ + l + 1, 1) && this.func_149966_a(p_149965_1_, p_149965_2_, p_149965_3_, p_149965_4_ + l + 2, 1))
                  {
 +                    // CraftBukkit start - Use BlockStateListPopulator
 +                    BlockStateListPopulator blockList = new BlockStateListPopulator(p_149965_1_.getWorld());
                      p_149965_1_.setBlockMetadataWithNotify(p_149965_2_, p_149965_3_, p_149965_4_ + l, 8, 2);
                      p_149965_1_.setBlockMetadataWithNotify(p_149965_2_, p_149965_3_, p_149965_4_ + l + 1, 8, 2);
                      p_149965_1_.setBlockMetadataWithNotify(p_149965_2_, p_149965_3_, p_149965_4_ + l + 2, 8, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_, p_149965_3_, p_149965_4_ + l, func_149729_e(0), 0, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_, p_149965_3_, p_149965_4_ + l + 1, func_149729_e(0), 0, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_, p_149965_3_, p_149965_4_ + l + 2, func_149729_e(0), 0, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l, func_149729_e(0), 0, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 1, func_149729_e(0), 0, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 2, func_149729_e(0), 0, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_, p_149965_3_ - 2, p_149965_4_ + l + 1, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_, p_149965_3_, p_149965_4_ + l, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_, p_149965_3_, p_149965_4_ + l + 1, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_, p_149965_3_, p_149965_4_ + l + 2, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 1, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 2, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_, p_149965_3_ - 2, p_149965_4_ + l + 1, func_149729_e(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_, p_149965_3_, p_149965_4_ + l, getBlockById(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_, p_149965_3_, p_149965_4_ + l + 1, getBlockById(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_, p_149965_3_, p_149965_4_ + l + 2, getBlockById(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l, getBlockById(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 1, getBlockById(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 2, getBlockById(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_, p_149965_3_ - 2, p_149965_4_ + l + 1, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_, p_149965_3_, p_149965_4_ + l, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_, p_149965_3_, p_149965_4_ + l + 1, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_, p_149965_3_, p_149965_4_ + l + 2, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 1, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 2, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_, p_149965_3_ - 2, p_149965_4_ + l + 1, getBlockById(0), 0, 2);
  
                      if (!p_149965_1_.isRemote)
                      {
-@@ -188,18 +214,21 @@
+@@ -199,18 +206,21 @@
                          entitywither.renderYawOffset = 90.0F;
                          entitywither.func_82206_m();
  
@@ -103,48 +77,48 @@
                      }
  
                      for (i1 = 0; i1 < 120; ++i1)
-@@ -207,13 +236,7 @@
+@@ -218,13 +228,7 @@
                          p_149965_1_.spawnParticle("snowballpoof", (double)p_149965_2_ + p_149965_1_.rand.nextDouble(), (double)(p_149965_3_ - 2) + p_149965_1_.rand.nextDouble() * 3.9D, (double)(p_149965_4_ + l + 1) + p_149965_1_.rand.nextDouble(), 0.0D, 0.0D, 0.0D);
                      }
  
--                    p_149965_1_.func_147444_c(p_149965_2_, p_149965_3_, p_149965_4_ + l, func_149729_e(0));
--                    p_149965_1_.func_147444_c(p_149965_2_, p_149965_3_, p_149965_4_ + l + 1, func_149729_e(0));
--                    p_149965_1_.func_147444_c(p_149965_2_, p_149965_3_, p_149965_4_ + l + 2, func_149729_e(0));
--                    p_149965_1_.func_147444_c(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l, func_149729_e(0));
--                    p_149965_1_.func_147444_c(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 1, func_149729_e(0));
--                    p_149965_1_.func_147444_c(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 2, func_149729_e(0));
--                    p_149965_1_.func_147444_c(p_149965_2_, p_149965_3_ - 2, p_149965_4_ + l + 1, func_149729_e(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_, p_149965_3_, p_149965_4_ + l, getBlockById(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_, p_149965_3_, p_149965_4_ + l + 1, getBlockById(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_, p_149965_3_, p_149965_4_ + l + 2, getBlockById(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l, getBlockById(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 1, getBlockById(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 2, getBlockById(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_, p_149965_3_ - 2, p_149965_4_ + l + 1, getBlockById(0));
 +                    // CraftBukkit end
                      return;
                  }
              }
-@@ -222,16 +245,18 @@
+@@ -233,16 +237,18 @@
              {
-                 if (p_149965_1_.func_147439_a(p_149965_2_ + l, p_149965_3_ - 1, p_149965_4_) == Blocks.soul_sand && p_149965_1_.func_147439_a(p_149965_2_ + l + 1, p_149965_3_ - 1, p_149965_4_) == Blocks.soul_sand && p_149965_1_.func_147439_a(p_149965_2_ + l + 1, p_149965_3_ - 2, p_149965_4_) == Blocks.soul_sand && p_149965_1_.func_147439_a(p_149965_2_ + l + 2, p_149965_3_ - 1, p_149965_4_) == Blocks.soul_sand && this.func_149966_a(p_149965_1_, p_149965_2_ + l, p_149965_3_, p_149965_4_, 1) && this.func_149966_a(p_149965_1_, p_149965_2_ + l + 1, p_149965_3_, p_149965_4_, 1) && this.func_149966_a(p_149965_1_, p_149965_2_ + l + 2, p_149965_3_, p_149965_4_, 1))
+                 if (p_149965_1_.getBlock(p_149965_2_ + l, p_149965_3_ - 1, p_149965_4_) == Blocks.soul_sand && p_149965_1_.getBlock(p_149965_2_ + l + 1, p_149965_3_ - 1, p_149965_4_) == Blocks.soul_sand && p_149965_1_.getBlock(p_149965_2_ + l + 1, p_149965_3_ - 2, p_149965_4_) == Blocks.soul_sand && p_149965_1_.getBlock(p_149965_2_ + l + 2, p_149965_3_ - 1, p_149965_4_) == Blocks.soul_sand && this.func_149966_a(p_149965_1_, p_149965_2_ + l, p_149965_3_, p_149965_4_, 1) && this.func_149966_a(p_149965_1_, p_149965_2_ + l + 1, p_149965_3_, p_149965_4_, 1) && this.func_149966_a(p_149965_1_, p_149965_2_ + l + 2, p_149965_3_, p_149965_4_, 1))
                  {
 +                    // CraftBukkit start - Use BlockStateListPopulator
 +                    BlockStateListPopulator blockList = new BlockStateListPopulator(p_149965_1_.getWorld());
                      p_149965_1_.setBlockMetadataWithNotify(p_149965_2_ + l, p_149965_3_, p_149965_4_, 8, 2);
                      p_149965_1_.setBlockMetadataWithNotify(p_149965_2_ + l + 1, p_149965_3_, p_149965_4_, 8, 2);
                      p_149965_1_.setBlockMetadataWithNotify(p_149965_2_ + l + 2, p_149965_3_, p_149965_4_, 8, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_ + l, p_149965_3_, p_149965_4_, func_149729_e(0), 0, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_ + l + 1, p_149965_3_, p_149965_4_, func_149729_e(0), 0, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_ + l + 2, p_149965_3_, p_149965_4_, func_149729_e(0), 0, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_ + l, p_149965_3_ - 1, p_149965_4_, func_149729_e(0), 0, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_ + l + 1, p_149965_3_ - 1, p_149965_4_, func_149729_e(0), 0, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_ + l + 2, p_149965_3_ - 1, p_149965_4_, func_149729_e(0), 0, 2);
--                    p_149965_1_.func_147465_d(p_149965_2_ + l + 1, p_149965_3_ - 2, p_149965_4_, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_ + l, p_149965_3_, p_149965_4_, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_ + l + 1, p_149965_3_, p_149965_4_, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_ + l + 2, p_149965_3_, p_149965_4_, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_ + l, p_149965_3_ - 1, p_149965_4_, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_ + l + 1, p_149965_3_ - 1, p_149965_4_, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_ + l + 2, p_149965_3_ - 1, p_149965_4_, func_149729_e(0), 0, 2);
-+                    blockList.setTypeAndData(p_149965_2_ + l + 1, p_149965_3_ - 2, p_149965_4_, func_149729_e(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_ + l, p_149965_3_, p_149965_4_, getBlockById(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_ + l + 1, p_149965_3_, p_149965_4_, getBlockById(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_ + l + 2, p_149965_3_, p_149965_4_, getBlockById(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_ + l, p_149965_3_ - 1, p_149965_4_, getBlockById(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_ + l + 1, p_149965_3_ - 1, p_149965_4_, getBlockById(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_ + l + 2, p_149965_3_ - 1, p_149965_4_, getBlockById(0), 0, 2);
+-                    p_149965_1_.setBlock(p_149965_2_ + l + 1, p_149965_3_ - 2, p_149965_4_, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_ + l, p_149965_3_, p_149965_4_, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_ + l + 1, p_149965_3_, p_149965_4_, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_ + l + 2, p_149965_3_, p_149965_4_, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_ + l, p_149965_3_ - 1, p_149965_4_, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_ + l + 1, p_149965_3_ - 1, p_149965_4_, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_ + l + 2, p_149965_3_ - 1, p_149965_4_, getBlockById(0), 0, 2);
++                    blockList.setTypeAndData(p_149965_2_ + l + 1, p_149965_3_ - 2, p_149965_4_, getBlockById(0), 0, 2);
  
                      if (!p_149965_1_.isRemote)
                      {
-@@ -239,18 +264,21 @@
+@@ -250,18 +256,21 @@
                          entitywither.setLocationAndAngles((double)(p_149965_2_ + l) + 1.5D, (double)p_149965_3_ - 1.45D, (double)p_149965_4_ + 0.5D, 0.0F, 0.0F);
                          entitywither.func_82206_m();
  
@@ -174,17 +148,17 @@
                      }
  
                      for (i1 = 0; i1 < 120; ++i1)
-@@ -258,13 +286,7 @@
+@@ -269,13 +278,7 @@
                          p_149965_1_.spawnParticle("snowballpoof", (double)(p_149965_2_ + l + 1) + p_149965_1_.rand.nextDouble(), (double)(p_149965_3_ - 2) + p_149965_1_.rand.nextDouble() * 3.9D, (double)p_149965_4_ + p_149965_1_.rand.nextDouble(), 0.0D, 0.0D, 0.0D);
                      }
  
--                    p_149965_1_.func_147444_c(p_149965_2_ + l, p_149965_3_, p_149965_4_, func_149729_e(0));
--                    p_149965_1_.func_147444_c(p_149965_2_ + l + 1, p_149965_3_, p_149965_4_, func_149729_e(0));
--                    p_149965_1_.func_147444_c(p_149965_2_ + l + 2, p_149965_3_, p_149965_4_, func_149729_e(0));
--                    p_149965_1_.func_147444_c(p_149965_2_ + l, p_149965_3_ - 1, p_149965_4_, func_149729_e(0));
--                    p_149965_1_.func_147444_c(p_149965_2_ + l + 1, p_149965_3_ - 1, p_149965_4_, func_149729_e(0));
--                    p_149965_1_.func_147444_c(p_149965_2_ + l + 2, p_149965_3_ - 1, p_149965_4_, func_149729_e(0));
--                    p_149965_1_.func_147444_c(p_149965_2_ + l + 1, p_149965_3_ - 2, p_149965_4_, func_149729_e(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_ + l, p_149965_3_, p_149965_4_, getBlockById(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_ + l + 1, p_149965_3_, p_149965_4_, getBlockById(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_ + l + 2, p_149965_3_, p_149965_4_, getBlockById(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_ + l, p_149965_3_ - 1, p_149965_4_, getBlockById(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_ + l + 1, p_149965_3_ - 1, p_149965_4_, getBlockById(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_ + l + 2, p_149965_3_ - 1, p_149965_4_, getBlockById(0));
+-                    p_149965_1_.notifyBlockChange(p_149965_2_ + l + 1, p_149965_3_ - 2, p_149965_4_, getBlockById(0));
 +                    // CraftBukkit end
                      return;
                  }

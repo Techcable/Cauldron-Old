@@ -17,10 +17,10 @@
 +
  public class TileEntityFurnace extends TileEntity implements ISidedInventory
  {
-     private static final int[] field_145962_k = new int[] {0};
-@@ -30,6 +40,37 @@
-     public int field_145963_i;
-     public int field_145961_j;
+     private static final int[] slotsTop = new int[] {0};
+@@ -34,6 +44,37 @@
+     // JAVADOC FIELD $$ field_145961_j
+     public int furnaceCookTime;
      private String field_145958_o;
 +
 +    // CraftBukkit start
@@ -30,7 +30,7 @@
 +
 +    public ItemStack[] getContents()
 +    {
-+        return this.field_145957_n;
++        return this.furnaceItemStacks;
 +    }
 +
 +    public void onOpen(CraftHumanEntity who)
@@ -56,7 +56,7 @@
      private static final String __OBFID = "CL_00000357";
  
      // JAVADOC METHOD $$ func_70302_i_
-@@ -172,7 +213,7 @@
+@@ -178,7 +219,7 @@
      // JAVADOC METHOD $$ func_70297_j_
      public int getInventoryStackLimit()
      {
@@ -64,113 +64,113 @@
 +        return maxStack; // CraftBukkit
      }
  
-     @SideOnly(Side.CLIENT)
-@@ -201,20 +242,54 @@
+     // JAVADOC METHOD $$ func_145953_d
+@@ -210,20 +251,54 @@
      {
-         boolean flag = this.field_145956_a > 0;
+         boolean flag = this.furnaceBurnTime > 0;
          boolean flag1 = false;
 +        // CraftBukkit start - Use wall time instead of ticks for cooking
 +        int elapsedTicks = MinecraftServer.currentTick - this.lastTick;
 +        this.lastTick = MinecraftServer.currentTick;
  
 +        // CraftBukkit - moved from below
-+        if (this.func_145950_i() && this.func_145948_k())
++        if (this.isBurning() && this.canSmelt())
 +        {
-+            this.field_145961_j += elapsedTicks;
++            this.furnaceCookTime += elapsedTicks;
 +
-+            if (this.field_145961_j >= 200)
++            if (this.furnaceCookTime >= 200)
 +            {
-+                this.field_145961_j %= 200;
-+                this.func_145949_j();
++                this.furnaceCookTime %= 200;
++                this.smeltItem();
 +                flag1 = true;
 +            }
 +        }
 +        else
 +        {
-+            this.field_145961_j = 0;
++            this.furnaceCookTime = 0;
 +        }
 +
 +        // CraftBukkit end
 +
-         if (this.field_145956_a > 0)
+         if (this.furnaceBurnTime > 0)
          {
--            --this.field_145956_a;
-+            this.field_145956_a -= elapsedTicks; // CraftBukkit
+-            --this.furnaceBurnTime;
++            this.furnaceBurnTime -= elapsedTicks; // CraftBukkit
          }
  
-         if (!this.field_145850_b.isRemote)
+         if (!this.worldObj.isRemote)
          {
--            if (this.field_145956_a == 0 && this.func_145948_k())
+-            if (this.furnaceBurnTime == 0 && this.canSmelt())
 +            // CraftBukkit start - Handle multiple elapsed ticks
-+            if (this.field_145956_a <= 0 && this.func_145948_k() && this.field_145957_n[1] != null)   // CraftBukkit - == to <=
++            if (this.furnaceBurnTime <= 0 && this.canSmelt() && this.furnaceItemStacks[1] != null)   // CraftBukkit - == to <=
              {
--                this.field_145963_i = this.field_145956_a = func_145952_a(this.field_145957_n[1]);
-+                CraftItemStack fuel = CraftItemStack.asCraftMirror(this.field_145957_n[1]);
-+                FurnaceBurnEvent furnaceBurnEvent = new FurnaceBurnEvent(this.field_145850_b.getWorld().getBlockAt(this.field_145851_c, this.field_145848_d, this.field_145849_e), fuel, func_145952_a(this.field_145957_n[1]));
-+                this.field_145850_b.getServer().getPluginManager().callEvent(furnaceBurnEvent);
+-                this.currentItemBurnTime = this.furnaceBurnTime = getItemBurnTime(this.furnaceItemStacks[1]);
++                CraftItemStack fuel = CraftItemStack.asCraftMirror(this.furnaceItemStacks[1]);
++                FurnaceBurnEvent furnaceBurnEvent = new FurnaceBurnEvent(this.worldObj.getWorld().getBlockAt(this.xCoord, this.yCoord, this.zCoord), fuel, getItemBurnTime(this.furnaceItemStacks[1]));
++                this.worldObj.getServer().getPluginManager().callEvent(furnaceBurnEvent);
  
--                if (this.field_145956_a > 0)
+-                if (this.furnaceBurnTime > 0)
 +                if (furnaceBurnEvent.isCancelled())
                  {
 +                    return;
 +                }
 +
-+                this.field_145963_i = furnaceBurnEvent.getBurnTime();
-+                this.field_145956_a += this.field_145963_i;
++                this.currentItemBurnTime = furnaceBurnEvent.getBurnTime();
++                this.furnaceBurnTime += this.currentItemBurnTime;
 +
-+                if (this.field_145956_a > 0 && furnaceBurnEvent.isBurning())
++                if (this.furnaceBurnTime > 0 && furnaceBurnEvent.isBurning())
 +                {
 +                    // CraftBukkit end
                      flag1 = true;
  
-                     if (this.field_145957_n[1] != null)
-@@ -229,6 +304,7 @@
+                     if (this.furnaceItemStacks[1] != null)
+@@ -238,6 +313,7 @@
                  }
              }
  
 +            /* CraftBukkit start - Moved up
-             if (this.func_145950_i() && this.func_145948_k())
+             if (this.isBurning() && this.canSmelt())
              {
-                 ++this.field_145961_j;
-@@ -244,6 +320,7 @@
+                 ++this.furnaceCookTime;
+@@ -253,6 +329,7 @@
              {
-                 this.field_145961_j = 0;
+                 this.furnaceCookTime = 0;
              }
 +            // CraftBukkit end */
  
-             if (flag != this.field_145956_a > 0)
+             if (flag != this.furnaceBurnTime > 0)
              {
-@@ -280,16 +357,37 @@
-         if (this.func_145948_k())
+@@ -291,16 +368,37 @@
+         if (this.canSmelt())
          {
-             ItemStack itemstack = FurnaceRecipes.smelting().func_151395_a(this.field_145957_n[0]);
+             ItemStack itemstack = FurnaceRecipes.smelting().getSmeltingResult(this.furnaceItemStacks[0]);
 +            // CraftBukkit start
-+            CraftItemStack source = CraftItemStack.asCraftMirror(this.field_145957_n[0]);
++            CraftItemStack source = CraftItemStack.asCraftMirror(this.furnaceItemStacks[0]);
 +            org.bukkit.inventory.ItemStack result = CraftItemStack.asBukkitCopy(itemstack);
-+            FurnaceSmeltEvent furnaceSmeltEvent = new FurnaceSmeltEvent(this.field_145850_b.getWorld().getBlockAt(this.field_145851_c, this.field_145848_d, this.field_145849_e), source, result);
-+            this.field_145850_b.getServer().getPluginManager().callEvent(furnaceSmeltEvent);
++            FurnaceSmeltEvent furnaceSmeltEvent = new FurnaceSmeltEvent(this.worldObj.getWorld().getBlockAt(this.xCoord, this.yCoord, this.zCoord), source, result);
++            this.worldObj.getServer().getPluginManager().callEvent(furnaceSmeltEvent);
  
--            if (this.field_145957_n[2] == null)
+-            if (this.furnaceItemStacks[2] == null)
 +            if (furnaceSmeltEvent.isCancelled())
              {
--                this.field_145957_n[2] = itemstack.copy();
+-                this.furnaceItemStacks[2] = itemstack.copy();
 +                return;
              }
--            else if (this.field_145957_n[2].getItem() == itemstack.getItem())
+-            else if (this.furnaceItemStacks[2].getItem() == itemstack.getItem())
 +
 +            result = furnaceSmeltEvent.getResult();
 +            itemstack = CraftItemStack.asNMSCopy(result);
 +
 +            if (itemstack != null)
              {
--                this.field_145957_n[2].stackSize += itemstack.stackSize; // Forge BugFix: Results may have multiple items
-+                if (this.field_145957_n[2] == null)
+-                this.furnaceItemStacks[2].stackSize += itemstack.stackSize; // Forge BugFix: Results may have multiple items
++                if (this.furnaceItemStacks[2] == null)
 +                {
-+                    this.field_145957_n[2] = itemstack;
++                    this.furnaceItemStacks[2] = itemstack;
 +                }
-+                else if (CraftItemStack.asCraftMirror(this.field_145957_n[2]).isSimilar(result))
++                else if (CraftItemStack.asCraftMirror(this.furnaceItemStacks[2]).isSimilar(result))
 +                {
-+                    this.field_145957_n[2].stackSize += itemstack.stackSize;
++                    this.furnaceItemStacks[2].stackSize += itemstack.stackSize;
 +                }
 +                else
 +                {
@@ -179,6 +179,6 @@
              }
  
 +            // CraftBukkit end
-             --this.field_145957_n[0].stackSize;
+             --this.furnaceItemStacks[0].stackSize;
  
-             if (this.field_145957_n[0].stackSize <= 0)
+             if (this.furnaceItemStacks[0].stackSize <= 0)

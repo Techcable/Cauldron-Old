@@ -114,9 +114,9 @@ public class VanillaCommandWrapper
         }
 
         @Override
-        public void func_145747_a(net.minecraft.util.IChatComponent iChatBaseComponent)
+        public void addChatMessage(net.minecraft.util.IChatComponent iChatBaseComponent)
         {
-            handle.func_145747_a( iChatBaseComponent );
+            handle.addChatMessage( iChatBaseComponent );
         }
 
         @Override
@@ -160,9 +160,9 @@ public class VanillaCommandWrapper
         }
 
         @Override
-        public void func_145747_a( net.minecraft.util.IChatComponent iChatBaseComponent )
+        public void addChatMessage( net.minecraft.util.IChatComponent iChatBaseComponent )
         {
-            sender.sendMessage( iChatBaseComponent.func_150261_e() );
+            sender.sendMessage( iChatBaseComponent.getUnformattedTextForChat() );
         }
 
         @Override

@@ -9,7 +9,7 @@
  public interface IInventory
  {
      // JAVADOC METHOD $$ func_70302_i_
-@@ -39,4 +41,20 @@
+@@ -41,4 +43,20 @@
  
      // JAVADOC METHOD $$ func_94041_b
      boolean isItemValidForSlot(int var1, ItemStack var2);

@@ -36,9 +36,9 @@
 -            return 1;
 -        }
 -        // JAVADOC METHOD $$ func_70296_d
--        public void onInventoryChanged()
+-        public void markDirty()
 -        {
--            super.onInventoryChanged();
+-            super.markDirty();
 -            ContainerEnchantment.this.onCraftMatrixChanged(this);
 -        }
 -    };
@@ -182,13 +182,13 @@
  
      public boolean canInteractWith(EntityPlayer par1EntityPlayer)
      {
--        return this.worldPointer.func_147439_a(this.posX, this.posY, this.posZ) != Blocks.enchanting_table ? false : par1EntityPlayer.getDistanceSq((double)this.posX + 0.5D, (double)this.posY + 0.5D, (double)this.posZ + 0.5D) <= 64.0D;
+-        return this.worldPointer.getBlock(this.posX, this.posY, this.posZ) != Blocks.enchanting_table ? false : par1EntityPlayer.getDistanceSq((double)this.posX + 0.5D, (double)this.posY + 0.5D, (double)this.posZ + 0.5D) <= 64.0D;
 +        if (!this.checkReachable)
 +        {
 +            return true;    // CraftBukkit
 +        }
 +
-+        return this.worldPointer.func_147439_a(this.posX, this.posY, this.posZ) != Blocks.enchanting_table ? false : par1EntityPlayer.getDistanceSq((double) this.posX + 0.5D, (double) this.posY + 0.5D, (double) this.posZ + 0.5D) <= 64.0D;
++        return this.worldPointer.getBlock(this.posX, this.posY, this.posZ) != Blocks.enchanting_table ? false : par1EntityPlayer.getDistanceSq((double) this.posX + 0.5D, (double) this.posY + 0.5D, (double) this.posZ + 0.5D) <= 64.0D;
      }
  
      // JAVADOC METHOD $$ func_82846_b

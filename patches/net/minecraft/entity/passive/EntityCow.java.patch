@@ -25,7 +25,7 @@
 -        for (k = 0; k < j; ++k)
 +        if (j > 0)
          {
--            this.func_145779_a(Items.leather, 1);
+-            this.dropItem(Items.leather, 1);
 +            loot.add(new org.bukkit.inventory.ItemStack(CraftMagicNumbers.getMaterial(Items.leather), j));
          }
  
@@ -36,11 +36,11 @@
          {
 -            if (this.isBurning())
 -            {
--                this.func_145779_a(Items.cooked_beef, 1);
+-                this.dropItem(Items.cooked_beef, 1);
 -            }
 -            else
 -            {
--                this.func_145779_a(Items.beef, 1);
+-                this.dropItem(Items.beef, 1);
 -            }
 +            loot.add(new org.bukkit.inventory.ItemStack(this.isBurning() ? CraftMagicNumbers.getMaterial(Items.cooked_beef) : CraftMagicNumbers.getMaterial(Items.beef), j));
          }

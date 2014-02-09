@@ -37,13 +37,13 @@
 -
 +        */
          // Tell client the block is gone immediately then process events
--        if (world.func_147438_o(x, y, z) == null)
-+        if (world.func_147438_o(x, y, z) == null && !(entityPlayer instanceof FakePlayer)) // MCPC+ - don't send packets to fakeplayers
+-        if (world.getTileEntity(x, y, z) == null)
++        if (world.getTileEntity(x, y, z) == null && !(entityPlayer instanceof FakePlayer)) // MCPC+ - don't send packets to fakeplayers
          {
              S23PacketBlockChange packet = new S23PacketBlockChange(x, y, z, world);
              packet.field_148883_d = Blocks.air;
 @@ -401,11 +410,11 @@
-         Block block = world.func_147439_a(x, y, z);
+         Block block = world.getBlock(x, y, z);
          int blockMetadata = world.getBlockMetadata(x, y, z);
          BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(x, y, z, world, block, blockMetadata, entityPlayer);
 -        event.setCanceled(preCancelEvent);
@@ -55,4 +55,4 @@
 +        if (event.isCanceled() && !(entityPlayer instanceof FakePlayer)) // MCPC+ - don't send packets to fakeplayers
          {
              // Let the client know the block still exists
-             entityPlayer.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(x, y, z, world));
+             entityPlayer.playerNetServerHandler.sendPacket(new S23PacketBlockChange(x, y, z, world));

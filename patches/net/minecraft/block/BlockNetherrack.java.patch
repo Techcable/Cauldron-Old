@@ -14,13 +14,13 @@
      private static final String __OBFID = "CL_00000275";
 @@ -18,4 +23,17 @@
      {
-         return MapColor.field_151655_K;
+         return MapColor.netherrackColor;
      }
 +
 +    // CraftBukkit start
 +    public void doPhysics(World world, int i, int j, int k, int l)
 +    {
-+        if (Block.func_149729_e(l) != null && Block.func_149729_e(l).func_149744_f())
++        if (Block.getBlockById(l) != null && Block.getBlockById(l).canProvidePower())
 +        {
 +            org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
 +            int power = block.getBlockPower();

@@ -9,7 +9,7 @@
  public class BlockStem extends BlockBush implements IGrowable
  {
      private final Block field_149877_a;
-@@ -46,14 +48,14 @@
+@@ -48,14 +50,14 @@
          {
              float f = this.func_149875_n(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_);
  
@@ -26,11 +26,11 @@
                  }
                  else
                  {
-@@ -105,7 +107,7 @@
+@@ -107,7 +109,7 @@
  
-                     if (p_149674_1_.func_147437_c(j1, p_149674_3_, k1) && (block.canSustainPlant(p_149674_1_, j1, p_149674_3_ - 1, k1, UP, this) || block == Blocks.dirt || block == Blocks.grass))
+                     if (p_149674_1_.isAirBlock(j1, p_149674_3_, k1) && (block.canSustainPlant(p_149674_1_, j1, p_149674_3_ - 1, k1, UP, this) || block == Blocks.dirt || block == Blocks.grass))
                      {
--                        p_149674_1_.func_147449_b(j1, p_149674_3_, k1, this.field_149877_a);
+-                        p_149674_1_.setBlock(j1, p_149674_3_, k1, this.field_149877_a);
 +                        CraftEventFactory.handleBlockGrowEvent(p_149674_1_, j1, p_149674_3_, k1, this.field_149877_a, 0); // CraftBukkit
                      }
                  }

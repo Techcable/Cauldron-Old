@@ -62,7 +62,7 @@
  
          if (flag)
          {
--            par1EntityPlayer.addStat(StatList.objectUseStats[Item.func_150891_b(this.field_151002_e)], 1);
+-            par1EntityPlayer.addStat(StatList.objectUseStats[Item.getIdFromItem(this.field_151002_e)], 1);
 +            org.bukkit.event.block.BlockPlaceEvent placeEvent = null;
 +            if (par2World.capturedBlockStates.size() > 1) 
 +            {
@@ -106,14 +106,14 @@
 +                    int metadata = par2World.getBlockMetadata(x, y, z);
 +                    int updateFlag = ((CraftBlockState)blockstate).getFlag();
 +                    Block oldBlock = CraftMagicNumbers.getBlock(blockstate.getTypeId());
-+                    Block newBlock = par2World.func_147439_a(x, y, z);
++                    Block newBlock = par2World.getBlock(x, y, z);
 +                    if (newBlock != null && !(newBlock.hasTileEntity(metadata))) { // Containers get placed automatically
-+                        newBlock.func_149726_b(par2World, x, y, z);
++                        newBlock.onBlockAdded(par2World, x, y, z);
 +                    }
 +
 +                    par2World.markAndNotifyBlock(x, y, z, null, oldBlock, newBlock, updateFlag);
 +                }
-+                par1EntityPlayer.addStat(StatList.objectUseStats[Item.func_150891_b(this.field_151002_e)], 1);
++                par1EntityPlayer.addStat(StatList.objectUseStats[Item.getIdFromItem(this.field_151002_e)], 1);
 +            }
          }
 +        par2World.capturedBlockStates.clear();

@@ -106,7 +106,7 @@
      // JAVADOC METHOD $$ func_70447_i
      public int getFirstEmptyStack()
      {
-@@ -711,6 +786,13 @@
+@@ -716,6 +791,13 @@
  
      public ItemStack getItemStack()
      {

@@ -30,7 +30,7 @@ public class CraftBlockProjectileSource implements BlockProjectileSource {
 
     @Override
     public Block getBlock() {
-        return dispenserBlock.func_145831_w().getWorld().getBlockAt(dispenserBlock.field_145851_c, dispenserBlock.field_145848_d, dispenserBlock.field_145849_e);
+        return dispenserBlock.getWorldObj().getWorld().getBlockAt(dispenserBlock.xCoord, dispenserBlock.yCoord, dispenserBlock.zCoord);
     }
 
     @Override
@@ -42,11 +42,11 @@ public class CraftBlockProjectileSource implements BlockProjectileSource {
     public <T extends Projectile> T launchProjectile(Class<? extends T> projectile, Vector velocity) {
         Validate.isTrue(getBlock().getType() == Material.DISPENSER, "Block is no longer dispenser");
         // Copied from BlockDispenser.dispense()
-        net.minecraft.block.BlockSourceImpl isourceblock = new net.minecraft.block.BlockSourceImpl(dispenserBlock.func_145831_w(), dispenserBlock.field_145851_c, dispenserBlock.field_145848_d, dispenserBlock.field_145849_e);
+        net.minecraft.block.BlockSourceImpl isourceblock = new net.minecraft.block.BlockSourceImpl(dispenserBlock.getWorldObj(), dispenserBlock.xCoord, dispenserBlock.yCoord, dispenserBlock.zCoord);
         // Copied from DispenseBehaviorProjectile
         net.minecraft.dispenser.IPosition iposition = net.minecraft.block.BlockDispenser.func_149939_a(isourceblock);
         net.minecraft.util.EnumFacing enumfacing = net.minecraft.block.BlockDispenser.func_149937_b(isourceblock.getBlockMetadata());
-        net.minecraft.world.World world = dispenserBlock.func_145831_w();
+        net.minecraft.world.World world = dispenserBlock.getWorldObj();
         net.minecraft.entity.Entity launch = null;
 
         if (Snowball.class.isAssignableFrom(projectile)) {

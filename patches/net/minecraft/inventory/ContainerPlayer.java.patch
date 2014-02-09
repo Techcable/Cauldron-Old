@@ -60,7 +60,7 @@
 +        }
 +
 +        EntityPlayerMP player = (EntityPlayerMP) super.crafters.get(0); // TODO: Is this _always_ correct? Seems like it.
-+        player.playerNetServerHandler.func_147359_a(new S2FPacketSetSlot(player.openContainer.windowId, 0, craftResult));
++        player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, 0, craftResult));
 +        // CraftBukkit end
      }
  

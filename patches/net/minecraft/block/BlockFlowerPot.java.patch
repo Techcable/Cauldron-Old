@@ -1,18 +1,18 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockFlowerPot.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockFlowerPot.java
-@@ -144,6 +144,7 @@
-         if (tileentityflowerpot != null && tileentityflowerpot.func_145965_a() != null)
+@@ -155,6 +155,7 @@
+         if (tileentityflowerpot != null && tileentityflowerpot.getFlowerPotItem() != null)
          {
-             this.func_149642_a(p_149690_1_, p_149690_2_, p_149690_3_, p_149690_4_, new ItemStack(tileentityflowerpot.func_145965_a(), 1, tileentityflowerpot.func_145966_b()));
+             this.dropBlockAsItem(p_149690_1_, p_149690_2_, p_149690_3_, p_149690_4_, new ItemStack(tileentityflowerpot.getFlowerPotItem(), 1, tileentityflowerpot.getFlowerPotData()));
 +            tileentityflowerpot.func_145964_a(null, 0);   // Spigot
          }
      }
  
-@@ -154,6 +155,7 @@
-         if (tileentityflowerpot != null && tileentityflowerpot.func_145965_a() != null)
+@@ -165,6 +166,7 @@
+         if (tileentityflowerpot != null && tileentityflowerpot.getFlowerPotItem() != null)
          {
-             this.func_149642_a(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, new ItemStack(tileentityflowerpot.func_145965_a(), 1, tileentityflowerpot.func_145966_b()));
+             this.dropBlockAsItem(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, new ItemStack(tileentityflowerpot.getFlowerPotItem(), 1, tileentityflowerpot.getFlowerPotData()));
 +            tileentityflowerpot.func_145964_a(null, 0);   // Spigot
          }
  
-         super.func_149749_a(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
+         super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);

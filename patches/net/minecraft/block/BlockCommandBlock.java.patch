@@ -9,7 +9,7 @@
  public class BlockCommandBlock extends BlockContainer
  {
      private static final String __OBFID = "CL_00000219";
-@@ -31,13 +33,20 @@
+@@ -33,13 +35,20 @@
              boolean flag = p_149695_1_.isBlockIndirectlyGettingPowered(p_149695_2_, p_149695_3_, p_149695_4_);
              int l = p_149695_1_.getBlockMetadata(p_149695_2_, p_149695_3_, p_149695_4_);
              boolean flag1 = (l & 1) != 0;
@@ -25,7 +25,7 @@
 +            if (eventRedstone.getNewCurrent() > 0 && !(eventRedstone.getOldCurrent() > 0))   // CraftBukkit
              {
                  p_149695_1_.setBlockMetadataWithNotify(p_149695_2_, p_149695_3_, p_149695_4_, l | 1, 4);
-                 p_149695_1_.func_147464_a(p_149695_2_, p_149695_3_, p_149695_4_, this, this.func_149738_a(p_149695_1_));
+                 p_149695_1_.scheduleBlockUpdate(p_149695_2_, p_149695_3_, p_149695_4_, this, this.tickRate(p_149695_1_));
              }
 -            else if (!flag && flag1)
 +            else if (!(eventRedstone.getNewCurrent() > 0) && eventRedstone.getOldCurrent() > 0)     // CraftBukkit

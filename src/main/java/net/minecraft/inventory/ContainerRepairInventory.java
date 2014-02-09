@@ -57,9 +57,9 @@ public class ContainerRepairInventory extends InventoryBasic   // CraftBukkit - 
     /**
      * Called when an the contents of an Inventory change, usually
      */
-    public void onInventoryChanged()
+    public void markDirty()
     {
-        super.onInventoryChanged();
+        super.markDirty();
         this.repairContainer.onCraftMatrixChanged((IInventory) this);
     }
 }

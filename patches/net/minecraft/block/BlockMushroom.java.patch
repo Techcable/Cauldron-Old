@@ -27,9 +27,9 @@
  public class BlockMushroom extends BlockBush implements IGrowable
  {
      private static final String __OBFID = "CL_00000272";
-@@ -19,7 +34,9 @@
- 
-     public void func_149674_a(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
+@@ -20,7 +35,9 @@
+     // JAVADOC METHOD $$ func_149674_a
+     public void updateTick(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
      {
 -        if (p_149674_5_.nextInt(25) == 0)
 +        final int sourceX = p_149674_2_, sourceY = p_149674_3_, sourceZ = p_149674_4_; // CraftBukkit
@@ -38,15 +38,15 @@
          {
              byte b0 = 4;
              int l = 5;
-@@ -66,7 +83,19 @@
+@@ -67,7 +84,19 @@
  
-             if (p_149674_1_.func_147437_c(i1, j1, k1) && this.func_149718_j(p_149674_1_, i1, j1, k1))
+             if (p_149674_1_.isAirBlock(i1, j1, k1) && this.canBlockStay(p_149674_1_, i1, j1, k1))
              {
--                p_149674_1_.func_147465_d(i1, j1, k1, this, 0, 2);
+-                p_149674_1_.setBlock(i1, j1, k1, this, 0, 2);
 +                // CraftBukkit start
 +                org.bukkit.World bworld = p_149674_1_.getWorld();
 +                BlockState blockState = bworld.getBlockAt(i1, j1, k1).getState();
-+                blockState.setTypeId(Block.func_149682_b(this)); // nms: this.id, 0, 2
++                blockState.setTypeId(Block.getIdFromBlock(this)); // nms: this.id, 0, 2
 +                BlockSpreadEvent event = new BlockSpreadEvent(blockState.getBlock(), bworld.getBlockAt(sourceX, sourceY, sourceZ), blockState);
 +                p_149674_1_.getServer().getPluginManager().callEvent(event);
 +
@@ -59,7 +59,7 @@
              }
          }
      }
-@@ -92,32 +121,89 @@
+@@ -96,32 +125,89 @@
          {
              return false;
          }
@@ -72,7 +72,7 @@
      public boolean func_149884_c(World p_149884_1_, int p_149884_2_, int p_149884_3_, int p_149884_4_, Random p_149884_5_)
      {
          int l = p_149884_1_.getBlockMetadata(p_149884_2_, p_149884_3_, p_149884_4_);
-         p_149884_1_.func_147468_f(p_149884_2_, p_149884_3_, p_149884_4_);
+         p_149884_1_.setBlockToAir(p_149884_2_, p_149884_3_, p_149884_4_);
 +        // CraftBukkit start
 +        boolean grown = false;
 +        StructureGrowEvent event = null;
@@ -143,7 +143,7 @@
 +        if (!grown || event.isCancelled())
          {
 +            p_149884_1_.capturedBlockStates.clear();
-             p_149884_1_.func_147465_d(p_149884_2_, p_149884_3_, p_149884_4_, this, l, 3);
+             p_149884_1_.setBlock(p_149884_2_, p_149884_3_, p_149884_4_, this, l, 3);
              return false;
          }
 +        p_149884_1_.capturedBlockStates.clear();

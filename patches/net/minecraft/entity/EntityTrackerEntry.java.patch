@@ -15,7 +15,7 @@
 +
  public class EntityTrackerEntry
  {
-     private static final Logger field_151262_p = LogManager.getLogger();
+     private static final Logger logger = LogManager.getLogger();
 @@ -136,15 +142,15 @@
              this.func_151259_a(new S1BPacketEntityAttach(0, this.myEntity, this.myEntity.ridingEntity));
          }
@@ -62,7 +62,7 @@
                      else
                      {
                          this.ticksSinceLastForcedTeleport = 0;
--                        object = new S18PacketEntityTeleport(this.myEntity.func_145782_y(), i, j, k, (byte)l, (byte)i1);
+-                        object = new S18PacketEntityTeleport(this.myEntity.getEntityId(), i, j, k, (byte)l, (byte)i1);
 +
 +                        // CraftBukkit start - Refresh list of who can see a player before sending teleport packet
 +                        if (this.myEntity instanceof EntityPlayerMP)
@@ -71,14 +71,14 @@
 +                        }
 +
 +                        // CraftBukkit end
-+                        object = new S18PacketEntityTeleport(this.myEntity.func_145782_y(), i, j, k, (byte) l, (byte) i1);
++                        object = new S18PacketEntityTeleport(this.myEntity.getEntityId(), i, j, k, (byte) l, (byte) i1);
                      }
                  }
  
 @@ -229,7 +259,7 @@
                  }
  
-                 this.func_111190_b();
+                 this.sendMetadataToAllAssociatedPlayers();
 -
 +                /* CraftBukkit start - Code moved up
                  if (flag)
@@ -127,7 +127,7 @@
              this.myEntity.velocityChanged = false;
          }
      }
-@@ -301,6 +356,13 @@
+@@ -302,6 +357,13 @@
  
              if (!set.isEmpty())
              {
@@ -138,10 +138,10 @@
 +                }
 +
 +                // CraftBukkit end
-                 this.func_151261_b(new S20PacketEntityProperties(this.myEntity.func_145782_y(), set));
+                 this.func_151261_b(new S20PacketEntityProperties(this.myEntity.getEntityId(), set));
              }
  
-@@ -352,6 +414,11 @@
+@@ -353,6 +415,11 @@
      // JAVADOC METHOD $$ func_73117_b
      public void tryStartWachingThis(EntityPlayerMP par1EntityPlayerMP)
      {
@@ -153,7 +153,7 @@
          if (par1EntityPlayerMP != this.myEntity)
          {
              double d0 = par1EntityPlayerMP.posX - (double)(this.lastScaledXPosition / 32);
-@@ -361,6 +428,19 @@
+@@ -362,6 +429,19 @@
              {
                  if (!this.trackingPlayers.contains(par1EntityPlayerMP) && (this.isPlayerWatchingThisChunk(par1EntityPlayerMP) || this.myEntity.forceSpawn))
                  {
@@ -168,17 +168,17 @@
 +                        }
 +                    }
 +
-+                    par1EntityPlayerMP.destroyedItemsNetCache.remove(Integer.valueOf(this.myEntity.func_145782_y()));
++                    par1EntityPlayerMP.destroyedItemsNetCache.remove(Integer.valueOf(this.myEntity.getEntityId()));
 +                    // CraftBukkit end
                      this.trackingPlayers.add(par1EntityPlayerMP);
                      Packet packet = this.func_151260_c();
-                     par1EntityPlayerMP.playerNetServerHandler.func_147359_a(packet);
-@@ -375,6 +455,13 @@
+                     par1EntityPlayerMP.playerNetServerHandler.sendPacket(packet);
+@@ -376,6 +456,13 @@
                          ServersideAttributeMap serversideattributemap = (ServersideAttributeMap)((EntityLivingBase)this.myEntity).getAttributeMap();
-                         Collection collection = serversideattributemap.func_111160_c();
+                         Collection collection = serversideattributemap.getWatchedAttributes();
  
 +                        // CraftBukkit start - If sending own attributes send scaled health instead of current maximum health
-+                        if (this.myEntity.func_145782_y() == par1EntityPlayerMP.func_145782_y())
++                        if (this.myEntity.getEntityId() == par1EntityPlayerMP.getEntityId())
 +                        {
 +                            ((EntityPlayerMP) this.myEntity).getBukkitEntity().injectScaledMaxHealth(collection, false);
 +                        }
@@ -186,23 +186,23 @@
 +                        // CraftBukkit end
                          if (!collection.isEmpty())
                          {
-                             par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S20PacketEntityProperties(this.myEntity.func_145782_y(), collection));
-@@ -403,6 +490,14 @@
-                         par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S1BPacketEntityAttach(0, this.myEntity, this.myEntity.ridingEntity));
+                             par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S20PacketEntityProperties(this.myEntity.getEntityId(), collection));
+@@ -404,6 +491,14 @@
+                         par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, this.myEntity, this.myEntity.ridingEntity));
                      }
  
 +                    // CraftBukkit start
 +                    if (this.myEntity.riddenByEntity != null)
 +                    {
-+                        par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S1BPacketEntityAttach(0, this.myEntity.riddenByEntity, this.myEntity));
++                        par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, this.myEntity.riddenByEntity, this.myEntity));
 +                    }
 +
 +                    // CraftBukkit end
 +
                      if (this.myEntity instanceof EntityLiving && ((EntityLiving)this.myEntity).getLeashedToEntity() != null)
                      {
-                         par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S1BPacketEntityAttach(1, this.myEntity, ((EntityLiving)this.myEntity).getLeashedToEntity()));
-@@ -431,6 +526,11 @@
+                         par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this.myEntity, ((EntityLiving)this.myEntity).getLeashedToEntity()));
+@@ -432,6 +527,11 @@
                          }
                      }
  
@@ -214,18 +214,18 @@
                      if (this.myEntity instanceof EntityLivingBase)
                      {
                          EntityLivingBase entitylivingbase = (EntityLivingBase)this.myEntity;
-@@ -469,7 +569,9 @@
+@@ -470,7 +570,9 @@
      {
          if (this.myEntity.isDead)
          {
--            field_151262_p.warn("Fetching addPacket for removed entity");
+-            logger.warn("Fetching addPacket for removed entity");
 +            // CraftBukkit start - Remove useless error spam, just return
-+            // field_151262_p.warn("Fetching addPacket for removed entity");
++            // logger.warn("Fetching addPacket for removed entity");
 +            // CraftBukkit end
          }
  
          Packet pkt = FMLNetworkHandler.getEntitySpawningPacket(this.myEntity);
-@@ -622,6 +724,11 @@
+@@ -623,6 +725,11 @@
  
      public void removePlayerFromTracker(EntityPlayerMP par1EntityPlayerMP)
      {

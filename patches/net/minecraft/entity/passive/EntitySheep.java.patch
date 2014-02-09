@@ -30,7 +30,7 @@
 +
          if (!this.getSheared())
          {
--            this.entityDropItem(new ItemStack(Item.func_150898_a(Blocks.wool), 1, this.getFleeceColor()), 0.0F);
+-            this.entityDropItem(new ItemStack(Item.getItemFromBlock(Blocks.wool), 1, this.getFleeceColor()), 0.0F);
 +            loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.Material.WOOL, 1, (short) 0, (byte) this.getFleeceColor()));
          }
 +
@@ -38,7 +38,7 @@
 +        // CraftBukkit end
      }
  
-     protected Item func_146068_u()
+     protected Item getDropItem()
 @@ -133,6 +146,38 @@
      // JAVADOC METHOD $$ func_70085_c
      public boolean interact(EntityPlayer par1EntityPlayer)
@@ -64,7 +64,7 @@
 +
 +                for (int j = 0; j < i; ++j)
 +                {
-+                    EntityItem entityitem = this.entityDropItem(new ItemStack(Item.func_150898_a(Blocks.wool), 1, this.getFleeceColor()), 1.0F);
++                    EntityItem entityitem = this.entityDropItem(new ItemStack(Item.getItemFromBlock(Blocks.wool), 1, this.getFleeceColor()), 1.0F);
 +                    entityitem.motionY += (double)(this.rand.nextFloat() * 0.05F);
 +                    entityitem.motionX += (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);
 +                    entityitem.motionZ += (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);

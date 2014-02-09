@@ -12,7 +12,7 @@
  
  public class BlockDropper extends BlockDispenser
  {
-@@ -38,7 +43,7 @@
+@@ -39,7 +44,7 @@
          return new TileEntityDropper();
      }
  
@@ -20,8 +20,8 @@
 +    public void func_149941_e(World p_149941_1_, int p_149941_2_, int p_149941_3_, int p_149941_4_)   // CraftBukkit - protected -> public
      {
          BlockSourceImpl blocksourceimpl = new BlockSourceImpl(p_149941_1_, p_149941_2_, p_149941_3_, p_149941_4_);
-         TileEntityDispenser tileentitydispenser = (TileEntityDispenser)blocksourceimpl.func_150835_j();
-@@ -60,10 +65,33 @@
+         TileEntityDispenser tileentitydispenser = (TileEntityDispenser)blocksourceimpl.getBlockTileEntity();
+@@ -61,10 +66,33 @@
  
                  if (iinventory != null)
                  {

@@ -13,15 +13,15 @@
  public class BlockMycelium extends Block
  {
      @SideOnly(Side.CLIENT)
-@@ -39,11 +45,25 @@
+@@ -41,11 +47,25 @@
          {
              if (p_149674_1_.getBlockLightValue(p_149674_2_, p_149674_3_ + 1, p_149674_4_) < 4 && p_149674_1_.getBlockLightOpacity(p_149674_2_, p_149674_3_ + 1, p_149674_4_) > 2)
              {
--                p_149674_1_.func_147449_b(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.dirt);
+-                p_149674_1_.setBlock(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.dirt);
 +                // CraftBukkit start
 +                org.bukkit.World bworld = p_149674_1_.getWorld();
 +                BlockState blockState = bworld.getBlockAt(p_149674_2_, p_149674_3_, p_149674_4_).getState();
-+                blockState.setTypeId(Block.func_149682_b(Blocks.dirt));
++                blockState.setTypeId(Block.getIdFromBlock(Blocks.dirt));
 +                BlockFadeEvent event = new BlockFadeEvent(blockState.getBlock(), blockState);
 +                p_149674_1_.getServer().getPluginManager().callEvent(event);
 +
@@ -41,15 +41,15 @@
                  {
                      int i1 = p_149674_2_ + p_149674_5_.nextInt(3) - 1;
                      int j1 = p_149674_3_ + p_149674_5_.nextInt(5) - 3;
-@@ -52,7 +72,19 @@
+@@ -54,7 +74,19 @@
  
-                     if (p_149674_1_.func_147439_a(i1, j1, k1) == Blocks.dirt && p_149674_1_.getBlockMetadata(i1, j1, k1) == 0 && p_149674_1_.getBlockLightValue(i1, j1 + 1, k1) >= 4 && p_149674_1_.getBlockLightOpacity(i1, j1 + 1, k1) <= 2)
+                     if (p_149674_1_.getBlock(i1, j1, k1) == Blocks.dirt && p_149674_1_.getBlockMetadata(i1, j1, k1) == 0 && p_149674_1_.getBlockLightValue(i1, j1 + 1, k1) >= 4 && p_149674_1_.getBlockLightOpacity(i1, j1 + 1, k1) <= 2)
                      {
--                        p_149674_1_.func_147449_b(i1, j1, k1, this);
+-                        p_149674_1_.setBlock(i1, j1, k1, this);
 +                        // CraftBukkit start
 +                        org.bukkit.World bworld = p_149674_1_.getWorld();
 +                        BlockState blockState = bworld.getBlockAt(i1, j1, k1).getState();
-+                        blockState.setTypeId(Block.func_149682_b(this));
++                        blockState.setTypeId(Block.getIdFromBlock(this));
 +                        BlockSpreadEvent event = new BlockSpreadEvent(blockState.getBlock(), bworld.getBlockAt(p_149674_2_, p_149674_3_, p_149674_4_), blockState);
 +                        p_149674_1_.getServer().getPluginManager().callEvent(event);
 +

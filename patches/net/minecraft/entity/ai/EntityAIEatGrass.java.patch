@@ -14,7 +14,7 @@
      private EntityLiving field_151500_b;
 @@ -74,7 +79,8 @@
  
-             if (this.field_151501_c.func_147439_a(i, j, k) == Blocks.tallgrass)
+             if (this.field_151501_c.getBlock(i, j, k) == Blocks.tallgrass)
              {
 -                if (this.field_151501_c.getGameRules().getGameRuleBooleanValue("mobGriefing"))
 +                // CraftBukkit
@@ -24,11 +24,11 @@
                  }
 @@ -83,7 +89,8 @@
              }
-             else if (this.field_151501_c.func_147439_a(i, j - 1, k) == Blocks.grass)
+             else if (this.field_151501_c.getBlock(i, j - 1, k) == Blocks.grass)
              {
 -                if (this.field_151501_c.getGameRules().getGameRuleBooleanValue("mobGriefing"))
 +                // CraftBukkit
 +                if (!CraftEventFactory.callEntityChangeBlockEvent(this.field_151500_b, this.field_151500_b.worldObj.getWorld().getBlockAt(i, j - 1, k), Material.DIRT, !this.field_151501_c.getGameRules().getGameRuleBooleanValue("mobGriefing")).isCancelled())
                  {
-                     this.field_151501_c.playAuxSFX(2001, i, j - 1, k, Block.func_149682_b(Blocks.grass));
-                     this.field_151501_c.func_147465_d(i, j - 1, k, Blocks.dirt, 0, 2);
+                     this.field_151501_c.playAuxSFX(2001, i, j - 1, k, Block.getIdFromBlock(Blocks.grass));
+                     this.field_151501_c.setBlock(i, j - 1, k, Blocks.dirt, 0, 2);

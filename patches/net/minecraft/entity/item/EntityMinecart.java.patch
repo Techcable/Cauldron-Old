@@ -78,7 +78,7 @@
 +
 +                    // CraftBukkit end
 +
-                     if (flag && !this.func_145818_k_())
+                     if (flag && !this.hasCustomInventoryName())
                      {
                          this.setDead();
 @@ -233,6 +279,14 @@
@@ -112,7 +112,7 @@
 -            double d0 = 0.4D;
 +            double d0 = this.maxSpeed; // CraftBukkit
              double d2 = 0.0078125D;
-             Block block = this.worldObj.func_147439_a(l, i, i1);
+             Block block = this.worldObj.getBlock(l, i, i1);
  
 @@ -381,7 +435,19 @@
              }
@@ -199,7 +199,7 @@
                  {
                      d2 = (double)MathHelper.sqrt_double(d2);
                      d0 /= d2;
-@@ -1116,6 +1200,32 @@
+@@ -1117,6 +1201,32 @@
      {
          return this.entityName;
      }

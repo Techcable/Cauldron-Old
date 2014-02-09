@@ -20,18 +20,18 @@
 -        for (int k = 0; k < j; ++k)
 +        if (j > 0)
          {
--            this.func_145779_a(Items.feather, 1);
+-            this.dropItem(Items.feather, 1);
 +            loot.add(new org.bukkit.inventory.ItemStack(CraftMagicNumbers.getMaterial(Items.feather), j));
          }
  
          if (this.isBurning())
          {
--            this.func_145779_a(Items.cooked_chicken, 1);
+-            this.dropItem(Items.cooked_chicken, 1);
 +            loot.add(new org.bukkit.inventory.ItemStack(CraftMagicNumbers.getMaterial(Items.cooked_chicken), 1));
          }
          else
          {
--            this.func_145779_a(Items.chicken, 1);
+-            this.dropItem(Items.chicken, 1);
 +            loot.add(new org.bukkit.inventory.ItemStack(CraftMagicNumbers.getMaterial(Items.chicken), 1));
          }
 +

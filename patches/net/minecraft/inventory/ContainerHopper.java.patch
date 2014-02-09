@@ -35,7 +35,7 @@
      {
          this.field_94538_a = par2IInventory;
 +        this.player = par1InventoryPlayer; // CraftBukkit - save player
-         par2IInventory.openChest();
+         par2IInventory.openInventory();
          byte b0 = 51;
          int i;
 @@ -37,6 +60,11 @@

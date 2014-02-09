@@ -106,7 +106,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public InetSocketAddress getAddress() {
         if (getHandle().playerNetServerHandler == null) return null;
 
-        SocketAddress addr = getHandle().playerNetServerHandler.field_147371_a.getSocketAddress();
+        SocketAddress addr = getHandle().playerNetServerHandler.netManager.getSocketAddress();
         if (addr instanceof InetSocketAddress) {
             return (InetSocketAddress) addr;
         } else {
@@ -137,7 +137,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         if (getHandle().playerNetServerHandler == null) return;
 
         for (net.minecraft.util.IChatComponent component : CraftChatMessage.fromString(message)) {
-            getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S02PacketChat(component));
+            getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S02PacketChat(component));
         }
     }
 
@@ -203,8 +203,8 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             if (entityplayer.playerNetServerHandler == null) continue;
 
             if (entityplayer.getBukkitEntity().canSee(this)) {
-                entityplayer.playerNetServerHandler.func_147359_a(oldpacket);
-                entityplayer.playerNetServerHandler.func_147359_a(packet);
+                entityplayer.playerNetServerHandler.sendPacket(oldpacket);
+                entityplayer.playerNetServerHandler.sendPacket(packet);
             }
         }
     }
@@ -234,7 +234,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         if (Thread.currentThread() != net.minecraft.server.MinecraftServer.getServer().primaryThread) throw new IllegalStateException("Asynchronous player kick!"); // Spigot
         if (getHandle().playerNetServerHandler == null) return;
 
-        getHandle().playerNetServerHandler.func_147360_c(message == null ? "" : message);
+        getHandle().playerNetServerHandler.kickPlayerFromServer(message == null ? "" : message);
     }
 
     @Override
@@ -242,7 +242,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         if (getHandle().playerNetServerHandler == null) return;
 
         // Do not directly assign here, from the packethandler we'll assign it.
-        getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S05PacketSpawnPosition(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+        getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S05PacketSpawnPosition(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
     }
 
     @Override
@@ -284,7 +284,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             instrumentName = "bassattack";
             break;
         }
-        getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S29PacketSoundEffect("note."+instrumentName, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), 3.0f, note));
+        getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S29PacketSoundEffect("note."+instrumentName, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), 3.0f, note));
     }
 
     @Override
@@ -309,7 +309,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                 instrumentName = "bassattack";
                 break;
         }
-        getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S29PacketSoundEffect("note."+instrumentName, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), 3.0f, note.getId()));
+        getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S29PacketSoundEffect("note."+instrumentName, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), 3.0f, note.getId()));
     }
 
     @Override
@@ -329,7 +329,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         double z = loc.getBlockZ() + 0.5;
 
         net.minecraft.network.play.server.S29PacketSoundEffect packet = new net.minecraft.network.play.server.S29PacketSoundEffect(sound, x, y, z, volume, pitch);
-        getHandle().playerNetServerHandler.func_147359_a(packet);
+        getHandle().playerNetServerHandler.sendPacket(packet);
     }
 
     @Override
@@ -338,7 +338,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
         int packetData = effect.getId();
         net.minecraft.network.play.server.S28PacketEffect packet = new net.minecraft.network.play.server.S28PacketEffect(packetData, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), data, false);
-        getHandle().playerNetServerHandler.func_147359_a(packet);
+        getHandle().playerNetServerHandler.sendPacket(packet);
     }
 
     @Override
@@ -366,7 +366,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
         packet.field_148883_d = CraftMagicNumbers.getBlock(material);
         packet.field_148884_e = data;
-        getHandle().playerNetServerHandler.func_147359_a(packet);
+        getHandle().playerNetServerHandler.sendPacket(packet);
     }
 
     @Override
@@ -415,7 +415,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                 bytes[y + 3] = data.buffer[y * 128 + x];
             }
             net.minecraft.network.play.server.S34PacketMaps packet = new net.minecraft.network.play.server.S34PacketMaps(map.getId(), bytes);
-            getHandle().playerNetServerHandler.func_147359_a(packet);
+            getHandle().playerNetServerHandler.sendPacket(packet);
         }
     }
 
@@ -764,7 +764,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
             getHandle().theItemInWorldManager.setGameType(net.minecraft.world.WorldSettings.GameType.getByID(mode.getValue()));
             getHandle().fallDistance = 0;
-            getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S2BPacketChangeGameState(3, mode.getValue()));
+            getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S2BPacketChangeGameState(3, mode.getValue()));
         }
     }
 
@@ -867,13 +867,13 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         //remove this player from the hidden player's EntityTrackerEntry
         net.minecraft.entity.EntityTracker tracker = ((net.minecraft.world.WorldServer) entity.worldObj).theEntityTracker;
         net.minecraft.entity.player.EntityPlayerMP other = ((CraftPlayer) player).getHandle();
-        net.minecraft.entity.EntityTrackerEntry entry = (net.minecraft.entity.EntityTrackerEntry) tracker.trackedEntityIDs.lookup(other.func_145782_y());
+        net.minecraft.entity.EntityTrackerEntry entry = (net.minecraft.entity.EntityTrackerEntry) tracker.trackedEntityIDs.lookup(other.getEntityId());
         if (entry != null) {
             entry.removePlayerFromTracker(getHandle());
         }
 
         //remove the hidden player from this player user list
-        getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S38PacketPlayerListItem(player.getPlayerListName(), false, 9999));
+        getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S38PacketPlayerListItem(player.getPlayerListName(), false, 9999));
     }
 
     public void showPlayer(Player player) {
@@ -885,12 +885,12 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
         net.minecraft.entity.EntityTracker tracker = ((net.minecraft.world.WorldServer) entity.worldObj).theEntityTracker;
         net.minecraft.entity.player.EntityPlayerMP other = ((CraftPlayer) player).getHandle();
-        net.minecraft.entity.EntityTrackerEntry entry = (net.minecraft.entity.EntityTrackerEntry) tracker.trackedEntityIDs.lookup(other.func_145782_y());
+        net.minecraft.entity.EntityTrackerEntry entry = (net.minecraft.entity.EntityTrackerEntry) tracker.trackedEntityIDs.lookup(other.getEntityId());
         if (entry != null && !entry.trackingPlayers.contains(getHandle())) {
             entry.tryStartWachingThis(getHandle());
         }
 
-        getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S38PacketPlayerListItem(player.getPlayerListName(), true, getHandle().ping));
+        getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S38PacketPlayerListItem(player.getPlayerListName(), true, getHandle().ping));
     }
 
     public boolean canSee(Player player) {
@@ -1010,7 +1010,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
         if (channels.contains(channel)) {
             net.minecraft.network.play.server.S3FPacketCustomPayload packet = new net.minecraft.network.play.server.S3FPacketCustomPayload(channel, message);
-            getHandle().playerNetServerHandler.func_147359_a(packet);
+            getHandle().playerNetServerHandler.sendPacket(packet);
         }
     }
 
@@ -1022,7 +1022,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void setResourcePack(String url) {
         Validate.notNull(url, "Resource pack URL cannot be null");
 
-        getHandle().func_147095_a(url); // should be setResourcePack
+        getHandle().requestTexturePackLoad(url); // should be setResourcePack
     }
 
     public void addChannel(String channel) {
@@ -1057,7 +1057,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                 }
             }
 
-            getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S3FPacketCustomPayload("REGISTER", stream.toByteArray()));
+            getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S3FPacketCustomPayload("REGISTER", stream.toByteArray()));
         }
     }
 
@@ -1237,13 +1237,13 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     public void updateScaledHealth() {
         net.minecraft.entity.ai.attributes.ServersideAttributeMap attributemapserver = (net.minecraft.entity.ai.attributes.ServersideAttributeMap) getHandle().getAttributeMap();
-        Set set = attributemapserver.func_111161_b();
+        Set set = attributemapserver.getAttributeInstanceSet();
 
         injectScaledMaxHealth(set, true);
 
         getHandle().getDataWatcher().updateObject(6, (float) getScaledHealth());
-        getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S06PacketUpdateHealth(getScaledHealth(), getHandle().getFoodStats().getFoodLevel(), getHandle().getFoodStats().getSaturationLevel()));
-        getHandle().playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S20PacketEntityProperties(getHandle().func_145782_y(), set));
+        getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S06PacketUpdateHealth(getScaledHealth(), getHandle().getFoodStats().getFoodLevel(), getHandle().getFoodStats().getSaturationLevel()));
+        getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S20PacketEntityProperties(getHandle().getEntityId(), set));
 
         set.clear();
         getHandle().maxHealthCache = getMaxHealth();
@@ -1254,14 +1254,14 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             return;
         }
         for (Object genericInstance : collection) {
-            net.minecraft.entity.ai.attributes.IAttribute attribute = ((net.minecraft.entity.ai.attributes.IAttributeInstance) genericInstance).func_111123_a();
+            net.minecraft.entity.ai.attributes.IAttribute attribute = ((net.minecraft.entity.ai.attributes.IAttributeInstance) genericInstance).getAttribute();
             if (attribute.getAttributeUnlocalizedName().equals("generic.maxHealth")) {
                 collection.remove(genericInstance);
                 break;
             }
             continue;
         }
-        collection.add(new net.minecraft.entity.ai.attributes.ModifiableAttributeInstance(getHandle().getAttributeMap(), (new net.minecraft.entity.ai.attributes.RangedAttribute("generic.maxHealth", scaledHealth ? healthScale : getMaxHealth(), 0.0D, Float.MAX_VALUE)).func_111117_a("Max Health").setShouldWatch(true)));
+        collection.add(new net.minecraft.entity.ai.attributes.ModifiableAttributeInstance(getHandle().getAttributeMap(), (new net.minecraft.entity.ai.attributes.RangedAttribute("generic.maxHealth", scaledHealth ? healthScale : getMaxHealth(), 0.0D, Float.MAX_VALUE)).setDescription("Max Health").setShouldWatch(true)));
     }
 
     // Spigot start

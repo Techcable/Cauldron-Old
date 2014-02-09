@@ -1,16 +1,16 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntityNote.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityNote.java
-@@ -66,7 +66,23 @@
+@@ -70,7 +70,23 @@
                  b0 = 4;
              }
  
--            p_145878_1_.func_147452_c(p_145878_2_, p_145878_3_, p_145878_4_, Blocks.noteblock, b0, this.field_145879_a);
+-            p_145878_1_.addBlockEvent(p_145878_2_, p_145878_3_, p_145878_4_, Blocks.noteblock, b0, this.note);
 +            // CraftBukkit start
-+            org.bukkit.event.block.NotePlayEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callNotePlayEvent(this.field_145850_b, p_145878_2_, p_145878_3_, p_145878_4_, b0, this.field_145879_a);
++            org.bukkit.event.block.NotePlayEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callNotePlayEvent(this.worldObj, p_145878_2_, p_145878_3_, p_145878_4_, b0, this.note);
 +
 +            if (!event.isCancelled())
 +            {
-+                this.field_145850_b.func_147452_c(p_145878_2_, p_145878_3_, p_145878_4_, Blocks.noteblock, event.getInstrument().getType(), event.getNote().getId());
++                this.worldObj.addBlockEvent(p_145878_2_, p_145878_3_, p_145878_4_, Blocks.noteblock, event.getInstrument().getType(), event.getNote().getId());
 +            }
 +
 +            // CraftBukkit end

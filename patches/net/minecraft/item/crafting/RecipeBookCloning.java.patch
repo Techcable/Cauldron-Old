@@ -1,10 +1,9 @@
 --- ../src-base/minecraft/net/minecraft/item/crafting/RecipeBookCloning.java
 +++ ../src-work/minecraft/net/minecraft/item/crafting/RecipeBookCloning.java
-@@ -5,11 +5,17 @@
- import net.minecraft.item.ItemStack;
+@@ -6,10 +6,17 @@
  import net.minecraft.nbt.NBTTagCompound;
  import net.minecraft.world.World;
--
+ 
 -public class RecipeBookCloning implements IRecipe
 +public class RecipeBookCloning extends ShapelessRecipes implements IRecipe   // CraftBukkit - added extends
  {

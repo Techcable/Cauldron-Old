@@ -147,7 +147,7 @@ public class CraftBlockState implements BlockState {
         }
 
         block.setData(getRawData(), applyPhysics);
-        world.getHandle().func_147471_g(x, y, z);
+        world.getHandle().markBlockForUpdate(x, y, z);
 
         return true;
     }

@@ -12,7 +12,7 @@
 +
  public class ContainerDispenser extends Container
  {
--    private TileEntityDispenser tileEntityDispenser;
+-    private TileEntityDispenser tileDispenser;
 +    public TileEntityDispenser tileEntityDispenser; // CraftBukkit - private -> public
 +    // CraftBukkit start
 +    private CraftInventoryView bukkitEntity = null;
@@ -22,7 +22,8 @@
  
      public ContainerDispenser(IInventory par1IInventory, TileEntityDispenser par2TileEntityDispenser)
      {
-         this.tileEntityDispenser = par2TileEntityDispenser;
+-        this.tileDispenser = par2TileEntityDispenser;
++        this.tileEntityDispenser = par2TileEntityDispenser;
 +        // CraftBukkit start - Save player
 +        // TODO: Should we check to make sure it really is an InventoryPlayer?
 +        this.player = (InventoryPlayer)par1IInventory;
@@ -30,21 +31,22 @@
          int i;
          int j;
  
-@@ -39,6 +53,13 @@
+@@ -39,7 +53,13 @@
  
      public boolean canInteractWith(EntityPlayer par1EntityPlayer)
      {
+-        return this.tileDispenser.isUseableByPlayer(par1EntityPlayer);
 +        // CraftBukkit start
 +        if (!this.checkReachable)
 +        {
 +            return true;
 +        }
 +        // CraftBukkit end
-+
-         return this.tileEntityDispenser.isUseableByPlayer(par1EntityPlayer);
++        return this.tileEntityDispenser.isUseableByPlayer(par1EntityPlayer);
      }
  
-@@ -84,4 +105,18 @@
+     // JAVADOC METHOD $$ func_82846_b
+@@ -84,4 +104,18 @@
  
          return itemstack;
      }

@@ -20,7 +20,7 @@
 +                        // CraftBukkit start
 +                        if (CraftEventFactory.callPlayerLeashEntityEvent(entityliving, this, par1EntityPlayer).isCancelled())
 +                        {
-+                            ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.func_147359_a(new S1BPacketEntityAttach(1, entityliving, entityliving.getLeashedToEntity()));
++                            ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, entityliving, entityliving.getLeashedToEntity()));
 +                            continue;
 +                        }
 +

@@ -26,9 +26,9 @@ public class AntiXray
         TByteSet blocks = new TByteHashSet();
         for ( Integer i : config.hiddenBlocks )
         {
-            net.minecraft.block.Block block = net.minecraft.block.Block.func_149729_e( i );
+            net.minecraft.block.Block block = net.minecraft.block.Block.getBlockById( i );
             // Check it exists and is not a tile entity
-            if ( block != null && !block.func_149716_u() )
+            if ( block != null && !block.hasTileEntity() )
             {
                 // Add it to the set of replacement blocks
                 blocks.add( (byte) (int) i );
@@ -138,13 +138,13 @@ public class AntiXray
         if ( world.blockExists( x, y, z ) )
         {
             // Get block id
-            net.minecraft.block.Block block = world.func_147439_a( x, y, z );
+            net.minecraft.block.Block block = world.getBlock( x, y, z );
 
             // See if it needs update
-            if ( updateSelf && obfuscateBlocks[net.minecraft.block.Block.func_149682_b( block )] )
+            if ( updateSelf && obfuscateBlocks[net.minecraft.block.Block.getIdFromBlock( block )] )
             {
                 // Send the update
-                world.func_147471_g( x, y, z );
+                world.markBlockForUpdate( x, y, z );
             }
 
             // Check other blocks for updates
@@ -174,7 +174,7 @@ public class AntiXray
 
     private static boolean hasTransparentBlockAdjacent(net.minecraft.world.World world, int x, int y, int z, int radius)
     {
-        return !world.func_147439_a( x, y, z ).func_149721_r() /* isSolidBlock */
+        return !world.getBlock( x, y, z ).isNormalCube() /* isSolidBlock */
                 || ( radius > 0
                 && ( hasTransparentBlockAdjacent( world, x + 1, y, z, radius - 1 )
                 || hasTransparentBlockAdjacent( world, x - 1, y, z, radius - 1 )

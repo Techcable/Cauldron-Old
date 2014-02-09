@@ -48,7 +48,7 @@
 +                    par2ItemStack.stackSize++;
 +                    // Chain to handler for new item
 +                    ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
-+                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.field_149943_a.getObject(eventStack.getItem());
++                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.dispenseBehaviorRegistry.getObject(eventStack.getItem());
 +
 +                    if (ibehaviordispenseitem != IBehaviorDispenseItem.itemDispenseBehaviorProvider && ibehaviordispenseitem != this)
 +                    {
@@ -100,7 +100,7 @@
 +                    par2ItemStack.stackSize++;
 +                    // Chain to handler for new item
 +                    ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
-+                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.field_149943_a.getObject(eventStack.getItem());
++                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.dispenseBehaviorRegistry.getObject(eventStack.getItem());
 +
 +                    if (ibehaviordispenseitem != IBehaviorDispenseItem.itemDispenseBehaviorProvider && ibehaviordispenseitem != this)
 +                    {
@@ -146,7 +146,7 @@
 +                    par2ItemStack.stackSize++;
 +                    // Chain to handler for new item
 +                    ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
-+                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.field_149943_a.getObject(eventStack.getItem());
++                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.dispenseBehaviorRegistry.getObject(eventStack.getItem());
 +
 +                    if (ibehaviordispenseitem != IBehaviorDispenseItem.itemDispenseBehaviorProvider && ibehaviordispenseitem != this)
 +                    {
@@ -156,7 +156,7 @@
 +                }
 +
 +                EntitySmallFireball entitysmallfireball = new EntitySmallFireball(world, d0, d1, d2, event.getVelocity().getX(), event.getVelocity().getY(), event.getVelocity().getZ());
-+                entitysmallfireball.projectileSource = new org.bukkit.craftbukkit.projectiles.CraftBlockProjectileSource((TileEntityDispenser) par1IBlockSource.func_150835_j());
++                entitysmallfireball.projectileSource = new org.bukkit.craftbukkit.projectiles.CraftBlockProjectileSource((TileEntityDispenser) par1IBlockSource.getBlockTileEntity());
 +                world.spawnEntityInWorld(entitysmallfireball);
 +                // par2ItemStack.splitStack(1); // Handled during event processing
 +                // CraftBukkit end
@@ -190,7 +190,7 @@
 +                    par2ItemStack.stackSize++;
 +                    // Chain to handler for new item
 +                    ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
-+                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.field_149943_a.getObject(eventStack.getItem());
++                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.dispenseBehaviorRegistry.getObject(eventStack.getItem());
 +
 +                    if (ibehaviordispenseitem != IBehaviorDispenseItem.itemDispenseBehaviorProvider && ibehaviordispenseitem != this)
 +                    {
@@ -223,7 +223,7 @@
 +                int y = j + enumfacing.getFrontOffsetY();
 +                int z = k + enumfacing.getFrontOffsetZ();
  
-+                if (world.func_147437_c(x, y, z) || !world.func_147439_a(x, y, z).func_149688_o().isSolid())
++                if (world.isAirBlock(x, y, z) || !world.getBlock(x, y, z).getMaterial().isSolid())
 +                {
 +                    org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
 +                    CraftItemStack craftItem = CraftItemStack.asCraftMirror(par2ItemStack);
@@ -243,7 +243,7 @@
 +                    {
 +                        // Chain to handler for new item
 +                        ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
-+                        IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.field_149943_a.getObject(eventStack.getItem());
++                        IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.dispenseBehaviorRegistry.getObject(eventStack.getItem());
 +
 +                        if (ibehaviordispenseitem != IBehaviorDispenseItem.itemDispenseBehaviorProvider && ibehaviordispenseitem != this)
 +                        {
@@ -269,7 +269,7 @@
 +                        par2ItemStack.func_150996_a(Items.bucket);
 +                        par2ItemStack.stackSize = 1;
 +                    }
-+                    else if (((TileEntityDispenser) par1IBlockSource.func_150835_j()).func_146019_a(new ItemStack(item)) < 0)
++                    else if (((TileEntityDispenser) par1IBlockSource.getBlockTileEntity()).func_146019_a(new ItemStack(item)) < 0)
 +                    {
 +                        this.field_150841_b.dispense(par1IBlockSource, new ItemStack(item));
 +                    }
@@ -301,7 +301,7 @@
 +                {
 +                    // Chain to handler for new item
 +                    ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
-+                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.field_149943_a.getObject(eventStack.getItem());
++                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.dispenseBehaviorRegistry.getObject(eventStack.getItem());
 +
 +                    if (ibehaviordispenseitem != IBehaviorDispenseItem.itemDispenseBehaviorProvider && ibehaviordispenseitem != this)
 +                    {
@@ -312,7 +312,7 @@
 +
 +                // CraftBukkit end
 +
-                 world.func_147468_f(i, j, k);
+                 world.setBlockToAir(i, j, k);
  
                  if (--par2ItemStack.stackSize == 0)
 @@ -308,16 +529,51 @@
@@ -324,10 +324,10 @@
 +                CraftItemStack craftItem = CraftItemStack.asCraftMirror(par2ItemStack);
 +                BlockDispenseEvent event = new BlockDispenseEvent(block, craftItem.clone(), new org.bukkit.util.Vector(0, 0, 0));
  
--                if (world.func_147437_c(i, j, k))
+-                if (world.isAirBlock(i, j, k))
 +                if (!BlockDispenser.eventFired)
                  {
--                    world.func_147449_b(i, j, k, Blocks.fire);
+-                    world.setBlock(i, j, k, Blocks.fire);
 +                    world.getServer().getPluginManager().callEvent(event);
 +                }
  
@@ -341,7 +341,7 @@
 +                {
 +                    // Chain to handler for new item
 +                    ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
-+                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.field_149943_a.getObject(eventStack.getItem());
++                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.dispenseBehaviorRegistry.getObject(eventStack.getItem());
 +
 +                    if (ibehaviordispenseitem != IBehaviorDispenseItem.itemDispenseBehaviorProvider && ibehaviordispenseitem != this)
                      {
@@ -353,12 +353,12 @@
 +
 +                // CraftBukkit end
 +
-+                if (world.func_147437_c(i, j, k))
++                if (world.isAirBlock(i, j, k))
 +                {
 +                    // CraftBukkit start - Ignition by dispensing flint and steel
 +                    if (!org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(world, i, j, k, par1IBlockSource.getXInt(), par1IBlockSource.getYInt(), par1IBlockSource.getZInt()).isCancelled())
 +                    {
-+                        world.func_147449_b(i, j, k, Blocks.fire);
++                        world.setBlock(i, j, k, Blocks.fire);
 +
 +                        if (par2ItemStack.attemptDamageItem(1, world.rand))
 +                        {
@@ -368,9 +368,9 @@
 +
 +                    // CraftBukkit end
 +                }
-                 else if (world.func_147439_a(i, j, k) == Blocks.tnt)
+                 else if (world.getBlock(i, j, k) == Blocks.tnt)
                  {
-                     Blocks.tnt.func_149664_b(world, i, j, k, 1);
+                     Blocks.tnt.onBlockDestroyedByPlayer(world, i, j, k, 1);
 @@ -357,7 +613,36 @@
                      int i = par1IBlockSource.getXInt() + enumfacing.getFrontOffsetX();
                      int j = par1IBlockSource.getYInt() + enumfacing.getFrontOffsetY();
@@ -394,7 +394,7 @@
 +                    {
 +                        // Chain to handler for new item
 +                        ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
-+                        IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.field_149943_a.getObject(eventStack.getItem());
++                        IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.dispenseBehaviorRegistry.getObject(eventStack.getItem());
 +
 +                        if (ibehaviordispenseitem != IBehaviorDispenseItem.itemDispenseBehaviorProvider && ibehaviordispenseitem != this)
 +                        {
@@ -435,7 +435,7 @@
 +                    par2ItemStack.stackSize++;
 +                    // Chain to handler for new item
 +                    ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
-+                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.field_149943_a.getObject(eventStack.getItem());
++                    IBehaviorDispenseItem ibehaviordispenseitem = (IBehaviorDispenseItem) BlockDispenser.dispenseBehaviorRegistry.getObject(eventStack.getItem());
 +
 +                    if (ibehaviordispenseitem != IBehaviorDispenseItem.itemDispenseBehaviorProvider && ibehaviordispenseitem != this)
 +                    {

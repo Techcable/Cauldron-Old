@@ -81,7 +81,7 @@ public class CraftHorse extends CraftAnimals implements Horse {
 
     public void setJumpStrength(double strength) {
         Validate.isTrue(strength >= 0, "Jump strength cannot be less than zero");
-        getHandle().getEntityAttribute(net.minecraft.entity.passive.EntityHorse.horseJumpStrength).setAttribute(strength);
+        getHandle().getEntityAttribute(net.minecraft.entity.passive.EntityHorse.horseJumpStrength).setBaseValue(strength);
     }
 
     @Override

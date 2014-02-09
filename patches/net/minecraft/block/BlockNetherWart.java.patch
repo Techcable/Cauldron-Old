@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockNetherWart.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockNetherWart.java
-@@ -45,7 +45,7 @@
+@@ -48,7 +48,7 @@
          if (l < 3 && p_149674_5_.nextInt(10) == 0)
          {
              ++l;
@@ -8,4 +8,4 @@
 +            org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockGrowEvent(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, this, l); // CraftBukkit
          }
  
-         super.func_149674_a(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, p_149674_5_);
+         super.updateTick(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, p_149674_5_);

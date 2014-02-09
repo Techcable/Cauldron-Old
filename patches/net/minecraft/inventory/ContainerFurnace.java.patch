@@ -11,7 +11,7 @@
 +
  public class ContainerFurnace extends Container
  {
-     private TileEntityFurnace furnace;
+     private TileEntityFurnace tileFurnace;
      private int lastCookTime;
      private int lastBurnTime;
      private int lastItemBurnTime;
@@ -27,7 +27,7 @@
 +            return bukkitEntity;
 +        }
 +
-+        CraftInventoryFurnace inventory = new CraftInventoryFurnace(this.furnace);
++        CraftInventoryFurnace inventory = new CraftInventoryFurnace(this.tileFurnace);
 +        bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
 +        return bukkitEntity;
 +    }
@@ -43,7 +43,7 @@
          int i;
  
          for (i = 0; i < 3; ++i)
-@@ -97,6 +120,11 @@
+@@ -97,6 +120,10 @@
  
      public boolean canInteractWith(EntityPlayer par1EntityPlayer)
      {
@@ -51,7 +51,6 @@
 +        {
 +            return true;    // CraftBukkit
 +        }
-+
-         return this.furnace.isUseableByPlayer(par1EntityPlayer);
+         return this.tileFurnace.isUseableByPlayer(par1EntityPlayer);
      }
  

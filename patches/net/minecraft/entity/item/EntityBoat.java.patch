@@ -16,8 +16,8 @@
 +
  public class EntityBoat extends Entity
  {
-     private boolean field_70279_a;
-@@ -35,6 +45,32 @@
+     // JAVADOC FIELD $$ field_70279_a
+@@ -36,6 +46,32 @@
      private double velocityZ;
      private static final String __OBFID = "CL_00001667";
  
@@ -50,7 +50,7 @@
      public EntityBoat(World par1World)
      {
          super(par1World);
-@@ -86,6 +122,7 @@
+@@ -87,6 +123,7 @@
          this.prevPosX = par2;
          this.prevPosY = par4;
          this.prevPosZ = par6;
@@ -58,7 +58,7 @@
      }
  
      // JAVADOC METHOD $$ func_70042_X
-@@ -103,6 +140,19 @@
+@@ -104,6 +141,19 @@
          }
          else if (!this.worldObj.isRemote && !this.isDead)
          {
@@ -78,7 +78,7 @@
              this.setForwardDirection(-this.getForwardDirection());
              this.setTimeSinceHit(10);
              this.setDamageTaken(this.getDamageTaken() + par2 * 10.0F);
-@@ -111,6 +161,18 @@
+@@ -112,6 +162,18 @@
  
              if (flag || this.getDamageTaken() > 40.0F)
              {
@@ -97,7 +97,7 @@
                  if (this.riddenByEntity != null)
                  {
                      this.riddenByEntity.mountEntity(this);
-@@ -192,6 +254,13 @@
+@@ -193,6 +255,13 @@
      // JAVADOC METHOD $$ func_70071_h_
      public void onUpdate()
      {
@@ -111,7 +111,7 @@
          super.onUpdate();
  
          if (this.getTimeSinceHit() > 0)
-@@ -314,7 +383,25 @@
+@@ -315,7 +384,25 @@
                  this.motionX += -Math.sin((double)(f * (float)Math.PI / 180.0F)) * this.speedMultiplier * (double)entitylivingbase.moveForward * 0.05000000074505806D;
                  this.motionZ += Math.cos((double)(f * (float)Math.PI / 180.0F)) * this.speedMultiplier * (double)entitylivingbase.moveForward * 0.05000000074505806D;
              }
@@ -137,7 +137,7 @@
              d2 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
  
              if (d2 > 0.35D)
-@@ -358,18 +445,32 @@
+@@ -359,18 +446,32 @@
  
                      if (block == Blocks.snow_layer)
                      {
@@ -148,7 +148,7 @@
 +                        }
 +
 +                        // CraftBukkit end
-                         this.worldObj.func_147468_f(i1, k, j);
+                         this.worldObj.setBlockToAir(i1, k, j);
                          this.isCollidedHorizontally = false;
                      }
                      else if (block == Blocks.waterlily)
@@ -171,7 +171,7 @@
              {
                  this.motionX *= 0.5D;
                  this.motionY *= 0.5D;
-@@ -382,17 +483,27 @@
+@@ -383,17 +484,27 @@
              {
                  if (!this.worldObj.isRemote && !this.isDead)
                  {
@@ -184,7 +184,7 @@
 -                    for (l = 0; l < 3; ++l)
 +                    if (!destroyEvent.isCancelled())
                      {
--                        this.func_145778_a(Item.func_150898_a(Blocks.planks), 1, 0.0F);
+-                        this.func_145778_a(Item.getItemFromBlock(Blocks.planks), 1, 0.0F);
 -                    }
 +                        this.setDead();
  
@@ -193,7 +193,7 @@
 -                        this.func_145778_a(Items.stick, 1, 0.0F);
 +                        for (l = 0; l < 3; ++l)
 +                        {
-+                            this.func_145778_a(Item.func_150898_a(Blocks.planks), 1, 0.0F);
++                            this.func_145778_a(Item.getItemFromBlock(Blocks.planks), 1, 0.0F);
 +                        }
 +
 +                        for (l = 0; l < 2; ++l)
@@ -206,7 +206,7 @@
                  }
              }
              else
-@@ -426,7 +537,22 @@
+@@ -427,7 +538,22 @@
  
              this.rotationYaw = (float)((double)this.rotationYaw + d7);
              this.setRotation(this.rotationYaw, this.rotationPitch);
@@ -229,7 +229,7 @@
              if (!this.worldObj.isRemote)
              {
                  List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
-@@ -446,6 +572,7 @@
+@@ -447,6 +573,7 @@
  
                  if (this.riddenByEntity != null && this.riddenByEntity.isDead)
                  {

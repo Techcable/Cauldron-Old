@@ -46,6 +46,6 @@ public class EntityMinecartCommandBlockListener extends CommandBlockLogic
     @SideOnly(Side.CLIENT)
     public void func_145757_a(ByteBuf p_145757_1_)
     {
-        p_145757_1_.writeInt(field_145768_a.func_145782_y());
+        p_145757_1_.writeInt(field_145768_a.getEntityId());
     }
 }

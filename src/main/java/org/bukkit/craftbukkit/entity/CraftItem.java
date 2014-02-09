@@ -28,11 +28,11 @@ public class CraftItem extends CraftEntity implements Item {
     }
 
     public int getPickupDelay() {
-        return item.field_145804_b;
+        return item.delayBeforeCanPickup;
     }
 
     public void setPickupDelay(int delay) {
-        item.field_145804_b = delay;
+        item.delayBeforeCanPickup = delay;
     }
 
     @Override

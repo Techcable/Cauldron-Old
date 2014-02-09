@@ -13,18 +13,7 @@
  public class Teleporter
  {
      private final WorldServer worldServerInstance;
-@@ -29,7 +35,9 @@
-         this.random = new Random(par1WorldServer.getSeed());
-     }
- 
--    // JAVADOC METHOD $$ func_77185_a
-+    /**
-+     * Place an entity in a nearby portal, creating one if necessary.
-+     */
-     public void placeInPortal(Entity par1Entity, double par2, double par4, double par6, float par8)
-     {
-         if (this.worldServerInstance.provider.dimensionId != 1)
-@@ -42,83 +50,157 @@
+@@ -42,83 +48,155 @@
          }
          else
          {
@@ -63,7 +52,7 @@
 +                    int l1 = j + j1;
 +                    int i2 = k + i1 * b1 - l * b0;
 +                    boolean flag = j1 < 0;
-+                    this.worldServerInstance.func_147449_b(k1, l1, i2, flag ? Blocks.obsidian : Blocks.air);
++                    this.worldServerInstance.setBlock(k1, l1, i2, flag ? Blocks.obsidian : Blocks.air);
 +                }
 +            }
 +        }
@@ -92,13 +81,13 @@
 +                    int i2 = k + i1 * b1 - l * b0;
 +                    boolean flag = j1 < 0;
 +
-+                    if (this.worldServerInstance.func_147439_a(k1, l1, i2) != (flag ? Blocks.obsidian : Blocks.air))
++                    if (this.worldServerInstance.getBlock(k1, l1, i2) != (flag ? Blocks.obsidian : Blocks.air))
                      {
 -                        int k1 = i + i1 * b0 + l * b1;
 -                        int l1 = j + j1;
 -                        int i2 = k + i1 * b1 - l * b0;
 -                        boolean flag = j1 < 0;
--                        this.worldServerInstance.func_147449_b(k1, l1, i2, flag ? Blocks.obsidian : Blocks.air);
+-                        this.worldServerInstance.setBlock(k1, l1, i2, flag ? Blocks.obsidian : Blocks.air);
 +                        return null;
                      }
                  }
@@ -112,10 +101,7 @@
      }
 +    // CraftBukkit end
  
--    // JAVADOC METHOD $$ func_77184_b
-+    /**
-+     * Place an entity in a nearby portal which already exists.
-+     */
+     // JAVADOC METHOD $$ func_77184_b
      public boolean placeInExistingPortal(Entity par1Entity, double par2, double par4, double par6, float par8)
      {
 -        short short1 = 128;
@@ -195,11 +181,11 @@
  
                      for (int i2 = this.worldServerInstance.getActualHeight() - 1; i2 >= 0; --i2)
                      {
--                        if (this.worldServerInstance.func_147439_a(l3, i2, l1) == Blocks.portal)
-+                        if (this.worldServerInstance.func_147439_a(k1, i2, l1) == Blocks.portal)
+-                        if (this.worldServerInstance.getBlock(l3, i2, l1) == Blocks.portal)
++                        if (this.worldServerInstance.getBlock(k1, i2, l1) == Blocks.portal)
                          {
--                            while (this.worldServerInstance.func_147439_a(l3, i2 - 1, l1) == Blocks.portal)
-+                            while (this.worldServerInstance.func_147439_a(k1, i2 - 1, l1) == Blocks.portal)
+-                            while (this.worldServerInstance.getBlock(l3, i2 - 1, l1) == Blocks.portal)
++                            while (this.worldServerInstance.getBlock(k1, i2 - 1, l1) == Blocks.portal)
                              {
                                  --i2;
                              }
@@ -219,7 +205,7 @@
                                  j = i2;
                                  k = l1;
                              }
-@@ -132,61 +214,93 @@
+@@ -132,61 +210,93 @@
          {
              if (flag)
              {
@@ -269,25 +255,25 @@
 +            d4 = (double) k + 0.5D;
 +            int j2 = -1;
 +
-             if (this.worldServerInstance.func_147439_a(i - 1, j, k) == Blocks.portal)
+             if (this.worldServerInstance.getBlock(i - 1, j, k) == Blocks.portal)
              {
 -                i4 = 2;
 +                j2 = 2;
              }
  
-             if (this.worldServerInstance.func_147439_a(i + 1, j, k) == Blocks.portal)
+             if (this.worldServerInstance.getBlock(i + 1, j, k) == Blocks.portal)
              {
 -                i4 = 0;
 +                j2 = 0;
              }
  
-             if (this.worldServerInstance.func_147439_a(i, j, k - 1) == Blocks.portal)
+             if (this.worldServerInstance.getBlock(i, j, k - 1) == Blocks.portal)
              {
 -                i4 = 3;
 +                j2 = 3;
              }
  
-             if (this.worldServerInstance.func_147439_a(i, j, k + 1) == Blocks.portal)
+             if (this.worldServerInstance.getBlock(i, j, k + 1) == Blocks.portal)
              {
 -                i4 = 1;
 +                j2 = 1;
@@ -304,15 +290,15 @@
 -                int i3 = Direction.offsetZ[i4];
 -                int j3 = Direction.offsetX[k2];
 -                int k3 = Direction.offsetZ[k2];
--                boolean flag1 = !this.worldServerInstance.func_147437_c(i + l2 + j3, j, k + i3 + k3) || !this.worldServerInstance.func_147437_c(i + l2 + j3, j + 1, k + i3 + k3);
--                boolean flag2 = !this.worldServerInstance.func_147437_c(i + l2, j, k + i3) || !this.worldServerInstance.func_147437_c(i + l2, j + 1, k + i3);
+-                boolean flag1 = !this.worldServerInstance.isAirBlock(i + l2 + j3, j, k + i3 + k3) || !this.worldServerInstance.isAirBlock(i + l2 + j3, j + 1, k + i3 + k3);
+-                boolean flag2 = !this.worldServerInstance.isAirBlock(i + l2, j, k + i3) || !this.worldServerInstance.isAirBlock(i + l2, j + 1, k + i3);
 +                int l2 = Direction.rotateLeft[j2];
 +                int i3 = Direction.offsetX[j2];
 +                int j3 = Direction.offsetZ[j2];
 +                int k3 = Direction.offsetX[l2];
 +                int l3 = Direction.offsetZ[l2];
-+                boolean flag1 = !this.worldServerInstance.func_147437_c(i + i3 + k3, j, k + j3 + l3) || !this.worldServerInstance.func_147437_c(i + i3 + k3, j + 1, k + j3 + l3);
-+                boolean flag2 = !this.worldServerInstance.func_147437_c(i + i3, j, k + j3) || !this.worldServerInstance.func_147437_c(i + i3, j + 1, k + j3);
++                boolean flag1 = !this.worldServerInstance.isAirBlock(i + i3 + k3, j, k + j3 + l3) || !this.worldServerInstance.isAirBlock(i + i3 + k3, j + 1, k + j3 + l3);
++                boolean flag2 = !this.worldServerInstance.isAirBlock(i + i3, j, k + j3) || !this.worldServerInstance.isAirBlock(i + i3, j + 1, k + j3);
  
                  if (flag1 && flag2)
                  {
@@ -326,8 +312,8 @@
 -                    d11 -= (double)j3;
 -                    int k1 = k - k3;
 -                    d7 -= (double)k3;
--                    flag1 = !this.worldServerInstance.func_147437_c(l3 + l2 + j3, j, k1 + i3 + k3) || !this.worldServerInstance.func_147437_c(l3 + l2 + j3, j + 1, k1 + i3 + k3);
--                    flag2 = !this.worldServerInstance.func_147437_c(l3 + l2, j, k1 + i3) || !this.worldServerInstance.func_147437_c(l3 + l2, j + 1, k1 + i3);
+-                    flag1 = !this.worldServerInstance.isAirBlock(l3 + l2 + j3, j, k1 + i3 + k3) || !this.worldServerInstance.isAirBlock(l3 + l2 + j3, j + 1, k1 + i3 + k3);
+-                    flag2 = !this.worldServerInstance.isAirBlock(l3 + l2, j, k1 + i3) || !this.worldServerInstance.isAirBlock(l3 + l2, j + 1, k1 + i3);
 +                    j2 = Direction.rotateOpposite[j2];
 +                    l2 = Direction.rotateOpposite[l2];
 +                    i3 = Direction.offsetX[j2];
@@ -338,12 +324,12 @@
 +                    d8 -= (double) k3;
 +                    int i4 = k - l3;
 +                    d4 -= (double) l3;
-+                    flag1 = !this.worldServerInstance.func_147437_c(k1 + i3 + k3, j, i4 + j3 + l3) || !this.worldServerInstance.func_147437_c(k1 + i3 + k3, j + 1, i4 + j3 + l3);
-+                    flag2 = !this.worldServerInstance.func_147437_c(k1 + i3, j, i4 + j3) || !this.worldServerInstance.func_147437_c(k1 + i3, j + 1, i4 + j3);
++                    flag1 = !this.worldServerInstance.isAirBlock(k1 + i3 + k3, j, i4 + j3 + l3) || !this.worldServerInstance.isAirBlock(k1 + i3 + k3, j + 1, i4 + j3 + l3);
++                    flag2 = !this.worldServerInstance.isAirBlock(k1 + i3, j, i4 + j3) || !this.worldServerInstance.isAirBlock(k1 + i3, j + 1, i4 + j3);
                  }
  
                  float f1 = 0.5F;
-@@ -205,24 +319,24 @@
+@@ -205,24 +315,24 @@
                      f2 = 0.0F;
                  }
  
@@ -373,7 +359,7 @@
                  {
                      f5 = 1.0F;
                      f6 = -1.0F;
-@@ -233,33 +347,77 @@
+@@ -233,33 +343,77 @@
                      f6 = 1.0F;
                  }
  
@@ -464,7 +450,7 @@
          int l = i;
          int i1 = j;
          int j1 = k;
-@@ -268,59 +426,59 @@
+@@ -268,59 +422,59 @@
          int i2;
          double d1;
          double d2;
@@ -501,11 +487,11 @@
 -                for (i3 = this.worldServerInstance.getActualHeight() - 1; i3 >= 0; --i3)
 +                for (k2 = this.worldServerInstance.getActualHeight() - 1; k2 >= 0; --k2)
                  {
--                    if (this.worldServerInstance.func_147437_c(i2, i3, k2))
-+                    if (this.worldServerInstance.func_147437_c(i2, k2, j2))
+-                    if (this.worldServerInstance.isAirBlock(i2, i3, k2))
++                    if (this.worldServerInstance.isAirBlock(i2, k2, j2))
                      {
--                        while (i3 > 0 && this.worldServerInstance.func_147437_c(i2, i3 - 1, k2))
-+                        while (k2 > 0 && this.worldServerInstance.func_147437_c(i2, k2 - 1, j2))
+-                        while (i3 > 0 && this.worldServerInstance.isAirBlock(i2, i3 - 1, k2))
++                        while (k2 > 0 && this.worldServerInstance.isAirBlock(i2, k2 - 1, j2))
                          {
 -                            --i3;
 +                            --k2;
@@ -543,12 +529,12 @@
 +                                        j4 = k2 + l3;
 +                                        int l4 = j2 + (i4 - 1) * k3 - j3 * l2;
  
--                                        if (k4 < 0 && !this.worldServerInstance.func_147439_a(l4, i5, j5).func_149688_o().isSolid() || k4 >= 0 && !this.worldServerInstance.func_147437_c(l4, i5, j5))
-+                                        if (l3 < 0 && !this.worldServerInstance.func_147439_a(k4, j4, l4).func_149688_o().isSolid() || l3 >= 0 && !this.worldServerInstance.func_147437_c(k4, j4, l4))
+-                                        if (k4 < 0 && !this.worldServerInstance.getBlock(l4, i5, j5).getMaterial().isSolid() || k4 >= 0 && !this.worldServerInstance.isAirBlock(l4, i5, j5))
++                                        if (l3 < 0 && !this.worldServerInstance.getBlock(k4, j4, l4).getMaterial().isSolid() || l3 >= 0 && !this.worldServerInstance.isAirBlock(k4, j4, l4))
                                          {
                                              continue label274;
                                          }
-@@ -328,16 +486,16 @@
+@@ -328,16 +482,16 @@
                                  }
                              }
  
@@ -572,7 +558,7 @@
                              }
                          }
                      }
-@@ -349,52 +507,52 @@
+@@ -349,52 +503,52 @@
          {
              for (i2 = i - b0; i2 <= i + b0; ++i2)
              {
@@ -589,11 +575,11 @@
 -                    for (i3 = this.worldServerInstance.getActualHeight() - 1; i3 >= 0; --i3)
 +                    for (k2 = this.worldServerInstance.getActualHeight() - 1; k2 >= 0; --k2)
                      {
--                        if (this.worldServerInstance.func_147437_c(i2, i3, k2))
-+                        if (this.worldServerInstance.func_147437_c(i2, k2, j2))
+-                        if (this.worldServerInstance.isAirBlock(i2, i3, k2))
++                        if (this.worldServerInstance.isAirBlock(i2, k2, j2))
                          {
--                            while (i3 > 0 && this.worldServerInstance.func_147437_c(i2, i3 - 1, k2))
-+                            while (k2 > 0 && this.worldServerInstance.func_147437_c(i2, k2 - 1, j2))
+-                            while (i3 > 0 && this.worldServerInstance.isAirBlock(i2, i3 - 1, k2))
++                            while (k2 > 0 && this.worldServerInstance.isAirBlock(i2, k2 - 1, j2))
                              {
 -                                --i3;
 +                                --k2;
@@ -620,8 +606,8 @@
 +                                        k4 = k2 + i4;
 +                                        j4 = j2 + (j3 - 1) * k3;
  
--                                        if (j4 < 0 && !this.worldServerInstance.func_147439_a(k4, l4, i5).func_149688_o().isSolid() || j4 >= 0 && !this.worldServerInstance.func_147437_c(k4, l4, i5))
-+                                        if (i4 < 0 && !this.worldServerInstance.func_147439_a(l3, k4, j4).func_149688_o().isSolid() || i4 >= 0 && !this.worldServerInstance.func_147437_c(l3, k4, j4))
+-                                        if (j4 < 0 && !this.worldServerInstance.getBlock(k4, l4, i5).getMaterial().isSolid() || j4 >= 0 && !this.worldServerInstance.isAirBlock(k4, l4, i5))
++                                        if (i4 < 0 && !this.worldServerInstance.getBlock(l3, k4, j4).getMaterial().isSolid() || i4 >= 0 && !this.worldServerInstance.isAirBlock(l3, k4, j4))
                                          {
                                              continue label222;
                                          }
@@ -648,7 +634,7 @@
                                  }
                              }
                          }
-@@ -403,16 +561,16 @@
+@@ -403,16 +557,16 @@
              }
          }
  
@@ -671,7 +657,7 @@
          }
  
          boolean flag;
-@@ -429,46 +587,46 @@
+@@ -429,46 +583,46 @@
                  i1 = this.worldServerInstance.getActualHeight() - 10;
              }
  
@@ -691,12 +677,12 @@
 -                        i4 = j2 + k3;
 -                        j4 = k2 + (j3 - 1) * l2 - i3 * l5;
 -                        flag = k3 < 0;
--                        this.worldServerInstance.func_147449_b(l3, i4, j4, flag ? Blocks.obsidian : Blocks.air);
+-                        this.worldServerInstance.setBlock(l3, i4, j4, flag ? Blocks.obsidian : Blocks.air);
 +                        k3 = i5 + (i3 - 1) * k5 + k2 * l5;
 +                        j3 = j5 + l2;
 +                        i4 = j2 + (i3 - 1) * l5 - k2 * k5;
 +                        flag = l2 < 0;
-+                        this.worldServerInstance.func_147449_b(k3, j3, i4, flag ? Blocks.obsidian : Blocks.air);
++                        this.worldServerInstance.setBlock(k3, j3, i4, flag ? Blocks.obsidian : Blocks.air);
                      }
                  }
              }
@@ -715,12 +701,12 @@
 -                    i4 = j2 + k3;
 -                    j4 = k2 + (j3 - 1) * l2;
 -                    flag = j3 == 0 || j3 == 3 || k3 == -1 || k3 == 3;
--                    this.worldServerInstance.func_147465_d(l3, i4, j4, (Block)(flag ? Blocks.obsidian : Blocks.portal), 0, 2);
+-                    this.worldServerInstance.setBlock(l3, i4, j4, (Block)(flag ? Blocks.obsidian : Blocks.portal), 0, 2);
 +                    k3 = i5 + (i3 - 1) * k5;
 +                    j3 = j5 + l2;
 +                    i4 = j2 + (i3 - 1) * l5;
 +                    flag = i3 == 0 || i3 == 3 || l2 == -1 || l2 == 3;
-+                    this.worldServerInstance.func_147465_d(k3, j3, i4, flag ? Blocks.obsidian : Blocks.portal, 0, 2);
++                    this.worldServerInstance.setBlock(k3, j3, i4, flag ? Blocks.obsidian : Blocks.portal, 0, 2);
                  }
              }
  
@@ -733,27 +719,15 @@
 -                    l3 = k5 + (j3 - 1) * l5;
 -                    i4 = j2 + k3;
 -                    j4 = k2 + (j3 - 1) * l2;
--                    this.worldServerInstance.func_147459_d(l3, i4, j4, this.worldServerInstance.func_147439_a(l3, i4, j4));
+-                    this.worldServerInstance.notifyBlocksOfNeighborChange(l3, i4, j4, this.worldServerInstance.getBlock(l3, i4, j4));
 +                    k3 = i5 + (i3 - 1) * k5;
 +                    j3 = j5 + l2;
 +                    i4 = j2 + (i3 - 1) * l5;
-+                    this.worldServerInstance.func_147459_d(k3, j3, i4, this.worldServerInstance.func_147439_a(k3, j3, i4));
++                    this.worldServerInstance.notifyBlocksOfNeighborChange(k3, j3, i4, this.worldServerInstance.getBlock(k3, j3, i4));
                  }
              }
          }
-@@ -476,7 +634,10 @@
-         return true;
-     }
- 
--    // JAVADOC METHOD $$ func_85189_a
-+    /**
-+     * called periodically to remove out-of-date portal locations from the cache list. Argument par1 is a
-+     * WorldServer.getTotalWorldTime() value.
-+     */
-     public void removeStalePortalLocations(long par1)
-     {
-         if (par1 % 100L == 0L)
-@@ -486,10 +647,10 @@
+@@ -486,10 +640,10 @@
  
              while (iterator.hasNext())
              {

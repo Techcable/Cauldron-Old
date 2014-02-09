@@ -27,7 +27,7 @@ public class CraftBeacon extends CraftBlockState implements Beacon {
         boolean result = super.update(force, applyPhysics);
 
         if (result) {
-            beacon.onInventoryChanged();
+            beacon.markDirty();
         }
 
         return result;

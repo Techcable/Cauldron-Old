@@ -17,8 +17,8 @@
 +
  public class Chunk
  {
-     private static final Logger field_150817_t = LogManager.getLogger();
-@@ -80,6 +91,8 @@
+     private static final Logger logger = LogManager.getLogger();
+@@ -81,6 +92,8 @@
      public long inhabitedTime;
      // JAVADOC FIELD $$ field_76649_t
      private int queuedLightChecks;
@@ -27,7 +27,7 @@
      private static final String __OBFID = "CL_00000373";
  
      public Chunk(World par1World, int par2, int par3)
-@@ -98,13 +111,23 @@
+@@ -99,13 +112,23 @@
  
          for (int k = 0; k < this.entityLists.length; ++k)
          {
@@ -52,8 +52,8 @@
      public Chunk(World p_i45446_1_, Block[] p_i45446_2_, int p_i45446_3_, int p_i45446_4_)
      {
          this(p_i45446_1_, p_i45446_3_, p_i45446_4_);
-@@ -618,7 +641,12 @@
-                 block1.func_149725_f(this.worldObj, l1, p_150807_2_, i2, k1);
+@@ -620,7 +643,12 @@
+                 block1.onBlockPreDestroy(this.worldObj, l1, p_150807_2_, i2, k1);
              }
  
 -            extendedblockstorage.func_150818_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_4_);
@@ -66,7 +66,7 @@
              extendedblockstorage.setExtBlockMetadata(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_5_); // Move this above to prevent other mods/tile entites from creating invalid ones for the wrong metadata
  
              if (!this.worldObj.isRemote)
-@@ -634,6 +662,14 @@
+@@ -636,6 +664,14 @@
                  }
              }
  
@@ -78,14 +78,14 @@
 +
 +            // CraftBukkit end
 +
-             if (extendedblockstorage.func_150819_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_) != p_150807_4_)
+             if (extendedblockstorage.getBlockByExtId(p_150807_1_, p_150807_2_ & 15, p_150807_3_) != p_150807_4_)
              {
                  return false;
-@@ -801,8 +837,12 @@
+@@ -803,8 +839,12 @@
  
          if (i != this.xPosition || j != this.zPosition)
          {
--            field_150817_t.error("Wrong location! " + par1Entity);
+-            logger.error("Wrong location! " + par1Entity);
 -            Thread.dumpStack();
 +            // CraftBukkit start
 +            Bukkit.getLogger().warning("Wrong location for " + par1Entity + " in world '" + worldObj.getWorld().getName() + "'!");
@@ -96,7 +96,7 @@
          }
  
          int k = MathHelper.floor_double(par1Entity.posY / 16.0D);
-@@ -823,6 +863,28 @@
+@@ -825,6 +865,28 @@
          par1Entity.chunkCoordY = k;
          par1Entity.chunkCoordZ = this.zPosition;
          this.entityLists[k].add(par1Entity);
@@ -125,7 +125,7 @@
      }
  
      // JAVADOC METHOD $$ func_76622_b
-@@ -845,6 +907,28 @@
+@@ -847,6 +909,28 @@
          }
  
          this.entityLists[par2].remove(par1Entity);
@@ -154,24 +154,24 @@
      }
  
      // JAVADOC METHOD $$ func_76619_d
-@@ -912,7 +996,16 @@
+@@ -914,7 +998,16 @@
  
-             p_150812_4_.func_145829_t();
-             this.field_150816_i.put(chunkposition, p_150812_4_);
+             p_150812_4_.validate();
+             this.chunkTileEntityMap.put(chunkposition, p_150812_4_);
 +            // CraftBukkit start
          }
 +        else
 +        {
-+            System.out.println("Attempted to place a tile entity (" + p_150812_4_ + ") at " + p_150812_4_.field_145851_c + "," + p_150812_4_.field_145848_d + "," + p_150812_4_.field_145849_e
-+                               + " (" + org.bukkit.Material.getMaterial(Block.func_149682_b(func_150810_a(p_150812_1_, p_150812_2_, p_150812_3_))) + ") where there was no entity tile!");
++            System.out.println("Attempted to place a tile entity (" + p_150812_4_ + ") at " + p_150812_4_.xCoord + "," + p_150812_4_.yCoord + "," + p_150812_4_.zCoord
++                               + " (" + org.bukkit.Material.getMaterial(Block.getIdFromBlock(getBlock(p_150812_1_, p_150812_2_, p_150812_3_))) + ") where there was no entity tile!");
 +            System.out.println("Chunk coordinates: " + (this.xPosition * 16) + "," + (this.zPosition * 16));
 +            new Exception().printStackTrace();
 +            // CraftBukkit end
 +        }
      }
  
-     public void func_150805_f(int p_150805_1_, int p_150805_2_, int p_150805_3_)
-@@ -959,12 +1052,28 @@
+     public void removeTileEntity(int p_150805_1_, int p_150805_2_, int p_150805_3_)
+@@ -961,12 +1054,28 @@
  
          while (iterator.hasNext())
          {
@@ -201,7 +201,7 @@
              this.worldObj.unloadEntities(this.entityLists[i]);
          }
          MinecraftForge.EVENT_BUS.post(new ChunkEvent.Unload(this));
-@@ -1221,8 +1330,8 @@
+@@ -1223,8 +1332,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getMetadataArray();
@@ -212,7 +212,7 @@
              }
          }
  
-@@ -1231,8 +1340,8 @@
+@@ -1233,8 +1342,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getBlocklightArray();
@@ -223,7 +223,7 @@
              }
          }
  
-@@ -1243,8 +1352,8 @@
+@@ -1245,8 +1354,8 @@
                  if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
                  {
                      nibblearray = this.storageArrays[l].getSkylightArray();
@@ -234,7 +234,7 @@
                  }
              }
          }
-@@ -1266,8 +1375,8 @@
+@@ -1268,8 +1377,8 @@
                          nibblearray = this.storageArrays[l].createBlockMSBArray();
                      }
  

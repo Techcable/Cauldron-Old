@@ -88,7 +88,7 @@
 -        for (k = 0; k < j; ++k)
 +        if (j > 0)
          {
--            this.func_145779_a(Items.ghast_tear, 1);
+-            this.dropItem(Items.ghast_tear, 1);
 +            loot.add(CraftItemStack.asNewCraftStack(Items.ghast_tear, j));
          }
  
@@ -97,7 +97,7 @@
 -        for (k = 0; k < j; ++k)
 +        if (j > 0)
          {
--            this.func_145779_a(Items.gunpowder, 1);
+-            this.dropItem(Items.gunpowder, 1);
 +            loot.add(CraftItemStack.asNewCraftStack(Items.gunpowder, j));
          }
 +

@@ -8,7 +8,7 @@
 +
  public class ContainerRepair extends Container
  {
-     private static final Logger field_148326_f = LogManager.getLogger();
+     private static final Logger logger = LogManager.getLogger();
      // JAVADOC FIELD $$ field_82852_f
      private IInventory outputSlot = new InventoryCraftResult();
      // JAVADOC FIELD $$ field_82853_g
@@ -16,9 +16,9 @@
 -    {
 -        private static final String __OBFID = "CL_00001733";
 -        // JAVADOC METHOD $$ func_70296_d
--        public void onInventoryChanged()
+-        public void markDirty()
 -        {
--            super.onInventoryChanged();
+-            super.markDirty();
 -            ContainerRepair.this.onCraftMatrixChanged(this);
 -        }
 -    };
@@ -50,7 +50,7 @@
 +            return true;    // CraftBukkit
 +        }
 +
-         return this.theWorld.func_147439_a(this.field_82861_i, this.field_82858_j, this.field_82859_k) != Blocks.anvil ? false : par1EntityPlayer.getDistanceSq((double)this.field_82861_i + 0.5D, (double)this.field_82858_j + 0.5D, (double)this.field_82859_k + 0.5D) <= 64.0D;
+         return this.theWorld.getBlock(this.field_82861_i, this.field_82858_j, this.field_82859_k) != Blocks.anvil ? false : par1EntityPlayer.getDistanceSq((double)this.field_82861_i + 0.5D, (double)this.field_82858_j + 0.5D, (double)this.field_82859_k + 0.5D) <= 64.0D;
      }
  
 @@ -543,4 +546,18 @@

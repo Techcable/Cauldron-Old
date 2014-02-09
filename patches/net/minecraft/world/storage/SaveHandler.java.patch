@@ -20,7 +20,7 @@
 +
  public class SaveHandler implements ISaveHandler, IPlayerFileData
  {
-     private static final Logger field_151478_a = LogManager.getLogger();
+     private static final Logger logger = LogManager.getLogger();
 @@ -30,6 +37,7 @@
      private final long initializationTime = MinecraftServer.getSystemTimeMillis();
      // JAVADOC FIELD $$ field_75767_f
@@ -100,7 +100,7 @@
 +            }
 +            catch (IOException ex)
 +            {
-+                field_151478_a.warn("Failed to read " + file1 + ", generating new random UUID", ex);
++                logger.warn("Failed to read " + file1 + ", generating new random UUID", ex);
 +            }
 +            finally
 +            {
@@ -129,7 +129,7 @@
 +        }
 +        catch (IOException ex)
 +        {
-+            field_151478_a.warn("Failed to write " + file1, ex);
++            logger.warn("Failed to write " + file1, ex);
 +        }
 +        finally
 +        {

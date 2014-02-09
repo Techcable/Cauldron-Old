@@ -6,7 +6,7 @@
          this.hardcore = par1NBTTagCompound.getBoolean("hardcore");
 +        this.dimension = par1NBTTagCompound.getInteger("dimension"); // MCPC+
  
-         if (par1NBTTagCompound.func_150297_b("initialized", 99))
+         if (par1NBTTagCompound.hasKey("initialized", 99))
          {
 @@ -210,6 +211,7 @@
          this.allowCommands = par1WorldInfo.allowCommands;

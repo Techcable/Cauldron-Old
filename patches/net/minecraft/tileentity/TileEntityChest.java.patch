@@ -12,9 +12,9 @@
 +
  public class TileEntityChest extends TileEntity implements IInventory
  {
-     private ItemStack[] field_145985_p = new ItemStack[36];
-@@ -31,6 +37,36 @@
-     private String field_145981_s;
+     private ItemStack[] chestContents = new ItemStack[36];
+@@ -40,6 +46,36 @@
+     private String customName;
      private static final String __OBFID = "CL_00000346";
  
 +    // CraftBukkit start
@@ -23,7 +23,7 @@
 +
 +    public ItemStack[] getContents()
 +    {
-+        return this.field_145985_p;
++        return this.chestContents;
 +    }
 +
 +    public void onOpen(CraftHumanEntity who)
@@ -49,94 +49,75 @@
 +
      public TileEntityChest()
      {
-         this.field_145982_r = -1;
-@@ -180,12 +216,17 @@
-     // JAVADOC METHOD $$ func_70297_j_
-     public int getInventoryStackLimit()
+         this.cachedChestType = -1;
+@@ -309,6 +345,12 @@
+     public void updateEntity()
      {
--        return 64;
-+        return maxStack; // CraftBukkit
-     }
- 
-     // JAVADOC METHOD $$ func_70300_a
-     public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer)
-     {
-+        if (this.field_145850_b == null)
-+        {
-+            return true;    // CraftBukkit
-+        }
+         super.updateEntity();
 +
-         return this.field_145850_b.func_147438_o(this.field_145851_c, this.field_145848_d, this.field_145849_e) != this ? false : par1EntityPlayer.getDistanceSq((double)this.field_145851_c + 0.5D, (double)this.field_145848_d + 0.5D, (double)this.field_145849_e + 0.5D) <= 64.0D;
-     }
- 
-@@ -296,6 +337,12 @@
-     public void func_145845_h()
-     {
-         super.func_145845_h();
-+
-+        if (this.field_145850_b == null)
++        if (this.worldObj == null)
 +        {
 +            return;    // CraftBukkit
 +        }
 +
-         this.func_145979_i();
-         ++this.field_145983_q;
+         this.checkForAdjacentChests();
+         ++this.ticksSinceSync;
          float f;
-@@ -410,8 +457,28 @@
-             this.field_145987_o = 0;
+@@ -424,8 +466,28 @@
+             this.numPlayersUsing = 0;
          }
  
-+        int oldPower = Math.max(0, Math.min(15, this.field_145987_o)); // CraftBukkit - Get power before new viewer is added
-         ++this.field_145987_o;
++        int oldPower = Math.max(0, Math.min(15, this.numPlayersUsing)); // CraftBukkit - Get power before new viewer is added
+         ++this.numPlayersUsing;
 +
-+        if (this.field_145850_b == null)
++        if (this.worldObj == null)
 +        {
 +            return;    // CraftBukkit
 +        }
 +
-         this.field_145850_b.func_147452_c(this.field_145851_c, this.field_145848_d, this.field_145849_e, this.func_145838_q(), 1, this.field_145987_o);
+         this.worldObj.addBlockEvent(this.xCoord, this.yCoord, this.zCoord, this.getBlockType(), 1, this.numPlayersUsing);
 +
 +        // CraftBukkit start - Call redstone event
-+        if (this.func_145838_q() == Blocks.trapped_chest)
++        if (this.getBlockType() == Blocks.trapped_chest)
 +        {
-+            int newPower = Math.max(0, Math.min(15, this.field_145987_o));
++            int newPower = Math.max(0, Math.min(15, this.numPlayersUsing));
 +
 +            if (oldPower != newPower)
 +            {
-+                org.bukkit.craftbukkit.event.CraftEventFactory.callRedstoneChange(field_145850_b, this.field_145851_c, this.field_145848_d, this.field_145849_e, oldPower, newPower);
++                org.bukkit.craftbukkit.event.CraftEventFactory.callRedstoneChange(worldObj, this.xCoord, this.yCoord, this.zCoord, oldPower, newPower);
 +            }
 +        }
 +
 +        // CraftBukkit end
-         this.field_145850_b.func_147459_d(this.field_145851_c, this.field_145848_d, this.field_145849_e, this.func_145838_q());
-         this.field_145850_b.func_147459_d(this.field_145851_c, this.field_145848_d - 1, this.field_145849_e, this.func_145838_q());
+         this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord, this.zCoord, this.getBlockType());
+         this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord - 1, this.zCoord, this.getBlockType());
      }
-@@ -420,8 +487,28 @@
+@@ -434,8 +496,28 @@
      {
-         if (this.func_145838_q() instanceof BlockChest)
+         if (this.getBlockType() instanceof BlockChest)
          {
-+            int oldPower = Math.max(0, Math.min(15, this.field_145987_o)); // CraftBukkit - Get power before new viewer is added
-             --this.field_145987_o;
++            int oldPower = Math.max(0, Math.min(15, this.numPlayersUsing)); // CraftBukkit - Get power before new viewer is added
+             --this.numPlayersUsing;
 +
-+            if (this.field_145850_b == null)
++            if (this.worldObj == null)
 +            {
 +                return;    // CraftBukkit
 +            }
 +
-             this.field_145850_b.func_147452_c(this.field_145851_c, this.field_145848_d, this.field_145849_e, this.func_145838_q(), 1, this.field_145987_o);
+             this.worldObj.addBlockEvent(this.xCoord, this.yCoord, this.zCoord, this.getBlockType(), 1, this.numPlayersUsing);
 +
 +            // CraftBukkit start - Call redstone event
-+            if (this.func_145838_q() == Blocks.trapped_chest)
++            if (this.getBlockType() == Blocks.trapped_chest)
 +            {
-+                int newPower = Math.max(0, Math.min(15, this.field_145987_o));
++                int newPower = Math.max(0, Math.min(15, this.numPlayersUsing));
 +
 +                if (oldPower != newPower)
 +                {
-+                    org.bukkit.craftbukkit.event.CraftEventFactory.callRedstoneChange(field_145850_b, this.field_145851_c, this.field_145848_d, this.field_145849_e, oldPower, newPower);
++                    org.bukkit.craftbukkit.event.CraftEventFactory.callRedstoneChange(worldObj, this.xCoord, this.yCoord, this.zCoord, oldPower, newPower);
 +                }
 +            }
 +
 +            // CraftBukkit end
-             this.field_145850_b.func_147459_d(this.field_145851_c, this.field_145848_d, this.field_145849_e, this.func_145838_q());
-             this.field_145850_b.func_147459_d(this.field_145851_c, this.field_145848_d - 1, this.field_145849_e, this.func_145838_q());
+             this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord, this.zCoord, this.getBlockType());
+             this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord - 1, this.zCoord, this.getBlockType());
          }

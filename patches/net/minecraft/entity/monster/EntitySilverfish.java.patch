@@ -11,7 +11,7 @@
      // JAVADOC FIELD $$ field_70843_d
 @@ -141,6 +143,13 @@
                              {
-                                 if (this.worldObj.func_147439_a(i + i1, j + l, k + j1) == Blocks.monster_egg)
+                                 if (this.worldObj.getBlock(i + i1, j + l, k + j1) == Blocks.monster_egg)
                                  {
 +                                    // CraftBukkit start
 +                                    if (CraftEventFactory.callEntityChangeBlockEvent(this, i + i1, j + l, k + j1, Blocks.air, 0).isCancelled())
@@ -28,12 +28,12 @@
                  if (BlockSilverfish.func_150196_a(block))
                  {
 +                    // CraftBukkit start
-+                    if (CraftEventFactory.callEntityChangeBlockEvent(this, i + Facing.offsetsXForSide[l1], j + Facing.offsetsYForSide[l1], k + Facing.offsetsZForSide[l1], Blocks.monster_egg, Block.func_149682_b(BlockSilverfish.func_149729_e(i1))).isCancelled())
++                    if (CraftEventFactory.callEntityChangeBlockEvent(this, i + Facing.offsetsXForSide[l1], j + Facing.offsetsYForSide[l1], k + Facing.offsetsZForSide[l1], Blocks.monster_egg, Block.getIdFromBlock(BlockSilverfish.getBlockById(i1))).isCancelled())
 +                    {
 +                        return;
 +                    }
 +
 +                    // CraftBukkit end
-                     this.worldObj.func_147465_d(i + Facing.offsetsXForSide[l1], j + Facing.offsetsYForSide[l1], k + Facing.offsetsZForSide[l1], Blocks.monster_egg, BlockSilverfish.func_150195_a(block, i1), 3);
+                     this.worldObj.setBlock(i + Facing.offsetsXForSide[l1], j + Facing.offsetsYForSide[l1], k + Facing.offsetsZForSide[l1], Blocks.monster_egg, BlockSilverfish.func_150195_a(block, i1), 3);
                      this.spawnExplosionParticle();
                      this.setDead();

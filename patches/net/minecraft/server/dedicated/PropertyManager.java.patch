@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/server/dedicated/PropertyManager.java
 +++ ../src-work/minecraft/net/minecraft/server/dedicated/PropertyManager.java
-@@ -10,11 +10,13 @@
+@@ -10,12 +10,14 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -10,12 +10,13 @@
  public class PropertyManager
  {
      private static final Logger field_164440_a = LogManager.getLogger();
--    private final Properties properties = new Properties();
-+    public final Properties properties = new Properties(); // CraftBukkit - private -> public
-     private final File associatedFile;
+     // JAVADOC FIELD $$ field_73672_b
+-    private final Properties serverProperties = new Properties();
++    public final Properties serverProperties = new Properties(); // CraftBukkit - private -> public
+     // JAVADOC FIELD $$ field_73673_c
+     private final File serverPropertiesFile;
      private static final String __OBFID = "CL_00001782";
- 
-@@ -58,6 +60,26 @@
+@@ -60,6 +62,26 @@
          }
      }
  
@@ -40,60 +41,19 @@
 +    // CraftBukkit end
 +
      // JAVADOC METHOD $$ func_73666_a
-     public void logMessageAndSave()
+     public void generateNewProperties()
      {
-@@ -72,6 +94,13 @@
+@@ -74,6 +96,13 @@
  
          try
          {
 +            // CraftBukkit start - Don't attempt writing to file if it's read only
-+            if (this.associatedFile.exists() && !this.associatedFile.canWrite())
++            if (this.serverPropertiesFile.exists() && !this.serverPropertiesFile.canWrite())
 +            {
 +                return;
 +            }
 +
 +            // CraftBukkit end
-             fileoutputstream = new FileOutputStream(this.associatedFile);
-             this.properties.store(fileoutputstream, "Minecraft server properties");
+             fileoutputstream = new FileOutputStream(this.serverPropertiesFile);
+             this.serverProperties.store(fileoutputstream, "Minecraft server properties");
          }
-@@ -112,7 +141,7 @@
-             this.saveProperties();
-         }
- 
--        return this.properties.getProperty(par1Str, par2Str);
-+        return this.getOverride(par1Str, this.properties.getProperty(par1Str, par2Str)); // CraftBukkit
-     }
- 
-     // JAVADOC METHOD $$ func_73669_a
-@@ -120,13 +149,13 @@
-     {
-         try
-         {
--            return Integer.parseInt(this.getProperty(par1Str, "" + par2));
-+            return this.getOverride(par1Str, Integer.parseInt(this.getProperty(par1Str, "" + par2))); // CraftBukkit
-         }
-         catch (Exception exception)
-         {
-             this.properties.setProperty(par1Str, "" + par2);
-             this.saveProperties();
--            return par2;
-+            return this.getOverride(par1Str, par2); // CraftBukkit
-         }
-     }
- 
-@@ -135,13 +164,13 @@
-     {
-         try
-         {
--            return Boolean.parseBoolean(this.getProperty(par1Str, "" + par2));
-+            return this.getOverride(par1Str, Boolean.parseBoolean(this.getProperty(par1Str, "" + par2))); // CraftBukkit
-         }
-         catch (Exception exception)
-         {
-             this.properties.setProperty(par1Str, "" + par2);
-             this.saveProperties();
--            return par2;
-+            return this.getOverride(par1Str, par2); // CraftBukkit
-         }
-     }
- 

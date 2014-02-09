@@ -329,7 +329,7 @@ public class CraftEventFactory {
      */
     public static BlockFadeEvent callBlockFadeEvent(Block block, net.minecraft.block.Block type) {
         BlockState state = block.getState();
-        state.setTypeId(net.minecraft.block.Block.func_149682_b(type));
+        state.setTypeId(net.minecraft.block.Block.getIdFromBlock(type));
 
         BlockFadeEvent event = new BlockFadeEvent(block, state);
         Bukkit.getPluginManager().callEvent(event);
@@ -338,7 +338,7 @@ public class CraftEventFactory {
 
     public static void handleBlockSpreadEvent(Block block, Block source, net.minecraft.block.Block type, int data) {
         BlockState state = block.getState();
-        state.setTypeId(net.minecraft.block.Block.func_149682_b(type));
+        state.setTypeId(net.minecraft.block.Block.getIdFromBlock(type));
         state.setRawData((byte) data);
 
         BlockSpreadEvent event = new BlockSpreadEvent(block, source, state);
@@ -525,7 +525,7 @@ public class CraftEventFactory {
     public static void handleBlockGrowEvent(net.minecraft.world.World world, int x, int y, int z, net.minecraft.block.Block type, int data) {
         Block block = world.getWorld().getBlockAt(x, y, z);
         CraftBlockState state = (CraftBlockState) block.getState();
-        state.setTypeId(net.minecraft.block.Block.func_149682_b(type));
+        state.setTypeId(net.minecraft.block.Block.getIdFromBlock(type));
         state.setRawData((byte) data);
 
         BlockGrowEvent event = new BlockGrowEvent(block, state);
@@ -620,7 +620,7 @@ public class CraftEventFactory {
     public static net.minecraft.inventory.Container callInventoryOpenEvent(net.minecraft.entity.player.EntityPlayerMP player, net.minecraft.inventory.Container container, boolean closeInv) {
         if (player.openContainer != player.inventoryContainer && closeInv) { // fire INVENTORY_CLOSE if one already open
     // MCPC+ end
-            player.playerNetServerHandler.func_147356_a(new net.minecraft.network.play.client.C0DPacketCloseWindow(player.openContainer.windowId));
+            player.playerNetServerHandler.processCloseWindow(new net.minecraft.network.play.client.C0DPacketCloseWindow(player.openContainer.windowId));
         }
 
         CraftServer server = player.worldObj.getServer();
@@ -786,7 +786,7 @@ public class CraftEventFactory {
 
             // Client will have updated its idea of the book item; we need to overwrite that
             net.minecraft.inventory.Slot slot = player.openContainer.getSlotFromInventory((net.minecraft.inventory.IInventory) player.inventory, itemInHandIndex);
-            player.playerNetServerHandler.func_147359_a(new net.minecraft.network.play.server.S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber, itemInHand));
+            player.playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber, itemInHand));
         }
     }
 
@@ -853,10 +853,10 @@ public class CraftEventFactory {
             if (!(playermp.theItemInWorldManager.getGameType().isAdventure() && !playermp.isCurrentToolAdventureModeExempt(x, y, z)) && !(playermp.theItemInWorldManager.getGameType().isCreative() && playermp.getHeldItem() != null && playermp.getHeldItem().getItem() instanceof ItemSword))
             {
                 int exp = 0;
-                if (!(block == null || !player.func_146099_a(block) || // Handle empty block or player unable to break block scenario
+                if (!(block == null || !player.canHarvestBlock(block) || // Handle empty block or player unable to break block scenario
                         block.canSilkHarvest(world, player, x, y, z, blockMetadata) && EnchantmentHelper.getSilkTouchModifier(player))) // If the block is being silk harvested, the exp dropped is 0
                 {
-                    int meta = block.func_149643_k(world, x, y, z);
+                    int meta = block.getDamageValue(world, x, y, z);
                     int bonusLevel = EnchantmentHelper.getFortuneModifier(player);
                     exp = block.getExpDrop(world, meta, bonusLevel);
                 }

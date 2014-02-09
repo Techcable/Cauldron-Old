@@ -71,7 +71,7 @@
      private static final String __OBFID = "CL_00001743";
  
      public InventoryCrafting(Container par1Container, int par2, int par3)
-@@ -115,7 +172,7 @@
+@@ -117,7 +174,7 @@
      // JAVADOC METHOD $$ func_70297_j_
      public int getInventoryStackLimit()
      {

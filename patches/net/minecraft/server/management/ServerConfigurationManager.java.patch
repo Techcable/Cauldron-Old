@@ -43,7 +43,7 @@
 +
  public abstract class ServerConfigurationManager
  {
-     private static final Logger field_148546_d = LogManager.getLogger();
+     private static final Logger logger = LogManager.getLogger();
 @@ -77,12 +104,12 @@
      // JAVADOC FIELD $$ field_72414_i
      private final Set ops = new HashSet();
@@ -81,9 +81,9 @@
              s = par1INetworkManager.getSocketAddress().toString();
          }
  
--        field_148546_d.info(par2EntityPlayerMP.getCommandSenderName() + "[" + s + "] logged in with entity id " + par2EntityPlayerMP.func_145782_y() + " at (" + par2EntityPlayerMP.posX + ", " + par2EntityPlayerMP.posY + ", " + par2EntityPlayerMP.posZ + ")");
+-        logger.info(par2EntityPlayerMP.getCommandSenderName() + "[" + s + "] logged in with entity id " + par2EntityPlayerMP.getEntityId() + " at (" + par2EntityPlayerMP.posX + ", " + par2EntityPlayerMP.posY + ", " + par2EntityPlayerMP.posZ + ")");
 +        // CraftBukkit - add world to 'logged in' message.
-+        field_148546_d.info(par2EntityPlayerMP.getCommandSenderName() + "[" + s + "] logged in with entity id " + par2EntityPlayerMP.func_145782_y() + " at ([" + par2EntityPlayerMP.worldObj.worldInfo.getWorldName() + "] " + par2EntityPlayerMP.posX + ", " + par2EntityPlayerMP.posY + ", " + par2EntityPlayerMP.posZ + ")");
++        logger.info(par2EntityPlayerMP.getCommandSenderName() + "[" + s + "] logged in with entity id " + par2EntityPlayerMP.getEntityId() + " at ([" + par2EntityPlayerMP.worldObj.worldInfo.getWorldName() + "] " + par2EntityPlayerMP.posX + ", " + par2EntityPlayerMP.posY + ", " + par2EntityPlayerMP.posZ + ")");
          WorldServer worldserver = this.mcServer.worldServerForDimension(par2EntityPlayerMP.dimension);
          ChunkCoordinates chunkcoordinates = worldserver.getSpawnPoint();
          this.func_72381_a(par2EntityPlayerMP, (EntityPlayerMP)null, worldserver);
@@ -107,23 +107,23 @@
 +        }
 +        // MCPC+ end
 +
-         nethandlerplayserver.func_147359_a(new S01PacketJoinGame(par2EntityPlayerMP.func_145782_y(), par2EntityPlayerMP.theItemInWorldManager.getGameType(), worldserver.getWorldInfo().isHardcoreModeEnabled(), worldserver.provider.dimensionId, worldserver.difficultySetting, this.getMaxPlayers(), worldserver.getWorldInfo().getTerrainType()));
+         nethandlerplayserver.sendPacket(new S01PacketJoinGame(par2EntityPlayerMP.getEntityId(), par2EntityPlayerMP.theItemInWorldManager.getGameType(), worldserver.getWorldInfo().isHardcoreModeEnabled(), worldserver.provider.dimensionId, worldserver.difficultySetting, this.getMaxPlayers(), worldserver.getWorldInfo().getTerrainType()));
 +        par2EntityPlayerMP.getBukkitEntity().sendSupportedChannels();
 +        // CraftBukkit end
-         nethandlerplayserver.func_147359_a(new S3FPacketCustomPayload("MC|Brand", this.getServerInstance().getServerModName().getBytes(Charsets.UTF_8)));
-         nethandlerplayserver.func_147359_a(new S05PacketSpawnPosition(chunkcoordinates.posX, chunkcoordinates.posY, chunkcoordinates.posZ));
-         nethandlerplayserver.func_147359_a(new S39PacketPlayerAbilities(par2EntityPlayerMP.capabilities));
+         nethandlerplayserver.sendPacket(new S3FPacketCustomPayload("MC|Brand", this.getServerInstance().getServerModName().getBytes(Charsets.UTF_8)));
+         nethandlerplayserver.sendPacket(new S05PacketSpawnPosition(chunkcoordinates.posX, chunkcoordinates.posY, chunkcoordinates.posZ));
+         nethandlerplayserver.sendPacket(new S39PacketPlayerAbilities(par2EntityPlayerMP.capabilities));
 @@ -127,9 +184,11 @@
          par2EntityPlayerMP.func_147099_x().func_150884_b(par2EntityPlayerMP);
          this.func_96456_a((ServerScoreboard)worldserver.getScoreboard(), par2EntityPlayerMP);
          this.mcServer.func_147132_au();
 +        /* CraftBukkit start - login message is handled in the event
          ChatComponentTranslation chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined", new Object[] {par2EntityPlayerMP.func_145748_c_()});
-         chatcomponenttranslation.func_150256_b().func_150238_a(EnumChatFormatting.YELLOW);
-         this.func_148539_a(chatcomponenttranslation);
+         chatcomponenttranslation.getChatStyle().setColor(EnumChatFormatting.YELLOW);
+         this.sendChatMsg(chatcomponenttranslation);
 +        // CraftBukkit end*/
          this.playerLoggedIn(par2EntityPlayerMP);
-         nethandlerplayserver.func_147364_a(par2EntityPlayerMP.posX, par2EntityPlayerMP.posY, par2EntityPlayerMP.posZ, par2EntityPlayerMP.rotationYaw, par2EntityPlayerMP.rotationPitch);
+         nethandlerplayserver.setPlayerLocation(par2EntityPlayerMP.posX, par2EntityPlayerMP.posY, par2EntityPlayerMP.posZ, par2EntityPlayerMP.rotationYaw, par2EntityPlayerMP.rotationPitch);
          this.updateTimeAndWeatherForPlayer(par2EntityPlayerMP, worldserver);
 @@ -164,7 +223,7 @@
          }
@@ -133,7 +133,7 @@
 +    public void func_96456_a(ServerScoreboard par1ServerScoreboard, EntityPlayerMP par2EntityPlayerMP)   // CraftBukkit - protected -> public
      {
          HashSet hashset = new HashSet();
-         Iterator iterator = par1ServerScoreboard.func_96525_g().iterator();
+         Iterator iterator = par1ServerScoreboard.getTeams().iterator();
 @@ -198,6 +257,11 @@
      // JAVADOC METHOD $$ func_72364_a
      public void setPlayerManager(WorldServer[] par1ArrayOfWorldServer)
@@ -150,7 +150,7 @@
      // JAVADOC METHOD $$ func_72377_c
      public void playerLoggedIn(EntityPlayerMP par1EntityPlayerMP)
      {
--        this.func_148540_a(new S38PacketPlayerListItem(par1EntityPlayerMP.getCommandSenderName(), true, 1000));
+-        this.sendPacketToAllPlayers(new S38PacketPlayerListItem(par1EntityPlayerMP.getCommandSenderName(), true, 1000));
 +        cserver.detectListNameConflict(par1EntityPlayerMP); // CraftBukkit
 +        // this.sendAll(new PacketPlayOutPlayerInfo(entityplayermp.getName(), true, 1000)); // CraftBukkit - replaced with loop below
          this.playerEntityList.add(par1EntityPlayerMP);
@@ -166,7 +166,7 @@
 +        {
 +            for (IChatComponent line : org.bukkit.craftbukkit.util.CraftChatMessage.fromString(joinMessage))
 +            {
-+                this.mcServer.getConfigurationManager().func_148540_a(new S02PacketChat(line));
++                this.mcServer.getConfigurationManager().sendPacketToAllPlayers(new S02PacketChat(line));
 +            }
 +        }
 +
@@ -188,12 +188,12 @@
          for (int i = 0; i < this.playerEntityList.size(); ++i)
          {
 -            EntityPlayerMP entityplayermp1 = (EntityPlayerMP)this.playerEntityList.get(i);
--            par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S38PacketPlayerListItem(entityplayermp1.getCommandSenderName(), true, entityplayermp1.ping));
+-            par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S38PacketPlayerListItem(entityplayermp1.getCommandSenderName(), true, entityplayermp1.ping));
 +            EntityPlayerMP entityplayermp1 = (EntityPlayerMP) this.playerEntityList.get(i);
 +
 +            if (entityplayermp1.getBukkitEntity().canSee(par1EntityPlayerMP.getBukkitEntity()))
 +            {
-+                entityplayermp1.playerNetServerHandler.func_147359_a(packet);
++                entityplayermp1.playerNetServerHandler.sendPacket(packet);
 +            }
          }
 +
@@ -210,7 +210,7 @@
 +            }
 +
 +            // .name -> .listName
-+            par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S38PacketPlayerListItem(entityplayermp1.listName, true, entityplayermp1.ping));
++            par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S38PacketPlayerListItem(entityplayermp1.listName, true, entityplayermp1.ping));
 +            // CraftBukkit end
 +        }
      }
@@ -256,14 +256,14 @@
 +        if (entityplayermp.ridingEntity != null && !(entityplayermp.ridingEntity instanceof EntityPlayerMP))   // CraftBukkit - Don't remove players
 +        {
 +            worldserver.removePlayerEntityDangerously(entityplayermp.ridingEntity);
-             field_148546_d.debug("removing player mount");
+             logger.debug("removing player mount");
          }
  
 -        worldserver.removeEntity(par1EntityPlayerMP);
 -        worldserver.getPlayerManager().removePlayer(par1EntityPlayerMP);
 -        this.playerEntityList.remove(par1EntityPlayerMP);
 -        this.field_148547_k.remove(par1EntityPlayerMP.getCommandSenderName());
--        this.func_148540_a(new S38PacketPlayerListItem(par1EntityPlayerMP.getCommandSenderName(), false, 9999));
+-        this.sendPacketToAllPlayers(new S38PacketPlayerListItem(par1EntityPlayerMP.getCommandSenderName(), false, 9999));
 +        worldserver.removeEntity(entityplayermp);
 +        worldserver.getPlayerManager().removePlayer(entityplayermp);
 +        this.playerEntityList.remove(entityplayermp);
@@ -279,7 +279,7 @@
 +
 +            if (entityplayermp1.getBukkitEntity().canSee(entityplayermp.getBukkitEntity()))
 +            {
-+                entityplayermp1.playerNetServerHandler.func_147359_a(packet);
++                entityplayermp1.playerNetServerHandler.sendPacket(packet);
 +            }
 +        }
 +
@@ -298,9 +298,9 @@
 +        // CraftBukkit end
      }
  
-     public String func_148542_a(SocketAddress p_148542_1_, GameProfile p_148542_2_)
-@@ -337,6 +494,77 @@
-         }
+     // JAVADOC METHOD $$ func_148542_a
+@@ -376,26 +533,191 @@
+         return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
      }
  
 +    // CraftBukkit start - Whole method, SocketAddress to LoginListener, added hostname to signature, return EntityPlayer
@@ -374,15 +374,44 @@
 +    }
 +
 +    // MCPC+ start - vanilla compatibility
-     public EntityPlayerMP func_148545_a(GameProfile p_148545_1_)
-     {
-         ArrayList arraylist = new ArrayList();
-@@ -373,27 +601,84 @@
- 
-         return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
-     }
++    public EntityPlayerMP processLogin(GameProfile p_148545_1_)
++    {
++        ArrayList arraylist = new ArrayList();
++        EntityPlayerMP entityplayermp;
++
++        for (int i = 0; i < this.playerEntityList.size(); ++i)
++        {
++            entityplayermp = (EntityPlayerMP)this.playerEntityList.get(i);
++
++            if (entityplayermp.getCommandSenderName().equalsIgnoreCase(p_148545_1_.getName()))
++            {
++                arraylist.add(entityplayermp);
++            }
++        }
++
++        Iterator iterator = arraylist.iterator();
++
++        while (iterator.hasNext())
++        {
++            entityplayermp = (EntityPlayerMP)iterator.next();
++            entityplayermp.playerNetServerHandler.kickPlayerFromServer("You logged in from another location");
++        }
++
++        Object object;
++
++        if (this.mcServer.isDemo())
++        {
++            object = new DemoWorldManager(this.mcServer.worldServerForDimension(0));
++        }
++        else
++        {
++            object = new ItemInWorldManager(this.mcServer.worldServerForDimension(0));
++        }
++
++        return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
++    }
 +    // MCPC+ end
- 
++
 +    public EntityPlayerMP processLogin(GameProfile gameprofile, EntityPlayerMP player)   // CraftBukkit - added EntityPlayer
 +    {
 +        ArrayList arraylist = new ArrayList();
@@ -403,7 +432,7 @@
 +        while (iterator.hasNext())
 +        {
 +            entityplayermp = (EntityPlayerMP) iterator.next();
-+            entityplayermp.playerNetServerHandler.func_147360_c("You logged in from another location");
++            entityplayermp.playerNetServerHandler.kickPlayerFromServer("You logged in from another location");
 +        }
 +
 +        /* CraftBukkit start
@@ -466,10 +495,10 @@
          par1EntityPlayerMP.dimension = par2;
          Object object;
  
-@@ -407,51 +692,214 @@
+@@ -409,51 +731,214 @@
          }
  
-         EntityPlayerMP entityplayermp1 = new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension), par1EntityPlayerMP.func_146103_bH(), (ItemInWorldManager)object);
+         EntityPlayerMP entityplayermp1 = new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension), par1EntityPlayerMP.getGameProfile(), (ItemInWorldManager)object);
 +        // */
 +        EntityPlayerMP entityplayermp1 = par1EntityPlayerMP;
 +        org.bukkit.World fromWorld = entityplayermp1.getBukkitEntity().getWorld();
@@ -479,7 +508,7 @@
 -        entityplayermp1.clonePlayer(par1EntityPlayerMP, par3);
 -        entityplayermp1.dimension = par2;
 +        entityplayermp1.clonePlayer(par1EntityPlayerMP, flag);
-         entityplayermp1.func_145769_d(par1EntityPlayerMP.func_145782_y());
+         entityplayermp1.setEntityId(par1EntityPlayerMP.getEntityId());
 -        WorldServer worldserver = this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension);
 -        this.func_72381_a(entityplayermp1, par1EntityPlayerMP, worldserver);
 +        // WorldServer worldserver = this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension); // CraftBukkit - handled later
@@ -519,14 +548,14 @@
 +                else
 +                {
 +                    entityplayermp1.setSpawnChunk(null, true);
-+                    entityplayermp1.playerNetServerHandler.func_147359_a(new S2BPacketChangeGameState(0, 0));
++                    entityplayermp1.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(0, 0));
 +                }
              }
 -            else
 +
 +            if (location == null)
              {
--                entityplayermp1.playerNetServerHandler.func_147359_a(new S2BPacketChangeGameState(0, 0.0F));
+-                entityplayermp1.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(0, 0.0F));
 +                cworld = (CraftWorld) this.mcServer.server.getWorlds().get(0);
 +                chunkcoordinates = cworld.getHandle().getSpawnPoint();
 +                location = new Location(cworld, chunkcoordinates.posX + 0.5, chunkcoordinates.posY, chunkcoordinates.posZ + 0.5);
@@ -565,7 +594,7 @@
              entityplayermp1.setPosition(entityplayermp1.posX, entityplayermp1.posY + 1.0D, entityplayermp1.posZ);
          }
  
--        entityplayermp1.playerNetServerHandler.func_147359_a(new S07PacketRespawn(entityplayermp1.dimension, entityplayermp1.worldObj.difficultySetting, entityplayermp1.worldObj.getWorldInfo().getTerrainType(), entityplayermp1.theItemInWorldManager.getGameType()));
+-        entityplayermp1.playerNetServerHandler.sendPacket(new S07PacketRespawn(entityplayermp1.dimension, entityplayermp1.worldObj.difficultySetting, entityplayermp1.worldObj.getWorldInfo().getTerrainType(), entityplayermp1.theItemInWorldManager.getGameType()));
 +        int actualDimension = worldserver.provider.dimensionId;
 +        // MCPC+ - change dim for bukkit added dimensions
 +        if (DimensionManager.isBukkitDimension(actualDimension))
@@ -577,17 +606,17 @@
 +        }
 +        // MCPC+ end
 +        // CraftBukkit start
-+        entityplayermp1.playerNetServerHandler.func_147359_a(new S07PacketRespawn(actualDimension, worldserver.difficultySetting, worldserver.getWorldInfo().getTerrainType(), entityplayermp1.theItemInWorldManager.getGameType()));
++        entityplayermp1.playerNetServerHandler.sendPacket(new S07PacketRespawn(actualDimension, worldserver.difficultySetting, worldserver.getWorldInfo().getTerrainType(), entityplayermp1.theItemInWorldManager.getGameType()));
 +        entityplayermp1.setWorld(worldserver);
 +        entityplayermp1.isDead = false;
 +        entityplayermp1.playerNetServerHandler.teleport(new Location(worldserver.getWorld(), entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ, entityplayermp1.rotationYaw, entityplayermp1.rotationPitch));
 +        entityplayermp1.setSneaking(false);
          chunkcoordinates1 = worldserver.getSpawnPoint();
--        entityplayermp1.playerNetServerHandler.func_147364_a(entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ, entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
+-        entityplayermp1.playerNetServerHandler.setPlayerLocation(entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ, entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
 +        // entityplayermp1.playerConnection.a(entityplayermp1.locX, entityplayermp1.locY, entityplayermp1.locZ, entityplayermp1.yaw, entityplayermp1.pitch);
 +        // CraftBukkit end
-         entityplayermp1.playerNetServerHandler.func_147359_a(new S05PacketSpawnPosition(chunkcoordinates1.posX, chunkcoordinates1.posY, chunkcoordinates1.posZ));
-         entityplayermp1.playerNetServerHandler.func_147359_a(new S1FPacketSetExperience(entityplayermp1.experience, entityplayermp1.experienceTotal, entityplayermp1.experienceLevel));
+         entityplayermp1.playerNetServerHandler.sendPacket(new S05PacketSpawnPosition(chunkcoordinates1.posX, chunkcoordinates1.posY, chunkcoordinates1.posZ));
+         entityplayermp1.playerNetServerHandler.sendPacket(new S1FPacketSetExperience(entityplayermp1.experience, entityplayermp1.experienceTotal, entityplayermp1.experienceLevel));
          this.updateTimeAndWeatherForPlayer(entityplayermp1, worldserver);
          worldserver.getPlayerManager().addPlayer(entityplayermp1);
          worldserver.spawnEntityInWorld(entityplayermp1);
@@ -601,7 +630,7 @@
 +        while (iterator.hasNext())
 +        {
 +            PotionEffect potioneffect = (PotionEffect) iterator.next();
-+            entityplayermp1.playerNetServerHandler.func_147359_a(new S1DPacketEntityEffect(entityplayermp1.func_145782_y(), potioneffect));
++            entityplayermp1.playerNetServerHandler.sendPacket(new S1DPacketEntityEffect(entityplayermp1.getEntityId(), potioneffect));
 +        }
 +
 +        // entityplayermp1.syncInventory();
@@ -698,7 +727,7 @@
      public void transferPlayerToDimension(EntityPlayerMP par1EntityPlayerMP, int par2)
      {
          transferPlayerToDimension(par1EntityPlayerMP, par2, mcServer.worldServerForDimension(par2).getDefaultTeleporter());
-@@ -485,7 +933,10 @@
+@@ -487,7 +972,10 @@
      // JAVADOC METHOD $$ func_82448_a
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer)
      {
@@ -710,7 +739,7 @@
      }
  
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer, Teleporter teleporter)
-@@ -571,6 +1022,192 @@
+@@ -573,6 +1061,192 @@
          par1Entity.setWorld(par4WorldServer);
      }
  
@@ -903,7 +932,7 @@
      // JAVADOC METHOD $$ func_72374_b
      public void sendPlayerInfoToAllPlayers()
      {
-@@ -579,11 +1216,36 @@
+@@ -581,11 +1255,36 @@
              this.playerPingIndex = 0;
          }
  
@@ -911,7 +940,7 @@
          if (this.playerPingIndex < this.playerEntityList.size())
          {
              EntityPlayerMP entityplayermp = (EntityPlayerMP)this.playerEntityList.get(this.playerPingIndex);
-             this.func_148540_a(new S38PacketPlayerListItem(entityplayermp.getCommandSenderName(), true, entityplayermp.ping));
+             this.sendPacketToAllPlayers(new S38PacketPlayerListItem(entityplayermp.getCommandSenderName(), true, entityplayermp.ping));
          }
 +        // CraftBukkit end */
 +        // Spigot start
@@ -928,7 +957,7 @@
 +                {
 +                    if (splayer.getBukkitEntity().canSee(player.getBukkitEntity()))
 +                    {
-+                        splayer.playerNetServerHandler.func_147359_a(packet);
++                        splayer.playerNetServerHandler.sendPacket(packet);
 +                    }
 +                }
 +
@@ -939,8 +968,8 @@
 +        // Spigot end
      }
  
-     public void func_148540_a(Packet p_148540_1_)
-@@ -652,12 +1314,30 @@
+     public void sendPacketToAllPlayers(Packet p_148540_1_)
+@@ -655,12 +1354,30 @@
      public void addOp(String par1Str)
      {
          this.ops.add(par1Str.toLowerCase());
@@ -971,7 +1000,7 @@
      }
  
      // JAVADOC METHOD $$ func_72370_d
-@@ -833,8 +1513,16 @@
+@@ -838,8 +1555,16 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -989,32 +1018,32 @@
              if (entityplayermp != p_148543_1_ && entityplayermp.dimension == p_148543_10_)
              {
                  double d4 = p_148543_2_ - entityplayermp.posX;
-@@ -891,9 +1579,12 @@
+@@ -896,9 +1621,12 @@
  
          if (par2WorldServer.isRaining())
          {
--            par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S2BPacketChangeGameState(1, 0.0F));
--            par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S2BPacketChangeGameState(7, par2WorldServer.getRainStrength(1.0F)));
--            par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S2BPacketChangeGameState(8, par2WorldServer.getWeightedThunderStrength(1.0F)));
+-            par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(1, 0.0F));
+-            par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(7, par2WorldServer.getRainStrength(1.0F)));
+-            par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(8, par2WorldServer.getWeightedThunderStrength(1.0F)));
 +            // CraftBukkit start - handle player weather
-+            // par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S2BPacketChangeGameState(1, 0.0F));
-+            // par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S2BPacketChangeGameState(7, par2WorldServer.getRainStrength(1.0F)));
-+            // par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S2BPacketChangeGameState(8, par2WorldServer.getWeightedThunderStrength(1.0F)));
++            // par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(1, 0.0F));
++            // par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(7, par2WorldServer.getRainStrength(1.0F)));
++            // par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(8, par2WorldServer.getWeightedThunderStrength(1.0F)));
 +            par1EntityPlayerMP.setPlayerWeather(org.bukkit.WeatherType.DOWNFALL, false);
 +            // CraftBukkit end
          }
      }
  
-@@ -901,7 +1592,7 @@
+@@ -906,7 +1634,7 @@
      public void syncPlayerInventory(EntityPlayerMP par1EntityPlayerMP)
      {
          par1EntityPlayerMP.sendContainerToPlayer(par1EntityPlayerMP.inventoryContainer);
 -        par1EntityPlayerMP.setPlayerHealthUpdated();
 +        par1EntityPlayerMP.getBukkitEntity().updateScaledHealth(); // CraftBukkit - Update scaled health on respawn and worldchange
-         par1EntityPlayerMP.playerNetServerHandler.func_147359_a(new S09PacketHeldItemChange(par1EntityPlayerMP.inventory.currentItem));
+         par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(par1EntityPlayerMP.inventory.currentItem));
      }
  
-@@ -920,7 +1611,10 @@
+@@ -925,7 +1653,10 @@
      // JAVADOC METHOD $$ func_72373_m
      public String[] getAvailablePlayerDat()
      {
@@ -1026,17 +1055,17 @@
      }
  
      public void setWhiteListEnabled(boolean par1)
-@@ -993,12 +1687,31 @@
+@@ -998,12 +1729,31 @@
      // JAVADOC METHOD $$ func_72392_r
      public void removeAllPlayers()
      {
 -        for (int i = 0; i < this.playerEntityList.size(); ++i)
 +        while (!this.playerEntityList.isEmpty())
          {
--            ((EntityPlayerMP)this.playerEntityList.get(i)).playerNetServerHandler.func_147360_c("Server closed");
+-            ((EntityPlayerMP)this.playerEntityList.get(i)).playerNetServerHandler.kickPlayerFromServer("Server closed");
 +            // Spigot start
 +            EntityPlayerMP p = (EntityPlayerMP) this.playerEntityList.get(0);
-+            p.playerNetServerHandler.func_147360_c(this.mcServer.server.getShutdownMessage());
++            p.playerNetServerHandler.kickPlayerFromServer(this.mcServer.server.getShutdownMessage());
 +
 +            if ((!this.playerEntityList.isEmpty()) && (this.playerEntityList.get(0) == p))
 +            {
@@ -1052,11 +1081,11 @@
 +    {
 +        for (IChatComponent component : ichatbasecomponent)
 +        {
-+            func_148544_a(component, true);
++            sendChatMsgImpl(component, true);
 +        }
 +    }
 +    // CraftBukkit end
 +
-     public void func_148544_a(IChatComponent p_148544_1_, boolean p_148544_2_)
+     public void sendChatMsgImpl(IChatComponent p_148544_1_, boolean p_148544_2_)
      {
-         this.mcServer.func_145747_a(p_148544_1_);
+         this.mcServer.addChatMessage(p_148544_1_);

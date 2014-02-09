@@ -9,7 +9,7 @@
  public class BlockRedstoneTorch extends BlockTorch
  {
      private boolean field_150113_a;
-@@ -125,10 +127,30 @@
+@@ -128,10 +130,30 @@
              list.remove(0);
          }
  
@@ -37,10 +37,10 @@
 +                }
 +
 +                // CraftBukkit end
-                 p_149674_1_.func_147465_d(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.unlit_redstone_torch, p_149674_1_.getBlockMetadata(p_149674_2_, p_149674_3_, p_149674_4_), 3);
+                 p_149674_1_.setBlock(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.unlit_redstone_torch, p_149674_1_.getBlockMetadata(p_149674_2_, p_149674_3_, p_149674_4_), 3);
  
                  if (this.func_150111_a(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, true))
-@@ -147,6 +169,19 @@
+@@ -150,6 +172,19 @@
          }
          else if (!flag && !this.func_150111_a(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, false))
          {
@@ -57,6 +57,6 @@
 +            }
 +
 +            // CraftBukkit end
-             p_149674_1_.func_147465_d(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.redstone_torch, p_149674_1_.getBlockMetadata(p_149674_2_, p_149674_3_, p_149674_4_), 3);
+             p_149674_1_.setBlock(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.redstone_torch, p_149674_1_.getBlockMetadata(p_149674_2_, p_149674_3_, p_149674_4_), 3);
          }
      }

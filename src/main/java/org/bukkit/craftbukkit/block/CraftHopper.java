@@ -24,7 +24,7 @@ public class CraftHopper extends CraftBlockState implements Hopper {
         boolean result = super.update(force, applyPhysics);
 
         if (result) {
-            hopper.onInventoryChanged();
+            hopper.markDirty();
         }
 
         return result;

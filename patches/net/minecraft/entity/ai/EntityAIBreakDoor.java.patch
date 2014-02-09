@@ -12,6 +12,6 @@
 +            }
 +
 +            // CraftBukkit end
-             this.theEntity.worldObj.func_147468_f(this.entityPosX, this.entityPosY, this.entityPosZ);
+             this.theEntity.worldObj.setBlockToAir(this.entityPosX, this.entityPosY, this.entityPosZ);
              this.theEntity.worldObj.playAuxSFX(1012, this.entityPosX, this.entityPosY, this.entityPosZ, 0);
-             this.theEntity.worldObj.playAuxSFX(2001, this.entityPosX, this.entityPosY, this.entityPosZ, Block.func_149682_b(this.field_151504_e));
+             this.theEntity.worldObj.playAuxSFX(2001, this.entityPosX, this.entityPosY, this.entityPosZ, Block.getIdFromBlock(this.field_151504_e));

@@ -45,7 +45,7 @@ final class CraftScore implements Score {
     }
 
     public void setScore(int score) throws IllegalStateException {
-        objective.checkState().board.func_96529_a(playerName, objective.getHandle()).func_96647_c(score);
+        objective.checkState().board.func_96529_a(playerName, objective.getHandle()).setScorePoints(score);
     }
 
     public CraftScoreboard getScoreboard() {

@@ -30,23 +30,23 @@
      private final MinecraftServer field_147387_a;
      private final NetworkManager field_147386_b;
      private static final String __OBFID = "CL_00001456";
-@@ -24,27 +37,102 @@
- 
-     public void func_147383_a(C00Handshake p_147383_1_)
+@@ -25,27 +38,102 @@
+     // JAVADOC METHOD $$ func_147383_a
+     public void processHandshake(C00Handshake p_147383_1_)
      {
 +        // MCPC+ start - prevent players from logging in before server has fully started. This fixes inventory wipe glitches.
 +        if (!DedicatedServer.allowPlayerLogins)
 +        {
 +            ChatComponentText chatcomponenttext = new ChatComponentText("Server is still starting! Please wait before reconnecting.");
-+            this.field_147386_b.func_150725_a(new S00PacketDisconnect(chatcomponenttext), new GenericFutureListener[0]);
-+            this.field_147386_b.func_150718_a(chatcomponenttext); // Should be close
++            this.field_147386_b.scheduleOutboundPacket(new S00PacketDisconnect(chatcomponenttext), new GenericFutureListener[0]);
++            this.field_147386_b.closeChannel(chatcomponenttext); // Should be close
 +            return;
 +        }
 +        // MCPC+ end
          switch (NetHandlerHandshakeTCP.SwitchEnumConnectionState.field_151291_a[p_147383_1_.func_149594_c().ordinal()])
          {
              case 1:
-                 this.field_147386_b.func_150723_a(EnumConnectionState.LOGIN);
+                 this.field_147386_b.setConnectionState(EnumConnectionState.LOGIN);
                  ChatComponentText chatcomponenttext;
  
 +                // CraftBukkit start
@@ -62,8 +62,8 @@
 +                        {
 +                            throttleTracker.put(address, currentTime);
 +                            chatcomponenttext = new ChatComponentText("Connection throttled! Please wait before reconnecting.");
-+                            this.field_147386_b.func_150725_a(new S00PacketDisconnect(chatcomponenttext), new GenericFutureListener[0]);
-+                            this.field_147386_b.func_150718_a(chatcomponenttext); // Should be close
++                            this.field_147386_b.scheduleOutboundPacket(new S00PacketDisconnect(chatcomponenttext), new GenericFutureListener[0]);
++                            this.field_147386_b.closeChannel(chatcomponenttext); // Should be close
 +                            return;
 +                        }
 +
@@ -99,20 +99,20 @@
                  {
 -                    chatcomponenttext = new ChatComponentText("Outdated server! I\'m still on 1.7.2");
 +                    chatcomponenttext = new ChatComponentText(org.spigotmc.SpigotConfig.outdatedServerMessage);   // Spigot
-                     this.field_147386_b.func_150725_a(new S00PacketDisconnect(chatcomponenttext), new GenericFutureListener[0]);
-                     this.field_147386_b.func_150718_a(chatcomponenttext);
+                     this.field_147386_b.scheduleOutboundPacket(new S00PacketDisconnect(chatcomponenttext), new GenericFutureListener[0]);
+                     this.field_147386_b.closeChannel(chatcomponenttext);
                  }
                  else if (p_147383_1_.func_149595_d() < 4)
                  {
 -                    chatcomponenttext = new ChatComponentText("Outdated client! Please use 1.7.2");
 +                    chatcomponenttext = new ChatComponentText(org.spigotmc.SpigotConfig.outdatedClientMessage);   // Spigot
-                     this.field_147386_b.func_150725_a(new S00PacketDisconnect(chatcomponenttext), new GenericFutureListener[0]);
-                     this.field_147386_b.func_150718_a(chatcomponenttext);
+                     this.field_147386_b.scheduleOutboundPacket(new S00PacketDisconnect(chatcomponenttext), new GenericFutureListener[0]);
+                     this.field_147386_b.closeChannel(chatcomponenttext);
                  }
                  else
                  {
--                    this.field_147386_b.func_150719_a(new NetHandlerLoginServer(this.field_147387_a, this.field_147386_b));
-+                    this.field_147386_b.func_150719_a((new NetHandlerLoginServer(this.field_147387_a, this.field_147386_b)));
+-                    this.field_147386_b.setNetHandler(new NetHandlerLoginServer(this.field_147387_a, this.field_147386_b));
++                    this.field_147386_b.setNetHandler((new NetHandlerLoginServer(this.field_147387_a, this.field_147386_b)));
 +
 +                    // Spigot Start
 +                    if (org.spigotmc.SpigotConfig.bungee)
@@ -122,7 +122,7 @@
 +                        if (split.length == 2 || split.length == 3)
 +                        {
 +                            p_147383_1_.field_149598_b = split[0];
-+                            field_147386_b.field_150743_l = new java.net.InetSocketAddress(split[1], ((java.net.InetSocketAddress) field_147386_b.getSocketAddress()).getPort());
++                            field_147386_b.socketAddress = new java.net.InetSocketAddress(split[1], ((java.net.InetSocketAddress) field_147386_b.getSocketAddress()).getPort());
 +                        }
 +
 +                        if (split.length == 3)
@@ -132,7 +132,7 @@
 +                    }
 +
 +                    // Spigot End
-+                    ((NetHandlerLoginServer) this.field_147386_b.func_150729_e()).hostname = p_147383_1_.field_149598_b + ":" + p_147383_1_.field_149599_c; // CraftBukkit - set hostname
++                    ((NetHandlerLoginServer) this.field_147386_b.getNetHandler()).hostname = p_147383_1_.field_149598_b + ":" + p_147383_1_.field_149599_c; // CraftBukkit - set hostname
                  }
  
                  break;

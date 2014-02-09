@@ -1,8 +1,8 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntityFlowerPot.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityFlowerPot.java
-@@ -55,4 +55,12 @@
+@@ -56,4 +56,12 @@
      {
-         return this.field_145968_i;
+         return this.flowerPotData;
      }
 +
 +    // MCPC+ start

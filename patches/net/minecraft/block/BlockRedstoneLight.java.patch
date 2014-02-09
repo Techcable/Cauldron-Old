@@ -9,7 +9,7 @@
  public class BlockRedstoneLight extends Block
  {
      private final boolean field_150171_a;
-@@ -35,6 +37,13 @@
+@@ -36,6 +38,13 @@
              }
              else if (!this.field_150171_a && p_149726_1_.isBlockIndirectlyGettingPowered(p_149726_2_, p_149726_3_, p_149726_4_))
              {
@@ -20,10 +20,10 @@
 +                }
 +
 +                // CraftBukkit end
-                 p_149726_1_.func_147465_d(p_149726_2_, p_149726_3_, p_149726_4_, Blocks.lit_redstone_lamp, 0, 2);
+                 p_149726_1_.setBlock(p_149726_2_, p_149726_3_, p_149726_4_, Blocks.lit_redstone_lamp, 0, 2);
              }
          }
-@@ -50,6 +59,13 @@
+@@ -52,6 +61,13 @@
              }
              else if (!this.field_150171_a && p_149695_1_.isBlockIndirectlyGettingPowered(p_149695_2_, p_149695_3_, p_149695_4_))
              {
@@ -34,10 +34,10 @@
 +                }
 +
 +                // CraftBukkit end
-                 p_149695_1_.func_147465_d(p_149695_2_, p_149695_3_, p_149695_4_, Blocks.lit_redstone_lamp, 0, 2);
+                 p_149695_1_.setBlock(p_149695_2_, p_149695_3_, p_149695_4_, Blocks.lit_redstone_lamp, 0, 2);
              }
          }
-@@ -59,6 +75,13 @@
+@@ -62,6 +78,13 @@
      {
          if (!p_149674_1_.isRemote && this.field_150171_a && !p_149674_1_.isBlockIndirectlyGettingPowered(p_149674_2_, p_149674_3_, p_149674_4_))
          {
@@ -48,6 +48,6 @@
 +            }
 +
 +            // CraftBukkit end
-             p_149674_1_.func_147465_d(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.redstone_lamp, 0, 2);
+             p_149674_1_.setBlock(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.redstone_lamp, 0, 2);
          }
      }

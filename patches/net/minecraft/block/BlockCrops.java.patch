@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockCrops.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockCrops.java
-@@ -49,10 +49,9 @@
+@@ -51,10 +51,9 @@
              {
                  float f = this.func_149864_n(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_);
  

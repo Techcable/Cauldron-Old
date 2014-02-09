@@ -1,14 +1,14 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockDispenser.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockDispenser.java
-@@ -30,6 +30,7 @@
- {
-     public static final IRegistry field_149943_a = new RegistryDefaulted(new BehaviorDefaultDispenseItem());
+@@ -31,6 +31,7 @@
+     // JAVADOC FIELD $$ field_149943_a
+     public static final IRegistry dispenseBehaviorRegistry = new RegistryDefaulted(new BehaviorDefaultDispenseItem());
      protected Random field_149942_b = new Random();
 +    public static boolean eventFired = false; // CraftBukkit
      @SideOnly(Side.CLIENT)
      protected IIcon field_149944_M;
      @SideOnly(Side.CLIENT)
-@@ -124,7 +125,8 @@
+@@ -129,7 +130,8 @@
          }
      }
  
@@ -17,8 +17,8 @@
 +    public void func_149941_e(World p_149941_1_, int p_149941_2_, int p_149941_3_, int p_149941_4_)
      {
          BlockSourceImpl blocksourceimpl = new BlockSourceImpl(p_149941_1_, p_149941_2_, p_149941_3_, p_149941_4_);
-         TileEntityDispenser tileentitydispenser = (TileEntityDispenser)blocksourceimpl.func_150835_j();
-@@ -145,6 +147,7 @@
+         TileEntityDispenser tileentitydispenser = (TileEntityDispenser)blocksourceimpl.getBlockTileEntity();
+@@ -150,6 +152,7 @@
                  if (ibehaviordispenseitem != IBehaviorDispenseItem.itemDispenseBehaviorProvider)
                  {
                      ItemStack itemstack1 = ibehaviordispenseitem.dispense(blocksourceimpl, itemstack);

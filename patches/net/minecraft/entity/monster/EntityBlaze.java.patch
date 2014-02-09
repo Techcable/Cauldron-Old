@@ -14,7 +14,7 @@
 -            for (int k = 0; k < j; ++k)
 +            if (j > 0)
              {
--                this.func_145779_a(Items.blaze_rod, 1);
+-                this.dropItem(Items.blaze_rod, 1);
 +                loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(Items.blaze_rod), j));
              }
          }

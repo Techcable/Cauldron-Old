@@ -80,7 +80,7 @@
              this.posX += this.motionX;
 @@ -232,7 +252,10 @@
          par1NBTTagCompound.setShort("zTile", (short)this.field_145794_g);
-         par1NBTTagCompound.setByte("inTile", (byte)Block.func_149682_b(this.field_145796_h));
+         par1NBTTagCompound.setByte("inTile", (byte)Block.getIdFromBlock(this.field_145796_h));
          par1NBTTagCompound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
 -        par1NBTTagCompound.setTag("direction", this.newDoubleNBTList(new double[] {this.motionX, this.motionY, this.motionZ}));
 +        // CraftBukkit - Fix direction being mismapped to invalid variables
@@ -91,22 +91,22 @@
  
      // JAVADOC METHOD $$ func_70037_a
 @@ -244,8 +267,17 @@
-         this.field_145796_h = Block.func_149729_e(par1NBTTagCompound.getByte("inTile") & 255);
+         this.field_145796_h = Block.getBlockById(par1NBTTagCompound.getByte("inTile") & 255);
          this.inGround = par1NBTTagCompound.getByte("inGround") == 1;
  
--        if (par1NBTTagCompound.func_150297_b("direction", 9))
+-        if (par1NBTTagCompound.hasKey("direction", 9))
 +        // CraftBukkit start - direction -> power
-+        if (par1NBTTagCompound.func_150297_b("power", 9))
++        if (par1NBTTagCompound.hasKey("power", 9))
          {
-+            NBTTagList nbttaglist = par1NBTTagCompound.func_150295_c("power", 6);
++            NBTTagList nbttaglist = par1NBTTagCompound.getTagList("power", 6);
 +            this.accelerationX = nbttaglist.func_150309_d(0);
 +            this.accelerationY = nbttaglist.func_150309_d(1);
 +            this.accelerationZ = nbttaglist.func_150309_d(2);
 +            // CraftBukkit end
 +        }
-+        else if (par1NBTTagCompound.func_150297_b("direction", 9))     // Spigot - Support vanilla's direction tag
++        else if (par1NBTTagCompound.hasKey("direction", 9))     // Spigot - Support vanilla's direction tag
 +        {
-             NBTTagList nbttaglist = par1NBTTagCompound.func_150295_c("direction", 6);
+             NBTTagList nbttaglist = par1NBTTagCompound.getTagList("direction", 6);
              this.motionX = nbttaglist.func_150309_d(0);
              this.motionY = nbttaglist.func_150309_d(1);
 @@ -281,6 +313,16 @@

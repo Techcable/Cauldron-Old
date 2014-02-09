@@ -55,15 +55,15 @@
 +
 +           if (cbEvent.isCancelled() || event.isCanceled())
              {
--                thisPlayerMP.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, theWorld));
+-                thisPlayerMP.playerNetServerHandler.sendPacket(new S23PacketBlockChange(par1, par2, par3, theWorld));
 +                // Let the client know the block still exists
-+                ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
++                ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.sendPacket(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
 +                // Update any tile entity data for this block
-+                TileEntity tileentity = this.theWorld.func_147438_o(par1, par2, par3);
++                TileEntity tileentity = this.theWorld.getTileEntity(par1, par2, par3);
 +
 +                if (tileentity != null)
 +                {
-+                    this.thisPlayerMP.playerNetServerHandler.func_147359_a(tileentity.func_145844_m());
++                    this.thisPlayerMP.playerNetServerHandler.sendPacket(tileentity.getDescriptionPacket());
 +                }
 +
                  return;
@@ -83,7 +83,7 @@
 +                // this.world.douseFire((EntityHuman) null, i, j, k, l); // CraftBukkit - Moved down
                  this.initialDamage = this.curblockDamage;
                  float f = 1.0F;
-                 Block block = this.theWorld.func_147439_a(par1, par2, par3);
+                 Block block = this.theWorld.getBlock(par1, par2, par3);
  
 -                
 -                if (!block.isAir(theWorld, par1, par2, par3))
@@ -94,28 +94,28 @@
 +                    // If we denied a door from opening, we need to send a correcting update to the client, as it already opened the door.
 +                    if (block == Blocks.wooden_door)
                      {
--                        block.func_149699_a(theWorld, par1, par2, par3, thisPlayerMP);
+-                        block.onBlockClicked(theWorld, par1, par2, par3, thisPlayerMP);
 -                        theWorld.extinguishFire(thisPlayerMP, par1, par2, par3, par4);
 +                        // For some reason *BOTH* the bottom/top part have to be marked updated.
 +                        boolean bottom = (this.theWorld.getBlockMetadata(par1, par2, par3) & 8) == 0;
-+                        ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
-+                        ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2 + (bottom ? 1 : -1), par3, this.theWorld));
++                        ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.sendPacket(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
++                        ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.sendPacket(new S23PacketBlockChange(par1, par2 + (bottom ? 1 : -1), par3, this.theWorld));
                      }
 -                    else
 +                    else if (block == Blocks.trapdoor)
                      {
--                        thisPlayerMP.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, theWorld));
-+                        ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
+-                        thisPlayerMP.playerNetServerHandler.sendPacket(new S23PacketBlockChange(par1, par2, par3, theWorld));
++                        ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.sendPacket(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
                      }
--                    f = block.func_149737_a(thisPlayerMP, thisPlayerMP.worldObj, par1, par2, par3);
+-                    f = block.getPlayerRelativeBlockHardness(thisPlayerMP, thisPlayerMP.worldObj, par1, par2, par3);
                  }
 -
 -                if (event.useItem == Event.Result.DENY)
 +                else if (!block.isAir(theWorld, par1, par2, par3))
                  {
 -                    if (f >= 1.0f)
-+                    block.func_149699_a(this.theWorld, par1, par2, par3, this.thisPlayerMP);
-+                    f = block.func_149737_a(this.thisPlayerMP, this.thisPlayerMP.worldObj, par1, par2, par3);
++                    block.onBlockClicked(this.theWorld, par1, par2, par3, this.thisPlayerMP);
++                    f = block.getPlayerRelativeBlockHardness(this.thisPlayerMP, this.thisPlayerMP.worldObj, par1, par2, par3);
 +                    // Allow fire punching to be blocked
 +                    this.theWorld.extinguishFire((EntityPlayer) null, par1, par2, par3, par4);
 +                }
@@ -124,8 +124,8 @@
 +                    // If we 'insta destroyed' then the client needs to be informed.
 +                    if (f > 1.0f)
                      {
--                        thisPlayerMP.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, theWorld));
-+                        ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
+-                        thisPlayerMP.playerNetServerHandler.sendPacket(new S23PacketBlockChange(par1, par2, par3, theWorld));
++                        ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.sendPacket(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
                      }
 +
                      return;
@@ -136,7 +136,7 @@
 +                if (blockEvent.isCancelled())
 +                {
 +                    // Let the client know the block still exists
-+                    ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
++                    ((EntityPlayerMP) this.thisPlayerMP).playerNetServerHandler.sendPacket(new S23PacketBlockChange(par1, par2, par3, this.theWorld));
 +                    return;
 +                }
 +
@@ -159,7 +159,7 @@
          }
      }
  
-@@ -264,18 +323,34 @@
+@@ -264,17 +323,24 @@
      {
          BlockEvent.BreakEvent event = ForgeHooks.onBlockBreakEvent(theWorld, gameType, thisPlayerMP, par1, par2, par3);
          if (event.isCanceled())
@@ -178,39 +178,26 @@
 -            ItemStack stack = thisPlayerMP.getCurrentEquippedItem();
 -            if (stack != null && stack.getItem().onBlockStartBreak(stack, par1, par2, par3, thisPlayerMP))
 +
-+            Block block = this.theWorld.func_147439_a(par1, par2, par3);
++            Block block = this.theWorld.getBlock(par1, par2, par3);
 +
 +            if (block == Blocks.air)
              {
 -                return false;
 +                return false;    // CraftBukkit - A plugin set block to air without cancelling
              }
--            Block block = this.theWorld.func_147439_a(par1, par2, par3);
+-            Block block = this.theWorld.getBlock(par1, par2, par3);
 +
              int l = this.theWorld.getBlockMetadata(par1, par2, par3);
-+
-+            // CraftBukkit start - Special case skulls, their item data comes from a tile entity
-+            if (block == Blocks.skull && !this.isCreative())
-+            {
-+                block.func_149690_a(theWorld, par1, par2, par3, l, 1.0F, 0);
-+                return this.removeBlock(par1, par2, par3);
-+            }
-+
-+            // CraftBukkit end
-             this.theWorld.playAuxSFXAtEntity(this.thisPlayerMP, 2001, par1, par2, par3, Block.func_149682_b(block) + (this.theWorld.getBlockMetadata(par1, par2, par3) << 12));
+             this.theWorld.playAuxSFXAtEntity(this.thisPlayerMP, 2001, par1, par2, par3, Block.getIdFromBlock(block) + (this.theWorld.getBlockMetadata(par1, par2, par3) << 12));
              boolean flag = false;
- 
-@@ -356,59 +431,107 @@
-     }
- 
+@@ -358,57 +424,105 @@
      // JAVADOC METHOD $$ func_73078_a
--    public boolean activateBlockOrUseItem(EntityPlayer par1EntityPlayer, World par2World, ItemStack par3ItemStack, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
-+    public boolean activateBlockOrUseItem(EntityPlayer par1EntityPlayer, World par2World, ItemStack par3ItemStack, int par4, int par5, int par6, int par7, float par8, float par9, float par10) // MCPC+ - manually merge whole method by hand
+     public boolean activateBlockOrUseItem(EntityPlayer par1EntityPlayer, World par2World, ItemStack par3ItemStack, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
      {
 -        PlayerInteractEvent event = ForgeEventFactory.onPlayerInteract(par1EntityPlayer, Action.RIGHT_CLICK_BLOCK, par4, par5, par6, par7);
 -        if (event.isCanceled())
 -        {
--            thisPlayerMP.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par4, par5, par6, theWorld));
+-            thisPlayerMP.playerNetServerHandler.sendPacket(new S23PacketBlockChange(par4, par5, par6, theWorld));
 -            return false;
 -        }
 -
@@ -221,7 +208,7 @@
 -        }
 -
 +        // CraftBukkit start - Interact
-         Block block = par2World.func_147439_a(par4, par5, par6);
+         Block block = par2World.getBlock(par4, par5, par6);
 -        boolean isAir = block.isAir(par2World, par4, par5, par6);
 -        boolean useBlock = !par1EntityPlayer.isSneaking() || par1EntityPlayer.getHeldItem() == null;
 -        if (!useBlock) useBlock = par1EntityPlayer.getHeldItem().getItem().doesSneakBypassUse(par2World, par4, par5, par6, par1EntityPlayer);
@@ -238,7 +225,7 @@
 +            // if forge event is explicitly cancelled, return
 +            if (forgeEvent.isCanceled())
              {
-+                thisPlayerMP.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par4, par5, par6, theWorld));
++                thisPlayerMP.playerNetServerHandler.sendPacket(new S23PacketBlockChange(par4, par5, par6, theWorld));
 +                return false;
 +            }
 +            // if we have no explicit deny, check if item can be used
@@ -259,20 +246,20 @@
 +                if (block == Blocks.wooden_door)
 +                {
 +                    boolean bottom = (par2World.getBlockMetadata(par4, par5, par6) & 8) == 0;
-+                    ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par4, par5 + (bottom ? 1 : -1), par6, par2World));
++                    ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.sendPacket(new S23PacketBlockChange(par4, par5 + (bottom ? 1 : -1), par6, par2World));
 +                }
 +
 +                result = (event.useItemInHand() != org.bukkit.event.Event.Result.ALLOW);
 +            }
 +            else if (!par1EntityPlayer.isSneaking() || par3ItemStack == null || par1EntityPlayer.getHeldItem().getItem().doesSneakBypassUse(par2World, par4, par5, par6, par1EntityPlayer))
 +            {
-                 result = block.func_149727_a(par2World, par4, par5, par6, par1EntityPlayer, par7, par8, par9, par10);
+                 result = block.onBlockActivated(par2World, par4, par5, par6, par1EntityPlayer, par7, par8, par9, par10);
 +                // MCPC+ start - if bukkitView is null, create one. Required for Ender Chests since they do not use NetworkRegistry.openRemoteGUI
 +                if (thisPlayerMP != null && !(thisPlayerMP.openContainer instanceof ContainerPlayer))
 +                {
 +                    if (thisPlayerMP.openContainer.getBukkitView() == null)
 +                    {
-+                        TileEntity te = thisPlayerMP.worldObj.func_147438_o(par4, par5, par6);
++                        TileEntity te = thisPlayerMP.worldObj.getTileEntity(par4, par5, par6);
 +                        if (te != null && te instanceof IInventory)
 +                        {
 +                            IInventory teInv = (IInventory)te;
@@ -298,7 +285,7 @@
 +
 +            if (par3ItemStack != null && !result)
              {
--                thisPlayerMP.playerNetServerHandler.func_147359_a(new S23PacketBlockChange(par4, par5, par6, theWorld));
+-                thisPlayerMP.playerNetServerHandler.sendPacket(new S23PacketBlockChange(par4, par5, par6, theWorld));
 -                result = event.useItem != Event.Result.ALLOW;
 +                int meta = par3ItemStack.getItemDamage();
 +                int size = par3ItemStack.stackSize;

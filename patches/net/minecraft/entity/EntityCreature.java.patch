@@ -88,7 +88,7 @@
                  float f2 = MathHelper.wrapAngleTo180_float(f1 - this.rotationYaw);
                  this.moveForward = (float)this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue();
  
-@@ -319,6 +363,7 @@
+@@ -320,6 +364,7 @@
              {
                  if (f > 10.0F)
                  {
@@ -96,7 +96,7 @@
                      this.clearLeashed(true, true);
                  }
  
-@@ -351,6 +396,7 @@
+@@ -352,6 +397,7 @@
  
              if (f > 10.0F)
              {

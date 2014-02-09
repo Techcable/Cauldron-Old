@@ -105,7 +105,7 @@
                      {
                          if (block.canEntityDestroy(worldObj, k1, l1, i2, this) && this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing"))
                          {
--                            flag1 = this.worldObj.func_147468_f(k1, l1, i2) || flag1;
+-                            flag1 = this.worldObj.setBlockToAir(k1, l1, i2) || flag1;
 +                            // CraftBukkit start - Add blocks to list rather than destroying them
 +                            // flag1 = this.world.setAir(k1, l1, i2) || flag1;
 +                            flag1 = true;
@@ -138,7 +138,7 @@
 +                // Yield zero ==> no drops
 +                for (org.bukkit.block.Block block : event.blockList())
 +                {
-+                    this.worldObj.func_147468_f(block.getX(), block.getY(), block.getZ());
++                    this.worldObj.setBlockToAir(block.getX(), block.getY(), block.getZ());
 +                }
 +            }
 +            else
@@ -157,13 +157,13 @@
 +                    int blockZ = block.getZ();
 +                    Block nmsBlock = org.bukkit.craftbukkit.util.CraftMagicNumbers.getBlock(blockId);
 +
-+                    if (nmsBlock.func_149659_a(explosionSource))
++                    if (nmsBlock.canDropFromExplosion(explosionSource))
 +                    {
-+                        nmsBlock.func_149690_a(this.worldObj, blockX, blockY, blockZ, block.getData(), event.getYield(), 0);
++                        nmsBlock.dropBlockAsItemWithChance(this.worldObj, blockX, blockY, blockZ, block.getData(), event.getYield(), 0);
 +                    }
 +
-+                    nmsBlock.func_149723_a(worldObj, blockX, blockY, blockZ, explosionSource);
-+                    this.worldObj.func_147468_f(blockX, blockY, blockZ);
++                    nmsBlock.onBlockDestroyedByExplosion(worldObj, blockX, blockY, blockZ, explosionSource);
++                    this.worldObj.setBlockToAir(blockX, blockY, blockZ);
 +                }
 +            }
 +
@@ -227,23 +227,23 @@
                          {
                              if (d2 <= ((double)(b1 - 1) - 0.5D) * ((double)(b1 - 1) - 0.5D))
                              {
--                                this.worldObj.func_147449_b(l, k, i1, Blocks.bedrock);
+-                                this.worldObj.setBlock(l, k, i1, Blocks.bedrock);
 +                                world.setTypeUpdate(l, k, i1, Blocks.bedrock);
                              }
                          }
                          else if (k > b0)
                          {
--                            this.worldObj.func_147449_b(l, k, i1, Blocks.air);
+-                            this.worldObj.setBlock(l, k, i1, Blocks.air);
 +                            world.setTypeUpdate(l, k, i1, Blocks.air);
                          }
                          else if (d2 > ((double)(b1 - 1) - 0.5D) * ((double)(b1 - 1) - 0.5D))
                          {
--                            this.worldObj.func_147449_b(l, k, i1, Blocks.bedrock);
+-                            this.worldObj.setBlock(l, k, i1, Blocks.bedrock);
 +                            world.setTypeUpdate(l, k, i1, Blocks.bedrock);
                          }
                          else
                          {
--                            this.worldObj.func_147449_b(l, k, i1, Blocks.end_portal);
+-                            this.worldObj.setBlock(l, k, i1, Blocks.end_portal);
 +                            world.setTypeUpdate(l, k, i1, Blocks.end_portal);
                          }
                      }
@@ -251,15 +251,15 @@
              }
          }
  
--        this.worldObj.func_147449_b(par1, b0 + 0, par2, Blocks.bedrock);
--        this.worldObj.func_147449_b(par1, b0 + 1, par2, Blocks.bedrock);
--        this.worldObj.func_147449_b(par1, b0 + 2, par2, Blocks.bedrock);
--        this.worldObj.func_147449_b(par1 - 1, b0 + 2, par2, Blocks.torch);
--        this.worldObj.func_147449_b(par1 + 1, b0 + 2, par2, Blocks.torch);
--        this.worldObj.func_147449_b(par1, b0 + 2, par2 - 1, Blocks.torch);
--        this.worldObj.func_147449_b(par1, b0 + 2, par2 + 1, Blocks.torch);
--        this.worldObj.func_147449_b(par1, b0 + 3, par2, Blocks.bedrock);
--        this.worldObj.func_147449_b(par1, b0 + 4, par2, Blocks.dragon_egg);
+-        this.worldObj.setBlock(par1, b0 + 0, par2, Blocks.bedrock);
+-        this.worldObj.setBlock(par1, b0 + 1, par2, Blocks.bedrock);
+-        this.worldObj.setBlock(par1, b0 + 2, par2, Blocks.bedrock);
+-        this.worldObj.setBlock(par1 - 1, b0 + 2, par2, Blocks.torch);
+-        this.worldObj.setBlock(par1 + 1, b0 + 2, par2, Blocks.torch);
+-        this.worldObj.setBlock(par1, b0 + 2, par2 - 1, Blocks.torch);
+-        this.worldObj.setBlock(par1, b0 + 2, par2 + 1, Blocks.torch);
+-        this.worldObj.setBlock(par1, b0 + 3, par2, Blocks.bedrock);
+-        this.worldObj.setBlock(par1, b0 + 4, par2, Blocks.dragon_egg);
 +        world.setType(par1, b0 + 0, par2, Blocks.bedrock);
 +        world.setType(par1, b0 + 1, par2, Blocks.bedrock);
 +        world.setType(par1, b0 + 2, par2, Blocks.bedrock);
@@ -291,7 +291,7 @@
 +
 +                    if (entity instanceof EntityPlayerMP)
 +                    {
-+                        ((EntityPlayerMP) entity).playerNetServerHandler.func_147359_a(packet);
++                        ((EntityPlayerMP) entity).playerNetServerHandler.sendPacket(packet);
 +                    }
 +                }
 +            }

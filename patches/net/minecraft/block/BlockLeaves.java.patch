@@ -9,9 +9,9 @@
  public abstract class BlockLeaves extends BlockLeavesBase implements IShearable
  {
      int[] field_150128_a;
-@@ -222,6 +224,16 @@
+@@ -226,6 +228,16 @@
  
-     private void func_150126_e(World p_150126_1_, int p_150126_2_, int p_150126_3_, int p_150126_4_)
+     private void removeLeaves(World p_150126_1_, int p_150126_2_, int p_150126_3_, int p_150126_4_)
      {
 +        // CraftBukkit start
 +        LeavesDecayEvent event = new LeavesDecayEvent(p_150126_1_.getWorld().getBlockAt(p_150126_2_, p_150126_3_, p_150126_4_));
@@ -23,6 +23,6 @@
 +        }
 +
 +        // CraftBukkit end
-         this.func_149697_b(p_150126_1_, p_150126_2_, p_150126_3_, p_150126_4_, p_150126_1_.getBlockMetadata(p_150126_2_, p_150126_3_, p_150126_4_), 0);
-         p_150126_1_.func_147468_f(p_150126_2_, p_150126_3_, p_150126_4_);
+         this.dropBlockAsItem(p_150126_1_, p_150126_2_, p_150126_3_, p_150126_4_, p_150126_1_.getBlockMetadata(p_150126_2_, p_150126_3_, p_150126_4_), 0);
+         p_150126_1_.setBlockToAir(p_150126_2_, p_150126_3_, p_150126_4_);
      }

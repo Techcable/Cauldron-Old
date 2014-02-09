@@ -12,12 +12,12 @@
 +
  public class BlockPistonBase extends Block
  {
-     private final boolean field_150082_a;
-@@ -128,13 +134,37 @@
+     // JAVADOC FIELD $$ field_150082_a
+@@ -140,13 +146,37 @@
  
-             if (flag && !func_150075_c(l))
+             if (flag && !isExtended(l))
              {
--                if (func_150077_h(p_150078_1_, p_150078_2_, p_150078_3_, p_150078_4_, i1))
+-                if (canExtend(p_150078_1_, p_150078_2_, p_150078_3_, p_150078_4_, i1))
 +                // CraftBukkit start
 +                int length = canExtend_IntCB(p_150078_1_, p_150078_2_, p_150078_3_, p_150078_4_, i1);
 +
@@ -33,10 +33,10 @@
 +                    }
 +
 +                    // CraftBukkit end
-                     p_150078_1_.func_147452_c(p_150078_2_, p_150078_3_, p_150078_4_, this, 0, i1);
+                     p_150078_1_.addBlockEvent(p_150078_2_, p_150078_3_, p_150078_4_, this, 0, i1);
                  }
              }
-             else if (!flag && func_150075_c(l))
+             else if (!flag && isExtended(l))
              {
 +                // CraftBukkit start
 +                org.bukkit.block.Block block = p_150078_1_.getWorld().getBlockAt(p_150078_2_, p_150078_3_, p_150078_4_);
@@ -50,11 +50,11 @@
 +
 +                // CraftBukkit end
                  p_150078_1_.setBlockMetadataWithNotify(p_150078_2_, p_150078_3_, p_150078_4_, i1, 2);
-                 p_150078_1_.func_147452_c(p_150078_2_, p_150078_3_, p_150078_4_, this, 1, i1);
+                 p_150078_1_.addBlockEvent(p_150078_2_, p_150078_3_, p_150078_4_, this, 1, i1);
              }
-@@ -297,6 +327,11 @@
+@@ -314,6 +344,11 @@
  
-     public static int func_150076_b(int p_150076_0_)
+     public static int getPistonOrientation(int p_150076_0_)
      {
 +        if ((p_150076_0_ & 7) >= Facing.oppositeSide.length)
 +        {
@@ -64,12 +64,13 @@
          return p_150076_0_ & 7;
      }
  
-@@ -366,7 +401,13 @@
+@@ -386,8 +421,14 @@
          }
      }
  
--    private static boolean func_150077_h(World p_150077_0_, int p_150077_1_, int p_150077_2_, int p_150077_3_, int p_150077_4_)
 +    // MCPC+ start - vanilla compatibility
+     // JAVADOC METHOD $$ func_150077_h
+-    private static boolean canExtend(World p_150077_0_, int p_150077_1_, int p_150077_2_, int p_150077_3_, int p_150077_4_)
 +    private static boolean func_150077_h(World world, int i, int j, int k, int l) {
 +        return canExtend_IntCB(world, i, j, k, l) >= 0;
 +    }
@@ -79,7 +80,7 @@
      {
          int i1 = p_150077_1_ + Facing.offsetsXForSide[p_150077_4_];
          int j1 = p_150077_2_ + Facing.offsetsYForSide[p_150077_4_];
-@@ -379,7 +420,7 @@
+@@ -400,7 +441,7 @@
              {
                  if (j1 <= 0 || j1 >= p_150077_0_.getHeight())
                  {
@@ -87,16 +88,16 @@
 +                    return -1; // CraftBukkit
                  }
  
-                 Block block = p_150077_0_.func_147439_a(i1, j1, k1);
-@@ -388,14 +429,14 @@
+                 Block block = p_150077_0_.getBlock(i1, j1, k1);
+@@ -409,14 +450,14 @@
                  {
-                     if (!func_150080_a(block, p_150077_0_, i1, j1, k1, true))
+                     if (!canPushBlock(block, p_150077_0_, i1, j1, k1, true))
                      {
 -                        return false;
 +                        return -1; // CraftBukkit
                      }
  
-                     if (block.func_149656_h() != 1)
+                     if (block.getMobilityFlag() != 1)
                      {
                          if (l1 == 12)
                          {
@@ -105,7 +106,7 @@
                          }
  
                          i1 += Facing.offsetsXForSide[p_150077_4_];
-@@ -407,7 +448,7 @@
+@@ -428,7 +469,7 @@
                  }
              }
  

@@ -106,7 +106,7 @@ public class MCPCCommand extends Command
                     ChatColor.GOLD + " Loaded Chunks: " + ChatColor.GRAY + world.theChunkProviderServer.loadedChunkHashMap.size() +
                     ChatColor.GOLD + " Active Chunks: " + ChatColor.GRAY + world.activeChunkSet.size() +
                     ChatColor.GOLD + " Entities: " + ChatColor.GRAY + world.loadedEntityList.size() +
-                    ChatColor.GOLD + " Tile Entities: " + ChatColor.GRAY + world.field_147482_g.size()
+                    ChatColor.GOLD + " Tile Entities: " + ChatColor.GRAY + world.loadedTileEntityList.size()
                     );
             sender.sendMessage(ChatColor.GOLD + " Entities Last Tick: " + ChatColor.GRAY + world.entitiesTicked +
                     ChatColor.GOLD + " Tiles Last Tick: " + ChatColor.GRAY + world.tilesTicked +

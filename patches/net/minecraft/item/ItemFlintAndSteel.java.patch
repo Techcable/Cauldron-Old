@@ -23,7 +23,7 @@
              --par5;
 @@ -58,8 +65,27 @@
          {
-             if (par3World.func_147437_c(par4, par5, par6))
+             if (par3World.isAirBlock(par4, par5, par6))
              {
 +                // CraftBukkit start - Store the clicked block
 +                if (CraftEventFactory.callBlockIgniteEvent(par3World, par4, par5, par6, org.bukkit.event.block.BlockIgniteEvent.IgniteCause.FLINT_AND_STEEL, par2EntityPlayer).isCancelled())
@@ -35,7 +35,7 @@
 +                CraftBlockState blockState = CraftBlockState.getBlockState(par3World, par4, par5, par6);
 +                // CraftBukkit end
                  par3World.playSoundEffect((double)par4 + 0.5D, (double)par5 + 0.5D, (double)par6 + 0.5D, "fire.ignite", 1.0F, itemRand.nextFloat() * 0.4F + 0.8F);
-                 par3World.func_147449_b(par4, par5, par6, Blocks.fire);
+                 par3World.setBlock(par4, par5, par6, Blocks.fire);
 +                // CraftBukkit start
 +                org.bukkit.event.block.BlockPlaceEvent placeEvent = CraftEventFactory.callBlockPlaceEvent(par3World, par2EntityPlayer, blockState, clickedX, clickedY, clickedZ);
 +

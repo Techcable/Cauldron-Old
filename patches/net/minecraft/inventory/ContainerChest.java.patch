@@ -50,7 +50,7 @@
      public ContainerChest(IInventory par1IInventory, IInventory par2IInventory)
 @@ -15,6 +51,10 @@
          this.numRows = par2IInventory.getSizeInventory() / 9;
-         par2IInventory.openChest();
+         par2IInventory.openInventory();
          int i = (this.numRows - 4) * 18;
 +        // CraftBukkit start - Save player
 +        // TODO: Should we check to make sure it really is an InventoryPlayer?
