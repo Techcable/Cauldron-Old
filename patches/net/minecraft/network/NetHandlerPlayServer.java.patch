@@ -107,7 +107,7 @@
      // JAVADOC FIELD $$ field_147374_l
 -    private int chatSpamThresholdCount;
 +    private volatile int chatSpamThresholdCount; // MCPC+ - set to volatile to fix multithreaded issues
-+    private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, "field_147374_l"); // CraftBukkit - multithreaded field
++    private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, "fiel" + "d_147374_l"); // CraftBukkit - multithreaded field
      private int field_147375_m;
      private IntHashMap field_147372_n = new IntHashMap();
 -    // JAVADOC FIELD $$ field_147373_o
