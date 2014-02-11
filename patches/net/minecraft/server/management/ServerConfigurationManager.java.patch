@@ -285,7 +285,7 @@
 +            // CraftBukkit end
 +        }
 +        // MCPC+ end
-+        //FMLCommonHandler.instance().firePlayerLoggedOut(entityplayermp);
++        FMLCommonHandler.instance().firePlayerLoggedOut(entityplayermp);
 +        this.writePlayerData(entityplayermp);
 +        WorldServer worldserver = entityplayermp.getServerForPlayer();
 +
