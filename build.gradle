@@ -55,6 +55,28 @@ launch4j {
     jreMinVersion = '1.6.0'
 }
 
+def getBuild() {
+    // check for jenkins build and if not found, return default
+    ext.env = System.getenv()
+    if(env.BUILD_NUMBER) {
+        return "-$env.BUILD_NUMBER"
+    } else {
+        return "-B0"
+    }
+}
+
+tasks.packageUniversal.manifest { 
+    attributes([
+    'Implementation-Vendor': 'MCPC',
+    'Implementation-Title': 'MCPC Plus',
+    'Implementation-Version': 'git-MCPC-Plus-'+project.version+getBuild(),
+    'Forge-Version': '10.12.0.1025',
+    'Specification-Vendor': 'Bukkit Team',
+    'Specification-Title': 'Bukkit',
+    'Specification-Version': '1.7.2-R0.3-SNAPSHOT'
+    ])
+}
+
 // TODO CHANGE THIS POM AND STUFF
 
 uploadArchives {

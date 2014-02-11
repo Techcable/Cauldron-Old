@@ -18,10 +18,10 @@
 +                Packet packet = (Packet) this.receivedPacketsQueue.poll();
 +
 +                // CraftBukkit start
-+                /*if (!this.isChannelOpen() || !this.channel.config().isAutoRead())   // Should be isConnected
++                if (!this.isChannelOpen() || !this.channel.config().isAutoRead())   // Should be isConnected
 +                {
 +                    continue;
-+                }*/
++                }
 +
 +                // CraftBukkit end
                  packet.processPacket(this.netHandler);
