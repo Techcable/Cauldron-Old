@@ -17,76 +17,107 @@ import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 
+// CraftBukkit start
+import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
+import java.util.HashMap;
+// CraftBukkit end
+
 public class PlayerInstance
 {
-    public List playersInChunk = new ArrayList(); // MCPC+ - private -> public
+    public List playersWatchingChunk; // MCPC+ - private -> public
     // JAVADOC FIELD $$ field_73264_c
     private final ChunkCoordIntPair chunkLocation;
-    private short[] field_151254_d = new short[64];
+    private short[] field_151254_d;
     private int numberOfTilesToUpdate;
     // JAVADOC FIELD $$ field_73260_f
     private int flagsYAreasToUpdate;
     // JAVADOC FIELD $$ field_111198_g
     private long previousWorldTime;
     final PlayerManager thePlayerManager;
-    private boolean loaded = false; // CraftBukkit
+    // CraftBukkit start
+    private final HashMap<EntityPlayerMP, Runnable> players = new HashMap<EntityPlayerMP, Runnable>();
+    private boolean loaded = false;
+    private Runnable loadedRunnable = new Runnable()
+    {
+        public void run()
+        {
+            PlayerInstance.this.loaded = true;
+        }
+    };
+    // CraftBukkit end
     private static final String __OBFID = "CL_00001435";
 
     public PlayerInstance(PlayerManager par1PlayerManager, int par2, int par3)
     {
         this.thePlayerManager = par1PlayerManager;
-        this.playersInChunk = new ArrayList();
+        this.playersWatchingChunk = new ArrayList();
         this.field_151254_d = new short[64];
         this.chunkLocation = new ChunkCoordIntPair(par2, par3);
-        // CraftBukkit start
-        par1PlayerManager.getWorldServer().theChunkProviderServer.getChunkAt(par2, par3, new Runnable()
-        {
-            public void run()
-            {
-                PlayerInstance.this.loaded = true;
-            }
-        });
-        // CraftBukkit end
+        par1PlayerManager.getWorldServer().theChunkProviderServer.getChunkAt(par2, par3, this.loadedRunnable); // CraftBukkit
     }
 
     public void addPlayer(final EntityPlayerMP par1EntityPlayerMP)   // CraftBukkit - added final to argument
     {
-        if (this.playersInChunk.contains(par1EntityPlayerMP))
+        if (this.playersWatchingChunk.contains(par1EntityPlayerMP))
         {
             throw new IllegalStateException("Failed to add player. " + par1EntityPlayerMP + " already is in chunk " + this.chunkLocation.chunkXPos + ", " + this.chunkLocation.chunkZPos);
         }
         else
         {
-            if (this.playersInChunk.isEmpty())
+            if (this.playersWatchingChunk.isEmpty())
             {
                 this.previousWorldTime = this.thePlayerManager.getWorldServer().getTotalWorldTime();
             }
 
-            this.playersInChunk.add(par1EntityPlayerMP);
+            this.playersWatchingChunk.add(par1EntityPlayerMP);
             // CraftBukkit start
+            Runnable playerRunnable;
+
             if (this.loaded)
             {
+                playerRunnable = null;
                 par1EntityPlayerMP.loadedChunks.add(this.chunkLocation);
             }
             else
             {
-                this.thePlayerManager.getWorldServer().theChunkProviderServer.getChunkAt(this.chunkLocation.chunkXPos, this.chunkLocation.chunkZPos, new Runnable()
+                playerRunnable = new Runnable()
                 {
                     public void run()
                     {
                         par1EntityPlayerMP.loadedChunks.add(PlayerInstance.this.chunkLocation);
                     }
-                });
+                };
+                this.thePlayerManager.getWorldServer().theChunkProviderServer.getChunkAt(this.chunkLocation.chunkXPos, this.chunkLocation.chunkZPos, playerRunnable);
             }
 
+            this.players.put(par1EntityPlayerMP, playerRunnable);
             // CraftBukkit end
         }
     }
 
     public void removePlayer(EntityPlayerMP par1EntityPlayerMP)
     {
-        if (this.playersInChunk.contains(par1EntityPlayerMP))
+        if (this.playersWatchingChunk.contains(par1EntityPlayerMP))
         {
+            // CraftBukkit start - If we haven't loaded yet don't load the chunk just so we can clean it up
+            if (!this.loaded)
+            {
+                ChunkIOExecutor.dropQueuedChunkLoad(this.thePlayerManager.getWorldServer(), this.chunkLocation.chunkXPos, this.chunkLocation.chunkZPos, this.players.get(par1EntityPlayerMP));
+                this.playersWatchingChunk.remove(par1EntityPlayerMP);
+                this.players.remove(par1EntityPlayerMP);
+
+                if (this.playersWatchingChunk.isEmpty())
+                {
+                    ChunkIOExecutor.dropQueuedChunkLoad(this.thePlayerManager.getWorldServer(), this.chunkLocation.chunkXPos, this.chunkLocation.chunkZPos, this.loadedRunnable);
+                    long i = (long) this.chunkLocation.chunkXPos + 2147483647L | (long) this.chunkLocation.chunkZPos + 2147483647L << 32;
+                    PlayerManager.getChunkWatchers(this.thePlayerManager).remove(i);
+                    PlayerManager.getChunkWatcherList(this.thePlayerManager).remove(this);
+                }
+
+                return;
+            }
+
+            // CraftBukkit end
             Chunk chunk = this.thePlayerManager.getWorldServer().getChunkFromChunkCoords(this.chunkLocation.chunkXPos, this.chunkLocation.chunkZPos);
 
             if (chunk.func_150802_k())
@@ -94,12 +125,13 @@ public class PlayerInstance
                 par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S21PacketChunkData(chunk, true, 0));
             }
 
-            this.playersInChunk.remove(par1EntityPlayerMP);
+            this.players.remove(par1EntityPlayerMP); // CraftBukkit
+            this.playersWatchingChunk.remove(par1EntityPlayerMP);
             par1EntityPlayerMP.loadedChunks.remove(this.chunkLocation);
 
             MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.UnWatch(chunkLocation, par1EntityPlayerMP));
 
-            if (this.playersInChunk.isEmpty())
+            if (this.playersWatchingChunk.isEmpty())
             {
                 long i = (long)this.chunkLocation.chunkXPos + 2147483647L | (long)this.chunkLocation.chunkZPos + 2147483647L << 32;
                 this.increaseInhabitedTime(chunk);
@@ -160,9 +192,9 @@ public class PlayerInstance
 
     public void sendToAllPlayersWatchingChunk(Packet p_151251_1_)
     {
-        for (int i = 0; i < this.playersInChunk.size(); ++i)
+        for (int i = 0; i < this.playersWatchingChunk.size(); ++i)
         {
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)this.playersInChunk.get(i);
+            EntityPlayerMP entityplayermp = (EntityPlayerMP)this.playersWatchingChunk.get(i);
 
             if (!entityplayermp.loadedChunks.contains(this.chunkLocation))
             {
@@ -262,9 +294,9 @@ public class PlayerInstance
         return par0PlayerInstance.chunkLocation;
     }
 
-    static List getPlayersInChunk(PlayerInstance par0PlayerInstance)
+    static List getPlayersWatchingChunk(PlayerInstance par0PlayerInstance)
     {
-        return par0PlayerInstance.playersInChunk;
+        return par0PlayerInstance.playersWatchingChunk;
     }
     // MCPC+ end
 }

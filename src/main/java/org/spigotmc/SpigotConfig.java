@@ -203,6 +203,7 @@ public class SpigotConfig
         Bukkit.getLogger().log( Level.INFO, "Using {0} threads for Netty based IO", count );
     }
 
+    /* MCPC+ - temp disable
     private static void replaceCommands()
     {
         if ( config.contains( "replace-commands" ) ) {
@@ -214,7 +215,7 @@ public class SpigotConfig
             SimpleCommandMap.removeFallback( command );
             VanillaCommandWrapper.allowedCommands.add( command );
         }
-    }
+    }*/
 
     public static boolean lateBind;
     private static void lateBind() {

@@ -38,4 +38,8 @@ public class CraftBlockCommandSender extends ServerCommandSender implements Bloc
     public void setOp(boolean value) {
         throw new UnsupportedOperationException("Cannot change operator status of a block");
     }
+
+    public net.minecraft.command.ICommandSender getTileEntity() {
+        return commandBlock;
+    }
 }

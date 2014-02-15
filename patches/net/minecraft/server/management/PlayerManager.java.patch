@@ -130,7 +130,7 @@
  
 +        if (pi != null)
 +        {
-+            return (pi.playersInChunk.size() > 0);
++            return (pi.playersWatchingChunk.size() > 0);
 +        }
 +
 +        return false;
@@ -259,7 +259,7 @@
 -        PlayerManager.PlayerInstance playerinstance = this.getOrCreateChunkWatcher(par2, par3, false);
 -        return playerinstance == null ? false : playerinstance.playersWatchingChunk.contains(par1EntityPlayerMP) && !par1EntityPlayerMP.loadedChunks.contains(playerinstance.chunkLocation);
 +        PlayerInstance playerinstance = this.getOrCreateChunkWatcher(par2, par3, false);
-+        return playerinstance == null ? false : PlayerInstance.getPlayersInChunk(playerinstance).contains(par1EntityPlayerMP) && !par1EntityPlayerMP.loadedChunks.contains(PlayerInstance.getChunkLocation(playerinstance));
++        return playerinstance == null ? false : PlayerInstance.getPlayersWatchingChunk(playerinstance).contains(par1EntityPlayerMP) && !par1EntityPlayerMP.loadedChunks.contains(PlayerInstance.getChunkLocation(playerinstance));
      }
  
      // JAVADOC METHOD $$ func_72686_a

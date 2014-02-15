@@ -150,47 +150,22 @@
                  if (!block.isAir(theWorld, par1, par2, par3) && f >= 1.0F)
                  {
                      this.tryHarvestBlock(par1, par2, par3);
-@@ -203,6 +260,8 @@
-                     this.durabilityRemainingOnBlock = i1;
-                 }
+@@ -274,7 +331,14 @@
+             {
+                 return false;
              }
 +
-+            theWorld.spigotConfig.antiXrayInstance.updateNearbyBlocks(theWorld, par1, par2, par3); // Spigot
-         }
-     }
- 
-@@ -264,17 +323,24 @@
-     {
-         BlockEvent.BreakEvent event = ForgeHooks.onBlockBreakEvent(theWorld, gameType, thisPlayerMP, par1, par2, par3);
-         if (event.isCanceled())
-+                {
-+                return false;
-+            }
-+        else
-         {
-+        ItemStack stack = thisPlayerMP.getCurrentEquippedItem();
-+        if (stack != null && stack.getItem().onBlockStartBreak(stack, par1, par2, par3, thisPlayerMP))
-+        {
-             return false;
-         }
--        else
--        {
--            ItemStack stack = thisPlayerMP.getCurrentEquippedItem();
--            if (stack != null && stack.getItem().onBlockStartBreak(stack, par1, par2, par3, thisPlayerMP))
-+
-+            Block block = this.theWorld.getBlock(par1, par2, par3);
+             Block block = this.theWorld.getBlock(par1, par2, par3);
 +
 +            if (block == Blocks.air)
-             {
--                return false;
++            {
 +                return false;    // CraftBukkit - A plugin set block to air without cancelling
-             }
--            Block block = this.theWorld.getBlock(par1, par2, par3);
++            }
 +
              int l = this.theWorld.getBlockMetadata(par1, par2, par3);
              this.theWorld.playAuxSFXAtEntity(this.thisPlayerMP, 2001, par1, par2, par3, Block.getIdFromBlock(block) + (this.theWorld.getBlockMetadata(par1, par2, par3) << 12));
              boolean flag = false;
-@@ -358,57 +424,105 @@
+@@ -358,57 +422,105 @@
      // JAVADOC METHOD $$ func_73078_a
      public boolean activateBlockOrUseItem(EntityPlayer par1EntityPlayer, World par2World, ItemStack par3ItemStack, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
      {

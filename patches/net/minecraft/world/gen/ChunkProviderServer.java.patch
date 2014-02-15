@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/gen/ChunkProviderServer.java
 +++ ../src-work/minecraft/net/minecraft/world/gen/ChunkProviderServer.java
-@@ -23,29 +23,49 @@
+@@ -23,29 +23,50 @@
  import net.minecraft.world.chunk.Chunk;
  import net.minecraft.world.chunk.EmptyChunk;
  import net.minecraft.world.chunk.IChunkProvider;
@@ -15,6 +15,7 @@
 +import java.util.Random;
 +import net.minecraft.block.BlockSand;
 +import org.bukkit.Server;
++import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
 +import org.bukkit.craftbukkit.util.LongHash;
 +import org.bukkit.craftbukkit.util.LongHashSet;
 +import org.bukkit.craftbukkit.util.LongObjectHashMap;
@@ -57,7 +58,7 @@
          this.defaultEmptyChunk = new EmptyChunk(par1WorldServer, 0, 0);
          this.worldObj = par1WorldServer;
          this.currentChunkLoader = par2IChunkLoader;
-@@ -55,7 +75,7 @@
+@@ -55,7 +76,7 @@
      // JAVADOC METHOD $$ func_73149_a
      public boolean chunkExists(int par1, int par2)
      {
@@ -66,7 +67,7 @@
      }
  
      // JAVADOC METHOD $$ func_73241_b
-@@ -68,21 +88,40 @@
+@@ -68,21 +89,40 @@
              int l = par2 * 16 + 8 - chunkcoordinates.posZ;
              short short1 = 128;
  
@@ -110,7 +111,11 @@
  
          while (iterator.hasNext())
          {
-@@ -94,16 +133,40 @@
+@@ -91,19 +131,69 @@
+         }
+     }
+ 
++    // CraftBukkit start - Add async variant, provide compatibility
      // JAVADOC METHOD $$ func_73158_c
      public Chunk loadChunk(int par1, int par2)
      {
@@ -134,14 +139,39 @@
 +
 +        MCPCHooks.logChunkLoad(this, "Get", i, j, true);
 +
-+        // If the chunk exists but isn't loaded do it async
-+        if (chunk == null && runnable != null && loader != null && loader.chunkExists(this.worldObj, i, j) && MCPCConfig.Setting.loadChunkAsync.getValue()) // MCPC+ added config setting to disallow async chunk loading
++        // We can only use the queue for already generated chunks
++        if (chunk == null && loader != null && loader.chunkExists(this.worldObj, i, j))
 +        {
-+            org.bukkit.craftbukkit.chunkio.ChunkIOExecutor.queueChunkLoad(this.worldObj, loader, this, i, j, runnable);
-+            return null;
++            if (runnable != null)
++            {
++                ChunkIOExecutor.queueChunkLoad(this.worldObj, loader, this, i, j, runnable);
++                return null;
++            }
++            else
++            {
++                chunk = ChunkIOExecutor.syncChunkLoad(this.worldObj, loader, this, i, j);
++            }
++        }
++        else if (chunk == null)
++        {
++            chunk = this.originalGetChunkAt(i, j);
 +        }
 +
-+        // CraftBukkit end
++        // If we didn't load the chunk async and have a callback run it now
++        if (runnable != null)
++        {
++            runnable.run();
++        }
++
++        return chunk;
++    }
++
++    public Chunk originalGetChunkAt(int i, int j)
++    {
++        this.chunksToUnload.remove(i, j);
++        Chunk chunk = (Chunk) this.loadedChunkHashMap.get(LongHash.toLong(i, j));
++        boolean newChunk = false;
++    // CraftBukkit end
 +
          if (chunk == null)
          {
@@ -156,7 +186,7 @@
              }
  
              if (chunk == null)
-@@ -116,38 +179,84 @@
+@@ -116,24 +206,45 @@
                  {
                      try
                      {
@@ -208,16 +238,8 @@
 +            org.bukkit.craftbukkit.SpigotTimings.syncChunkLoadTimer.stopTiming(); // Spigot
          }
  
-+        // CraftBukkit start - If we didn't need to load the chunk run the callback now
-+        if (runnable != null)
-+        {
-+            runnable.run();
-+        }
-+
-+        // CraftBukkit end
          return chunk;
-     }
- 
+@@ -142,12 +253,30 @@
      // JAVADOC METHOD $$ func_73154_d
      public Chunk provideChunk(int par1, int par2)
      {
@@ -251,7 +273,7 @@
      {
          if (this.currentChunkLoader == null)
          {
-@@ -157,6 +266,8 @@
+@@ -157,6 +286,8 @@
          {
              try
              {
@@ -260,7 +282,7 @@
                  Chunk chunk = this.currentChunkLoader.loadChunk(this.worldObj, par1, par2);
  
                  if (chunk != null)
-@@ -167,6 +278,7 @@
+@@ -167,6 +298,7 @@
                      {
                          this.currentChunkProvider.recreateStructures(par1, par2);
                      }
@@ -268,7 +290,7 @@
                  }
  
                  return chunk;
-@@ -180,7 +292,7 @@
+@@ -180,7 +312,7 @@
      }
  
      // JAVADOC METHOD $$ func_73243_a
@@ -277,7 +299,7 @@
      {
          if (this.currentChunkLoader != null)
          {
-@@ -196,7 +308,7 @@
+@@ -196,7 +328,7 @@
      }
  
      // JAVADOC METHOD $$ func_73242_b
@@ -286,7 +308,7 @@
      {
          if (this.currentChunkLoader != null)
          {
-@@ -204,15 +316,18 @@
+@@ -204,15 +336,18 @@
              {
                  par1Chunk.lastSaveTime = this.worldObj.getTotalWorldTime();
                  this.currentChunkLoader.saveChunk(this.worldObj, par1Chunk);
@@ -306,7 +328,7 @@
          }
      }
  
-@@ -228,6 +343,35 @@
+@@ -228,6 +363,35 @@
              if (this.currentChunkProvider != null)
              {
                  this.currentChunkProvider.populate(par1IChunkProvider, par2, par3);
@@ -342,7 +364,7 @@
                  GameRegistry.generateWorld(par2, par3, worldObj, currentChunkProvider, par1IChunkProvider);
                  chunk.setChunkModified();
              }
-@@ -238,10 +382,13 @@
+@@ -238,10 +402,13 @@
      public boolean saveChunks(boolean par1, IProgressUpdate par2IProgressUpdate)
      {
          int i = 0;
@@ -358,7 +380,7 @@
  
              if (par1)
              {
-@@ -278,31 +425,60 @@
+@@ -278,31 +445,60 @@
      {
          if (!this.worldObj.levelSaving)
          {
@@ -430,7 +452,7 @@
              if (this.currentChunkLoader != null)
              {
                  this.currentChunkLoader.chunkTick();
-@@ -321,7 +497,8 @@
+@@ -321,7 +517,8 @@
      // JAVADOC METHOD $$ func_73148_d
      public String makeString()
      {
@@ -440,7 +462,7 @@
      }
  
      // JAVADOC METHOD $$ func_73155_a
-@@ -337,8 +514,32 @@
+@@ -337,8 +534,32 @@
  
      public int getLoadedChunkCount()
      {

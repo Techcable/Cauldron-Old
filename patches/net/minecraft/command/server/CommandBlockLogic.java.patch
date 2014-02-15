@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/command/server/CommandBlockLogic.java
 +++ ../src-work/minecraft/net/minecraft/command/server/CommandBlockLogic.java
-@@ -9,18 +9,29 @@
+@@ -9,18 +9,30 @@
  import net.minecraft.command.ICommandSender;
  import net.minecraft.nbt.NBTTagCompound;
  import net.minecraft.server.MinecraftServer;
@@ -12,6 +12,7 @@
 +// CraftBukkit start
 +import java.util.ArrayList;
 +import org.apache.logging.log4j.Level;
++import org.bukkit.craftbukkit.command.VanillaCommandWrapper;
 +import com.google.common.base.Joiner;
 +import net.minecraft.command.PlayerSelector;
 +import net.minecraft.entity.EntityMinecartCommandBlockListener;
@@ -31,7 +32,7 @@
      private static final String __OBFID = "CL_00000128";
  
      public int func_145760_g()
-@@ -95,8 +106,128 @@
+@@ -95,8 +107,140 @@
  
          if (minecraftserver != null && minecraftserver.isCommandBlockEnabled())
          {
@@ -59,15 +60,27 @@
 +                return;
 +            }
 +
-+            // Make sure this is a valid command
-+            if (commandMap.getCommand(args[0]) == null)
++            // If the world has no players don't run
++            if (this.getEntityWorld().playerEntities.isEmpty())
 +            {
-+                this.field_145764_b = org.spigotmc.VanillaCommandWrapper.dispatch(sender, command);   // Spigot - Try vanilla commands
++                this.field_145764_b = 0;
 +                return;
 +            }
 +
-+            // If the world has no players don't run
-+            if (this.getEntityWorld().playerEntities.isEmpty())
++            // Handle vanilla commands;
++            if (minecraftserver.server.getCommandBlockOverride(args[0]))
++            {
++                org.bukkit.command.Command commandBlockCommand = commandMap.getCommand("minecraft:" + args[0]);
++
++                if (commandBlockCommand instanceof VanillaCommandWrapper)
++                {
++                    this.field_145764_b = ((VanillaCommandWrapper) commandBlockCommand).dispatchVanillaCommandBlock(this, this.field_145763_e);
++                    return;
++                }
++            }
++
++            // Make sure this is a valid command
++            if (commandMap.getCommand(args[0]) == null)
 +            {
 +                this.field_145764_b = 0;
 +                return;
@@ -162,7 +175,7 @@
          }
          else
          {
-@@ -104,6 +235,31 @@
+@@ -104,6 +248,31 @@
          }
      }
  

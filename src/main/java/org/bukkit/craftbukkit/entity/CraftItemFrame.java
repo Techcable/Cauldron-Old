@@ -4,7 +4,9 @@ package org.bukkit.craftbukkit.entity;
 import org.apache.commons.lang.Validate;
 
 import org.bukkit.Rotation;
+import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
@@ -12,6 +14,17 @@ import org.bukkit.entity.ItemFrame;
 public class CraftItemFrame extends CraftHanging implements ItemFrame {
     public CraftItemFrame(CraftServer server, net.minecraft.entity.item.EntityItemFrame entity) {
         super(server, entity);
+    }
+
+    public boolean setFacingDirection(BlockFace face, boolean force) {
+        if (!super.setFacingDirection(face, force)) {
+            return false;
+        }
+
+        net.minecraft.world.WorldServer world = ((CraftWorld) this.getWorld()).getHandle();
+        world.getEntityTracker().removeEntityFromAllTrackingPlayers(this.getHandle());
+        world.getEntityTracker().addEntityToTracker(this.getHandle());
+        return true;
     }
 
     public void setItem(org.bukkit.inventory.ItemStack item) {

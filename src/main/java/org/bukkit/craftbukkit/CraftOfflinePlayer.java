@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -55,18 +56,15 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     }
 
     public boolean isBanned() {
-        return server.getHandle().getBannedPlayers().isBanned(name.toLowerCase());
+        return server.getBanList(BanList.Type.NAME).isBanned(getName());
     }
 
     public void setBanned(boolean value) {
         if (value) {
-            net.minecraft.server.management.BanEntry entry = new net.minecraft.server.management.BanEntry(name.toLowerCase());
-            server.getHandle().getBannedPlayers().put(entry);
+            server.getBanList(BanList.Type.NAME).addBan(getName(), null, null, null);
         } else {
-            server.getHandle().getBannedPlayers().remove(name.toLowerCase());
+            server.getBanList(BanList.Type.NAME).pardon(getName());
         }
-
-        server.getHandle().getBannedPlayers().saveToFileWithHeader();
     }
 
     public boolean isWhitelisted() {

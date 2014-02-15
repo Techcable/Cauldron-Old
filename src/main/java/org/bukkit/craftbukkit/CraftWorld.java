@@ -1094,8 +1094,8 @@ public class CraftWorld implements World {
         } else if (Weather.class.isAssignableFrom(clazz)) {
             // not sure what this can do
             if (LightningStrike.class.isAssignableFrom(clazz)) {
-            entity = new net.minecraft.entity.effect.EntityLightningBolt(world, x, y, z);
-            // what is this, I don't even
+                entity = new net.minecraft.entity.effect.EntityLightningBolt(world, x, y, z);
+                // what is this, I don't even
             }
         } else if (Firework.class.isAssignableFrom(clazz)) {
             entity = new net.minecraft.entity.item.EntityFireworkRocket(world, x, y, z, null);

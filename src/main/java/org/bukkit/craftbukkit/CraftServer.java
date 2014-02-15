@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -27,6 +28,7 @@ import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
 
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -47,6 +49,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.conversations.Conversable;
+import org.bukkit.craftbukkit.command.VanillaCommandWrapper;
 import org.bukkit.craftbukkit.help.SimpleHelpMap;
 import org.bukkit.craftbukkit.inventory.CraftFurnaceRecipe;
 import org.bukkit.craftbukkit.inventory.CraftInventoryCustom;
@@ -100,12 +103,11 @@ import org.bukkit.plugin.messaging.StandardMessenger;
 import org.bukkit.scheduler.BukkitWorker;
 import org.bukkit.util.StringUtil;
 import org.bukkit.util.permissions.DefaultPermissions;
-
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
-
 import org.apache.commons.lang.Validate;
+
 import com.avaje.ebean.config.DataSourceConfig;
 import com.avaje.ebean.config.ServerConfig;
 import com.avaje.ebean.config.dbplatform.SQLitePlatform;
@@ -116,6 +118,7 @@ import com.google.common.collect.MapMaker;
 import org.bukkit.craftbukkit.command.CraftSimpleCommandMap;
 
 import cpw.mods.fml.common.FMLLog;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraftforge.common.DimensionManager;
@@ -141,7 +144,8 @@ public final class CraftServer implements Server {
     protected final net.minecraft.server.MinecraftServer console;
     protected final net.minecraft.server.dedicated.DedicatedPlayerList playerList;
     private final Map<String, World> worlds = new LinkedHashMap<String, World>();
-    public YamlConfiguration configuration = Main.configuration; // MCPC+ - use Main configuration
+    public YamlConfiguration configuration = MinecraftServer.configuration; // MCPC+
+    private YamlConfiguration commandsConfiguration = MinecraftServer.commandsConfiguration; // MCPC+
     private final Yaml yaml = new Yaml(new SafeConstructor());
     private final Map<String, OfflinePlayer> offlinePlayers = new MapMaker().softValues().makeMap();
     private final AutoUpdater updater;
@@ -161,6 +165,7 @@ public final class CraftServer implements Server {
     public boolean playerCommandState;
     private boolean printSaveWarning;
     private CraftIconCache icon;
+    private boolean overrideAllCommandBlockCommands = false;
 
     private final class BooleanWrapper {
         private boolean value = true;
@@ -192,12 +197,45 @@ public final class CraftServer implements Server {
             getLogger().info("Console input is disabled due to --noconsole command argument");
         }
 
-        configuration = YamlConfiguration.loadConfiguration(getConfigFile());
-        // MCPC+ start - moved to Main so FML/Forge can access during server startup
-        //configuration.options().copyDefaults(true);
-        //configuration.setDefaults(YamlConfiguration.loadConfiguration(getClass().getClassLoader().getResourceAsStream("configurations/bukkit.yml")));
-        //saveConfig();
-        // MCPC+ end
+        /* MCPC+ start - moved to MinecraftServer so FML/Forge can access during server startup
+        configuration = YamlConfiguration.loadConfiguration(getConfigFile());        
+        configuration.options().copyDefaults(true);
+        configuration.setDefaults(YamlConfiguration.loadConfiguration(getClass().getClassLoader().getResourceAsStream("configurations/bukkit.yml")));
+        ConfigurationSection legacyAlias = null;
+        if (!configuration.isString("aliases")) {
+            legacyAlias = configuration.getConfigurationSection("aliases");
+            configuration.set("aliases", "now-in-commands.yml");
+        }
+        saveConfig();
+        if (getCommandsConfigFile().isFile()) {
+            legacyAlias = null;
+        }
+        commandsConfiguration = YamlConfiguration.loadConfiguration(getCommandsConfigFile());
+        commandsConfiguration.options().copyDefaults(true);
+        commandsConfiguration.setDefaults(YamlConfiguration.loadConfiguration(getClass().getClassLoader().getResourceAsStream("configurations/commands.yml")));
+        saveCommandsConfig();
+
+        // Migrate aliases from old file and add previously implicit $1- to pass all arguments
+        if (legacyAlias != null) {
+            ConfigurationSection aliases = commandsConfiguration.createSection("aliases");
+            for (String key : legacyAlias.getKeys(false)) {
+                ArrayList<String> commands = new ArrayList<String>();
+
+                if (legacyAlias.isList(key)) {
+                    for (String command : legacyAlias.getStringList(key)) {
+                        commands.add(command + " $1-");
+                    }
+                } else {
+                    commands.add(legacyAlias.getString(key) + " $1-");
+                }
+
+                aliases.set(key, commands);
+            }
+        }
+
+        saveCommandsConfig();
+        // MCPC+ end */
+        overrideAllCommandBlockCommands = commandsConfiguration.getStringList("command-block-overrides").contains("*");
         ((SimplePluginManager) pluginManager).useTimings(configuration.getBoolean("settings.plugin-profiling"));
         monsterSpawn = configuration.getInt("spawn-limits.monsters");
         animalSpawn = configuration.getInt("spawn-limits.animals");
@@ -223,8 +261,16 @@ public final class CraftServer implements Server {
         // Spigot End
     }
 
+    public boolean getCommandBlockOverride(String command) {
+        return overrideAllCommandBlockCommands || commandsConfiguration.getStringList("command-block-overrides").contains(command);
+    }
+
     private File getConfigFile() {
         return (File) console.options.valueOf("bukkit-settings");
+    }
+
+    private File getCommandsConfigFile() {
+        return (File) console.options.valueOf("commands-settings");
     }
 
     private void saveConfig() {
@@ -232,6 +278,14 @@ public final class CraftServer implements Server {
             configuration.save(getConfigFile());
         } catch (IOException ex) {
             Logger.getLogger(CraftServer.class.getName()).log(Level.SEVERE, "Could not save " + getConfigFile(), ex);
+        }
+    }
+
+    private void saveCommandsConfig() {
+        try {
+            commandsConfiguration.save(getCommandsConfigFile());
+        } catch (IOException ex) {
+            Logger.getLogger(CraftServer.class.getName()).log(Level.SEVERE, "Could not save " + getCommandsConfigFile(), ex);
         }
     }
 
@@ -275,6 +329,8 @@ public final class CraftServer implements Server {
         }
 
         if (type == PluginLoadOrder.POSTWORLD) {
+            commandMap.setFallbackCommands();
+            setVanillaCommands();
             commandMap.registerServerAliases();
             loadCustomPermissions();
             DefaultPermissions.registerCorePermissions();
@@ -284,6 +340,50 @@ public final class CraftServer implements Server {
 
     public void disablePlugins() {
         pluginManager.disablePlugins();
+    }
+
+    private void setVanillaCommands() {
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandAchievement(), "/achievement give <stat_name> [player]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandBanPlayer(), "/ban <playername> [reason]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandBanIp(), "/ban-ip <ip-address|playername>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandListBans(), "/banlist [ips]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandClearInventory(), "/clear <playername> [item] [metadata]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandDefaultGameMode(), "/defaultgamemode <mode>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandDeOp(), "/deop <playername>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandDifficulty(), "/difficulty <new difficulty>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandEffect(), "/effect <player> <effect|clear> [seconds] [amplifier]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandEnchant(), "/enchant <playername> <enchantment ID> [enchantment level]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandGameMode(), "/gamemode <mode> [player]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandGameRule(), "/gamerule <rulename> [true|false]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandGive(), "/give <playername> <item> [amount] [metadata] [dataTag]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandHelp(), "/help [page|commandname]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandSetPlayerTimeout(), "/setidletimeout <Minutes until kick>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandServerKick(), "/kick <playername> [reason]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandKill(), "/kill [playername]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandListPlayers(), "/list"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandEmote(), "/me <actiontext>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandOp(), "/op <playername>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandPardonPlayer(), "/pardon <playername>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandPardonIp(), "/pardon-ip <ip-address>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandPlaySound(), "/playsound <sound> <playername> [x] [y] [z] [volume] [pitch] [minimumVolume]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandBroadcast(), "/say <message>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandScoreboard(), "/scoreboard"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandShowSeed(), "/seed"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandSetBlock(), "/setblock <x> <y> <z> <tilename> [datavalue] [oldblockHandling] [dataTag]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandSetDefaultSpawnpoint(), "/setworldspawn [x] [y] [z]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandSetSpawnpoint(), "/spawnpoint <playername> [x] [y] [z]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandSpreadPlayers(), "/spreadplayers <x> <z> [spreadDistance] [maxRange] [respectTeams] <playernames>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandSummon(), "/summon <EntityName> [x] [y] [z] [dataTag]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandTeleport(), "/tp [player] <target>\n/tp [player] <x> <y> <z>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandMessage(), "/tell <playername> <message>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandMessageRaw(), "/tellraw <playername> <raw message>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandTestFor(), "/testfor <playername | selector> [dataTag]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandTestForBlock(), "/testforblock <x> <y> <z> <tilename> [datavalue] [dataTag]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandTime(), "/time set <value>\n/time add <value>"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandToggleDownfall(), "/toggledownfall"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandWeather(), "/weather <clear/rain/thunder> [duration in seconds]"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.server.CommandWhitelist(), "/whitelist (add|remove) <player>\n/whitelist (on|off|list|reload)"));
+        commandMap.register("minecraft", new VanillaCommandWrapper(new net.minecraft.command.CommandXP(), "/xp <amount> [player]\n/xp <amount>L [player]"));
     }
 
     private void loadPlugin(Plugin plugin) {
@@ -577,6 +677,7 @@ public final class CraftServer implements Server {
 
     public void reload() {
         configuration = YamlConfiguration.loadConfiguration(getConfigFile());
+        commandsConfiguration = YamlConfiguration.loadConfiguration(getCommandsConfigFile());
         net.minecraft.server.dedicated.PropertyManager config = new net.minecraft.server.dedicated.PropertyManager(console.options);
 
         ((net.minecraft.server.dedicated.DedicatedServer) console).settings = config;
@@ -626,6 +727,7 @@ public final class CraftServer implements Server {
         pluginManager.clearPlugins();
         commandMap.clearCommands();
         resetRecipes();
+        overrideAllCommandBlockCommands = commandsConfiguration.getStringList("command-block-overrides").contains("*");
         org.spigotmc.SpigotConfig.registerCommands(); // Spigot
 
         int pollCount = 0;
@@ -1126,20 +1228,19 @@ public final class CraftServer implements Server {
 
     @SuppressWarnings("unchecked")
     public Set<String> getIPBans() {
-        return playerList.getBannedIPs().getBannedList().keySet();
+        return new HashSet<String>(playerList.getBannedIPs().getBannedList().keySet());
     }
 
     public void banIP(String address) {
         Validate.notNull(address, "Address cannot be null.");
 
-        net.minecraft.server.management.BanEntry entry = new net.minecraft.server.management.BanEntry(address);
-        playerList.getBannedIPs().put(entry);
-        playerList.getBannedIPs().saveToFileWithHeader();
+        this.getBanList(org.bukkit.BanList.Type.IP).addBan(address, null, null, null);
     }
 
     public void unbanIP(String address) {
-        playerList.getBannedIPs().remove(address);
-        playerList.getBannedIPs().saveToFileWithHeader();
+        Validate.notNull(address, "Address cannot be null.");
+
+        this.getBanList(org.bukkit.BanList.Type.IP).pardon(address);
     }
 
     public Set<OfflinePlayer> getBannedPlayers() {
@@ -1150,6 +1251,19 @@ public final class CraftServer implements Server {
         }
 
         return result;
+    }
+
+    @Override
+    public BanList getBanList(BanList.Type type){
+        Validate.notNull(type, "Type cannot be null");
+
+        switch(type){
+        case IP:
+            return new CraftBanList(playerList.getBannedIPs());
+        case NAME:
+        default: // Fall through as a player name list for safety
+            return new CraftBanList(playerList.getBannedPlayers());
+        }
     }
 
     public void setWhitelist(boolean value) {

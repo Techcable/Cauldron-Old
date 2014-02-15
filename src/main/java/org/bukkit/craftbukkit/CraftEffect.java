@@ -55,8 +55,6 @@ public class CraftEffect {
             Validate.isTrue(((Material) data).isBlock(), "Material is not a block!");
             datavalue = ((Material) data).getId();
             break;
-        case ITEM_BREAK:
-            datavalue = ((Material) data).getId();
         default:
             datavalue = 0;
         }

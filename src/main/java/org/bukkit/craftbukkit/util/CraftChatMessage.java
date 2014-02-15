@@ -13,7 +13,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 public final class CraftChatMessage {
     private static class StringMessage {
         private static final Map<Character, net.minecraft.util.EnumChatFormatting> formatMap;
-        private static final Pattern INCREMENTAL_PATTERN = Pattern.compile("(" + String.valueOf(org.bukkit.ChatColor.COLOR_CHAR) + "[0-9a-fk-or])|(\\n)|((?:(?:https?)://)?(?:[-\\w_\\.]{2,}\\.[a-z]{2,4}.*?(?=[\\.\\?!,;:]?(?:[ \\n]|$))))", Pattern.CASE_INSENSITIVE);
+        private static final Pattern INCREMENTAL_PATTERN = Pattern.compile("(" + String.valueOf(org.bukkit.ChatColor.COLOR_CHAR) + "[0-9a-fk-or])|(\\n)|(?:(https?://[^ ][^ ]*?)(?=[\\.\\?!,;:]?(?:[ \\n]|$)))", Pattern.CASE_INSENSITIVE);
 
         static {
             Builder<Character, net.minecraft.util.EnumChatFormatting> builder = ImmutableMap.builder();
@@ -79,9 +79,6 @@ public final class CraftChatMessage {
                     currentChatComponent = null;
                     break;
                 case 3:
-                    if ( !( match.startsWith( "http://" ) || match.startsWith( "https://" ) ) ) {
-                        match = "http://" + match;
-                    }
                     modifier.setChatClickEvent(new net.minecraft.event.ClickEvent(net.minecraft.event.ClickEvent.Action.OPEN_URL, match)); // Should be setChatClickable
                     appendNewComponent(matcher.end(groupId));
                     modifier.setChatClickEvent((net.minecraft.event.ClickEvent) null);
@@ -93,7 +90,7 @@ public final class CraftChatMessage {
                 appendNewComponent(message.length());
             }
 
-            output = list.toArray(new net.minecraft.util.IChatComponent[list.size()]);
+            output = list.toArray(new net.minecraft.util.IChatComponent[0]);
         }
 
         private void appendNewComponent(int index) {

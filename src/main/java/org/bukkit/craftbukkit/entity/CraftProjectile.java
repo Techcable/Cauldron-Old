@@ -49,8 +49,8 @@ public class CraftProjectile extends AbstractProjectile implements Projectile { 
     @Deprecated
     public LivingEntity _INVALID_getShooter() {
         if (getHandle().thrower == null) {
-        return null;
-    }
+            return null;
+        }
         return (LivingEntity) getHandle().thrower.getBukkitEntity();
     }
 
@@ -62,6 +62,6 @@ public class CraftProjectile extends AbstractProjectile implements Projectile { 
         getHandle().thrower = ((CraftLivingEntity) shooter).getHandle();
         if (shooter instanceof CraftHumanEntity) {
             getHandle().throwerName = ((CraftHumanEntity) shooter).getName();
-    }
+        }
     }
 }

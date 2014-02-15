@@ -26,17 +26,10 @@
          {
              float f = 0.7F;
              double d0 = (double)(p_149642_1_.rand.nextFloat() * f) + (double)(1.0F - f) * 0.5D;
-@@ -1237,6 +1238,30 @@
+@@ -1237,6 +1238,23 @@
          return this;
      }
  
-+    // CraftBukkit start
-+    public int getExpDrop(World world, int data, int enchantmentLevel)
-+    {
-+        return 0;
-+    }
-+    // CraftBukkit end
-+
 +    // Spigot start
 +    public static float range(float min, float value, float max)
 +    {

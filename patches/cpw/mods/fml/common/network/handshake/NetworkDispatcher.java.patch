@@ -9,3 +9,12 @@
          }
          return false;
      }
+@@ -445,7 +445,7 @@
+         // Stop the epic channel closed spam at close
+         if (!(cause instanceof ClosedChannelException))
+         {
+-            FMLLog.log(Level.ERROR, cause, "NetworkDispatcher exception");
++            //FMLLog.log(Level.ERROR, cause, "NetworkDispatcher exception"); // MCPC+ - disable unneeded spam
+         }
+         super.exceptionCaught(ctx, cause);
+     }

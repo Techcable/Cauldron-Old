@@ -39,7 +39,7 @@ public class RecipeIterator implements Iterator<Recipe> {
             if (smeltingCustom.hasNext()) {
                 removeFrom = smeltingCustom;
                 item = smeltingCustom.next();
-        } else {
+            } else {
                 removeFrom = smeltingVanilla;
                 item = smeltingVanilla.next();
             }

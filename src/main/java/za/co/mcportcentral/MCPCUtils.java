@@ -20,7 +20,7 @@ public class MCPCUtils {
     public static boolean isOverridingUpdateEntity(Class<? extends TileEntity> c) 
     {
         Class clazz = null;
-        String method = "func_145845_h"; // updateEntity
+        String method = deobfuscatedEnvironment() ? "updateEntity" : "func_145845_h"; // updateEntity
         try {
             clazz = c.getMethod(method).getDeclaringClass();
         }

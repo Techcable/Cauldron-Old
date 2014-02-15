@@ -107,7 +107,7 @@
      // JAVADOC FIELD $$ field_147374_l
 -    private int chatSpamThresholdCount;
 +    private volatile int chatSpamThresholdCount; // MCPC+ - set to volatile to fix multithreaded issues
-+    private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, "fiel" + "d_147374_l"); // CraftBukkit - multithreaded field
++    private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, MCPCUtils.deobfuscatedEnvironment() ? "chatSpamThresholdCount" : "fiel" + "d_147374_l"); // CraftBukkit - multithreaded field
      private int field_147375_m;
      private IntHashMap field_147372_n = new IntHashMap();
 -    // JAVADOC FIELD $$ field_147373_o
@@ -607,7 +607,7 @@
          try
          {
              this.netManager.scheduleOutboundPacket(p_147359_1_, new GenericFutureListener[0]);
-@@ -686,14 +1046,32 @@
+@@ -686,21 +1046,39 @@
      // JAVADOC METHOD $$ func_147355_a
      public void processHeldItemChange(C09PacketHeldItemChange p_147355_1_)
      {
@@ -640,6 +640,14 @@
          }
      }
  
+     // JAVADOC METHOD $$ func_147354_a
+     public void processChatMessage(C01PacketChatMessage p_147354_1_)
+     {
+-        if (this.playerEntity.func_147096_v() == EntityPlayer.EnumChatVisibility.HIDDEN)
++        if (this.playerEntity.isDead || this.playerEntity.func_147096_v() == EntityPlayer.EnumChatVisibility.HIDDEN)   // CraftBukkit - dead men tell no tales
+         {
+             ChatComponentTranslation chatcomponenttranslation = new ChatComponentTranslation("chat.cannotSend", new Object[0]);
+             chatcomponenttranslation.getChatStyle().setColor(EnumChatFormatting.RED);
 @@ -716,15 +1094,75 @@
              {
                  if (!ChatAllowedCharacters.isAllowedCharacter(s.charAt(i)))
@@ -718,23 +726,52 @@
              else
              {
                  ChatComponentTranslation chatcomponenttranslation1 = new ChatComponentTranslation("chat.type.text", new Object[] {this.playerEntity.func_145748_c_(), s});
-@@ -733,28 +1171,240 @@
+@@ -733,28 +1171,270 @@
                  this.serverController.getConfigurationManager().sendChatMsgImpl(chatcomponenttranslation1, false);
              }
  
 -            this.chatSpamThresholdCount += 20;
--
--            if (this.chatSpamThresholdCount > 200 && !this.serverController.getConfigurationManager().isPlayerOpped(this.playerEntity.getCommandSenderName()))
 +            // CraftBukkit start - replaced with thread safe throttle
 +            // this.chatThrottle += 20;
 +            if (chatSpamField.addAndGet(this, 20) > 200 && !this.serverController.getConfigurationManager().isPlayerOpped(this.playerEntity.getCommandSenderName()))
-             {
-+                // CraftBukkit end
-                 this.kickPlayerFromServer("disconnect.spam");
-             }
-         }
-     }
++            {
++                if (p_147354_1_.hasPriority())
++                {
++                    Waitable waitable = new Waitable()
++                    {
++                        @Override
++                        protected Object evaluate()
++                        {
++                            NetHandlerPlayServer.this.kickPlayerFromServer("disconnect.spam");
++                            return null;
++                        }
++                    };
++                    this.serverController.processQueue.add(waitable);
  
+-            if (this.chatSpamThresholdCount > 200 && !this.serverController.getConfigurationManager().isPlayerOpped(this.playerEntity.getCommandSenderName()))
++                    try
++                    {
++                        waitable.get();
++                    }
++                    catch (InterruptedException e)
++                    {
++                        Thread.currentThread().interrupt();
++                    }
++                    catch (ExecutionException e)
++                    {
++                        throw new RuntimeException(e);
++                    }
++                }
++                else
++                {
++                    this.kickPlayerFromServer("disconnect.spam");
++                }
++
++                // CraftBukkit end
++            }
++        }
++    }
++
 +    // CraftBukkit start
 +    public void chat(String s, boolean async)
 +    {
@@ -758,7 +795,8 @@
 +            this.server.getPluginManager().callEvent(event);
 +
 +            if (PlayerChatEvent.getHandlerList().getRegisteredListeners().length != 0)
-+            {
+             {
+-                this.kickPlayerFromServer("disconnect.spam");
 +                // Evil plugins still listening to deprecated event
 +                final PlayerChatEvent queueEvent = new PlayerChatEvent(player, event.getMessage(), event.getFormat(), event.getRecipients());
 +                queueEvent.setCancelled(event.isCancelled());
@@ -817,7 +855,7 @@
 +                {
 +                    throw new RuntimeException("Exception processing chat event", e.getCause());
 +                }
-+            }
+             }
 +            else
 +            {
 +                if (event.isCancelled())
@@ -843,10 +881,10 @@
 +                    }
 +                }
 +            }
-+        }
-+    }
+         }
+     }
 +    // CraftBukkit end
-+
+ 
      // JAVADOC METHOD $$ func_147361_d
      private void handleSlashCommand(String p_147361_1_)
      {
@@ -963,7 +1001,7 @@
              this.playerEntity.swingItem();
          }
      }
-@@ -762,8 +1412,38 @@
+@@ -762,8 +1442,38 @@
      // JAVADOC METHOD $$ func_147357_a
      public void processEntityAction(C0BPacketEntityAction p_147357_1_)
      {
@@ -1002,7 +1040,7 @@
          if (p_147357_1_.func_149513_d() == 1)
          {
              this.playerEntity.setSneaking(true);
-@@ -783,7 +1463,7 @@
+@@ -783,7 +1493,7 @@
          else if (p_147357_1_.func_149513_d() == 3)
          {
              this.playerEntity.wakeUpPlayer(false, true, true);
@@ -1011,7 +1049,7 @@
          }
          else if (p_147357_1_.func_149513_d() == 6)
          {
-@@ -801,8 +1481,22 @@
+@@ -801,8 +1511,22 @@
      // JAVADOC METHOD $$ func_147340_a
      public void processUseEntity(C02PacketUseEntity p_147340_1_)
      {
@@ -1035,7 +1073,7 @@
          this.playerEntity.func_143004_u();
  
          if (entity != null)
-@@ -817,9 +1511,49 @@
+@@ -817,9 +1541,49 @@
  
              if (this.playerEntity.getDistanceSqToEntity(entity) < d0)
              {
@@ -1085,7 +1123,7 @@
                  }
                  else if (p_147340_1_.func_149565_c() == C02PacketUseEntity.Action.ATTACK)
                  {
-@@ -831,6 +1565,14 @@
+@@ -831,6 +1595,14 @@
                      }
  
                      this.playerEntity.attackTargetEntityWithCurrentItem(entity);
@@ -1100,7 +1138,7 @@
                  }
              }
          }
-@@ -847,7 +1589,7 @@
+@@ -847,7 +1619,7 @@
              case 1:
                  if (this.playerEntity.playerConqueredTheEnd)
                  {
@@ -1109,7 +1147,7 @@
                  }
                  else if (this.playerEntity.getServerForPlayer().getWorldInfo().isHardcoreModeEnabled())
                  {
-@@ -886,18 +1628,451 @@
+@@ -886,18 +1658,451 @@
      // JAVADOC METHOD $$ func_147356_a
      public void processCloseWindow(C0DPacketCloseWindow p_147356_1_)
      {
@@ -1562,7 +1600,7 @@
              if (ItemStack.areItemStacksEqual(p_147351_1_.func_149546_g(), itemstack))
              {
                  this.playerEntity.playerNetServerHandler.sendPacket(new S32PacketConfirmTransaction(p_147351_1_.func_149548_c(), p_147351_1_.func_149547_f(), true));
-@@ -919,6 +2094,14 @@
+@@ -919,6 +2124,14 @@
                  }
  
                  this.playerEntity.sendContainerAndContentsToPlayer(this.playerEntity.openContainer, arraylist);
@@ -1577,7 +1615,7 @@
              }
          }
      }
-@@ -943,9 +2126,60 @@
+@@ -943,9 +2156,60 @@
              boolean flag = p_147344_1_.func_149627_c() < 0;
              ItemStack itemstack = p_147344_1_.func_149625_d();
              boolean flag1 = p_147344_1_.func_149627_c() >= 1 && p_147344_1_.func_149627_c() < 36 + InventoryPlayer.getHotbarSize();
@@ -1639,7 +1677,7 @@
              if (flag1 && flag2 && flag3)
              {
                  if (itemstack == null)
-@@ -975,8 +2209,13 @@
+@@ -975,8 +2239,13 @@
      // JAVADOC METHOD $$ func_147339_a
      public void processConfirmTransaction(C0FPacketConfirmTransaction p_147339_1_)
      {
@@ -1654,7 +1692,7 @@
          if (oshort != null && p_147339_1_.func_149533_d() == oshort.shortValue() && this.playerEntity.openContainer.windowId == p_147339_1_.func_149532_c() && !this.playerEntity.openContainer.isPlayerNotUsingContainer(this.playerEntity))
          {
              this.playerEntity.openContainer.setPlayerIsPresent(this.playerEntity, true);
-@@ -985,6 +2224,11 @@
+@@ -985,6 +2254,11 @@
  
      public void processUpdateSign(C12PacketUpdateSign p_147343_1_)
      {
@@ -1666,7 +1704,7 @@
          this.playerEntity.func_143004_u();
          WorldServer worldserver = this.serverController.worldServerForDimension(this.playerEntity.dimension);
  
-@@ -999,6 +2243,7 @@
+@@ -999,6 +2273,7 @@
                  if (!tileentitysign.func_145914_a() || tileentitysign.func_145911_b() != this.playerEntity)
                  {
                      this.serverController.logWarning("Player " + this.playerEntity.getCommandSenderName() + " just tried to change non-editable sign");
@@ -1674,7 +1712,7 @@
                      return;
                  }
              }
-@@ -1009,6 +2254,7 @@
+@@ -1009,6 +2284,7 @@
              for (j = 0; j < 4; ++j)
              {
                  boolean flag = true;
@@ -1682,7 +1720,7 @@
  
                  if (p_147343_1_.func_149589_f()[j].length() > 15)
                  {
-@@ -1036,8 +2282,29 @@
+@@ -1036,8 +2312,29 @@
                  j = p_147343_1_.func_149588_c();
                  int k = p_147343_1_.func_149586_d();
                  i = p_147343_1_.func_149585_e();
@@ -1714,7 +1752,7 @@
                  tileentitysign1.markDirty();
                  worldserver.markBlockForUpdate(j, k, i);
              }
-@@ -1062,7 +2329,23 @@
+@@ -1062,7 +2359,23 @@
      // JAVADOC METHOD $$ func_147348_a
      public void processPlayerAbilities(C13PacketPlayerAbilities p_147348_1_)
      {
@@ -1739,7 +1777,7 @@
      }
  
      // JAVADOC METHOD $$ func_147341_a
-@@ -1092,6 +2375,14 @@
+@@ -1092,6 +2405,14 @@
          ItemStack itemstack;
          ItemStack itemstack1;
  
@@ -1754,7 +1792,7 @@
          if ("MC|BEdit".equals(p_147349_1_.func_149559_c()))
          {
              try
-@@ -1107,12 +2398,16 @@
+@@ -1107,12 +2428,16 @@
  
                  if (itemstack.getItem() == Items.writable_book && itemstack.getItem() == itemstack1.getItem())
                  {
@@ -1765,7 +1803,7 @@
 +                // CraftBukkit start
              }
 -            catch (Exception exception4)
-+            catch (Exception exception)
++            catch (Throwable exception)
              {
 -                logger.error("Couldn\'t handle book info", exception4);
 +                logger.error("Couldn\'t handle book info", exception);
@@ -1774,7 +1812,7 @@
              }
          }
          else if ("MC|BSign".equals(p_147349_1_.func_149559_c()))
-@@ -1130,15 +2425,16 @@
+@@ -1130,15 +2455,16 @@
  
                  if (itemstack.getItem() == Items.written_book && itemstack1.getItem() == Items.writable_book)
                  {
@@ -1788,7 +1826,7 @@
 +                // CraftBukkit start
              }
 -            catch (Exception exception3)
-+            catch (Exception exception1)
++            catch (Throwable exception1)
              {
 -                logger.error("Couldn\'t sign book", exception3);
 +                logger.error("Couldn\'t sign book", exception1);
@@ -1797,48 +1835,57 @@
              }
          }
          else
-@@ -1161,7 +2457,10 @@
-                 }
-                 catch (Exception exception2)
-                 {
+@@ -1158,10 +2484,14 @@
+                     {
+                         ((ContainerMerchant)container).setCurrentRecipeIndex(i);
+                     }
++
 +                    // CraftBukkit start
+                 }
+-                catch (Exception exception2)
++                catch (Throwable exception2)
+                 {
                      logger.error("Couldn\'t select trade", exception2);
 +                    this.kickPlayerFromServer("Invalid trade data!");
 +                    // CraftBukkit end
                  }
              }
              else if ("MC|AdvCdm".equals(p_147349_1_.func_149559_c()))
-@@ -1206,9 +2505,12 @@
+@@ -1205,10 +2535,14 @@
+                             commandblocklogic.func_145756_e();
                              this.playerEntity.addChatMessage(new ChatComponentTranslation("advMode.setCommand.success", new Object[] {s1}));
                          }
++
++                        // CraftBukkit start
                      }
 -                    catch (Exception exception1)
-+                    catch (Exception exception3)
++                    catch (Throwable exception3)
                      {
 -                        logger.error("Couldn\'t set command block", exception1);
-+                        // CraftBukkit start
 +                        logger.error("Couldn\'t set command block", exception3);
 +                        this.kickPlayerFromServer("Invalid CommandBlock data!");
 +                        // CraftBukkit end
                      }
                  }
                  else
-@@ -1237,9 +2539,12 @@
+@@ -1236,10 +2570,14 @@
+                             tileentitybeacon.setSecondaryEffect(j);
                              tileentitybeacon.markDirty();
                          }
++
++                        // CraftBukkit start
                      }
 -                    catch (Exception exception)
-+                    catch (Exception exception4)
++                    catch (Throwable exception4)
                      {
 -                        logger.error("Couldn\'t set beacon", exception);
-+                        // CraftBukkit start
 +                        logger.error("Couldn\'t set beacon", exception4);
 +                        this.kickPlayerFromServer("Invalid beacon data!");
 +                        // CraftBukkit end
                      }
                  }
              }
-@@ -1261,6 +2566,45 @@
+@@ -1261,6 +2599,45 @@
                      containerrepair.updateItemName("");
                  }
              }
@@ -1884,7 +1931,7 @@
          }
      }
  
-@@ -1273,39 +2617,46 @@
+@@ -1273,39 +2650,46 @@
          }
      }
  
