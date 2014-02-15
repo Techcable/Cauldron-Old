@@ -1035,14 +1035,14 @@
 +                    } catch (IOException ex) {
 +                        logger.log(org.apache.logging.log4j.Level.ERROR, "Could not save " + configFile, ex);
 +                }
-+                if (((File)options.valueOf("commands-settings")).isFile()) {
++                if (commandFile.isFile()) {
 +                    legacyAlias = null;
 +                }
-+                commandsConfiguration = YamlConfiguration.loadConfiguration((File)options.valueOf("commands-settings"));
++                commandsConfiguration = YamlConfiguration.loadConfiguration(commandFile);
 +                commandsConfiguration.options().copyDefaults(true);
 +                commandsConfiguration.setDefaults(YamlConfiguration.loadConfiguration(MinecraftServer.class.getClassLoader().getResourceAsStream("configurations/commands.yml")));
 +                try {
-+                    configuration.save(commandFile);
++                    commandsConfiguration.save(commandFile);
 +                    } catch (IOException ex) {
 +                        logger.log(org.apache.logging.log4j.Level.ERROR, "Could not save " + commandFile, ex);
 +                }
@@ -1066,7 +1066,7 @@
 +                }
 +
 +                try {
-+                    configuration.save(commandFile);
++                    commandsConfiguration.save(commandFile);
 +                    } catch (IOException ex) {
 +                        logger.log(org.apache.logging.log4j.Level.ERROR, "Could not save " + commandFile, ex);
 +                }
