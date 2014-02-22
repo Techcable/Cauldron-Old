@@ -277,7 +277,7 @@ public class ActivationRange
     public static boolean checkIfActive(Entity entity)
     {
         SpigotTimings.checkIfActiveTimer.startTiming();
-        
+
         boolean isActive = entity.activatedTick >= MinecraftServer.currentTick || entity.defaultActivationState;
 
         // Should this entity tick?
@@ -298,9 +298,11 @@ public class ActivationRange
         {
             isActive = false;
         }
+
+        // Make sure not on edge of unloaded chunk
+
         int x = net.minecraft.util.MathHelper.floor_double( entity.posX );
         int z = net.minecraft.util.MathHelper.floor_double( entity.posZ );
-        // Make sure not on edge of unloaded chunk
         if ( isActive && !entity.worldObj.doChunksNearChunkExist( x, 0, z, 16 ) )
         {
             isActive = false;

@@ -20,7 +20,7 @@
  @SideOnly(Side.SERVER)
  public class DedicatedServer extends MinecraftServer implements IServer
  {
-@@ -42,15 +52,19 @@
+@@ -42,16 +52,19 @@
      private final List pendingCommandList = Collections.synchronizedList(new ArrayList());
      private RConThreadQuery theRConThreadQuery;
      private RConThreadMain theRConThreadMain;
@@ -29,7 +29,7 @@
      private boolean canSpawnStructures;
      private WorldSettings.GameType gameType;
      private boolean guiIsEnabled;
-+    public static boolean allowPlayerLogins = false; // MCPC+ - used to signal when players are allowed to login
+     public static boolean allowPlayerLogins = false;
      private static final String __OBFID = "CL_00001784";
  
 -    public DedicatedServer(File par1File)
@@ -38,12 +38,12 @@
      {
 -        super(par1File, Proxy.NO_PROXY);
 +        super(options, Proxy.NO_PROXY);
-+        // super(file1, Proxy.NO_PROXY);
++        // super(par1File, Proxy.NO_PROXY);
 +        // CraftBukkit end
          Thread thread = new Thread("Server Infinisleeper")
          {
              private static final String __OBFID = "CL_00001787";
-@@ -79,7 +93,7 @@
+@@ -80,7 +93,7 @@
      }
  
      // JAVADOC METHOD $$ func_71197_b
@@ -52,12 +52,12 @@
      {
          Thread thread = new Thread("Server console handler")
          {
-@@ -104,6 +118,30 @@
+@@ -105,6 +118,30 @@
          };
          thread.setDaemon(true);
          thread.start();
 +        // CraftBukkit start - TODO: handle command-line logging arguments
-+        /*java.util.logging.Logger global = java.util.logging.Logger.getLogger("");
++        java.util.logging.Logger global = java.util.logging.Logger.getLogger("");
 +        global.setUseParentHandlers(false);
 +
 +        for (java.util.logging.Handler handler : global.getHandlers())
@@ -78,12 +78,12 @@
 +
 +        new Thread(new org.bukkit.craftbukkit.util.TerminalConsoleWriterThread(System.out, this.reader)).start();
 +        System.setOut(new PrintStream(new LoggerOutputStream(logger, Level.INFO), true));
-+        System.setErr(new PrintStream(new LoggerOutputStream(logger, Level.WARN), true));*/
++        System.setErr(new PrintStream(new LoggerOutputStream(logger, Level.WARN), true));
 +        // CraftBukkit end
          field_155771_h.info("Starting minecraft server version 1.7.2");
  
          if (Runtime.getRuntime().maxMemory() / 1024L / 1024L < 512L)
-@@ -114,7 +152,7 @@
+@@ -115,7 +152,7 @@
          FMLCommonHandler.instance().onServerStart(this);
  
          field_155771_h.info("Loading properties");
@@ -92,7 +92,7 @@
  
          if (this.isSinglePlayer())
          {
-@@ -160,22 +198,39 @@
+@@ -161,22 +198,39 @@
              this.setServerPort(this.settings.getIntProperty("server-port", 25565));
          }
  
@@ -141,7 +141,7 @@
          if (!this.isServerInOnlineMode())
          {
              field_155771_h.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
-@@ -186,7 +241,8 @@
+@@ -187,7 +241,8 @@
  
          FMLCommonHandler.instance().onServerStarted();
  
@@ -151,7 +151,7 @@
          long j = System.nanoTime();
  
          if (this.getFolderName() == null)
-@@ -238,6 +294,21 @@
+@@ -239,6 +294,21 @@
          String s3 = String.format("%.3fs", new Object[] {Double.valueOf((double)i1 / 1.0E9D)});
          field_155771_h.info("Done (" + s3 + ")! For help, type \"help\" or \"?\"");
  
@@ -173,13 +173,14 @@
          if (this.settings.getBooleanProperty("enable-query", false))
          {
              field_155771_h.info("Starting GS4 status listener");
-@@ -250,11 +321,28 @@
+@@ -251,12 +321,30 @@
              field_155771_h.info("Starting remote control listener");
              this.theRConThreadMain = new RConThreadMain(this);
              this.theRConThreadMain.startThread();
 +            this.remoteConsole = new org.bukkit.craftbukkit.command.CraftRemoteConsoleCommandSender(); // CraftBukkit
          }
  
+-        allowPlayerLogins = true;
 +        // CraftBukkit start
 +        if (this.server.getBukkitSpawnRadius() > -1)
 +        {
@@ -189,10 +190,12 @@
 +            this.server.removeBukkitSpawnRadius();
 +            this.settings.saveProperties();
 +        }
++        // CraftBukkit end
 +
          return FMLCommonHandler.instance().handleServerStarting(this);
      }
  
++    // CraftBukkit start
 +    public PropertyManager getPropertyManager()
 +    {
 +        return this.settings;
@@ -202,7 +205,7 @@
      public boolean canStructuresSpawn()
      {
          return this.canSpawnStructures;
-@@ -362,8 +450,14 @@
+@@ -364,8 +452,14 @@
      {
          while (!this.pendingCommandList.isEmpty())
          {

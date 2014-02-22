@@ -24,7 +24,6 @@ public class Main {
 
     public static OptionSet loadOptions(String[] args) {
     // MCPC end
-        System.out.println("Args = " + args);
         OptionParser parser = new OptionParser() {
             {
                 acceptsAll(asList("?", "help"), "Show the help");

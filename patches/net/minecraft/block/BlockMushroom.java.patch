@@ -1,33 +1,19 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockMushroom.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockMushroom.java
-@@ -1,11 +1,26 @@
- package net.minecraft.block;
- 
- import java.util.Random;
-+
-+import net.minecraft.entity.player.EntityPlayerMP;
- import net.minecraft.init.Blocks;
- import net.minecraft.world.World;
+@@ -6,6 +6,12 @@
  import net.minecraft.world.gen.feature.WorldGenBigMushroom;
  import net.minecraftforge.common.util.ForgeDirection;
  
 +// CraftBukkit start
-+import java.util.ArrayList;
-+
-+import net.minecraft.item.ItemDye;
-+import net.minecraft.item.ItemStack;
-+import org.bukkit.Location;
-+import org.bukkit.TreeType;
 +import org.bukkit.block.BlockState;
-+import org.bukkit.entity.Player;
 +import org.bukkit.event.block.BlockSpreadEvent;
-+import org.bukkit.event.world.StructureGrowEvent;
++import org.bukkit.TreeType;
 +// CraftBukkit end
 +
  public class BlockMushroom extends BlockBush implements IGrowable
  {
      private static final String __OBFID = "CL_00000272";
-@@ -20,7 +35,9 @@
+@@ -20,7 +26,9 @@
      // JAVADOC METHOD $$ func_149674_a
      public void updateTick(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
      {
@@ -38,7 +24,7 @@
          {
              byte b0 = 4;
              int l = 5;
-@@ -67,7 +84,19 @@
+@@ -67,7 +75,19 @@
  
              if (p_149674_1_.isAirBlock(i1, j1, k1) && this.canBlockStay(p_149674_1_, i1, j1, k1))
              {
@@ -59,98 +45,16 @@
              }
          }
      }
-@@ -96,32 +125,89 @@
-         {
-             return false;
-         }
--    }
-+    } 
+@@ -106,10 +126,12 @@
  
-+    /**
-+     * Fertilize the mushroom.
-+     */
-     public boolean func_149884_c(World p_149884_1_, int p_149884_2_, int p_149884_3_, int p_149884_4_, Random p_149884_5_)
-     {
-         int l = p_149884_1_.getBlockMetadata(p_149884_2_, p_149884_3_, p_149884_4_);
-         p_149884_1_.setBlockToAir(p_149884_2_, p_149884_3_, p_149884_4_);
-+        // CraftBukkit start
-+        boolean grown = false;
-+        StructureGrowEvent event = null;
-+        Location location = new Location(p_149884_1_.getWorld(), p_149884_2_, p_149884_3_, p_149884_4_);
-         WorldGenBigMushroom worldgenbigmushroom = null;
-+        TreeType treeType = null;
- 
-+        // MCPC+ start - Refactor cb patch
-+        EntityPlayerMP entityplayer = (EntityPlayerMP)ItemStack.currentPlayer;
-+        Player player = entityplayer != null ? entityplayer.getBukkitEntity() : null;
-+        ItemStack itemstack = null;
-+        boolean bonemeal = false;
-+        if (entityplayer != null && entityplayer.getCurrentEquippedItem() != null)
-+        {
-+            bonemeal = (entityplayer.getCurrentEquippedItem().getItem() instanceof ItemDye && entityplayer.getCurrentEquippedItem().getItemDamage() == 15);
-+            itemstack = entityplayer.getCurrentEquippedItem();
-+        }
-+
          if (this == Blocks.brown_mushroom)
          {
-+            treeType = TreeType.BROWN_MUSHROOM;
++            BlockSapling.treeType = TreeType.BROWN_MUSHROOM; // CraftBukkit
              worldgenbigmushroom = new WorldGenBigMushroom(0);
          }
          else if (this == Blocks.red_mushroom)
          {
-+            treeType = TreeType.RED_MUSHROOM;
++            BlockSapling.treeType = TreeType.RED_MUSHROOM; // CraftBukkit
              worldgenbigmushroom = new WorldGenBigMushroom(1);
          }
  
--        if (worldgenbigmushroom != null && worldgenbigmushroom.generate(p_149884_1_, p_149884_5_, p_149884_2_, p_149884_3_, p_149884_4_))
-+        if (worldgenbigmushroom != null)
-         {
--            return true;
--        }
--        else
-+            p_149884_1_.runningTreeGeneration = true;
-+            p_149884_1_.captureBlockStates = true;
-+            grown = worldgenbigmushroom.generate(p_149884_1_, p_149884_5_, p_149884_2_, p_149884_3_, p_149884_4_);
-+            p_149884_1_.captureBlockStates = false;
-+            p_149884_1_.runningTreeGeneration = false;
-+            if (grown)
-+            {
-+                if (player != null)
-+                {
-+                    event = new StructureGrowEvent(location, treeType, bonemeal, player, p_149884_1_.capturedBlockStates);
-+                    org.bukkit.Bukkit.getPluginManager().callEvent(event);
-+                }
-+
-+                if (event != null && event.isCancelled())
-+                {
-+                    grown = false;
-+                }
-+                else
-+                {
-+                    for (BlockState blockstate : p_149884_1_.capturedBlockStates)
-+                    {
-+                        blockstate.update(true);
-+                    }
-+
-+                    if (itemstack != null && itemstack.getItem() instanceof ItemDye && itemstack.getItemDamage() == 15)
-+                    {
-+                        --itemstack.stackSize;
-+                    }
-+                }
-+            }
-+        } 
-+
-+        if (!grown || event.isCancelled())
-         {
-+            p_149884_1_.capturedBlockStates.clear();
-             p_149884_1_.setBlock(p_149884_2_, p_149884_3_, p_149884_4_, this, l, 3);
-             return false;
-         }
-+        p_149884_1_.capturedBlockStates.clear();
-+        // MCPC+ end
-+
-+        return true;
-+        // CraftBukkit end
-     }
- 
-     public boolean func_149851_a(World p_149851_1_, int p_149851_2_, int p_149851_3_, int p_149851_4_, boolean p_149851_5_)

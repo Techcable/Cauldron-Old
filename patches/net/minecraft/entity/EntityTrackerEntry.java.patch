@@ -214,18 +214,19 @@
                      if (this.myEntity instanceof EntityLivingBase)
                      {
                          EntityLivingBase entitylivingbase = (EntityLivingBase)this.myEntity;
-@@ -470,7 +570,9 @@
+@@ -470,7 +570,10 @@
      {
          if (this.myEntity.isDead)
          {
 -            logger.warn("Fetching addPacket for removed entity");
 +            // CraftBukkit start - Remove useless error spam, just return
 +            // logger.warn("Fetching addPacket for removed entity");
++            return null;
 +            // CraftBukkit end
          }
  
          Packet pkt = FMLNetworkHandler.getEntitySpawningPacket(this.myEntity);
-@@ -623,6 +725,11 @@
+@@ -623,6 +726,11 @@
  
      public void removePlayerFromTracker(EntityPlayerMP par1EntityPlayerMP)
      {

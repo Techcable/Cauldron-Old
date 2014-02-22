@@ -12,7 +12,7 @@
  import net.minecraft.item.ItemStack;
  import net.minecraft.nbt.NBTTagCompound;
  import net.minecraft.pathfinding.PathEntity;
-@@ -70,6 +72,47 @@
+@@ -70,6 +72,46 @@
  import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
  import net.minecraft.entity.EnumCreatureType;
  
@@ -54,13 +54,12 @@
 +import za.co.mcportcentral.MCPCConfig;
 +import za.co.mcportcentral.MCPCHooks;
 +import za.co.mcportcentral.MCPCWorldConfig;
-+import za.co.mcportcentral.entity.CraftFakePlayer;
 +//MCPC+ end
 +
  public abstract class World implements IBlockAccess
  {
     /**
-@@ -84,12 +127,33 @@
+@@ -84,12 +126,33 @@
      // JAVADOC FIELD $$ field_72999_e
      public boolean scheduledUpdatesAreImmediate;
      // JAVADOC FIELD $$ field_72996_f
@@ -98,7 +97,7 @@
      // JAVADOC FIELD $$ field_73010_i
      public List playerEntities = new ArrayList();
      // JAVADOC FIELD $$ field_73007_j
-@@ -112,13 +176,13 @@
+@@ -112,13 +175,13 @@
      // JAVADOC FIELD $$ field_73012_v
      public Random rand = new Random();
      // JAVADOC FIELD $$ field_73011_w
@@ -115,7 +114,7 @@
      // JAVADOC FIELD $$ field_72987_B
      public boolean findingSpawnPoint;
      public MapStorage mapStorage;
-@@ -128,21 +192,88 @@
+@@ -128,21 +191,88 @@
      // JAVADOC FIELD $$ field_82741_K
      private final Vec3Pool vecPool = new Vec3Pool(300, 2000);
      private final Calendar theCalendar = Calendar.getInstance();
@@ -150,7 +149,7 @@
 +    // MCPC+ start
 +    public boolean restoringBlockStates = false;
 +    public boolean captureBlockStates = false;
-+    public boolean runningTreeGeneration = false;
++    public boolean captureTreeGeneration = false;
 +    public ArrayList<BlockState> capturedBlockStates = new ArrayList<BlockState>();
 +    public ArrayList<EntityItem> capturedItems = new ArrayList<EntityItem>();
 +    public int entitiesTicked;
@@ -210,7 +209,7 @@
      private static final String __OBFID = "CL_00000140";
  
      // JAVADOC METHOD $$ func_72807_a
-@@ -187,6 +318,29 @@
+@@ -187,6 +317,29 @@
          return this.provider.worldChunkMgr;
      }
  
@@ -240,7 +239,7 @@
      @SideOnly(Side.CLIENT)
      public World(ISaveHandler p_i45368_1_, String p_i45368_2_, WorldProvider p_i45368_3_, WorldSettings p_i45368_4_, Profiler p_i45368_5_)
      {
-@@ -200,6 +354,13 @@
+@@ -200,6 +353,13 @@
          this.worldInfo = new WorldInfo(p_i45368_4_, p_i45368_2_);
          this.provider = p_i45368_3_;
          perWorldStorage = new MapStorage((ISaveHandler)null);
@@ -254,7 +253,7 @@
      }
  
      // Broken up so that the WorldClient gets the chance to set the mapstorage object before the dimension initializes
-@@ -228,8 +389,138 @@
+@@ -228,8 +388,138 @@
          this.calculateInitialWeather();
      }
  
@@ -393,7 +392,7 @@
          this.ambientTickCountdown = this.rand.nextInt(12000);
          this.spawnHostileMobs = true;
          this.spawnPeacefulMobs = true;
-@@ -237,7 +528,23 @@
+@@ -237,7 +527,23 @@
          this.lightUpdateBlockList = new int[32768];
          this.saveHandler = p_i45369_1_;
          this.theProfiler = p_i45369_5_;
@@ -418,7 +417,7 @@
          this.worldInfo = p_i45369_1_.loadWorldInfo();
  
          if (p_i45369_4_ != null)
-@@ -256,13 +563,25 @@
+@@ -256,13 +562,25 @@
          if (this.worldInfo == null)
          {
              this.worldInfo = new WorldInfo(p_i45369_3_, p_i45369_2_);
@@ -444,7 +443,7 @@
          this.chunkProvider = this.createChunkProvider();
  
          if (this instanceof WorldServer)
-@@ -314,6 +633,8 @@
+@@ -314,6 +632,8 @@
  
          this.calculateInitialSkylight();
          this.calculateInitialWeather();
@@ -453,7 +452,28 @@
      }
  
      private static MapStorage s_mapStorage;
-@@ -390,6 +711,13 @@
+@@ -359,6 +679,20 @@
+ 
+     public Block getBlock(int p_147439_1_, int p_147439_2_, int p_147439_3_)
+     {
++        // MCPC+ start - tree generation
++        if (captureTreeGeneration) 
++        {
++            Iterator<BlockState> it = capturedBlockStates.iterator();
++            while (it.hasNext())
++            {
++                BlockState previous = it.next();
++                if (previous.getX() == p_147439_1_ && previous.getY() == p_147439_2_ && previous.getZ() == p_147439_3_) 
++                {
++                    return CraftMagicNumbers.getBlock(previous.getTypeId());
++                }
++            }
++        }
++        // MCPC+ end
+         if (p_147439_1_ >= -30000000 && p_147439_3_ >= -30000000 && p_147439_1_ < 30000000 && p_147439_3_ < 30000000 && p_147439_2_ >= 0 && p_147439_2_ < 256)
+         {
+             Chunk chunk = null;
+@@ -390,6 +724,13 @@
          return block.isAir(this, p_147437_1_, p_147437_2_, p_147437_3_);
      }
  
@@ -467,7 +487,7 @@
      // JAVADOC METHOD $$ func_72899_e
      public boolean blockExists(int par1, int par2, int par3)
      {
-@@ -416,7 +744,8 @@
+@@ -416,7 +757,8 @@
              {
                  for (int l1 = par3; l1 <= par6; ++l1)
                  {
@@ -477,7 +497,7 @@
                      {
                          return false;
                      }
-@@ -432,7 +761,7 @@
+@@ -432,7 +774,7 @@
      }
  
      // JAVADOC METHOD $$ func_72916_c
@@ -486,7 +506,7 @@
      {
          return this.chunkProvider.chunkExists(par1, par2);
      }
-@@ -443,11 +772,23 @@
+@@ -443,15 +785,52 @@
          return this.getChunkFromChunkCoords(par1 >> 4, par2 >> 4);
      }
  
@@ -511,7 +531,36 @@
  
      // JAVADOC METHOD $$ func_147465_d
      public boolean setBlock(int p_147465_1_, int p_147465_2_, int p_147465_3_, Block p_147465_4_, int p_147465_5_, int p_147465_6_)
-@@ -471,29 +812,37 @@
+     {
++        // MCPC+ start - tree generation
++        if (this.captureTreeGeneration) 
++        {
++            BlockState blockstate = null;
++            Iterator<BlockState> it = capturedBlockStates.iterator();
++            while (it.hasNext()) 
++            {
++                BlockState previous = it.next();
++                if (previous.getX() == p_147465_1_ && previous.getY() == p_147465_2_ && previous.getZ() == p_147465_3_) 
++                {
++                    blockstate = previous;
++                    it.remove();
++                    break;
++                }
++            }
++            if (blockstate == null) 
++            {
++                blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, p_147465_1_, p_147465_2_, p_147465_3_, p_147465_6_);
++            }
++            blockstate.setTypeId(CraftMagicNumbers.getId(p_147465_4_));
++            blockstate.setRawData((byte) p_147465_5_);
++            this.capturedBlockStates.add(blockstate);
++            return true;
++        }
++        // MCPC+ end
+         if (p_147465_1_ >= -30000000 && p_147465_3_ >= -30000000 && p_147465_1_ < 30000000 && p_147465_3_ < 30000000)
+         {
+             if (p_147465_2_ < 0)
+@@ -471,29 +850,31 @@
                  {
                      block1 = chunk.getBlock(p_147465_1_ & 15, p_147465_2_, p_147465_3_ & 15);
                  }
@@ -519,23 +568,16 @@
 +                org.bukkit.block.BlockState blockstate = null;
 +                if (this.captureBlockStates) {
 +                    blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, p_147465_1_, p_147465_2_, p_147465_3_, p_147465_6_);
-+                    if (this.runningTreeGeneration) { // set block data that is about to be placed for tree generation
-+                        blockstate.setTypeId(CraftMagicNumbers.getId(p_147465_4_));
-+                        blockstate.setRawData((byte) p_147465_5_);
-+                    }
 +                    this.capturedBlockStates.add(blockstate);
 +                }
  
--                boolean flag = chunk.func_150807_a(p_147465_1_ & 15, p_147465_2_, p_147465_3_ & 15, p_147465_4_, p_147465_5_);
-+                boolean flag = false;
-+                if (!this.runningTreeGeneration) { // do not set block data while generating a tree
-+                    flag = chunk.func_150807_a(p_147465_1_ & 15, p_147465_2_, p_147465_3_ & 15, p_147465_4_, p_147465_5_);
-+                }
+                 boolean flag = chunk.func_150807_a(p_147465_1_ & 15, p_147465_2_, p_147465_3_ & 15, p_147465_4_, p_147465_5_);
 +
-+                if (!flag && this.captureBlockStates && !this.runningTreeGeneration) {
++                if (!flag && this.captureBlockStates) {
 +                    this.capturedBlockStates.remove(blockstate);
 +                }
 +                // MCPC+ end
++
                  this.theProfiler.startSection("checkLight");
                  this.func_147451_t(p_147465_1_, p_147465_2_, p_147465_3_);
                  this.theProfiler.endSection();
@@ -565,7 +607,7 @@
  
                  return flag;
              }
-@@ -504,6 +853,26 @@
+@@ -504,9 +885,43 @@
          }
      }
  
@@ -592,7 +634,24 @@
      // JAVADOC METHOD $$ func_72805_g
      public int getBlockMetadata(int par1, int par2, int par3)
      {
-@@ -625,6 +994,13 @@
++        // MCPC+ start - tree generation
++        if (captureTreeGeneration) 
++        {
++            Iterator<BlockState> it = capturedBlockStates.iterator();
++            while (it.hasNext()) 
++            {
++                BlockState previous = it.next();
++                if (previous.getX() == par1 && previous.getY() == par2 && previous.getZ() == par3) 
++                {
++                    return previous.getRawData();
++                }
++            }
++        }
++        // MCPC+ end
+         if (par1 >= -30000000 && par3 >= -30000000 && par1 < 30000000 && par3 < 30000000)
+         {
+             if (par2 < 0)
+@@ -625,6 +1040,13 @@
      // JAVADOC METHOD $$ func_147444_c
      public void notifyBlockChange(int p_147444_1_, int p_147444_2_, int p_147444_3_, Block p_147444_4_)
      {
@@ -606,7 +665,7 @@
          this.notifyBlocksOfNeighborChange(p_147444_1_, p_147444_2_, p_147444_3_, p_147444_4_);
      }
  
-@@ -711,6 +1087,21 @@
+@@ -711,6 +1133,21 @@
  
              try
              {
@@ -628,7 +687,7 @@
                  block.onNeighborBlockChange(this, p_147460_1_, p_147460_2_, p_147460_3_, p_147460_4_);
              }
              catch (Throwable throwable1)
-@@ -1254,6 +1645,7 @@
+@@ -1254,6 +1691,7 @@
  
                              if (movingobjectposition1 != null)
                              {
@@ -636,7 +695,7 @@
                                  return movingobjectposition1;
                              }
                          }
-@@ -1262,6 +1654,8 @@
+@@ -1262,6 +1700,8 @@
                              movingobjectposition2 = new MovingObjectPosition(l, i1, j1, b0, p_147447_1_, false);
                          }
                      }
@@ -645,7 +704,7 @@
                  }
  
                  return p_147447_5_ ? movingobjectposition2 : null;
-@@ -1347,32 +1741,114 @@
+@@ -1347,32 +1787,114 @@
      // JAVADOC METHOD $$ func_72838_d
      public boolean spawnEntityInWorld(Entity par1Entity)
      {
@@ -770,7 +829,7 @@
              return true;
          }
      }
-@@ -1383,6 +1859,8 @@
+@@ -1383,6 +1905,8 @@
          {
              ((IWorldAccess)this.worldAccesses.get(i)).onEntityCreate(par1Entity);
          }
@@ -779,7 +838,7 @@
      }
  
      protected void onEntityRemoved(Entity par1Entity)
-@@ -1391,6 +1869,8 @@
+@@ -1391,6 +1915,8 @@
          {
              ((IWorldAccess)this.worldAccesses.get(i)).onEntityDestroy(par1Entity);
          }
@@ -788,7 +847,7 @@
      }
  
      // JAVADOC METHOD $$ func_72900_e
-@@ -1418,6 +1898,11 @@
+@@ -1418,6 +1944,11 @@
      // JAVADOC METHOD $$ func_72973_f
      public void removePlayerEntityDangerously(Entity par1Entity)
      {
@@ -800,7 +859,7 @@
          par1Entity.setDead();
  
          if (par1Entity instanceof EntityPlayer)
-@@ -1434,7 +1919,20 @@
+@@ -1434,7 +1965,20 @@
              this.getChunkFromChunkCoords(i, j).removeEntity(par1Entity);
          }
  
@@ -822,7 +881,7 @@
          this.onEntityRemoved(par1Entity);
      }
  
-@@ -1454,32 +1952,48 @@
+@@ -1454,32 +1998,48 @@
          int l = MathHelper.floor_double(par2AxisAlignedBB.maxY + 1.0D);
          int i1 = MathHelper.floor_double(par2AxisAlignedBB.minZ);
          int j1 = MathHelper.floor_double(par2AxisAlignedBB.maxZ + 1.0D);
@@ -885,7 +944,7 @@
          double d0 = 0.25D;
          List list = this.getEntitiesWithinAABBExcludingEntity(par1Entity, par2AxisAlignedBB.expand(d0, d0, d0));
  
-@@ -1826,11 +2340,37 @@
+@@ -1826,11 +2386,37 @@
          Entity entity;
          CrashReport crashreport;
          CrashReportCategory crashreportcategory;
@@ -924,7 +983,7 @@
              try
              {
                  ++entity.ticksExisted;
-@@ -1867,6 +2407,7 @@
+@@ -1867,6 +2453,7 @@
              }
          }
  
@@ -932,7 +991,7 @@
          this.theProfiler.endStartSection("remove");
          this.loadedEntityList.removeAll(this.unloadedEntityList);
          int j;
-@@ -1891,11 +2432,30 @@
+@@ -1891,11 +2478,30 @@
  
          this.unloadedEntityList.clear();
          this.theProfiler.endStartSection("regular");
@@ -965,7 +1024,7 @@
              if (entity.ridingEntity != null)
              {
                  if (!entity.ridingEntity.isDead && entity.ridingEntity.riddenByEntity == entity)
-@@ -1913,7 +2473,9 @@
+@@ -1913,7 +2519,9 @@
              {
                  try
                  {
@@ -975,7 +1034,7 @@
                  }
                  catch (Throwable throwable1)
                  {
-@@ -1946,29 +2508,62 @@
+@@ -1946,29 +2554,62 @@
                      this.getChunkFromChunkCoords(j, l).removeEntity(entity);
                  }
  
@@ -1012,7 +1071,7 @@
 +            // Spigot end
 +            // CraftBukkit start - Don't tick entities in chunks queued for unload
 +            ChunkProviderServer chunkProviderServer = ((WorldServer) this).theChunkProviderServer;
-+            //if (!isActiveBlockCoord(tileentity.xCoord, tileentity.zCoord)) continue; // MCPC+ don't tick inactive chunks - disable temporarily
++            if (!isActiveBlockCoord(tileentity.xCoord, tileentity.zCoord)) continue; // MCPC+ don't tick inactive chunks
 +            if (chunkProviderServer.chunksToUnload.contains(tileentity.xCoord >> 4, tileentity.zCoord >> 4))
 +            {
 +                continue;
@@ -1041,7 +1100,7 @@
                      crashreport = CrashReport.makeCrashReport(throwable, "Ticking block entity");
                      crashreportcategory = crashreport.makeCategory("Block entity being ticked");
                      tileentity.func_145828_a(crashreportcategory);
-@@ -2001,6 +2596,10 @@
+@@ -2001,6 +2642,10 @@
              }
          }
  
@@ -1052,7 +1111,7 @@
          if (!this.field_147483_b.isEmpty())
          {
              for (Object tile : field_147483_b)
-@@ -2045,16 +2644,20 @@
+@@ -2045,16 +2690,20 @@
              this.addedTileEntityList.clear();
          }
  
@@ -1076,7 +1135,7 @@
          }
      }
  
-@@ -2072,16 +2675,26 @@
+@@ -2072,16 +2721,26 @@
          boolean isForced = getPersistentChunks().containsKey(new ChunkCoordIntPair(i >> 4, j >> 4));
          byte b0 = isForced ? (byte)0 : 32;
          boolean canUpdate = !par2 || this.checkChunksExist(i - b0, 0, j - b0, i + b0, 0, j + b0);
@@ -1105,7 +1164,7 @@
              par1Entity.lastTickPosX = par1Entity.posX;
              par1Entity.lastTickPosY = par1Entity.posY;
              par1Entity.lastTickPosZ = par1Entity.posZ;
-@@ -2165,6 +2778,8 @@
+@@ -2165,6 +2824,8 @@
                      par1Entity.riddenByEntity = null;
                  }
              }
@@ -1114,7 +1173,7 @@
          }
      }
  
-@@ -2365,6 +2980,7 @@
+@@ -2365,6 +3026,7 @@
                  par3Entity.motionZ += vec3.zCoord * d1;
              }
  
@@ -1122,7 +1181,7 @@
              return flag;
          }
      }
-@@ -2461,6 +3077,7 @@
+@@ -2461,6 +3123,7 @@
          double d2 = 1.0D / ((par2AxisAlignedBB.maxZ - par2AxisAlignedBB.minZ) * 2.0D + 1.0D);
          int i = 0;
          int j = 0;
@@ -1130,7 +1189,7 @@
  
          for (float f = 0.0F; f <= 1.0F; f = (float)((double)f + d0))
          {
-@@ -2482,7 +3099,8 @@
+@@ -2482,7 +3145,8 @@
              }
          }
  
@@ -1140,7 +1199,7 @@
      }
  
      // JAVADOC METHOD $$ func_72886_a
-@@ -2605,7 +3223,7 @@
+@@ -2605,7 +3269,7 @@
              return;
          }
  
@@ -1149,7 +1208,7 @@
          {
              if (this.field_147481_N)
              {
-@@ -2760,7 +3378,16 @@
+@@ -2760,7 +3424,16 @@
  
                      if (i <= 0)
                      {
@@ -1167,7 +1226,7 @@
                      }
                  }
  
-@@ -2796,7 +3423,16 @@
+@@ -2796,7 +3469,16 @@
  
                      if (j <= 0)
                      {
@@ -1185,7 +1244,7 @@
                      }
                  }
  
-@@ -2818,28 +3454,72 @@
+@@ -2818,28 +3500,72 @@
  
      protected void setActivePlayerChunksAndCheckLight()
      {
@@ -1266,7 +1325,7 @@
          }
  
          this.theProfiler.endSection();
-@@ -2851,7 +3531,7 @@
+@@ -2851,7 +3577,7 @@
  
          this.theProfiler.startSection("playerCheckLight");
  
@@ -1275,7 +1334,7 @@
          {
              i = this.rand.nextInt(this.playerEntities.size());
              entityplayer = (EntityPlayer)this.playerEntities.get(i);
-@@ -3333,8 +4013,21 @@
+@@ -3333,8 +4059,21 @@
          {
              Entity entity = (Entity)this.loadedEntityList.get(j);
  
@@ -1298,7 +1357,7 @@
                  ++i;
              }
          }
-@@ -3345,6 +4038,11 @@
+@@ -3345,6 +4084,11 @@
      // JAVADOC METHOD $$ func_72868_a
      public void addLoadedEntities(List par1List)
      {
@@ -1310,7 +1369,7 @@
          for (int i = 0; i < par1List.size(); ++i)
          {
              Entity entity = (Entity)par1List.get(i);
-@@ -3367,7 +4065,12 @@
+@@ -3367,7 +4111,12 @@
      {
          Block block1 = this.getBlock(p_147472_2_, p_147472_3_, p_147472_4_);
          AxisAlignedBB axisalignedbb = p_147472_5_ ? null : p_147472_1_.getCollisionBoundingBoxFromPool(this, p_147472_2_, p_147472_3_, p_147472_4_);
@@ -1324,7 +1383,7 @@
      }
  
      public PathEntity getPathEntityToEntity(Entity par1Entity, Entity par2Entity, float par3, boolean par4, boolean par5, boolean par6, boolean par7)
-@@ -3522,7 +4225,15 @@
+@@ -3522,7 +4271,15 @@
  
          for (int i = 0; i < this.playerEntities.size(); ++i)
          {
@@ -1341,7 +1400,7 @@
              double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
  
              if ((par7 < 0.0D || d5 < par7 * par7) && (d4 == -1.0D || d5 < d4))
-@@ -3549,8 +4260,16 @@
+@@ -3549,8 +4306,16 @@
  
          for (int i = 0; i < this.playerEntities.size(); ++i)
          {
@@ -1359,7 +1418,7 @@
              if (!entityplayer1.capabilities.disableDamage && entityplayer1.isEntityAlive())
              {
                  double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
-@@ -3719,6 +4438,18 @@
+@@ -3719,6 +4484,18 @@
      // JAVADOC METHOD $$ func_72854_c
      public void updateAllPlayersSleepingFlag() {}
  
@@ -1378,7 +1437,7 @@
      public float getWeightedThunderStrength(float par1)
      {
          return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * par1) * this.getRainStrength(par1);
-@@ -4017,8 +4748,8 @@
+@@ -4017,8 +4794,8 @@
       */
      public void addTileEntity(TileEntity entity)
      {
@@ -1389,7 +1448,7 @@
          {
              dest.add(entity);
          }
-@@ -4114,4 +4845,43 @@
+@@ -4114,4 +4891,43 @@
          }
          return count;
      }

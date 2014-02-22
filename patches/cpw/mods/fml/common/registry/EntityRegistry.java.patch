@@ -13,15 +13,16 @@
  public class EntityRegistry
  {
      public class EntityRegistration
-@@ -118,6 +124,7 @@
+@@ -118,6 +124,8 @@
      private ListMultimap<ModContainer, EntityRegistration> entityRegistrations = ArrayListMultimap.create();
      private Map<String,ModContainer> entityNames = Maps.newHashMap();
      private BiMap<Class<? extends Entity>, EntityRegistration> entityClassRegistrations = HashBiMap.create();
 +    public static Map<Class <? extends Entity>, String> entityTypeMap = Maps.newHashMap(); // MCPC+ - used by CraftCustomEntity
++    public static Map<String, Class <? extends Entity>> entityClassMap = Maps.newHashMap(); // MCPC+ - used by CraftWorld
      public static EntityRegistry instance()
      {
          return INSTANCE;
-@@ -147,6 +154,7 @@
+@@ -147,6 +155,7 @@
      public static void registerModEntity(Class<? extends Entity> entityClass, String entityName, int id, Object mod, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates)
      {
          instance().doModEntityRegistration(entityClass, entityName, id, mod, trackingRange, updateFrequency, sendsVelocityUpdates);
@@ -29,7 +30,7 @@
      }
  
      @SuppressWarnings("unchecked")
-@@ -197,6 +205,7 @@
+@@ -197,6 +206,7 @@
          }
          id = instance().validateAndClaimId(id);
          EntityList.addMapping(entityClass, entityName, id);
@@ -37,7 +38,7 @@
      }
  
      private int validateAndClaimId(int id)
-@@ -249,8 +258,37 @@
+@@ -249,8 +259,38 @@
          }
          instance().validateAndClaimId(id);
          EntityList.addMapping(entityClass, entityName, id, backgroundEggColour, foregroundEggColour);
@@ -63,6 +64,7 @@
 +            modId = activeModContainer.getModId();
 +        entityName = modId + "." + entityName;
 +        entityTypeMap.put(entityClass, entityName);
++        entityClassMap.put(entityName, entityClass);
 +    }
 +
 +    // used by CraftCustomEntity

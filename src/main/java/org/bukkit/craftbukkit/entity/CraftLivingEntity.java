@@ -40,11 +40,23 @@ import org.bukkit.util.BlockIterator;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
 
+import cpw.mods.fml.common.registry.EntityRegistry; // MCPC+
+
 public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     private CraftEntityEquipment equipment;
+    // MCPC+ start
+    public Class<? extends net.minecraft.entity.EntityLivingBase> entityClass;
+    public String entityName;
+    // MCPC+ end
 
     public CraftLivingEntity(final CraftServer server, final net.minecraft.entity.EntityLivingBase entity) {
         super(server, entity);
+        // MCPC+ start
+        this.entityClass = entity.getClass();
+        this.entityName = EntityRegistry.getCustomEntityTypeName(entityClass);
+        if (entityName == null)
+            entityName = entity.getCommandSenderName();
+        // MCPC+ end
 
         if (entity instanceof net.minecraft.entity.EntityLiving) {
             equipment = new CraftEntityEquipment(this);
@@ -224,7 +236,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     @Override
     public String toString() {
-        return "CraftLivingEntity{" + "id=" + getEntityId() + '}';
+        return this.entityName; // MCPC+
     }
 
     public Player getKiller() {
@@ -323,7 +335,12 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public EntityType getType() {
-        return EntityType.UNKNOWN;
+        // MCPC+ start
+        EntityType type = EntityType.fromName(this.entityName);
+        if (type != null)
+            return type;
+        else return EntityType.UNKNOWN;
+        // MCPC+ end
     }
 
     public boolean hasLineOfSight(Entity other) {

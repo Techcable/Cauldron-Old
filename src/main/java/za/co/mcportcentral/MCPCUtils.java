@@ -11,6 +11,8 @@ import java.util.Map;
 import cpw.mods.fml.relauncher.FMLRelaunchLog;
 import cpw.mods.fml.relauncher.Side;
 
+import org.bukkit.inventory.InventoryHolder;
+
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 
@@ -21,12 +23,13 @@ public class MCPCUtils {
     {
         Class clazz = null;
         String method = deobfuscatedEnvironment() ? "updateEntity" : "func_145845_h"; // updateEntity
-        try {
+        try 
+        {
             clazz = c.getMethod(method).getDeclaringClass();
         }
         catch (Throwable e)
         {
-            e.printStackTrace();
+            //e.printStackTrace(); no need for spam
         }
 
         return clazz != TileEntity.class;
@@ -35,11 +38,14 @@ public class MCPCUtils {
     public static boolean canTileEntityUpdate(Class<? extends TileEntity> c)
     {
         boolean canUpdate = false;
-        try {
+        try 
+        {
             Constructor<? extends TileEntity> ctor = c.getConstructor();
             TileEntity te = ctor.newInstance();
             canUpdate = te.canUpdate();
-        } catch (Throwable e) {
+        } 
+        catch (Throwable e) 
+        {
             // ignore
         }
         return canUpdate;
@@ -107,6 +113,18 @@ public class MCPCUtils {
             else result = false;
         }
         return result;
+    }
+
+    public static InventoryHolder getOwner(TileEntity tileentity)
+    {
+        org.bukkit.block.BlockState state = tileentity.worldObj.getWorld().getBlockAt(tileentity.xCoord, tileentity.yCoord, tileentity.zCoord).getState();
+
+        if (state instanceof InventoryHolder)
+        {
+            return (InventoryHolder) state;
+        }
+
+        return null;
     }
 
     public static boolean deobfuscatedEnvironment()

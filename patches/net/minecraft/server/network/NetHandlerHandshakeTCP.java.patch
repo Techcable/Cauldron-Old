@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/server/network/NetHandlerHandshakeTCP.java
 +++ ../src-work/minecraft/net/minecraft/server/network/NetHandlerHandshakeTCP.java
-@@ -2,16 +2,29 @@
+@@ -2,6 +2,7 @@
  
  import io.netty.util.concurrent.GenericFutureListener;
  import net.minecraft.network.EnumConnectionState;
@@ -8,9 +8,7 @@
  import net.minecraft.network.NetworkManager;
  import net.minecraft.network.handshake.INetHandlerHandshakeServer;
  import net.minecraft.network.handshake.client.C00Handshake;
- import net.minecraft.network.login.server.S00PacketDisconnect;
- import net.minecraft.server.MinecraftServer;
-+import net.minecraft.server.dedicated.DedicatedServer;
+@@ -11,8 +12,19 @@
  import net.minecraft.util.ChatComponentText;
  import net.minecraft.util.IChatComponent;
  
@@ -30,22 +28,7 @@
      private final MinecraftServer field_147387_a;
      private final NetworkManager field_147386_b;
      private static final String __OBFID = "CL_00001456";
-@@ -25,27 +38,102 @@
-     // JAVADOC METHOD $$ func_147383_a
-     public void processHandshake(C00Handshake p_147383_1_)
-     {
-+        // MCPC+ start - prevent players from logging in before server has fully started. This fixes inventory wipe glitches.
-+        if (!DedicatedServer.allowPlayerLogins)
-+        {
-+            ChatComponentText chatcomponenttext = new ChatComponentText("Server is still starting! Please wait before reconnecting.");
-+            this.field_147386_b.scheduleOutboundPacket(new S00PacketDisconnect(chatcomponenttext), new GenericFutureListener[0]);
-+            this.field_147386_b.closeChannel(chatcomponenttext); // Should be close
-+            return;
-+        }
-+        // MCPC+ end
-         switch (NetHandlerHandshakeTCP.SwitchEnumConnectionState.field_151291_a[p_147383_1_.func_149594_c().ordinal()])
-         {
-             case 1:
+@@ -40,21 +52,87 @@
                  this.field_147386_b.setConnectionState(EnumConnectionState.LOGIN);
                  ChatComponentText chatcomponenttext;
  

@@ -13,6 +13,8 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.Material;
 
+import za.co.mcportcentral.MCPCUtils; // MCPC+
+
 public class CraftInventory implements Inventory {
     protected final net.minecraft.inventory.IInventory inventory;
 
@@ -39,7 +41,14 @@ public class CraftInventory implements Inventory {
 
     public ItemStack[] getContents() {
         ItemStack[] items = new ItemStack[getSize()];
-        net.minecraft.item.ItemStack[] mcItems = getInventory().getContents();
+        // MCPC+ start - fixes appeng TileDrive AbstractMethodError
+        net.minecraft.item.ItemStack[] mcItems = null;
+        try {
+            mcItems = getInventory().getContents();
+        } catch (AbstractMethodError e) {
+            return new ItemStack[0]; // return empty list
+        }
+        // MCPC+ end
 
         int size = Math.min(items.length, mcItems.length);
         for (int i = 0; i < size; i++) {
@@ -404,7 +413,13 @@ public class CraftInventory implements Inventory {
     }
 
     public List<HumanEntity> getViewers() {
-        return this.inventory.getViewers();
+        // MCPC+ start
+        try {
+            return this.inventory.getViewers();
+        } catch (AbstractMethodError e) {
+            return new java.util.ArrayList<HumanEntity>();
+        }
+        // MCPC+ end
     }
 
     public String getTitle() {
@@ -445,7 +460,17 @@ public class CraftInventory implements Inventory {
     }
 
     public InventoryHolder getHolder() {
-        return inventory.getOwner();
+        // MCPC+ start - fixes openblocks AbstractMethodError
+        try {
+            return inventory.getOwner();
+        } catch (AbstractMethodError e) {
+            if (inventory instanceof net.minecraft.tileentity.TileEntity) {
+                return MCPCUtils.getOwner((net.minecraft.tileentity.TileEntity)inventory);
+            } else {
+                return null;                
+            }
+        }
+        // MCPC+ end
     }
 
     public int getMaxStackSize() {

@@ -8,21 +8,28 @@
  import net.minecraft.block.Block;
  import net.minecraft.enchantment.Enchantment;
  import net.minecraft.enchantment.EnchantmentDurability;
-@@ -34,6 +35,13 @@
+@@ -34,6 +35,20 @@
  import net.minecraft.world.World;
  import net.minecraftforge.event.ForgeEventFactory;
  
 +import org.bukkit.craftbukkit.util.CraftMagicNumbers; // CraftBukkit
 +import net.minecraft.entity.player.EntityPlayerMP; // Spigot
 +// MCPC+ start
++import net.minecraft.block.BlockSapling;
++import net.minecraft.block.BlockMushroom;
++
++import org.bukkit.Location;
++import org.bukkit.TreeType;
 +import org.bukkit.block.BlockState;
 +import org.bukkit.craftbukkit.block.CraftBlockState;
++import org.bukkit.entity.Player;
++import org.bukkit.event.world.StructureGrowEvent;
 +// MCPC+ end
 +
  public final class ItemStack
  {
      public static final DecimalFormat field_111284_a = new DecimalFormat("#.###");
-@@ -46,8 +54,14 @@
+@@ -46,8 +61,14 @@
      public NBTTagCompound stackTagCompound;
      // JAVADOC FIELD $$ field_77991_e
      int itemDamage;
@@ -38,7 +45,7 @@
      private static final String __OBFID = "CL_00000043";
  
      public ItemStack(Block par1Block)
-@@ -131,12 +145,82 @@
+@@ -131,12 +152,116 @@
  
      public boolean tryPlaceItemIntoWorld(EntityPlayer par1EntityPlayer, World par2World, int par3, int par4, int par5, int par6, float par7, float par8, float par9)
      {
@@ -51,32 +58,66 @@
 +            nbt = (NBTTagCompound)this.getTagCompound().copy();
 +        }
 +
-+        if (!(this.getItem() instanceof ItemDye && this.getItemDamage() == 15) && !(this.getItem() instanceof ItemBucket)) // if not bonemeal
++        if (!(this.getItem() instanceof ItemBucket)) // if not bucket
 +        {
 +            par2World.captureBlockStates = true;
++            if (this.getItem() instanceof ItemDye && this.getItemDamage() == 15) 
++            {
++                Block block= par2World.getBlock(par3, par4, par5);
++                if (block != null && (block instanceof BlockSapling || block instanceof BlockMushroom))
++                {
++                    par2World.captureTreeGeneration = true;
++                }
++            }
 +        }
 +        currentPlayer = par1EntityPlayer;
          boolean flag = this.getItem().onItemUse(this, par1EntityPlayer, par2World, par3, par4, par5, par6, par7, par8, par9);
 +        par2World.captureBlockStates = false;
 +        currentPlayer = null;
++        if (flag && par2World.captureTreeGeneration && par2World.capturedBlockStates.size() > 0) 
++        {
++            par2World.captureTreeGeneration = false;
++            Location location = new Location(par2World.getWorld(), par3, par4, par5);
++            TreeType treeType = BlockSapling.treeType;
++            BlockSapling.treeType = null;
++            List<BlockState> blocks = (List<BlockState>) par2World.capturedBlockStates.clone();
++            par2World.capturedBlockStates.clear();
++            StructureGrowEvent event = null;
++            if (treeType != null)
++            {
++                event = new StructureGrowEvent(location, treeType, false, (Player) par1EntityPlayer.getBukkitEntity(), blocks);
++                org.bukkit.Bukkit.getPluginManager().callEvent(event);
++            }
++            if (event == null || !event.isCancelled())
++            {
++                for (BlockState blockstate : blocks) 
++                {
++                    blockstate.update(true);
++                }
++            }
  
++            return flag;
++        }
++
          if (flag)
          {
 -            par1EntityPlayer.addStat(StatList.objectUseStats[Item.getIdFromItem(this.field_151002_e)], 1);
 +            org.bukkit.event.block.BlockPlaceEvent placeEvent = null;
-+            if (par2World.capturedBlockStates.size() > 1) 
++            List<BlockState> blockstates = (List<BlockState>) par2World.capturedBlockStates.clone();
++            par2World.capturedBlockStates.clear();
++            if (blockstates.size() > 1) 
 +            {
-+                placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockMultiPlaceEvent(par2World, par1EntityPlayer, par2World.capturedBlockStates, par3, par4, par5);
++                placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockMultiPlaceEvent(par2World, par1EntityPlayer, blockstates, par3, par4, par5);
 +            } 
-+            else if (par2World.capturedBlockStates.size() == 1)
++            else if (blockstates.size() == 1)
 +            {
-+                placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(par2World, par1EntityPlayer, par2World.capturedBlockStates.get(0), par3, par4, par5);
++                placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(par2World, par1EntityPlayer, blockstates.get(0), par3, par4, par5);
 +            }
 +            if (placeEvent != null && (placeEvent.isCancelled() || !placeEvent.canBuild()))
 +            {
 +                flag = false; // cancel placement
 +                // revert back all captured blocks
-+                for (BlockState blockstate : par2World.capturedBlockStates)
++                for (BlockState blockstate : blockstates)
 +                {
 +                    par2World.restoringBlockStates = true;
 +                    blockstate.update(true, false); // restore blockstate
@@ -98,7 +139,7 @@
 +                    par2World.spawnEntityInWorld(par2World.capturedItems.get(i));
 +                }
 +
-+                for (BlockState blockstate : par2World.capturedBlockStates)
++                for (BlockState blockstate : blockstates)
 +                {
 +                    int x = blockstate.getX();
 +                    int y = blockstate.getY();
@@ -122,7 +163,7 @@
  
          return flag;
      }
-@@ -244,8 +328,22 @@
+@@ -244,8 +369,22 @@
      }
  
      // JAVADOC METHOD $$ func_96631_a
@@ -145,7 +186,7 @@
          if (!this.isItemStackDamageable())
          {
              return false;
-@@ -267,6 +365,22 @@
+@@ -267,6 +406,22 @@
  
                  par1 -= k;
  
@@ -168,7 +209,7 @@
                  if (par1 <= 0)
                  {
                      return false;
-@@ -306,6 +420,13 @@
+@@ -306,6 +461,13 @@
                          this.stackSize = 0;
                      }
  
@@ -182,7 +223,7 @@
                      this.itemDamage = 0;
                  }
              }
-@@ -448,6 +569,7 @@
+@@ -448,6 +610,7 @@
      // JAVADOC METHOD $$ func_77982_d
      public void setTagCompound(NBTTagCompound par1NBTTagCompound)
      {

@@ -1,33 +1,15 @@
 --- ../src-base/minecraft/net/minecraft/item/ItemDye.java
 +++ ../src-work/minecraft/net/minecraft/item/ItemDye.java
-@@ -23,6 +23,12 @@
+@@ -23,6 +23,8 @@
  import net.minecraftforge.common.util.FakePlayerFactory;
  import net.minecraftforge.event.entity.player.BonemealEvent;
  
 +import org.bukkit.event.entity.SheepDyeWoolEvent; // CraftBukkit
-+// MCPC+ start
-+import net.minecraft.block.BlockMushroom;
-+import net.minecraft.block.BlockSapling;
-+// MCPC+ end
 +
  public class ItemDye extends Item
  {
      public static final String[] field_150923_a = new String[] {"black", "red", "green", "brown", "blue", "purple", "cyan", "silver", "gray", "pink", "lime", "yellow", "lightBlue", "magenta", "orange", "white"};
-@@ -170,7 +176,12 @@
-                         igrowable.func_149853_b(p_150919_1_, p_150919_1_.rand, p_150919_2_, p_150919_3_, p_150919_4_);
-                     }
- 
--                    --p_150919_0_.stackSize;
-+                    // MCPC+ start - we handle sapling and mushroom stacksize in BlockSapling and BlockMushroom so ignore it here
-+                    if (!(igrowable instanceof BlockSapling) && !(igrowable instanceof BlockMushroom))
-+                    {
-+                        --p_150919_0_.stackSize;
-+                    }
-+                    // MCPC+ end
-                 }
- 
-                 return true;
-@@ -224,6 +235,18 @@
+@@ -224,6 +226,18 @@
  
              if (!entitysheep.getSheared() && entitysheep.getFleeceColor() != i)
              {

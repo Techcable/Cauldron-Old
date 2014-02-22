@@ -22,7 +22,7 @@ import net.minecraft.entity.Entity;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.common.util.FakePlayerFactory;
-import za.co.mcportcentral.entity.*;
+import za.co.mcportcentral.entity.CraftCustomEntity;
 // MCPC+ end
 
 public abstract class CraftEntity implements org.bukkit.entity.Entity {
@@ -47,7 +47,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                 // This case is never hit in vanilla
                 //else { return new CraftHumanEntity(server, (net.minecraft.entity.player.EntityPlayer) entity); }
                 else {
-                    return new CraftFakePlayer(server, FakePlayerFactory.get(DimensionManager.getWorld(entity.worldObj.provider.dimensionId), ((net.minecraft.entity.player.EntityPlayer) entity).getGameProfile()));
+                    return new CraftPlayer(server, FakePlayerFactory.get(DimensionManager.getWorld(entity.worldObj.provider.dimensionId), ((net.minecraft.entity.player.EntityPlayer) entity).getGameProfile()));
                 }
                 // MCPC+ end
             }
@@ -63,11 +63,11 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                     else if (entity instanceof net.minecraft.entity.passive.EntityTameable) {
                         if (entity instanceof net.minecraft.entity.passive.EntityWolf) { return new CraftWolf(server, (net.minecraft.entity.passive.EntityWolf) entity); }
                         else if (entity instanceof net.minecraft.entity.passive.EntityOcelot) { return new CraftOcelot(server, (net.minecraft.entity.passive.EntityOcelot) entity); } // MCPC+
-                        else { return new CraftCustomTameableAnimal(server, (net.minecraft.entity.passive.EntityTameable) entity); } // MCPC+
+                        else { return new CraftTameableAnimal(server, (net.minecraft.entity.passive.EntityTameable) entity); } // MCPC+
                     }
                     else if (entity instanceof net.minecraft.entity.passive.EntitySheep) { return new CraftSheep(server, (net.minecraft.entity.passive.EntitySheep) entity); }
                     else if (entity instanceof net.minecraft.entity.passive.EntityHorse) { return new CraftHorse(server, (net.minecraft.entity.passive.EntityHorse) entity); }
-                    else { return new CraftCustomAnimal(server, (net.minecraft.entity.passive.EntityAnimal) entity); } // MCPC+
+                    else { return new CraftAnimals(server, (net.minecraft.entity.passive.EntityAnimal) entity); }
                 }
                 // Monsters
                 else if (entity instanceof net.minecraft.entity.monster.EntityMob) {
@@ -88,20 +88,20 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                         else { return new CraftSpider(server, (net.minecraft.entity.monster.EntitySpider) entity); }
                     }
 
-                    else  { return new CraftCustomMonster(server, (net.minecraft.entity.monster.EntityMob) entity); } // MCPC+
+                    else  { return new CraftMonster(server, (net.minecraft.entity.monster.EntityMob) entity); }
                 }
                 // Water Animals
                 else if (entity instanceof net.minecraft.entity.passive.EntityWaterMob) {
                     if (entity instanceof net.minecraft.entity.passive.EntitySquid) { return new CraftSquid(server, (net.minecraft.entity.passive.EntitySquid) entity); }
-                    else { return new CraftCustomWaterMob(server, (net.minecraft.entity.passive.EntityWaterMob) entity); } // MCPC+
+                    else { return new CraftWaterMob(server, (net.minecraft.entity.passive.EntityWaterMob) entity); }
                 }
                 else if (entity instanceof net.minecraft.entity.monster.EntityGolem) {
                     if (entity instanceof net.minecraft.entity.monster.EntitySnowman) { return new CraftSnowman(server, (net.minecraft.entity.monster.EntitySnowman) entity); }
                     else if (entity instanceof net.minecraft.entity.monster.EntityIronGolem) { return new CraftIronGolem(server, (net.minecraft.entity.monster.EntityIronGolem) entity); }
-                    else { return new CraftCustomLivingEntity(server, (net.minecraft.entity.EntityLivingBase) entity); } // MCPC+
+                    else { return new CraftLivingEntity(server, (net.minecraft.entity.EntityLivingBase) entity); } // MCPC+
                 }
                 else if (entity instanceof net.minecraft.entity.passive.EntityVillager) { return new CraftVillager(server, (net.minecraft.entity.passive.EntityVillager) entity); }
-                else { return new CraftCustomCreature(server, (net.minecraft.entity.EntityCreature) entity); } // MCPC+
+                else { return new CraftCreature(server, (net.minecraft.entity.EntityCreature) entity); }
             }
             // Slimes are a special (and broken) case
             else if (entity instanceof net.minecraft.entity.monster.EntitySlime) {
@@ -119,9 +119,9 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             // Ambient
             else if (entity instanceof net.minecraft.entity.passive.EntityAmbientCreature) {
                 if (entity instanceof net.minecraft.entity.passive.EntityBat) { return new CraftBat(server, (net.minecraft.entity.passive.EntityBat) entity); }
-                else { return new CraftCustomAmbient(server, (net.minecraft.entity.passive.EntityAmbientCreature) entity); } // MCPC+
+                else { return new CraftAmbient(server, (net.minecraft.entity.passive.EntityAmbientCreature) entity); }
             }
-            else  { return new CraftCustomLivingEntity(server, (net.minecraft.entity.EntityLivingBase) entity); } // MCPC+
+            else  { return new CraftLivingEntity(server, (net.minecraft.entity.EntityLivingBase) entity); }
         }
         else if (entity instanceof net.minecraft.entity.boss.EntityDragonPart) {
             net.minecraft.entity.boss.EntityDragonPart part = (net.minecraft.entity.boss.EntityDragonPart) entity;
@@ -174,7 +174,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         // MCPC+ - used for custom entities that extend Entity directly
         else if (entity instanceof net.minecraft.entity.Entity) { return new CraftCustomEntity(server, (net.minecraft.entity.Entity) entity); }
 
-        throw new AssertionError("Unknown entity " + entity == null ? null : entity.getClass() + ": " + entity); // MCPC - show the entity that caused exception
+        throw new AssertionError("Unknown entity " + entity == null ? null : entity.getClass() + ": " + entity); // MCPC+ - show the entity that caused exception
     }
 
     // MCPC+ start - copy of getEntity() but operates on classes instead of instances, for EntityRegistry registerBukkitType
@@ -187,13 +187,12 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             // Players
             if (net.minecraft.entity.player.EntityPlayer.class.isAssignableFrom(nmsClass)) {
                 if (net.minecraft.entity.player.EntityPlayerMP.class.isAssignableFrom(nmsClass)) { return CraftPlayer.class; }
-                // MCPC+ start - support fake player classes from mods
+                // support fake player classes from mods
                 // This case is never hit in vanilla
                 //else { return CraftHumanEntity.class; }
                 else {
-                    return CraftFakePlayer.class;
+                    return CraftPlayer.class;
                 }
-                // MCPC+ end
             }
             else if (net.minecraft.entity.EntityCreature.class.isAssignableFrom(nmsClass)) {
                 // Animals
@@ -207,11 +206,11 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                     else if (net.minecraft.entity.passive.EntityTameable.class.isAssignableFrom(nmsClass)) {
                         if (net.minecraft.entity.passive.EntityWolf.class.isAssignableFrom(nmsClass)) { return CraftWolf.class; }
                         else if (net.minecraft.entity.passive.EntityOcelot.class.isAssignableFrom(nmsClass)) { return CraftOcelot.class; } // MCPC+
-                        else { return CraftCustomTameableAnimal.class; } // MCPC+
+                        else { return CraftTameableAnimal.class; }
                     }
                     else if (net.minecraft.entity.passive.EntitySheep.class.isAssignableFrom(nmsClass)) { return CraftSheep.class; }
                     else if (net.minecraft.entity.passive.EntityHorse.class.isAssignableFrom(nmsClass)) { return CraftHorse.class; }
-                    else { return CraftCustomAnimal.class; } // MCPC+
+                    else { return CraftAnimals.class; }
                 }
                 // Monsters
                 else if (net.minecraft.entity.monster.EntityMob.class.isAssignableFrom(nmsClass)) {
@@ -232,20 +231,20 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                         else { return CraftSpider.class; }
                     }
 
-                    else  { return CraftCustomMonster.class; } // MCPC+
+                    else  { return CraftMonster.class; }
                 }
                 // Water Animals
                 else if (net.minecraft.entity.passive.EntityWaterMob.class.isAssignableFrom(nmsClass)) {
                     if (net.minecraft.entity.passive.EntitySquid.class.isAssignableFrom(nmsClass)) { return CraftSquid.class; }
-                    else { return CraftCustomWaterMob.class; } // MCPC+
+                    else { return CraftWaterMob.class; }
                 }
                 else if (net.minecraft.entity.monster.EntityGolem.class.isAssignableFrom(nmsClass)) {
                     if (net.minecraft.entity.monster.EntitySnowman.class.isAssignableFrom(nmsClass)) { return CraftSnowman.class; }
                     else if (net.minecraft.entity.monster.EntityIronGolem.class.isAssignableFrom(nmsClass)) { return CraftIronGolem.class; }
-                    else { return CraftCustomLivingEntity.class; } // MCPC+
+                    else { return CraftLivingEntity.class; }
                 }
                 else if (net.minecraft.entity.passive.EntityVillager.class.isAssignableFrom(nmsClass)) { return CraftVillager.class; }
-                else { return CraftCustomCreature.class; } // MCPC+
+                else { return CraftCreature.class; }
             }
             // Slimes are a special (and broken) case
             else if (net.minecraft.entity.monster.EntitySlime.class.isAssignableFrom(nmsClass)) {
@@ -263,9 +262,9 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             // Ambient
             else if (net.minecraft.entity.passive.EntityAmbientCreature.class.isAssignableFrom(nmsClass)) {
                 if (net.minecraft.entity.passive.EntityBat.class.isAssignableFrom(nmsClass)) { return CraftBat.class; }
-                else { return CraftCustomAmbient.class; } // MCPC+
+                else { return CraftAmbient.class; }
             }
-            else  { return CraftCustomLivingEntity.class; } // MCPC+
+            else  { return CraftLivingEntity.class; }
         }
         else if (net.minecraft.entity.boss.EntityDragonPart.class.isAssignableFrom(nmsClass)) {
             /* MCPC+ - no instance, best we can say is this is a CraftComplexPart

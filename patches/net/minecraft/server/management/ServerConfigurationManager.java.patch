@@ -155,40 +155,13 @@
          NBTTagCompound nbttagcompound1;
  
          if (par1EntityPlayerMP.getCommandSenderName().equals(this.mcServer.getServerOwner()) && nbttagcompound != null)
-@@ -242,29 +306,86 @@
-     // JAVADOC METHOD $$ func_72391_b
-     protected void writePlayerData(EntityPlayerMP par1EntityPlayerMP)
-     {
--        this.playerNBTManagerObj.writePlayerData(par1EntityPlayerMP);
--        StatisticsFile statisticsfile = (StatisticsFile)this.field_148547_k.get(par1EntityPlayerMP.getCommandSenderName());
--
--        if (statisticsfile != null)
-+        // MCPC+ start 
-+        //
-+        //  FML nulls out playerNetServerHandler during login process then sets it back after a connection has
-+        //  been established. Due to this, we must verify the player made a successful connection before 
-+        //  attempting to write player data.
-+        //  This prevents the player.dat file from possibly being reset after a client disconnects during the login process.
-+        if (par1EntityPlayerMP.playerNetServerHandler != null)
-         {
--            statisticsfile.func_150883_b();
-+            this.playerNBTManagerObj.writePlayerData(par1EntityPlayerMP);
-+            StatisticsFile statisticsfile = (StatisticsFile)this.field_148547_k.get(par1EntityPlayerMP.getCommandSenderName());
-+    
-+            if (statisticsfile != null)
-+            {
-+                statisticsfile.func_150883_b();
-+            }
-         }
-+        // MCPC+ end
-     }
- 
+@@ -256,17 +320,64 @@
      // JAVADOC METHOD $$ func_72377_c
      public void playerLoggedIn(EntityPlayerMP par1EntityPlayerMP)
      {
 -        this.sendPacketToAllPlayers(new S38PacketPlayerListItem(par1EntityPlayerMP.getCommandSenderName(), true, 1000));
 +        cserver.detectListNameConflict(par1EntityPlayerMP); // CraftBukkit
-+        // this.sendAll(new PacketPlayOutPlayerInfo(entityplayermp.getName(), true, 1000)); // CraftBukkit - replaced with loop below
++        // this.sendPacketToAllPlayers(new S38PacketPlayerListItem(par1EntityPlayerMP.getCommandSenderName(), true, 1000)); // CraftBukkit - replaced with loop below
          this.playerEntityList.add(par1EntityPlayerMP);
          WorldServer worldserver = this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension);
 -        worldserver.spawnEntityInWorld(par1EntityPlayerMP);
@@ -252,7 +225,7 @@
      }
  
      // JAVADOC METHOD $$ func_72358_d
-@@ -274,24 +395,70 @@
+@@ -276,24 +387,70 @@
      }
  
      // JAVADOC METHOD $$ func_72367_e
@@ -335,7 +308,7 @@
      }
  
      // JAVADOC METHOD $$ func_148542_a
-@@ -376,26 +543,191 @@
+@@ -378,26 +535,191 @@
          return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
      }
  
@@ -531,7 +504,7 @@
          par1EntityPlayerMP.dimension = par2;
          Object object;
  
-@@ -409,51 +741,214 @@
+@@ -411,51 +733,214 @@
          }
  
          EntityPlayerMP entityplayermp1 = new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension), par1EntityPlayerMP.getGameProfile(), (ItemInWorldManager)object);
@@ -763,7 +736,7 @@
      public void transferPlayerToDimension(EntityPlayerMP par1EntityPlayerMP, int par2)
      {
          transferPlayerToDimension(par1EntityPlayerMP, par2, mcServer.worldServerForDimension(par2).getDefaultTeleporter());
-@@ -487,7 +982,10 @@
+@@ -489,7 +974,10 @@
      // JAVADOC METHOD $$ func_82448_a
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer)
      {
@@ -775,7 +748,7 @@
      }
  
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer, Teleporter teleporter)
-@@ -573,6 +1071,192 @@
+@@ -575,6 +1063,192 @@
          par1Entity.setWorld(par4WorldServer);
      }
  
@@ -968,7 +941,7 @@
      // JAVADOC METHOD $$ func_72374_b
      public void sendPlayerInfoToAllPlayers()
      {
-@@ -581,11 +1265,36 @@
+@@ -583,11 +1257,36 @@
              this.playerPingIndex = 0;
          }
  
@@ -1005,7 +978,7 @@
      }
  
      public void sendPacketToAllPlayers(Packet p_148540_1_)
-@@ -655,12 +1364,30 @@
+@@ -657,12 +1356,30 @@
      public void addOp(String par1Str)
      {
          this.ops.add(par1Str.toLowerCase());
@@ -1036,7 +1009,7 @@
      }
  
      // JAVADOC METHOD $$ func_72370_d
-@@ -838,8 +1565,16 @@
+@@ -840,8 +1557,16 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -1054,7 +1027,7 @@
              if (entityplayermp != p_148543_1_ && entityplayermp.dimension == p_148543_10_)
              {
                  double d4 = p_148543_2_ - entityplayermp.posX;
-@@ -896,9 +1631,12 @@
+@@ -898,9 +1623,12 @@
  
          if (par2WorldServer.isRaining())
          {
@@ -1070,7 +1043,7 @@
          }
      }
  
-@@ -906,7 +1644,7 @@
+@@ -908,7 +1636,7 @@
      public void syncPlayerInventory(EntityPlayerMP par1EntityPlayerMP)
      {
          par1EntityPlayerMP.sendContainerToPlayer(par1EntityPlayerMP.inventoryContainer);
@@ -1079,7 +1052,7 @@
          par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(par1EntityPlayerMP.inventory.currentItem));
      }
  
-@@ -925,7 +1663,10 @@
+@@ -927,7 +1655,10 @@
      // JAVADOC METHOD $$ func_72373_m
      public String[] getAvailablePlayerDat()
      {
@@ -1091,7 +1064,7 @@
      }
  
      public void setWhiteListEnabled(boolean par1)
-@@ -998,12 +1739,31 @@
+@@ -1000,12 +1731,31 @@
      // JAVADOC METHOD $$ func_72392_r
      public void removeAllPlayers()
      {

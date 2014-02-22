@@ -32,7 +32,6 @@ import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.metadata.BlockMetadataStore;
 import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.entity.*;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.entity.minecart.HopperMinecart;
 import org.bukkit.entity.minecart.PoweredMinecart;
@@ -49,6 +48,8 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.StandardMessenger;
 import org.bukkit.util.Vector;
+
+import cpw.mods.fml.common.registry.EntityRegistry; // MCPC+
 
 public class CraftWorld implements World {
     //public static final int CUSTOM_DIMENSION_OFFSET = 10; // MCPC+ - disabled
@@ -341,8 +342,37 @@ public class CraftWorld implements World {
     }
 
     public Entity spawnEntity(Location loc, EntityType entityType) {
+        // MCPC+ start - handle custom entity spawns from plugins
+        if (EntityRegistry.entityClassMap.get(entityType.getName()) != null)
+        {
+            net.minecraft.entity.Entity entity = null;
+            entity = getEntity(EntityRegistry.entityClassMap.get(entityType.getName()), world);
+            if (entity != null)
+            {
+                entity.setLocationAndAngles(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+                world.addEntity(entity, SpawnReason.CUSTOM);
+                return entity.getBukkitEntity();
+            }
+        }
+        // MCPC+ end
         return spawn(loc, entityType.getEntityClass());
     }
+
+    // MCPC+ start
+    public net.minecraft.entity.Entity getEntity(Class<? extends net.minecraft.entity.Entity> clazz, net.minecraft.world.World world)
+    {
+        System.out.println("getEntity " + clazz);
+        net.minecraft.entity.EntityLiving entity = null;
+        try
+        {
+            entity = (net.minecraft.entity.EntityLiving) clazz.getConstructor(new Class[] { net.minecraft.world.World.class }).newInstance(new Object[] { world });
+        }
+        catch (Throwable throwable)
+        {
+        }
+        return entity;
+    }
+    // MCPC+ end
 
     public LightningStrike strikeLightning(Location loc) {
         net.minecraft.entity.effect.EntityLightningBolt lightning = new net.minecraft.entity.effect.EntityLightningBolt(world, loc.getX(), loc.getY(), loc.getZ());
@@ -461,11 +491,11 @@ public class CraftWorld implements World {
             break;
         }
 
-        world.runningTreeGeneration = true;
+        world.captureTreeGeneration = true;
         world.captureBlockStates = true;
         boolean grownTree = gen.generate(world, rand, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
         world.captureBlockStates = false;
-        world.runningTreeGeneration = false;
+        world.captureTreeGeneration = false;
         if (grownTree) { // Copy block data to delegate
             for (BlockState blockstate : world.capturedBlockStates) {
                 int x = blockstate.getX();
