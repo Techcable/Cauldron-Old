@@ -57,7 +57,7 @@
          thread.setDaemon(true);
          thread.start();
 +        // CraftBukkit start - TODO: handle command-line logging arguments
-+        java.util.logging.Logger global = java.util.logging.Logger.getLogger("");
++        /*java.util.logging.Logger global = java.util.logging.Logger.getLogger("");
 +        global.setUseParentHandlers(false);
 +
 +        for (java.util.logging.Handler handler : global.getHandlers())
@@ -79,7 +79,7 @@
 +        new Thread(new org.bukkit.craftbukkit.util.TerminalConsoleWriterThread(System.out, this.reader)).start();
 +        System.setOut(new PrintStream(new LoggerOutputStream(logger, Level.INFO), true));
 +        System.setErr(new PrintStream(new LoggerOutputStream(logger, Level.WARN), true));
-+        // CraftBukkit end
++        // CraftBukkit end */
          field_155771_h.info("Starting minecraft server version 1.7.2");
  
          if (Runtime.getRuntime().maxMemory() / 1024L / 1024L < 512L)
