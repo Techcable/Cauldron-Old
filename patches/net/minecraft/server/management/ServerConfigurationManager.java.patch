@@ -736,7 +736,22 @@
      public void transferPlayerToDimension(EntityPlayerMP par1EntityPlayerMP, int par2)
      {
          transferPlayerToDimension(par1EntityPlayerMP, par2, mcServer.worldServerForDimension(par2).getDefaultTeleporter());
-@@ -489,7 +974,10 @@
+@@ -483,13 +968,25 @@
+             PotionEffect potioneffect = (PotionEffect)iterator.next();
+             par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S1DPacketEntityEffect(par1EntityPlayerMP.getEntityId(), potioneffect));
+         }
++
++        // MCPC+ start - fire PlayerChangedWorldEvent for mods that call this method
++        if (worldserver != worldserver1)
++        {
++            PlayerChangedWorldEvent event = new PlayerChangedWorldEvent((Player) par1EntityPlayerMP.getBukkitEntity(), worldserver.getWorld());
++            Bukkit.getServer().getPluginManager().callEvent(event);
++        }
++
++        // MCPC+ end
+         FMLCommonHandler.instance().firePlayerChangedDimensionEvent(par1EntityPlayerMP, j, par2);
+     }
+ 
      // JAVADOC METHOD $$ func_82448_a
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer)
      {
@@ -748,7 +763,7 @@
      }
  
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer, Teleporter teleporter)
-@@ -575,6 +1063,192 @@
+@@ -575,6 +1072,192 @@
          par1Entity.setWorld(par4WorldServer);
      }
  
@@ -941,7 +956,7 @@
      // JAVADOC METHOD $$ func_72374_b
      public void sendPlayerInfoToAllPlayers()
      {
-@@ -583,11 +1257,36 @@
+@@ -583,11 +1266,36 @@
              this.playerPingIndex = 0;
          }
  
@@ -978,7 +993,7 @@
      }
  
      public void sendPacketToAllPlayers(Packet p_148540_1_)
-@@ -657,12 +1356,30 @@
+@@ -657,12 +1365,30 @@
      public void addOp(String par1Str)
      {
          this.ops.add(par1Str.toLowerCase());
@@ -1009,7 +1024,7 @@
      }
  
      // JAVADOC METHOD $$ func_72370_d
-@@ -840,8 +1557,16 @@
+@@ -840,8 +1566,16 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -1027,7 +1042,7 @@
              if (entityplayermp != p_148543_1_ && entityplayermp.dimension == p_148543_10_)
              {
                  double d4 = p_148543_2_ - entityplayermp.posX;
-@@ -898,9 +1623,12 @@
+@@ -898,9 +1632,12 @@
  
          if (par2WorldServer.isRaining())
          {
@@ -1043,7 +1058,7 @@
          }
      }
  
-@@ -908,7 +1636,7 @@
+@@ -908,7 +1645,7 @@
      public void syncPlayerInventory(EntityPlayerMP par1EntityPlayerMP)
      {
          par1EntityPlayerMP.sendContainerToPlayer(par1EntityPlayerMP.inventoryContainer);
@@ -1052,7 +1067,7 @@
          par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(par1EntityPlayerMP.inventory.currentItem));
      }
  
-@@ -927,7 +1655,10 @@
+@@ -927,7 +1664,10 @@
      // JAVADOC METHOD $$ func_72373_m
      public String[] getAvailablePlayerDat()
      {
@@ -1064,7 +1079,7 @@
      }
  
      public void setWhiteListEnabled(boolean par1)
-@@ -1000,12 +1731,31 @@
+@@ -1000,12 +1740,31 @@
      // JAVADOC METHOD $$ func_72392_r
      public void removeAllPlayers()
      {
