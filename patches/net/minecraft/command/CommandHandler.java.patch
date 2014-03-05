@@ -43,7 +43,7 @@
 +        // MCPC+ start - register vanilla commands with Bukkit to support permissions.
 +        CraftSimpleCommandMap commandMap = FMLCommonHandler.instance().getMinecraftServerInstance().server.getCraftCommandMap();
 +        ModCustomCommand customCommand = new ModCustomCommand(par1ICommand.getCommandName());
-+        customCommand.setPermission(par1ICommand.getClass().getName());
++        customCommand.setPermission(permissionNode);
 +        if (list != null)
 +            customCommand.setAliases(list);
 +        commandMap.register(par1ICommand.getCommandName(), customCommand);
