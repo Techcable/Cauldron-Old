@@ -497,7 +497,8 @@ public class CraftWorld implements World {
         world.captureBlockStates = false;
         world.captureTreeGeneration = false;
         if (grownTree) { // Copy block data to delegate
-            for (BlockState blockstate : world.capturedBlockStates) {
+            List<BlockState> blocks = (List<BlockState>) world.capturedBlockStates.clone(); // Avoid CME's
+            for (BlockState blockstate : blocks) {
                 int x = blockstate.getX();
                 int y = blockstate.getY();
                 int z = blockstate.getZ();

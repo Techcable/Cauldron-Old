@@ -452,14 +452,15 @@
      }
  
      private static MapStorage s_mapStorage;
-@@ -359,6 +679,20 @@
+@@ -359,6 +679,21 @@
  
      public Block getBlock(int p_147439_1_, int p_147439_2_, int p_147439_3_)
      {
 +        // MCPC+ start - tree generation
 +        if (captureTreeGeneration) 
 +        {
-+            Iterator<BlockState> it = capturedBlockStates.iterator();
++            List<BlockState> blocks = (List<BlockState>) capturedBlockStates.clone(); // Avoid CME's
++            Iterator<BlockState> it = blocks.iterator();
 +            while (it.hasNext())
 +            {
 +                BlockState previous = it.next();
@@ -473,7 +474,7 @@
          if (p_147439_1_ >= -30000000 && p_147439_3_ >= -30000000 && p_147439_1_ < 30000000 && p_147439_3_ < 30000000 && p_147439_2_ >= 0 && p_147439_2_ < 256)
          {
              Chunk chunk = null;
-@@ -390,6 +724,13 @@
+@@ -390,6 +725,13 @@
          return block.isAir(this, p_147437_1_, p_147437_2_, p_147437_3_);
      }
  
@@ -487,7 +488,7 @@
      // JAVADOC METHOD $$ func_72899_e
      public boolean blockExists(int par1, int par2, int par3)
      {
-@@ -416,7 +757,8 @@
+@@ -416,7 +758,8 @@
              {
                  for (int l1 = par3; l1 <= par6; ++l1)
                  {
@@ -497,7 +498,7 @@
                      {
                          return false;
                      }
-@@ -432,7 +774,7 @@
+@@ -432,7 +775,7 @@
      }
  
      // JAVADOC METHOD $$ func_72916_c
@@ -506,7 +507,7 @@
      {
          return this.chunkProvider.chunkExists(par1, par2);
      }
-@@ -443,15 +785,52 @@
+@@ -443,15 +786,52 @@
          return this.getChunkFromChunkCoords(par1 >> 4, par2 >> 4);
      }
  
@@ -560,7 +561,7 @@
          if (p_147465_1_ >= -30000000 && p_147465_3_ >= -30000000 && p_147465_1_ < 30000000 && p_147465_3_ < 30000000)
          {
              if (p_147465_2_ < 0)
-@@ -471,29 +850,31 @@
+@@ -471,29 +851,31 @@
                  {
                      block1 = chunk.getBlock(p_147465_1_ & 15, p_147465_2_, p_147465_3_ & 15);
                  }
@@ -607,7 +608,7 @@
  
                  return flag;
              }
-@@ -504,9 +885,43 @@
+@@ -504,9 +886,43 @@
          }
      }
  
@@ -651,7 +652,7 @@
          if (par1 >= -30000000 && par3 >= -30000000 && par1 < 30000000 && par3 < 30000000)
          {
              if (par2 < 0)
-@@ -625,6 +1040,13 @@
+@@ -625,6 +1041,13 @@
      // JAVADOC METHOD $$ func_147444_c
      public void notifyBlockChange(int p_147444_1_, int p_147444_2_, int p_147444_3_, Block p_147444_4_)
      {
@@ -665,7 +666,7 @@
          this.notifyBlocksOfNeighborChange(p_147444_1_, p_147444_2_, p_147444_3_, p_147444_4_);
      }
  
-@@ -711,6 +1133,21 @@
+@@ -711,6 +1134,21 @@
  
              try
              {
@@ -687,7 +688,7 @@
                  block.onNeighborBlockChange(this, p_147460_1_, p_147460_2_, p_147460_3_, p_147460_4_);
              }
              catch (Throwable throwable1)
-@@ -1254,6 +1691,7 @@
+@@ -1254,6 +1692,7 @@
  
                              if (movingobjectposition1 != null)
                              {
@@ -695,7 +696,7 @@
                                  return movingobjectposition1;
                              }
                          }
-@@ -1262,6 +1700,8 @@
+@@ -1262,6 +1701,8 @@
                              movingobjectposition2 = new MovingObjectPosition(l, i1, j1, b0, p_147447_1_, false);
                          }
                      }
@@ -704,7 +705,7 @@
                  }
  
                  return p_147447_5_ ? movingobjectposition2 : null;
-@@ -1347,32 +1787,114 @@
+@@ -1347,32 +1788,114 @@
      // JAVADOC METHOD $$ func_72838_d
      public boolean spawnEntityInWorld(Entity par1Entity)
      {
@@ -829,7 +830,7 @@
              return true;
          }
      }
-@@ -1383,6 +1905,8 @@
+@@ -1383,6 +1906,8 @@
          {
              ((IWorldAccess)this.worldAccesses.get(i)).onEntityCreate(par1Entity);
          }
@@ -838,7 +839,7 @@
      }
  
      protected void onEntityRemoved(Entity par1Entity)
-@@ -1391,6 +1915,8 @@
+@@ -1391,6 +1916,8 @@
          {
              ((IWorldAccess)this.worldAccesses.get(i)).onEntityDestroy(par1Entity);
          }
@@ -847,7 +848,7 @@
      }
  
      // JAVADOC METHOD $$ func_72900_e
-@@ -1418,6 +1944,11 @@
+@@ -1418,6 +1945,11 @@
      // JAVADOC METHOD $$ func_72973_f
      public void removePlayerEntityDangerously(Entity par1Entity)
      {
@@ -859,7 +860,7 @@
          par1Entity.setDead();
  
          if (par1Entity instanceof EntityPlayer)
-@@ -1434,7 +1965,20 @@
+@@ -1434,7 +1966,20 @@
              this.getChunkFromChunkCoords(i, j).removeEntity(par1Entity);
          }
  
@@ -881,7 +882,7 @@
          this.onEntityRemoved(par1Entity);
      }
  
-@@ -1454,32 +1998,48 @@
+@@ -1454,32 +1999,48 @@
          int l = MathHelper.floor_double(par2AxisAlignedBB.maxY + 1.0D);
          int i1 = MathHelper.floor_double(par2AxisAlignedBB.minZ);
          int j1 = MathHelper.floor_double(par2AxisAlignedBB.maxZ + 1.0D);
@@ -944,7 +945,7 @@
          double d0 = 0.25D;
          List list = this.getEntitiesWithinAABBExcludingEntity(par1Entity, par2AxisAlignedBB.expand(d0, d0, d0));
  
-@@ -1826,11 +2386,37 @@
+@@ -1826,11 +2387,37 @@
          Entity entity;
          CrashReport crashreport;
          CrashReportCategory crashreportcategory;
@@ -983,7 +984,7 @@
              try
              {
                  ++entity.ticksExisted;
-@@ -1867,6 +2453,7 @@
+@@ -1867,6 +2454,7 @@
              }
          }
  
@@ -991,7 +992,7 @@
          this.theProfiler.endStartSection("remove");
          this.loadedEntityList.removeAll(this.unloadedEntityList);
          int j;
-@@ -1891,11 +2478,30 @@
+@@ -1891,11 +2479,30 @@
  
          this.unloadedEntityList.clear();
          this.theProfiler.endStartSection("regular");
@@ -1024,7 +1025,7 @@
              if (entity.ridingEntity != null)
              {
                  if (!entity.ridingEntity.isDead && entity.ridingEntity.riddenByEntity == entity)
-@@ -1913,7 +2519,9 @@
+@@ -1913,7 +2520,9 @@
              {
                  try
                  {
@@ -1034,7 +1035,7 @@
                  }
                  catch (Throwable throwable1)
                  {
-@@ -1946,29 +2554,62 @@
+@@ -1946,29 +2555,62 @@
                      this.getChunkFromChunkCoords(j, l).removeEntity(entity);
                  }
  
@@ -1100,7 +1101,7 @@
                      crashreport = CrashReport.makeCrashReport(throwable, "Ticking block entity");
                      crashreportcategory = crashreport.makeCategory("Block entity being ticked");
                      tileentity.func_145828_a(crashreportcategory);
-@@ -2001,6 +2642,10 @@
+@@ -2001,6 +2643,10 @@
              }
          }
  
@@ -1111,7 +1112,7 @@
          if (!this.field_147483_b.isEmpty())
          {
              for (Object tile : field_147483_b)
-@@ -2045,16 +2690,20 @@
+@@ -2045,16 +2691,20 @@
              this.addedTileEntityList.clear();
          }
  
@@ -1135,7 +1136,7 @@
          }
      }
  
-@@ -2072,16 +2721,26 @@
+@@ -2072,16 +2722,26 @@
          boolean isForced = getPersistentChunks().containsKey(new ChunkCoordIntPair(i >> 4, j >> 4));
          byte b0 = isForced ? (byte)0 : 32;
          boolean canUpdate = !par2 || this.checkChunksExist(i - b0, 0, j - b0, i + b0, 0, j + b0);
@@ -1164,7 +1165,7 @@
              par1Entity.lastTickPosX = par1Entity.posX;
              par1Entity.lastTickPosY = par1Entity.posY;
              par1Entity.lastTickPosZ = par1Entity.posZ;
-@@ -2165,6 +2824,8 @@
+@@ -2165,6 +2825,8 @@
                      par1Entity.riddenByEntity = null;
                  }
              }
@@ -1173,7 +1174,7 @@
          }
      }
  
-@@ -2365,6 +3026,7 @@
+@@ -2365,6 +3027,7 @@
                  par3Entity.motionZ += vec3.zCoord * d1;
              }
  
@@ -1181,7 +1182,7 @@
              return flag;
          }
      }
-@@ -2461,6 +3123,7 @@
+@@ -2461,6 +3124,7 @@
          double d2 = 1.0D / ((par2AxisAlignedBB.maxZ - par2AxisAlignedBB.minZ) * 2.0D + 1.0D);
          int i = 0;
          int j = 0;
@@ -1189,7 +1190,7 @@
  
          for (float f = 0.0F; f <= 1.0F; f = (float)((double)f + d0))
          {
-@@ -2482,7 +3145,8 @@
+@@ -2482,7 +3146,8 @@
              }
          }
  
@@ -1199,7 +1200,7 @@
      }
  
      // JAVADOC METHOD $$ func_72886_a
-@@ -2605,7 +3269,7 @@
+@@ -2605,7 +3270,7 @@
              return;
          }
  
@@ -1208,7 +1209,7 @@
          {
              if (this.field_147481_N)
              {
-@@ -2760,7 +3424,16 @@
+@@ -2760,7 +3425,16 @@
  
                      if (i <= 0)
                      {
@@ -1226,7 +1227,7 @@
                      }
                  }
  
-@@ -2796,7 +3469,16 @@
+@@ -2796,7 +3470,16 @@
  
                      if (j <= 0)
                      {
@@ -1244,7 +1245,7 @@
                      }
                  }
  
-@@ -2818,28 +3500,72 @@
+@@ -2818,28 +3501,72 @@
  
      protected void setActivePlayerChunksAndCheckLight()
      {
@@ -1325,7 +1326,7 @@
          }
  
          this.theProfiler.endSection();
-@@ -2851,7 +3577,7 @@
+@@ -2851,7 +3578,7 @@
  
          this.theProfiler.startSection("playerCheckLight");
  
@@ -1334,7 +1335,7 @@
          {
              i = this.rand.nextInt(this.playerEntities.size());
              entityplayer = (EntityPlayer)this.playerEntities.get(i);
-@@ -3333,8 +4059,21 @@
+@@ -3333,8 +4060,21 @@
          {
              Entity entity = (Entity)this.loadedEntityList.get(j);
  
@@ -1357,7 +1358,7 @@
                  ++i;
              }
          }
-@@ -3345,6 +4084,11 @@
+@@ -3345,6 +4085,11 @@
      // JAVADOC METHOD $$ func_72868_a
      public void addLoadedEntities(List par1List)
      {
@@ -1369,7 +1370,7 @@
          for (int i = 0; i < par1List.size(); ++i)
          {
              Entity entity = (Entity)par1List.get(i);
-@@ -3367,7 +4111,12 @@
+@@ -3367,7 +4112,12 @@
      {
          Block block1 = this.getBlock(p_147472_2_, p_147472_3_, p_147472_4_);
          AxisAlignedBB axisalignedbb = p_147472_5_ ? null : p_147472_1_.getCollisionBoundingBoxFromPool(this, p_147472_2_, p_147472_3_, p_147472_4_);
@@ -1383,7 +1384,7 @@
      }
  
      public PathEntity getPathEntityToEntity(Entity par1Entity, Entity par2Entity, float par3, boolean par4, boolean par5, boolean par6, boolean par7)
-@@ -3522,7 +4271,15 @@
+@@ -3522,7 +4272,15 @@
  
          for (int i = 0; i < this.playerEntities.size(); ++i)
          {
@@ -1400,7 +1401,7 @@
              double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
  
              if ((par7 < 0.0D || d5 < par7 * par7) && (d4 == -1.0D || d5 < d4))
-@@ -3549,8 +4306,16 @@
+@@ -3549,8 +4307,16 @@
  
          for (int i = 0; i < this.playerEntities.size(); ++i)
          {
@@ -1418,7 +1419,7 @@
              if (!entityplayer1.capabilities.disableDamage && entityplayer1.isEntityAlive())
              {
                  double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
-@@ -3719,6 +4484,18 @@
+@@ -3719,6 +4485,18 @@
      // JAVADOC METHOD $$ func_72854_c
      public void updateAllPlayersSleepingFlag() {}
  
@@ -1437,7 +1438,7 @@
      public float getWeightedThunderStrength(float par1)
      {
          return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * par1) * this.getRainStrength(par1);
-@@ -4017,8 +4794,8 @@
+@@ -4017,8 +4795,8 @@
       */
      public void addTileEntity(TileEntity entity)
      {
@@ -1448,7 +1449,7 @@
          {
              dest.add(entity);
          }
-@@ -4114,4 +4891,43 @@
+@@ -4114,4 +4892,43 @@
          }
          return count;
      }
