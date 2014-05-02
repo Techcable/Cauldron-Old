@@ -3,8 +3,8 @@
 	url = https://github.com/MinecraftPortCentral/FML.git
 [submodule "bukkit"]
 	path = bukkit
-	url = git://github.com/SpigotMC/Spigot-API.git
-	branch = master
+	url = git://github.com/MinecraftPortCentral/Spigot-API.git
+	branch = 1.7.2
 [submodule "forge"]
 	path = forge
 	url = git://github.com/MinecraftForge/MinecraftForge.git

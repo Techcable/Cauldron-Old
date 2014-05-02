@@ -45,7 +45,7 @@ minecraft {
 }
 
 group = 'net.minecraftforge'
-version = "1.7.2-R0.4-forge1033"
+version = "1.7.2-R0.4-forge1047"
 
 jenkins {
     job = 'MCPC'
@@ -70,7 +70,7 @@ tasks.packageUniversal.manifest {
     'Implementation-Vendor': 'MCPC',
     'Implementation-Title': 'MCPC Plus',
     'Implementation-Version': 'git-MCPC-Plus-'+project.version+getBuild(),
-    'Forge-Version': '10.12.0.1033',
+    'Forge-Version': '10.12.0.1047',
     'Specification-Vendor': 'Bukkit Team',
     'Specification-Title': 'Bukkit',
     'Specification-Version': '1.7.2-R0.4-SNAPSHOT'
