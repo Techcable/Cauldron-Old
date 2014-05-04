@@ -70,7 +70,7 @@
  
 -    private static boolean canExtend(World p_150077_0_, int p_150077_1_, int p_150077_2_, int p_150077_3_, int p_150077_4_)
 +    // MCPC+ start - vanilla compatibility
-+    private static boolean func_150077_h(World world, int i, int j, int k, int l) {
++    private static boolean canExtend(World world, int i, int j, int k, int l) {
 +        return canExtend_IntCB(world, i, j, k, l) >= 0;
 +    }
 +    // MCPC+ end

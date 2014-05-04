@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/util/Vec3.java
 +++ ../src-work/minecraft/net/minecraft/util/Vec3.java
-@@ -10,6 +10,7 @@
+@@ -7,6 +7,7 @@
      public double xCoord;
      public double yCoord;
      public double zCoord;
@@ -8,7 +8,7 @@
      private static final String __OBFID = "CL_00000612";
  
      public static Vec3 createVectorHelper(double par0, double par2, double par4)
-@@ -40,7 +41,7 @@
+@@ -37,7 +38,7 @@
          this.myVec3LocalPool = par1Vec3Pool;
      }
  

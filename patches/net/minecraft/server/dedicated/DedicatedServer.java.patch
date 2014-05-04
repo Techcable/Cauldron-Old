@@ -21,7 +21,7 @@
  public class DedicatedServer extends MinecraftServer implements IServer
  {
 @@ -42,16 +52,19 @@
-     private final List pendingCommandList = Collections.synchronizedList(new ArrayList());
+     public final List pendingCommandList = Collections.synchronizedList(new ArrayList());
      private RConThreadQuery theRConThreadQuery;
      private RConThreadMain theRConThreadMain;
 -    private PropertyManager settings;

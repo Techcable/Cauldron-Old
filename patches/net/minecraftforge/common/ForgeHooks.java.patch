@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/common/ForgeHooks.java
 +++ ../src-work/minecraft/net/minecraftforge/common/ForgeHooks.java
-@@ -46,6 +46,7 @@
+@@ -48,6 +48,7 @@
  import net.minecraftforge.event.entity.player.PlayerOpenContainerEvent;
  import net.minecraftforge.event.world.BlockEvent;
  import static net.minecraft.init.Blocks.*;
@@ -8,7 +8,7 @@
  
  public class ForgeHooks
  {
-@@ -335,6 +336,12 @@
+@@ -337,6 +338,12 @@
      {
          player.captureDrops = true;
          EntityItem ret = player.func_146097_a(item, false, includeName);
@@ -21,7 +21,7 @@
          player.capturedDrops.clear();
          player.captureDrops = false;
  
-@@ -377,6 +384,8 @@
+@@ -379,6 +386,8 @@
  
      public static BlockEvent.BreakEvent onBlockBreakEvent(World world, GameType gameType, EntityPlayerMP entityPlayer, int x, int y, int z)
      {
@@ -30,7 +30,7 @@
          // Logic from tryHarvestBlock for pre-canceling the event
          boolean preCancelEvent = false;
          if (gameType.isAdventure() && !entityPlayer.isCurrentToolAdventureModeExempt(x, y, z))
-@@ -387,9 +396,9 @@
+@@ -389,9 +398,9 @@
          {
              preCancelEvent = true;
          }
@@ -42,7 +42,7 @@
          {
              S23PacketBlockChange packet = new S23PacketBlockChange(x, y, z, world);
              packet.field_148883_d = Blocks.air;
-@@ -401,11 +410,11 @@
+@@ -403,11 +412,11 @@
          Block block = world.getBlock(x, y, z);
          int blockMetadata = world.getBlockMetadata(x, y, z);
          BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(x, y, z, world, block, blockMetadata, entityPlayer);

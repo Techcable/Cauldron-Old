@@ -2,7 +2,7 @@
 +++ ../src-work/minecraft/net/minecraft/world/storage/SaveHandler.java
 @@ -10,6 +10,7 @@
  import cpw.mods.fml.common.FMLCommonHandler;
- import cpw.mods.fml.common.registry.GameRegistryException;
+ import cpw.mods.fml.common.StartupQuery;
  import net.minecraft.entity.player.EntityPlayer;
 +import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.nbt.CompressedStreamTools;
@@ -59,7 +59,7 @@
          }
      }
  
-@@ -266,6 +277,14 @@
+@@ -267,6 +278,14 @@
  
          if (nbttagcompound != null)
          {
@@ -74,7 +74,7 @@
              par1EntityPlayer.readFromNBT(nbttagcompound);
          }
  
-@@ -322,4 +341,80 @@
+@@ -323,4 +342,80 @@
      {
          return this.saveDirectoryName;
      }
