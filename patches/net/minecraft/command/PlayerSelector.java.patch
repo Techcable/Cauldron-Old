@@ -8,8 +8,8 @@
  import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.server.MinecraftServer;
  import net.minecraft.util.ChunkCoordinates;
-@@ -56,6 +57,13 @@
-     // JAVADOC METHOD $$ func_82380_c
+@@ -51,6 +52,13 @@
+ 
      public static EntityPlayerMP[] matchPlayers(ICommandSender par0ICommandSender, String par1Str)
      {
 +        // CraftBukkit start

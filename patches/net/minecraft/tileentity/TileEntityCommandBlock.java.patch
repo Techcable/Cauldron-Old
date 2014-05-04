@@ -1,13 +1,12 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntityCommandBlock.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityCommandBlock.java
-@@ -12,40 +12,9 @@
+@@ -12,39 +12,9 @@
  
  public class TileEntityCommandBlock extends TileEntity
  {
 -    private final CommandBlockLogic field_145994_a = new CommandBlockLogic()
 -    {
 -        private static final String __OBFID = "CL_00000348";
--        // JAVADOC METHOD $$ func_82114_b
 -        public ChunkCoordinates getPlayerCoordinates()
 -        {
 -            return new ChunkCoordinates(TileEntityCommandBlock.this.xCoord, TileEntityCommandBlock.this.yCoord, TileEntityCommandBlock.this.zCoord);
@@ -44,7 +43,7 @@
      private static final String __OBFID = "CL_00000347";
  
      public void writeToNBT(NBTTagCompound p_145841_1_)
-@@ -72,4 +41,12 @@
+@@ -70,4 +40,12 @@
      {
          return this.field_145994_a;
      }

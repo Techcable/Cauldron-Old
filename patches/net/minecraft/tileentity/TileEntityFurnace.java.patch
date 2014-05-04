@@ -18,8 +18,8 @@
  public class TileEntityFurnace extends TileEntity implements ISidedInventory
  {
      private static final int[] slotsTop = new int[] {0};
-@@ -34,6 +44,37 @@
-     // JAVADOC FIELD $$ field_145961_j
+@@ -30,6 +40,37 @@
+     public int currentItemBurnTime;
      public int furnaceCookTime;
      private String field_145958_o;
 +
@@ -55,17 +55,17 @@
 +    // CraftBukkit end
      private static final String __OBFID = "CL_00000357";
  
-     // JAVADOC METHOD $$ func_70302_i_
-@@ -178,7 +219,7 @@
-     // JAVADOC METHOD $$ func_70297_j_
+     public int getSizeInventory()
+@@ -166,7 +207,7 @@
+ 
      public int getInventoryStackLimit()
      {
 -        return 64;
 +        return maxStack; // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_145953_d
-@@ -210,20 +251,54 @@
+     @SideOnly(Side.CLIENT)
+@@ -195,20 +236,54 @@
      {
          boolean flag = this.furnaceBurnTime > 0;
          boolean flag1 = false;
@@ -124,7 +124,7 @@
                      flag1 = true;
  
                      if (this.furnaceItemStacks[1] != null)
-@@ -238,6 +313,7 @@
+@@ -223,6 +298,7 @@
                  }
              }
  
@@ -132,7 +132,7 @@
              if (this.isBurning() && this.canSmelt())
              {
                  ++this.furnaceCookTime;
-@@ -253,6 +329,7 @@
+@@ -238,6 +314,7 @@
              {
                  this.furnaceCookTime = 0;
              }
@@ -140,7 +140,7 @@
  
              if (flag != this.furnaceBurnTime > 0)
              {
-@@ -291,16 +368,37 @@
+@@ -274,16 +351,37 @@
          if (this.canSmelt())
          {
              ItemStack itemstack = FurnaceRecipes.smelting().getSmeltingResult(this.furnaceItemStacks[0]);

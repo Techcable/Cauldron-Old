@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/village/Village.java
 +++ ../src-work/minecraft/net/minecraft/village/Village.java
-@@ -77,7 +77,7 @@
+@@ -71,7 +71,7 @@
              {
                  EntityIronGolem entityirongolem = new EntityIronGolem(this.worldObj);
                  entityirongolem.setPosition(vec3.xCoord, vec3.yCoord, vec3.zCoord);

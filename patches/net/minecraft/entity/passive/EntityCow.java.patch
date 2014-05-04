@@ -13,8 +13,8 @@
  public class EntityCow extends EntityAnimal
  {
      private static final String __OBFID = "CL_00001640";
-@@ -86,27 +92,25 @@
-     // JAVADOC METHOD $$ func_70628_a
+@@ -80,27 +86,25 @@
+ 
      protected void dropFewItems(boolean par1, int par2)
      {
 +        // CraftBukkit start - Whole method
@@ -49,8 +49,8 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_70085_c
-@@ -116,15 +120,25 @@
+     public boolean interact(EntityPlayer par1EntityPlayer)
+@@ -109,15 +113,25 @@
  
          if (itemstack != null && itemstack.getItem() == Items.bucket && !par1EntityPlayer.capabilities.isCreativeMode)
          {

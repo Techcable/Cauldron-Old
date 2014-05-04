@@ -8,9 +8,9 @@
 +
  public class RegistryNamespaced extends RegistrySimple implements IObjectIntIterable
  {
-     // JAVADOC FIELD $$ field_148759_a
-@@ -20,6 +22,14 @@
-     // JAVADOC METHOD $$ func_148756_a
+     protected ObjectIntIdentityMap underlyingIntegerMap = new ObjectIntIdentityMap();
+@@ -18,6 +20,14 @@
+ 
      public void addObject(int p_148756_1_, String p_148756_2_, Object p_148756_3_)
      {
 +        // MCPC+ start - register item/block materials for Bukkit

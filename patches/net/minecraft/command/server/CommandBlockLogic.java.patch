@@ -32,7 +32,7 @@
      private static final String __OBFID = "CL_00000128";
  
      public int func_145760_g()
-@@ -95,8 +107,140 @@
+@@ -94,8 +106,140 @@
  
          if (minecraftserver != null && minecraftserver.isCommandBlockEnabled())
          {
@@ -175,7 +175,7 @@
          }
          else
          {
-@@ -104,6 +248,31 @@
+@@ -103,6 +247,31 @@
          }
      }
  
@@ -204,6 +204,6 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_70005_c_
      public String getCommandSenderName()
      {
+         return this.field_145761_f;

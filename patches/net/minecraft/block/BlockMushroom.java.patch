@@ -13,8 +13,8 @@
  public class BlockMushroom extends BlockBush implements IGrowable
  {
      private static final String __OBFID = "CL_00000272";
-@@ -20,7 +26,9 @@
-     // JAVADOC METHOD $$ func_149674_a
+@@ -19,7 +25,9 @@
+ 
      public void updateTick(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
      {
 -        if (p_149674_5_.nextInt(25) == 0)
@@ -24,7 +24,7 @@
          {
              byte b0 = 4;
              int l = 5;
-@@ -67,7 +75,19 @@
+@@ -66,7 +74,19 @@
  
              if (p_149674_1_.isAirBlock(i1, j1, k1) && this.canBlockStay(p_149674_1_, i1, j1, k1))
              {
@@ -45,7 +45,7 @@
              }
          }
      }
-@@ -106,10 +126,12 @@
+@@ -102,10 +122,12 @@
  
          if (this == Blocks.brown_mushroom)
          {

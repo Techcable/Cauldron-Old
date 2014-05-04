@@ -8,16 +8,16 @@
  
  import cpw.mods.fml.common.registry.EntityRegistry;
  
-@@ -47,7 +48,7 @@
+@@ -46,7 +47,7 @@
+     private static final Logger logger = LogManager.getLogger();
      private final WorldServer theWorld;
-     // JAVADOC FIELD $$ field_72793_b
      private Set trackedEntities = new HashSet();
 -    private IntHashMap trackedEntityIDs = new IntHashMap();
 +    public IntHashMap trackedEntityIDs = new IntHashMap(); // CraftBukkit - private -> public
      private int entityViewDistance;
      private static final String __OBFID = "CL_00001431";
  
-@@ -186,6 +187,13 @@
+@@ -184,6 +185,13 @@
  
      public void addEntityToTracker(Entity par1Entity, int par2, final int par3, boolean par4)
      {
@@ -31,7 +31,7 @@
          if (par2 > this.entityViewDistance)
          {
              par2 = this.entityViewDistance;
-@@ -240,6 +248,11 @@
+@@ -238,6 +246,11 @@
  
      public void removeEntityFromAllTrackingPlayers(Entity par1Entity)
      {

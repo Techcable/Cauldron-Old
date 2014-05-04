@@ -12,16 +12,16 @@
 +
  public class Potion
  {
-     // JAVADOC FIELD $$ field_76425_a
-@@ -94,6 +100,7 @@
+     public static final Potion[] potionTypes = new Potion[32];
+@@ -78,6 +84,7 @@
          }
  
          this.liquidColor = par3;
 +        org.bukkit.potion.PotionEffectType.registerPotionEffectType(new org.bukkit.craftbukkit.potion.CraftPotionEffectType(this)); // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_76399_b
-@@ -115,14 +122,14 @@
+     protected Potion setIconIndex(int par1, int par2)
+@@ -97,14 +104,14 @@
          {
              if (par1EntityLivingBase.getHealth() < par1EntityLivingBase.getMaxHealth())
              {
@@ -38,7 +38,7 @@
              }
          }
          else if (this.id == wither.id)
-@@ -149,13 +156,20 @@
+@@ -131,12 +138,19 @@
          }
          else
          {
@@ -47,7 +47,6 @@
          }
      }
  
-     // JAVADOC METHOD $$ func_76402_a
      public void affectEntity(EntityLivingBase par1EntityLivingBase, EntityLivingBase par2EntityLivingBase, int par3, double par4)
      {
 +        // CraftBukkit start - Delegate; we need EntityPotion
@@ -60,7 +59,7 @@
          int j;
  
          if ((this.id != heal.id || par2EntityLivingBase.isEntityUndead()) && (this.id != harm.id || !par2EntityLivingBase.isEntityUndead()))
-@@ -170,14 +184,15 @@
+@@ -151,14 +165,15 @@
                  }
                  else
                  {

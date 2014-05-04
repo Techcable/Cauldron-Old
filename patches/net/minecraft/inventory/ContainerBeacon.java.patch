@@ -9,7 +9,7 @@
  public class ContainerBeacon extends Container
  {
      private TileEntityBeacon tileBeacon;
-@@ -16,10 +18,15 @@
+@@ -15,10 +17,15 @@
      private int field_82865_g;
      private int field_82867_h;
      private int field_82868_i;
@@ -25,7 +25,7 @@
          this.tileBeacon = par2TileEntityBeacon;
          this.addSlotToContainer(this.beaconSlot = new ContainerBeacon.BeaconSlot(par2TileEntityBeacon, 0, 136, 110));
          byte b0 = 36;
-@@ -78,6 +85,12 @@
+@@ -77,6 +84,12 @@
  
      public boolean canInteractWith(EntityPlayer par1EntityPlayer)
      {
@@ -38,7 +38,7 @@
          return this.tileBeacon.isUseableByPlayer(par1EntityPlayer);
      }
  
-@@ -147,6 +160,20 @@
+@@ -145,6 +158,20 @@
          return itemstack;
      }
  

@@ -23,9 +23,9 @@
 +
  public class InventoryPlayer implements IInventory
  {
-     // JAVADOC FIELD $$ field_70462_a
-@@ -31,7 +39,46 @@
-     // JAVADOC FIELD $$ field_70459_e
+     public ItemStack[] mainInventory = new ItemStack[36];
+@@ -25,7 +33,46 @@
+     private ItemStack itemStack;
      public boolean inventoryChanged;
      private static final String __OBFID = "CL_00001709";
 +    // CraftBukkit start
@@ -71,7 +71,7 @@
      public InventoryPlayer(EntityPlayer par1EntityPlayer)
      {
          this.player = par1EntityPlayer;
-@@ -90,6 +137,34 @@
+@@ -81,6 +128,34 @@
          return -1;
      }
  
@@ -103,10 +103,10 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_70447_i
      public int getFirstEmptyStack()
      {
-@@ -716,6 +791,13 @@
+         for (int i = 0; i < this.mainInventory.length; ++i)
+@@ -684,6 +759,13 @@
  
      public ItemStack getItemStack()
      {

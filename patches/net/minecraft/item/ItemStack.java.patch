@@ -29,23 +29,22 @@
  public final class ItemStack
  {
      public static final DecimalFormat field_111284_a = new DecimalFormat("#.###");
-@@ -46,8 +61,14 @@
+@@ -42,7 +57,13 @@
+     private Item field_151002_e;
      public NBTTagCompound stackTagCompound;
-     // JAVADOC FIELD $$ field_77991_e
      int itemDamage;
+-    private EntityItemFrame itemFrame;
 +
 +    // MCPC+ - due to a bug in Gson(https://code.google.com/p/google-gson/issues/detail?id=440), a stackoverflow 
 +    //         can occur when gson attempts to resolve a field of a class that points to itself.
 +    //         As a temporary workaround, we will prevent serialization for this object until the bug is fixed.
 +    //         This fixes EE3's serialization of ItemStack.
-     // JAVADOC FIELD $$ field_82843_f
--    private EntityItemFrame itemFrame;
 +    private transient EntityItemFrame itemFrame;
 +    public static EntityPlayer currentPlayer; // MCPC+ - reference to current player calling onItemUse
      private static final String __OBFID = "CL_00000043";
  
      public ItemStack(Block par1Block)
-@@ -131,12 +152,116 @@
+@@ -123,12 +144,116 @@
  
      public boolean tryPlaceItemIntoWorld(EntityPlayer par1EntityPlayer, World par2World, int par3, int par4, int par5, int par6, float par7, float par8, float par9)
      {
@@ -163,10 +162,10 @@
  
          return flag;
      }
-@@ -244,8 +369,22 @@
+@@ -224,8 +349,22 @@
+         return getItem().getMaxDamage(this);
      }
  
-     // JAVADOC METHOD $$ func_96631_a
 +    // Spigot start
 +
 +    /**
@@ -186,7 +185,7 @@
          if (!this.isItemStackDamageable())
          {
              return false;
-@@ -267,6 +406,22 @@
+@@ -247,6 +386,22 @@
  
                  par1 -= k;
  
@@ -209,7 +208,7 @@
                  if (par1 <= 0)
                  {
                      return false;
-@@ -306,6 +461,13 @@
+@@ -285,6 +440,13 @@
                          this.stackSize = 0;
                      }
  
@@ -223,8 +222,8 @@
                      this.itemDamage = 0;
                  }
              }
-@@ -448,6 +610,7 @@
-     // JAVADOC METHOD $$ func_77982_d
+@@ -416,6 +578,7 @@
+ 
      public void setTagCompound(NBTTagCompound par1NBTTagCompound)
      {
 +        // MCPC+ - do not alter name of compound. Fixes Ars Magica 2 Spellbooks

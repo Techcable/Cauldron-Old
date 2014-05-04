@@ -12,7 +12,7 @@
  public class EntityAIAttackOnCollide extends EntityAIBase
  {
      World worldObj;
-@@ -79,6 +84,15 @@
+@@ -73,6 +78,15 @@
      public boolean continueExecuting()
      {
          EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();

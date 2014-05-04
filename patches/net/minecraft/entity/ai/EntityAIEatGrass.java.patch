@@ -12,7 +12,7 @@
  public class EntityAIEatGrass extends EntityAIBase
  {
      private EntityLiving field_151500_b;
-@@ -74,7 +79,8 @@
+@@ -69,7 +74,8 @@
  
              if (this.field_151501_c.getBlock(i, j, k) == Blocks.tallgrass)
              {
@@ -22,7 +22,7 @@
                  {
                      this.field_151501_c.func_147480_a(i, j, k, false);
                  }
-@@ -83,7 +89,8 @@
+@@ -78,7 +84,8 @@
              }
              else if (this.field_151501_c.getBlock(i, j - 1, k) == Blocks.grass)
              {

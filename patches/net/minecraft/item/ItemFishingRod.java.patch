@@ -9,7 +9,7 @@
  public class ItemFishingRod extends Item
  {
      @SideOnly(Side.CLIENT)
-@@ -47,11 +49,22 @@
+@@ -44,11 +46,22 @@
          }
          else
          {

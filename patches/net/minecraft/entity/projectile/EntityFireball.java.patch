@@ -18,7 +18,7 @@
      private static final String __OBFID = "CL_00001717";
  
      public EntityFireball(World par1World)
-@@ -63,20 +67,28 @@
+@@ -62,20 +66,28 @@
      {
          super(par1World);
          this.shootingEntity = par2EntityLivingBase;
@@ -51,10 +51,10 @@
 +        this.accelerationZ = d2 / d3 * 0.1D;
 +    }
 +
-     // JAVADOC METHOD $$ func_70071_h_
      public void onUpdate()
      {
-@@ -142,7 +154,7 @@
+         if (!this.worldObj.isRemote && (this.shootingEntity != null && this.shootingEntity.isDead || !this.worldObj.blockExists((int)this.posX, (int)this.posY, (int)this.posZ)))
+@@ -140,7 +152,7 @@
  
                      if (movingobjectposition1 != null)
                      {
@@ -63,7 +63,7 @@
  
                          if (d1 < d0 || d0 == 0.0D)
                          {
-@@ -161,6 +173,14 @@
+@@ -159,6 +171,14 @@
              if (movingobjectposition != null)
              {
                  this.onImpact(movingobjectposition);
@@ -78,7 +78,7 @@
              }
  
              this.posX += this.motionX;
-@@ -232,7 +252,10 @@
+@@ -227,7 +247,10 @@
          par1NBTTagCompound.setShort("zTile", (short)this.field_145794_g);
          par1NBTTagCompound.setByte("inTile", (byte)Block.getIdFromBlock(this.field_145796_h));
          par1NBTTagCompound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
@@ -89,8 +89,8 @@
 +        par1NBTTagCompound.setTag("direction", this.newDoubleNBTList(new double[] { this.motionX, this.motionY, this.motionZ}));
      }
  
-     // JAVADOC METHOD $$ func_70037_a
-@@ -244,8 +267,17 @@
+     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
+@@ -238,8 +261,17 @@
          this.field_145796_h = Block.getBlockById(par1NBTTagCompound.getByte("inTile") & 255);
          this.inGround = par1NBTTagCompound.getByte("inGround") == 1;
  
@@ -109,7 +109,7 @@
              NBTTagList nbttaglist = par1NBTTagCompound.getTagList("direction", 6);
              this.motionX = nbttaglist.func_150309_d(0);
              this.motionY = nbttaglist.func_150309_d(1);
-@@ -281,6 +313,16 @@
+@@ -273,6 +305,16 @@
  
              if (par1DamageSource.getEntity() != null)
              {

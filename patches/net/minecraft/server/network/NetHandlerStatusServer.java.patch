@@ -21,7 +21,7 @@
  public class NetHandlerStatusServer implements INetHandlerStatusServer
  {
      private final MinecraftServer field_147314_a;
-@@ -40,7 +48,36 @@
+@@ -37,7 +45,36 @@
  
      public void processServerQuery(C00PacketServerQuery p_147312_1_)
      {

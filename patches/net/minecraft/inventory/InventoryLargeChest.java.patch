@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/inventory/InventoryLargeChest.java
 +++ ../src-work/minecraft/net/minecraft/inventory/InventoryLargeChest.java
-@@ -3,14 +3,65 @@
+@@ -3,11 +3,62 @@
  import net.minecraft.entity.player.EntityPlayer;
  import net.minecraft.item.ItemStack;
  
@@ -12,13 +12,10 @@
 +
  public class InventoryLargeChest implements IInventory
  {
-     // JAVADOC FIELD $$ field_70479_a
      private String name;
-     // JAVADOC FIELD $$ field_70477_b
 -    private IInventory upperChest;
-+    public IInventory upperChest; // CraftBukkit - private -> public
-     // JAVADOC FIELD $$ field_70478_c
 -    private IInventory lowerChest;
++    public IInventory upperChest; // CraftBukkit - private -> public
 +    public IInventory lowerChest; // CraftBukkit - private -> public
 +    // CraftBukkit start
 +    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
@@ -68,12 +65,12 @@
      private static final String __OBFID = "CL_00001507";
  
      public InventoryLargeChest(String par1Str, IInventory par2IInventory, IInventory par3IInventory)
-@@ -89,7 +140,7 @@
-     // JAVADOC METHOD $$ func_70297_j_
+@@ -77,7 +128,7 @@
+ 
      public int getInventoryStackLimit()
      {
 -        return this.upperChest.getInventoryStackLimit();
 +        return Math.min(this.upperChest.getInventoryStackLimit(), this.lowerChest.getInventoryStackLimit()); // CraftBukkit - check both sides
      }
  
-     // JAVADOC METHOD $$ func_70296_d
+     public void markDirty()

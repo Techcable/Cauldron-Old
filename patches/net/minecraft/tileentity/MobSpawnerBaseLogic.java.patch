@@ -12,8 +12,8 @@
 +
  public abstract class MobSpawnerBaseLogic
  {
-     // JAVADOC FIELD $$ field_98286_b
-@@ -169,7 +175,23 @@
+     public int spawnDelay = 20;
+@@ -162,7 +168,23 @@
  
              if (par1Entity.worldObj != null)
              {
@@ -38,7 +38,7 @@
              }
  
              NBTTagCompound nbttagcompound2;
-@@ -197,7 +219,7 @@
+@@ -190,7 +212,7 @@
  
                      if (par1Entity.worldObj != null)
                      {
@@ -47,7 +47,7 @@
                      }
  
                      entity1.mountEntity(entity2);
-@@ -209,7 +231,7 @@
+@@ -202,7 +224,7 @@
          else if (par1Entity instanceof EntityLivingBase && par1Entity.worldObj != null)
          {
              ((EntityLiving)par1Entity).onSpawnWithEgg((IEntityLivingData)null);

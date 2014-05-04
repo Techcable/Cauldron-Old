@@ -9,7 +9,7 @@
  public class EntitySmallFireball extends EntityFireball
  {
      private static final String __OBFID = "CL_00001721";
-@@ -37,7 +39,16 @@
+@@ -36,7 +38,16 @@
              {
                  if (!par1MovingObjectPosition.entityHit.isImmuneToFire() && par1MovingObjectPosition.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 5.0F))
                  {
@@ -27,7 +27,7 @@
                  }
              }
              else
-@@ -69,7 +80,13 @@
+@@ -68,7 +79,13 @@
  
                  if (this.worldObj.isAirBlock(i, j, k))
                  {

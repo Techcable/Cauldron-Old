@@ -13,16 +13,16 @@
  public class EntitySheep extends EntityAnimal implements IShearable
  {
      private final InventoryCrafting field_90016_e = new InventoryCrafting(new Container()
-@@ -65,6 +71,7 @@
+@@ -63,6 +69,7 @@
          this.tasks.addTask(8, new EntityAILookIdle(this));
          this.field_90016_e.setInventorySlotContents(0, new ItemStack(Items.dye, 1, 0));
          this.field_90016_e.setInventorySlotContents(1, new ItemStack(Items.dye, 1, 0));
 +        this.field_90016_e.resultInventory = new InventoryCraftResult(); // CraftBukkit - add result slot for event
      }
  
-     // JAVADOC METHOD $$ func_70650_aV
-@@ -106,10 +113,16 @@
-     // JAVADOC METHOD $$ func_70628_a
+     protected boolean isAIEnabled()
+@@ -101,10 +108,16 @@
+ 
      protected void dropFewItems(boolean par1, int par2)
      {
 +        // CraftBukkit start - Whole method
@@ -39,8 +39,8 @@
      }
  
      protected Item getDropItem()
-@@ -133,6 +146,38 @@
-     // JAVADOC METHOD $$ func_70085_c
+@@ -127,6 +140,38 @@
+ 
      public boolean interact(EntityPlayer par1EntityPlayer)
      {
 +        ItemStack itemstack = par1EntityPlayer.inventory.getCurrentItem();
@@ -78,8 +78,8 @@
          return super.interact(par1EntityPlayer);
      }
  
-@@ -246,8 +291,17 @@
-     // JAVADOC METHOD $$ func_70615_aA
+@@ -231,8 +276,17 @@
+ 
      public void eatGrassBonus()
      {
 -        this.setSheared(false);

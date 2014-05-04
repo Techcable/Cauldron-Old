@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockJukebox.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockJukebox.java
-@@ -169,8 +169,23 @@
+@@ -163,8 +163,23 @@
  
              public void func_145857_a(ItemStack p_145857_1_)
              {

@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/item/ItemBow.java
 +++ ../src-work/minecraft/net/minecraft/item/ItemBow.java
-@@ -85,6 +85,21 @@
+@@ -84,6 +84,21 @@
                  entityarrow.setFire(100);
              }
  
@@ -22,7 +22,7 @@
              par1ItemStack.damageItem(1, par3EntityPlayer);
              par2World.playSoundAtEntity(par3EntityPlayer, "random.bow", 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + f * 0.5F);
  
-@@ -99,7 +114,7 @@
+@@ -98,7 +113,7 @@
  
              if (!par2World.isRemote)
              {

@@ -13,23 +13,21 @@
 +
  public abstract class EntityLiving extends EntityLivingBase
  {
-     // JAVADOC FIELD $$ field_70757_a
-@@ -58,11 +65,11 @@
-     // JAVADOC FIELD $$ field_82182_bS
+     public int livingSoundTime;
+@@ -52,9 +59,9 @@
+     private EntityLivingBase attackTarget;
+     private EntitySenses senses;
      private ItemStack[] equipment = new ItemStack[5];
-     // JAVADOC FIELD $$ field_82174_bp
 -    protected float[] equipmentDropChances = new float[5];
-+    public float[] equipmentDropChances = new float[5]; // CraftBukkit - protected -> public
-     // JAVADOC FIELD $$ field_82172_bs
 -    private boolean canPickUpLoot;
-+    public boolean canPickUpLoot; // CraftBukkit - private -> public
-     // JAVADOC FIELD $$ field_82179_bU
 -    private boolean persistenceRequired;
++    public float[] equipmentDropChances = new float[5]; // CraftBukkit - protected -> public
++    public boolean canPickUpLoot; // CraftBukkit - private -> public
 +    public boolean persistenceRequired; // CraftBukkit - private -> public
      protected float defaultPitch;
-     // JAVADOC FIELD $$ field_70776_bF
      private Entity currentTarget;
-@@ -336,9 +343,23 @@
+     protected int numTicksToChaseTarget;
+@@ -311,9 +318,23 @@
      public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
      {
          super.readEntityFromNBT(par1NBTTagCompound);
@@ -55,7 +53,7 @@
          if (par1NBTTagCompound.hasKey("CustomName", 8) && par1NBTTagCompound.getString("CustomName").length() > 0)
          {
              this.setCustomNameTag(par1NBTTagCompound.getString("CustomName"));
-@@ -551,15 +572,41 @@
+@@ -521,15 +542,41 @@
                      this.entityAge = 0;
                  }
              }
@@ -97,7 +95,7 @@
          this.worldObj.theProfiler.startSection("sensing");
          this.senses.clearSensingCache();
          this.worldObj.theProfiler.endSection();
-@@ -1052,6 +1099,14 @@
+@@ -1005,6 +1052,14 @@
      {
          if (this.getLeashed() && this.getLeashedToEntity() == par1EntityPlayer)
          {
@@ -112,7 +110,7 @@
              this.clearLeashed(true, !par1EntityPlayer.capabilities.isCreativeMode);
              return true;
          }
-@@ -1063,6 +1118,14 @@
+@@ -1016,6 +1071,14 @@
              {
                  if (!(this instanceof EntityTameable) || !((EntityTameable)this).isTamed())
                  {
@@ -127,7 +125,7 @@
                      this.setLeashedToEntity(par1EntityPlayer, true);
                      --itemstack.stackSize;
                      return true;
-@@ -1070,6 +1133,14 @@
+@@ -1023,6 +1086,14 @@
  
                  if (par1EntityPlayer.getCommandSenderName().equalsIgnoreCase(((EntityTameable)this).getOwnerName()))
                  {
@@ -142,7 +140,7 @@
                      this.setLeashedToEntity(par1EntityPlayer, true);
                      --itemstack.stackSize;
                      return true;
-@@ -1098,6 +1169,7 @@
+@@ -1049,6 +1120,7 @@
          {
              if (this.leashedToEntity == null || this.leashedToEntity.isDead)
              {
@@ -150,7 +148,7 @@
                  this.clearLeashed(true, true);
              }
          }
-@@ -1187,10 +1259,16 @@
+@@ -1136,10 +1208,16 @@
              }
              else
              {

@@ -1,16 +1,16 @@
 --- ../src-base/minecraft/net/minecraft/util/IntHashMap.java
 +++ ../src-work/minecraft/net/minecraft/util/IntHashMap.java
-@@ -16,7 +16,7 @@
-     // JAVADOC FIELD $$ field_76052_e
+@@ -10,7 +10,7 @@
+     private int threshold = 12;
+     private final float growFactor = 0.75F;
      private transient volatile int versionStamp;
-     // JAVADOC FIELD $$ field_76050_f
 -    private Set keySet = new HashSet();
 +    // private Set keySet = new HashSet(); // CraftBukkit - expensive and unused
      private static final String __OBFID = "CL_00001490";
  
-     // JAVADOC METHOD $$ func_76044_g
-@@ -73,7 +73,7 @@
-     // JAVADOC METHOD $$ func_76038_a
+     private static int computeHash(int par0)
+@@ -61,7 +61,7 @@
+ 
      public void addKey(int par1, Object par2Obj)
      {
 -        this.keySet.add(Integer.valueOf(par1));
@@ -18,8 +18,8 @@
          int j = computeHash(par1);
          int k = getSlotIndex(j, this.slots.length);
  
-@@ -140,7 +140,7 @@
-     // JAVADOC METHOD $$ func_76049_d
+@@ -125,7 +125,7 @@
+ 
      public Object removeObject(int par1)
      {
 -        this.keySet.remove(Integer.valueOf(par1));

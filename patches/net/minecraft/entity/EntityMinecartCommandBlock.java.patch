@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/EntityMinecartCommandBlock.java
 +++ ../src-work/minecraft/net/minecraft/entity/EntityMinecartCommandBlock.java
-@@ -16,34 +16,9 @@
+@@ -16,33 +16,9 @@
  
  public class EntityMinecartCommandBlock extends EntityMinecart
  {
@@ -22,7 +22,6 @@
 -        {
 -            p_145757_1_.writeInt(EntityMinecartCommandBlock.this.getEntityId());
 -        }
--        // JAVADOC METHOD $$ func_82114_b
 -        public ChunkCoordinates getPlayerCoordinates()
 -        {
 -            return new ChunkCoordinates(MathHelper.floor_double(EntityMinecartCommandBlock.this.posX), MathHelper.floor_double(EntityMinecartCommandBlock.this.posY + 0.5D), MathHelper.floor_double(EntityMinecartCommandBlock.this.posZ));

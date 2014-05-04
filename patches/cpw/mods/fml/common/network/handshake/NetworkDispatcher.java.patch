@@ -9,7 +9,7 @@
          }
          return false;
      }
-@@ -445,7 +445,7 @@
+@@ -453,7 +453,7 @@
          // Stop the epic channel closed spam at close
          if (!(cause instanceof ClosedChannelException))
          {

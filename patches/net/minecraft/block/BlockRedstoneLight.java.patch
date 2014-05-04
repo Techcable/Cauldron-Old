@@ -9,7 +9,7 @@
  public class BlockRedstoneLight extends Block
  {
      private final boolean field_150171_a;
-@@ -36,6 +38,13 @@
+@@ -35,6 +37,13 @@
              }
              else if (!this.field_150171_a && p_149726_1_.isBlockIndirectlyGettingPowered(p_149726_2_, p_149726_3_, p_149726_4_))
              {
@@ -23,7 +23,7 @@
                  p_149726_1_.setBlock(p_149726_2_, p_149726_3_, p_149726_4_, Blocks.lit_redstone_lamp, 0, 2);
              }
          }
-@@ -52,6 +61,13 @@
+@@ -50,6 +59,13 @@
              }
              else if (!this.field_150171_a && p_149695_1_.isBlockIndirectlyGettingPowered(p_149695_2_, p_149695_3_, p_149695_4_))
              {
@@ -37,7 +37,7 @@
                  p_149695_1_.setBlock(p_149695_2_, p_149695_3_, p_149695_4_, Blocks.lit_redstone_lamp, 0, 2);
              }
          }
-@@ -62,6 +78,13 @@
+@@ -59,6 +75,13 @@
      {
          if (!p_149674_1_.isRemote && this.field_150171_a && !p_149674_1_.isBlockIndirectlyGettingPowered(p_149674_2_, p_149674_3_, p_149674_4_))
          {

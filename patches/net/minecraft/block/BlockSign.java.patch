@@ -9,7 +9,7 @@
  public class BlockSign extends BlockContainer
  {
      private Class field_149968_a;
-@@ -172,6 +174,17 @@
+@@ -163,6 +165,17 @@
          }
  
          super.onNeighborBlockChange(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_, p_149695_5_);
@@ -26,4 +26,4 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_149694_d
+     @SideOnly(Side.CLIENT)

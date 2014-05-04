@@ -1,17 +1,17 @@
 --- ../src-base/minecraft/net/minecraft/item/crafting/FurnaceRecipes.java
 +++ ../src-work/minecraft/net/minecraft/item/crafting/FurnaceRecipes.java
-@@ -15,8 +15,9 @@
+@@ -14,8 +14,9 @@
+ public class FurnaceRecipes
  {
      private static final FurnaceRecipes smeltingBase = new FurnaceRecipes();
-     // JAVADOC FIELD $$ field_77604_b
 -    private Map smeltingList = new HashMap();
 +    public Map smeltingList = new HashMap(); // CraftBukkit - private -> public
      private Map experienceList = new HashMap();
 +    public Map customRecipes = new HashMap(); // CraftBukkit
      private static final String __OBFID = "CL_00000085";
  
-     // JAVADOC METHOD $$ func_77602_a
-@@ -25,7 +26,7 @@
+     public static FurnaceRecipes smelting()
+@@ -23,7 +24,7 @@
          return smeltingBase;
      }
  
@@ -20,7 +20,7 @@
      {
          this.func_151393_a(Blocks.iron_ore, new ItemStack(Items.iron_ingot), 0.7F);
          this.func_151393_a(Blocks.gold_ore, new ItemStack(Items.gold_ingot), 1.0F);
-@@ -78,17 +79,38 @@
+@@ -76,16 +77,37 @@
          this.experienceList.put(p_151394_2_, Float.valueOf(p_151394_3_));
      }
  
@@ -31,7 +31,6 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_151395_a
      public ItemStack getSmeltingResult(ItemStack p_151395_1_)
      {
 -        Iterator iterator = this.smeltingList.entrySet().iterator();

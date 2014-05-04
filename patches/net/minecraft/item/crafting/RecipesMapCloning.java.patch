@@ -16,6 +16,6 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_77569_a
      public boolean matches(InventoryCrafting par1InventoryCrafting, World par2World)
      {
+         int i = 0;

@@ -1,15 +1,10 @@
 !.gitignore
-.metadata
-.settings/
-dependency-reduced-pom.xml
-target
+
+# eclipse
+/eclipse
+
+# gradle
+build
+.gradle
+
 *.DS_Store
-/logs/
-/*.pyc
-/forge-*/
-/patches-old/
-/mcp/
-/temp/
-/FML/*
-
-

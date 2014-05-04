@@ -16,7 +16,7 @@
      public int field_145814_a;
      public int field_145812_b;
      public boolean field_145813_c;
-@@ -106,7 +111,8 @@
+@@ -103,7 +108,8 @@
  
                  if (this.field_145812_b == 1)
                  {
@@ -26,7 +26,7 @@
                      {
                          this.setDead();
                          return;
-@@ -125,8 +131,17 @@
+@@ -122,8 +128,17 @@
                      {
                          this.setDead();
  
@@ -45,7 +45,7 @@
                              if (this.field_145811_e instanceof BlockFalling)
                              {
                                  ((BlockFalling)this.field_145811_e).func_149828_a(this.worldObj, i, j, k, this.field_145814_a);
-@@ -193,8 +208,18 @@
+@@ -189,8 +204,18 @@
  
                  while (iterator.hasNext())
                  {

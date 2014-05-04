@@ -13,7 +13,7 @@
  public class EntitySnowman extends EntityGolem implements IRangedAttackMob
  {
      private static final String __OBFID = "CL_00001650";
-@@ -63,7 +69,7 @@
+@@ -61,7 +67,7 @@
  
          if (this.worldObj.getBiomeGenForCoords(i, k).getFloatTemperature(i, j, k) > 1.0F)
          {
@@ -22,7 +22,7 @@
          }
  
          for (int l = 0; l < 4; ++l)
-@@ -74,7 +80,18 @@
+@@ -72,7 +78,18 @@
  
              if (this.worldObj.getBlock(i, j, k).getMaterial() == Material.air && this.worldObj.getBiomeGenForCoords(i, k).getFloatTemperature(i, j, k) < 0.8F && Blocks.snow_layer.canPlaceBlockAt(this.worldObj, i, j, k))
              {
@@ -42,8 +42,8 @@
              }
          }
      }
-@@ -87,12 +104,17 @@
-     // JAVADOC METHOD $$ func_70628_a
+@@ -84,12 +101,17 @@
+ 
      protected void dropFewItems(boolean par1, int par2)
      {
 +        // CraftBukkit start
@@ -61,4 +61,4 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_82196_d
+     public void attackEntityWithRangedAttack(EntityLivingBase par1EntityLivingBase, float par2)

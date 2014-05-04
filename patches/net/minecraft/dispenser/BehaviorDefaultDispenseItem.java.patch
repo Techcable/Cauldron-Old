@@ -12,7 +12,7 @@
  public class BehaviorDefaultDispenseItem implements IBehaviorDispenseItem
  {
      private static final String __OBFID = "CL_00001195";
-@@ -25,10 +30,18 @@
+@@ -23,10 +28,18 @@
          EnumFacing enumfacing = BlockDispenser.func_149937_b(par1IBlockSource.getBlockMetadata());
          IPosition iposition = BlockDispenser.func_149939_a(par1IBlockSource);
          ItemStack itemstack1 = par2ItemStack.splitStack(1);
@@ -32,7 +32,7 @@
      public static void doDispense(World par0World, ItemStack par1ItemStack, int par2, EnumFacing par3EnumFacing, IPosition par4IPosition)
      {
          double d0 = par4IPosition.getX();
-@@ -43,8 +56,69 @@
+@@ -41,8 +54,69 @@
          entityitem.motionY += par0World.rand.nextGaussian() * 0.007499999832361937D * (double)par2;
          entityitem.motionZ += par0World.rand.nextGaussian() * 0.007499999832361937D * (double)par2;
          par0World.spawnEntityInWorld(entityitem);
@@ -99,6 +99,6 @@
 +        // CraftBukkit end
 +    }
 +
-     // JAVADOC METHOD $$ func_82485_a
      protected void playDispenseSound(IBlockSource par1IBlockSource)
      {
+         par1IBlockSource.getWorld().playAuxSFX(1000, par1IBlockSource.getXInt(), par1IBlockSource.getYInt(), par1IBlockSource.getZInt(), 0);

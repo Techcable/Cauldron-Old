@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/inventory/InventoryCrafting.java
 +++ ../src-work/minecraft/net/minecraft/inventory/InventoryCrafting.java
-@@ -3,6 +3,14 @@
+@@ -3,11 +3,68 @@
  import net.minecraft.entity.player.EntityPlayer;
  import net.minecraft.item.ItemStack;
  
@@ -14,10 +14,8 @@
 +
  public class InventoryCrafting implements IInventory
  {
-     // JAVADOC FIELD $$ field_70466_a
-@@ -11,6 +19,55 @@
+     private ItemStack[] stackList;
      private int inventoryWidth;
-     // JAVADOC FIELD $$ field_70465_c
      private Container eventHandler;
 +    // CraftBukkit start
 +    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
@@ -71,12 +69,12 @@
      private static final String __OBFID = "CL_00001743";
  
      public InventoryCrafting(Container par1Container, int par2, int par3)
-@@ -117,7 +174,7 @@
-     // JAVADOC METHOD $$ func_70297_j_
+@@ -105,7 +162,7 @@
+ 
      public int getInventoryStackLimit()
      {
 -        return 64;
 +        return maxStack; // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_70296_d
+     public void markDirty() {}

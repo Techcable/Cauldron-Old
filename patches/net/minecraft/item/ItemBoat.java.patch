@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/item/ItemBoat.java
 +++ ../src-work/minecraft/net/minecraft/item/ItemBoat.java
-@@ -81,7 +81,16 @@
+@@ -80,7 +80,16 @@
                      i = movingobjectposition.blockX;
                      int j = movingobjectposition.blockY;
                      int k = movingobjectposition.blockZ;

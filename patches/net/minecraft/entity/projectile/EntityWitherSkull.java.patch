@@ -9,7 +9,7 @@
  public class EntityWitherSkull extends EntityFireball
  {
      private static final String __OBFID = "CL_00001728";
-@@ -71,7 +73,7 @@
+@@ -68,7 +70,7 @@
                  {
                      if (par1MovingObjectPosition.entityHit.attackEntityFrom(DamageSource.causeMobDamage(this.shootingEntity), 8.0F) && !par1MovingObjectPosition.entityHit.isEntityAlive())
                      {
@@ -18,7 +18,7 @@
                      }
                  }
                  else
-@@ -99,7 +101,16 @@
+@@ -96,7 +98,16 @@
                  }
              }
  

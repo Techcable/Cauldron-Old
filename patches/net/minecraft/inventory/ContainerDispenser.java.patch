@@ -45,8 +45,8 @@
 +        return this.tileEntityDispenser.isUseableByPlayer(par1EntityPlayer);
      }
  
-     // JAVADOC METHOD $$ func_82846_b
-@@ -84,4 +104,18 @@
+     public ItemStack transferStackInSlot(EntityPlayer par1EntityPlayer, int par2)
+@@ -83,4 +103,18 @@
  
          return itemstack;
      }

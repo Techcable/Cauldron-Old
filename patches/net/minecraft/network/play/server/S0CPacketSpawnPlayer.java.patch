@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/network/play/server/S0CPacketSpawnPlayer.java
 +++ ../src-work/minecraft/net/minecraft/network/play/server/S0CPacketSpawnPlayer.java
-@@ -64,7 +64,7 @@
+@@ -62,7 +62,7 @@
      {
          p_148840_1_.writeVarIntToBuffer(this.field_148957_a);
          p_148840_1_.writeStringToBuffer(this.field_148955_b.getId());

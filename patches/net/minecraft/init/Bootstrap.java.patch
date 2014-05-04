@@ -20,7 +20,7 @@
  public class Bootstrap
  {
      private static boolean field_151355_a = false;
-@@ -123,14 +129,48 @@
+@@ -116,14 +122,48 @@
                  double d0 = par1IBlockSource.getX() + (double)enumfacing.getFrontOffsetX();
                  double d1 = (double)((float)par1IBlockSource.getYInt() + 0.2F);
                  double d2 = par1IBlockSource.getZ() + (double)enumfacing.getFrontOffsetZ();
@@ -72,7 +72,7 @@
                  return par2ItemStack;
              }
          });
-@@ -144,9 +184,43 @@
+@@ -136,9 +176,43 @@
                  double d0 = par1IBlockSource.getX() + (double)enumfacing.getFrontOffsetX();
                  double d1 = (double)((float)par1IBlockSource.getYInt() + 0.2F);
                  double d2 = par1IBlockSource.getZ() + (double)enumfacing.getFrontOffsetZ();
@@ -117,8 +117,8 @@
 +                // CraftBukkit end
                  return par2ItemStack;
              }
-             // JAVADOC METHOD $$ func_82485_a
-@@ -171,8 +245,42 @@
+             protected void playDispenseSound(IBlockSource par1IBlockSource)
+@@ -161,8 +235,42 @@
                  double d3 = random.nextGaussian() * 0.05D + (double)enumfacing.getFrontOffsetX();
                  double d4 = random.nextGaussian() * 0.05D + (double)enumfacing.getFrontOffsetY();
                  double d5 = random.nextGaussian() * 0.05D + (double)enumfacing.getFrontOffsetZ();
@@ -162,8 +162,8 @@
 +                // CraftBukkit end
                  return par2ItemStack;
              }
-             // JAVADOC METHOD $$ func_82485_a
-@@ -213,9 +321,41 @@
+             protected void playDispenseSound(IBlockSource par1IBlockSource)
+@@ -201,9 +309,41 @@
                      d3 = 0.0D;
                  }
  
@@ -206,9 +206,9 @@
 +                // itemstack.a(1); // CraftBukkit - handled during event processing
                  return par2ItemStack;
              }
-             // JAVADOC METHOD $$ func_82485_a
-@@ -231,16 +371,67 @@
-             // JAVADOC METHOD $$ func_82487_b
+             protected void playDispenseSound(IBlockSource par1IBlockSource)
+@@ -217,16 +357,67 @@
+             private static final String __OBFID = "CL_00001399";
              public ItemStack dispenseStack(IBlockSource par1IBlockSource, ItemStack par2ItemStack)
              {
 -                ItemBucket itembucket = (ItemBucket)par2ItemStack.getItem();
@@ -278,7 +278,7 @@
                      return par2ItemStack;
                  }
                  else
-@@ -281,6 +472,36 @@
+@@ -266,6 +457,36 @@
                      item = Items.lava_bucket;
                  }
  
@@ -315,7 +315,7 @@
                  world.setBlockToAir(i, j, k);
  
                  if (--par2ItemStack.stackSize == 0)
-@@ -308,16 +529,51 @@
+@@ -292,16 +513,51 @@
                  int i = par1IBlockSource.getXInt() + enumfacing.getFrontOffsetX();
                  int j = par1IBlockSource.getYInt() + enumfacing.getFrontOffsetY();
                  int k = par1IBlockSource.getZInt() + enumfacing.getFrontOffsetZ();
@@ -371,7 +371,7 @@
                  else if (world.getBlock(i, j, k) == Blocks.tnt)
                  {
                      Blocks.tnt.onBlockDestroyedByPlayer(world, i, j, k, 1);
-@@ -357,7 +613,36 @@
+@@ -339,7 +595,36 @@
                      int i = par1IBlockSource.getXInt() + enumfacing.getFrontOffsetX();
                      int j = par1IBlockSource.getYInt() + enumfacing.getFrontOffsetY();
                      int k = par1IBlockSource.getZInt() + enumfacing.getFrontOffsetZ();
@@ -408,7 +408,7 @@
                      if (ItemDye.func_150919_a(par2ItemStack, world, i, j, k))
                      {
                          if (!world.isRemote)
-@@ -401,9 +686,41 @@
+@@ -381,9 +666,41 @@
                  int i = par1IBlockSource.getXInt() + enumfacing.getFrontOffsetX();
                  int j = par1IBlockSource.getYInt() + enumfacing.getFrontOffsetY();
                  int k = par1IBlockSource.getZInt() + enumfacing.getFrontOffsetZ();

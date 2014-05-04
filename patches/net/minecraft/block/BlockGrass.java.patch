@@ -13,7 +13,7 @@
  public class BlockGrass extends Block implements IGrowable
  {
      private static final Logger logger = LogManager.getLogger();
-@@ -47,11 +53,25 @@
+@@ -45,11 +51,25 @@
          {
              if (p_149674_1_.getBlockLightValue(p_149674_2_, p_149674_3_ + 1, p_149674_4_) < 4 && p_149674_1_.getBlockLightOpacity(p_149674_2_, p_149674_3_ + 1, p_149674_4_) > 2)
              {
@@ -41,7 +41,7 @@
                  {
                      int i1 = p_149674_2_ + p_149674_5_.nextInt(3) - 1;
                      int j1 = p_149674_3_ + p_149674_5_.nextInt(5) - 3;
-@@ -60,7 +80,19 @@
+@@ -58,7 +78,19 @@
  
                      if (p_149674_1_.getBlock(i1, j1, k1) == Blocks.dirt && p_149674_1_.getBlockMetadata(i1, j1, k1) == 0 && p_149674_1_.getBlockLightValue(i1, j1 + 1, k1) >= 4 && p_149674_1_.getBlockLightOpacity(i1, j1 + 1, k1) <= 2)
                      {

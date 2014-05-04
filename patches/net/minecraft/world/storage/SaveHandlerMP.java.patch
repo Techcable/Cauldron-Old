@@ -9,7 +9,7 @@
  import net.minecraft.nbt.NBTTagCompound;
  import net.minecraft.world.MinecraftException;
  import net.minecraft.world.WorldProvider;
-@@ -60,4 +62,12 @@
+@@ -50,4 +52,12 @@
      {
          return null;
      }

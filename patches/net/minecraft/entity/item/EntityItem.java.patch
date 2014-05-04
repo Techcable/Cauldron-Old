@@ -12,15 +12,15 @@
  public class EntityItem extends Entity
  {
      private static final Logger logger = LogManager.getLogger();
-@@ -34,6 +39,7 @@
+@@ -31,6 +36,7 @@
+     private String field_145801_f;
      private String field_145802_g;
-     // JAVADOC FIELD $$ field_70290_d
      public float hoverStart;
 +    private int lastTick = MinecraftServer.currentTick; // CraftBukkit
      private static final String __OBFID = "CL_00001669";
  
      /**
-@@ -57,9 +63,17 @@
+@@ -54,9 +60,17 @@
  
      public EntityItem(World par1World, double par2, double par4, double par6, ItemStack par8ItemStack)
      {
@@ -39,8 +39,8 @@
 +        this.lifespan = (par8ItemStack.getItem() == null ? par1World.spigotConfig.itemDespawnRate : par8ItemStack.getItem().getEntityLifespan(par8ItemStack, par1World)); // Spigot
      }
  
-     // JAVADOC METHOD $$ func_70041_e_
-@@ -94,94 +108,103 @@
+     protected boolean canTriggerWalking()
+@@ -89,93 +103,102 @@
              }
          }
  
@@ -192,7 +192,6 @@
 +        }
      }
  
-     // JAVADOC METHOD $$ func_85054_d
      private void searchForOtherItemsNearby()
      {
 -        Iterator iterator = this.worldObj.getEntitiesWithinAABB(EntityItem.class, this.boundingBox.expand(0.5D, 0.0D, 0.5D)).iterator();
@@ -203,7 +202,7 @@
  
          while (iterator.hasNext())
          {
-@@ -232,11 +255,13 @@
+@@ -225,11 +248,13 @@
              }
              else
              {
@@ -222,7 +221,7 @@
                  return true;
              }
          }
-@@ -329,8 +354,27 @@
+@@ -316,8 +341,27 @@
          }
  
          NBTTagCompound nbttagcompound1 = par1NBTTagCompound.getCompoundTag("Item");
@@ -251,7 +250,7 @@
          ItemStack item = getDataWatcher().getWatchableObjectItemStack(10);
  
          if (item == null || item.stackSize <= 0)
-@@ -364,6 +408,31 @@
+@@ -350,6 +394,31 @@
              ItemStack itemstack = this.getEntityItem();
              int i = itemstack.stackSize;
  

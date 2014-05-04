@@ -12,5 +12,5 @@
      }
 +    // CraftBukkit end
  
-     // JAVADOC METHOD $$ func_148833_a
      public void processPacket(INetHandlerPlayServer p_149555_1_)
+     {

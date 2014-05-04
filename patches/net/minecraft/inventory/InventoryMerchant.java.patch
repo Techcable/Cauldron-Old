@@ -54,12 +54,12 @@
      private static final String __OBFID = "CL_00001756";
  
      public InventoryMerchant(EntityPlayer par1EntityPlayer, IMerchant par2IMerchant)
-@@ -133,7 +173,7 @@
-     // JAVADOC METHOD $$ func_70297_j_
+@@ -124,7 +164,7 @@
+ 
      public int getInventoryStackLimit()
      {
 -        return 64;
 +        return maxStack; // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_70300_a
+     public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer)

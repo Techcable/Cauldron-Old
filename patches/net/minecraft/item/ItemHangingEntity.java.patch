@@ -13,7 +13,7 @@
  public class ItemHangingEntity extends Item
  {
      private final Class hangingEntityClass;
-@@ -45,6 +51,28 @@
+@@ -44,6 +50,28 @@
                  {
                      if (!par3World.isRemote)
                      {

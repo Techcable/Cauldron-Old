@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/ai/EntityAIRunAroundLikeCrazy.java
 +++ ../src-work/minecraft/net/minecraft/entity/ai/EntityAIRunAroundLikeCrazy.java
-@@ -68,7 +68,8 @@
+@@ -64,7 +64,8 @@
                  int i = this.horseHost.getTemper();
                  int j = this.horseHost.getMaxTemper();
  
@@ -10,7 +10,7 @@
                  {
                      this.horseHost.setTamedBy((EntityPlayer)this.horseHost.riddenByEntity);
                      this.horseHost.worldObj.setEntityState(this.horseHost, (byte)7);
-@@ -78,8 +79,20 @@
+@@ -74,8 +75,20 @@
                  this.horseHost.increaseTemper(5);
              }
  

@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntityBrewingStand.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityBrewingStand.java
-@@ -15,19 +15,57 @@
+@@ -15,17 +15,55 @@
  import net.minecraftforge.common.MinecraftForge;
  import net.minecraftforge.event.brewing.PotionBrewedEvent;
  
@@ -15,12 +15,10 @@
  {
      private static final int[] field_145941_a = new int[] {3};
      private static final int[] field_145947_i = new int[] {0, 1, 2};
-     // JAVADOC FIELD $$ field_145945_j
 -    private ItemStack[] brewingItemStacks = new ItemStack[4];
 -    private int brewTime;
 +    public ItemStack[] brewingItemStacks = new ItemStack[4]; // CraftBukkit - private -> public
 +    public int brewTime; // CraftBukkit - private -> public
-     // JAVADOC FIELD $$ field_145943_l
      private int filledSlots;
      private Item ingredientID;
      private String field_145942_n;
@@ -57,10 +55,10 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_145825_b
      public String getInventoryName()
      {
-@@ -53,12 +91,17 @@
+         return this.hasCustomInventoryName() ? this.field_145942_n : "container.brewing";
+@@ -48,12 +86,17 @@
  
      public void updateEntity()
      {
@@ -80,7 +78,7 @@
                  this.brewPotions();
                  this.markDirty();
              }
-@@ -148,6 +191,20 @@
+@@ -143,6 +186,20 @@
          {
              ItemStack itemstack = this.brewingItemStacks[3];
  
@@ -101,12 +99,12 @@
              for (int i = 0; i < 3; ++i)
              {
                  if (this.brewingItemStacks[i] != null && this.brewingItemStacks[i].getItem() instanceof ItemPotion)
-@@ -291,7 +348,7 @@
-     // JAVADOC METHOD $$ func_70297_j_
+@@ -281,7 +338,7 @@
+ 
      public int getInventoryStackLimit()
      {
 -        return 64;
 +        return this.maxStack; // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_70300_a
+     public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer)

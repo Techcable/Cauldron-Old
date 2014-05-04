@@ -1,7 +1,7 @@
 --- ../src-base/minecraft/net/minecraft/network/PacketBuffer.java
 +++ ../src-work/minecraft/net/minecraft/network/PacketBuffer.java
-@@ -103,7 +103,7 @@
-     // JAVADOC METHOD $$ func_150788_a
+@@ -97,7 +97,7 @@
+ 
      public void writeItemStackToBuffer(ItemStack p_150788_1_) throws IOException
      {
 -        if (p_150788_1_ == null)

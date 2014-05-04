@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockSnow.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockSnow.java
-@@ -124,6 +124,14 @@
+@@ -114,6 +114,14 @@
      {
          if (p_149674_1_.getSavedLightValue(EnumSkyBlock.Block, p_149674_2_, p_149674_3_, p_149674_4_) > 11)
          {

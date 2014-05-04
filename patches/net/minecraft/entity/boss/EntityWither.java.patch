@@ -12,7 +12,7 @@
  public class EntityWither extends EntityMob implements IBossDisplayData, IRangedAttackMob
  {
      private float[] field_82220_d = new float[2];
-@@ -236,15 +241,25 @@
+@@ -228,15 +233,25 @@
  
              if (i <= 0)
              {
@@ -41,7 +41,7 @@
              }
          }
          else
-@@ -357,6 +372,13 @@
+@@ -349,6 +364,13 @@
  
                                  if (!block.isAir(worldObj, j2, k, l) && block.canEntityDestroy(worldObj, j2, k, l, this))
                                  {
@@ -55,8 +55,8 @@
                                      flag = this.worldObj.func_147480_a(j2, k, l, true) || flag;
                                  }
                              }
-@@ -530,8 +552,12 @@
-     // JAVADOC METHOD $$ func_70628_a
+@@ -517,8 +539,12 @@
+ 
      protected void dropFewItems(boolean par1, int par2)
      {
 -        this.dropItem(Items.nether_star, 1);

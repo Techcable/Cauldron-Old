@@ -13,7 +13,7 @@
  public class EntityEnderPearl extends EntityThrowable
  {
      private static final String __OBFID = "CL_00001725";
-@@ -53,18 +59,37 @@
+@@ -52,18 +58,37 @@
  
                  if (entityplayermp.playerNetServerHandler.func_147362_b().isChannelOpen() && entityplayermp.worldObj == this.worldObj)
                  {

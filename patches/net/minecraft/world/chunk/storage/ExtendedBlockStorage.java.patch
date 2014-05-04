@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/chunk/storage/ExtendedBlockStorage.java
 +++ ../src-work/minecraft/net/minecraft/world/chunk/storage/ExtendedBlockStorage.java
-@@ -39,6 +39,29 @@
+@@ -31,6 +31,29 @@
          }
      }
  
@@ -27,10 +27,10 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_150819_a
      public Block getBlockByExtId(int p_150819_1_, int p_150819_2_, int p_150819_3_)
      {
-@@ -157,6 +180,106 @@
+         int l = this.blockLSBArray[p_150819_2_ << 8 | p_150819_3_ << 4 | p_150819_1_] & 255;
+@@ -139,6 +162,106 @@
  
      public void removeInvalidBlocks()
      {
@@ -137,15 +137,14 @@
          this.blockRefCount = 0;
          this.tickRefCount = 0;
  
-@@ -219,33 +342,76 @@
-     // JAVADOC METHOD $$ func_76664_a
+@@ -197,29 +320,72 @@
+ 
      public void setBlockLSBArray(byte[] par1ArrayOfByte)
      {
 -        this.blockLSBArray = par1ArrayOfByte;
 +        this.blockLSBArray = this.validateByteArray(par1ArrayOfByte); // CraftBukkit - Validate data
      }
  
-     // JAVADOC METHOD $$ func_76673_a
      public void setBlockMSBArray(NibbleArray par1NibbleArray)
      {
 -        this.blockMSBArray = par1NibbleArray;
@@ -169,21 +168,18 @@
 +        this.blockMSBArray = this.validateNibbleArray(par1NibbleArray); // CraftBukkit - Validate data
      }
  
-     // JAVADOC METHOD $$ func_76668_b
      public void setBlockMetadataArray(NibbleArray par1NibbleArray)
      {
 -        this.blockMetadataArray = par1NibbleArray;
 +        this.blockMetadataArray = this.validateNibbleArray(par1NibbleArray); // CraftBukkit - Validate data
      }
  
-     // JAVADOC METHOD $$ func_76659_c
      public void setBlocklightArray(NibbleArray par1NibbleArray)
      {
 -        this.blocklightArray = par1NibbleArray;
 +        this.blocklightArray = this.validateNibbleArray(par1NibbleArray); // CraftBukkit - Validate data
      }
  
-     // JAVADOC METHOD $$ func_76666_d
      public void setSkylightArray(NibbleArray par1NibbleArray)
      {
 -        this.skylightArray = par1NibbleArray;
@@ -216,6 +212,6 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_76667_m
      @SideOnly(Side.CLIENT)
      public NibbleArray createBlockMSBArray()
+     {

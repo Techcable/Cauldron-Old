@@ -11,7 +11,7 @@
  
  public class BlockCactus extends Block implements IPlantable
  {
-@@ -48,9 +52,9 @@
+@@ -47,9 +51,9 @@
              {
                  int i1 = p_149674_1_.getBlockMetadata(p_149674_2_, p_149674_3_, p_149674_4_);
  
@@ -23,8 +23,8 @@
                      p_149674_1_.setBlockMetadataWithNotify(p_149674_2_, p_149674_3_, p_149674_4_, 0, 4);
                      this.onNeighborBlockChange(p_149674_1_, p_149674_2_, p_149674_3_ + 1, p_149674_4_, this);
                  }
-@@ -146,6 +150,24 @@
-     // JAVADOC METHOD $$ func_149670_a
+@@ -135,6 +139,24 @@
+ 
      public void onEntityCollidedWithBlock(World p_149670_1_, int p_149670_2_, int p_149670_3_, int p_149670_4_, Entity p_149670_5_)
      {
 +        // CraftBukkit start - EntityDamageByBlock event

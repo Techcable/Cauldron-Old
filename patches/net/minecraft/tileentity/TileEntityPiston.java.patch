@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntityPiston.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityPiston.java
-@@ -145,6 +145,11 @@
+@@ -140,6 +140,11 @@
  
      public void updateEntity()
      {

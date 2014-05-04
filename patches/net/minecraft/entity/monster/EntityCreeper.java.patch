@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/monster/EntityCreeper.java
 +++ ../src-work/minecraft/net/minecraft/entity/monster/EntityCreeper.java
-@@ -23,6 +23,11 @@
+@@ -23,12 +23,18 @@
  import net.minecraft.util.DamageSource;
  import net.minecraft.world.World;
  
@@ -11,17 +11,16 @@
 +
  public class EntityCreeper extends EntityMob
  {
-     // JAVADOC FIELD $$ field_70834_e
-@@ -32,6 +37,7 @@
+     private int lastActiveTime;
+     private int timeSinceIgnited;
      private int fuseTime = 30;
-     // JAVADOC FIELD $$ field_82226_g
      private int explosionRadius = 3;
 +    private int record = -1; // CraftBukkit
      private static final String __OBFID = "CL_00001684";
  
      public EntityCreeper(World par1World)
-@@ -174,17 +180,57 @@
-     // JAVADOC METHOD $$ func_70645_a
+@@ -162,17 +168,57 @@
+ 
      public void onDeath(DamageSource par1DamageSource)
      {
 -        super.onDeath(par1DamageSource);
@@ -81,7 +80,7 @@
      public boolean attackEntityAsMob(Entity par1Entity)
      {
          return true;
-@@ -224,9 +270,35 @@
+@@ -207,9 +253,35 @@
      public void onStruckByLightning(EntityLightningBolt par1EntityLightningBolt)
      {
          super.onStruckByLightning(par1EntityLightningBolt);
@@ -115,10 +114,10 @@
 +        // CraftBukkit end
 +    }
 +
-     // JAVADOC METHOD $$ func_70085_c
      protected boolean interact(EntityPlayer par1EntityPlayer)
      {
-@@ -253,17 +325,22 @@
+         ItemStack itemstack = par1EntityPlayer.inventory.getCurrentItem();
+@@ -235,17 +307,22 @@
          if (!this.worldObj.isRemote)
          {
              boolean flag = this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing");

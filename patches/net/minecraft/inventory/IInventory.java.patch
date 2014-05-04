@@ -8,10 +8,10 @@
 +
  public interface IInventory
  {
-     // JAVADOC METHOD $$ func_70302_i_
-@@ -41,4 +43,20 @@
+     int getSizeInventory();
+@@ -30,4 +32,20 @@
+     void closeInventory();
  
-     // JAVADOC METHOD $$ func_94041_b
      boolean isItemValidForSlot(int var1, ItemStack var2);
 +
 +    // CraftBukkit start

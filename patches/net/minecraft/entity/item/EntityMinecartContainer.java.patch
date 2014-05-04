@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/item/EntityMinecartContainer.java
 +++ ../src-work/minecraft/net/minecraft/entity/item/EntityMinecartContainer.java
-@@ -9,6 +9,13 @@
+@@ -9,12 +9,61 @@
  import net.minecraft.util.DamageSource;
  import net.minecraft.world.World;
  
@@ -14,7 +14,6 @@
  public abstract class EntityMinecartContainer extends EntityMinecart implements IInventory
  {
      private ItemStack[] minecartContainerItems = new ItemStack[36];
-@@ -16,6 +23,48 @@
      private boolean dropContentsWhenDead = true;
      private static final String __OBFID = "CL_00001674";
  
@@ -63,8 +62,8 @@
      public EntityMinecartContainer(World par1World)
      {
          super(par1World);
-@@ -158,6 +207,13 @@
-     // JAVADOC METHOD $$ func_71027_c
+@@ -147,6 +196,13 @@
+ 
      public void travelToDimension(int par1)
      {
 +        // Spigot Start
