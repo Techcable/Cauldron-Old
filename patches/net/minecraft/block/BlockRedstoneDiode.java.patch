@@ -8,8 +8,8 @@
 +
  public abstract class BlockRedstoneDiode extends BlockDirectional
  {
-     // JAVADOC FIELD $$ field_149914_a
-@@ -49,16 +51,30 @@
+     protected final boolean isRepeaterPowered;
+@@ -44,16 +46,30 @@
      {
          int l = p_149674_1_.getBlockMetadata(p_149674_2_, p_149674_3_, p_149674_4_);
  

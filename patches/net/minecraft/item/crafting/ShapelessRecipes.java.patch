@@ -11,8 +11,8 @@
 +
  public class ShapelessRecipes implements IRecipe
  {
-     // JAVADOC FIELD $$ field_77580_a
-@@ -21,6 +26,25 @@
+     private final ItemStack recipeOutput;
+@@ -19,6 +24,25 @@
          this.recipeItems = par2List;
      }
  

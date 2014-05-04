@@ -53,7 +53,7 @@
      private static final String __OBFID = "CL_00000359";
  
      public void readFromNBT(NBTTagCompound p_145839_1_)
-@@ -243,11 +284,44 @@
+@@ -232,11 +273,44 @@
                  if (this.getStackInSlot(i) != null)
                  {
                      ItemStack itemstack = this.getStackInSlot(i).copy();
@@ -100,7 +100,7 @@
                          return true;
                      }
  
-@@ -313,11 +387,53 @@
+@@ -302,11 +376,53 @@
          if (itemstack != null && func_145890_b(p_145892_1_, itemstack, p_145892_2_, p_145892_3_))
          {
              ItemStack itemstack1 = itemstack.copy();
@@ -156,7 +156,7 @@
                  return true;
              }
  
-@@ -337,6 +453,16 @@
+@@ -326,6 +442,16 @@
          }
          else
          {

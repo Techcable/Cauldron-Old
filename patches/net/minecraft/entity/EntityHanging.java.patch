@@ -15,7 +15,7 @@
  public abstract class EntityHanging extends Entity
  {
      private int tickCounter1;
-@@ -126,6 +134,38 @@
+@@ -125,6 +133,38 @@
  
              if (!this.isDead && !this.onValidSurface())
              {
@@ -54,7 +54,7 @@
                  this.setDead();
                  this.onBroken((Entity)null);
              }
-@@ -238,6 +278,39 @@
+@@ -233,6 +273,39 @@
          {
              if (!this.isDead && !this.worldObj.isRemote)
              {
@@ -94,7 +94,7 @@
                  this.setDead();
                  this.setBeenAttacked();
                  this.onBroken(par1DamageSource.getEntity());
-@@ -252,6 +325,22 @@
+@@ -246,6 +319,22 @@
      {
          if (!this.worldObj.isRemote && !this.isDead && par1 * par1 + par3 * par3 + par5 * par5 > 0.0D)
          {

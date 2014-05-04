@@ -12,7 +12,7 @@
  
  public class CommandHandler implements ICommandManager
  {
-@@ -50,7 +55,7 @@
+@@ -48,7 +53,7 @@
                  throw new CommandNotFoundException();
              }
  
@@ -21,8 +21,8 @@
              {
                  CommandEvent event = new CommandEvent(icommand, par1ICommandSender, astring);
                  if (MinecraftForge.EVENT_BUS.post(event))
-@@ -128,9 +133,30 @@
-     // JAVADOC METHOD $$ func_71560_a
+@@ -125,9 +130,30 @@
+ 
      public ICommand registerCommand(ICommand par1ICommand)
      {
 +        // MCPC+ start - register commands with permission nodes, defaulting to class name

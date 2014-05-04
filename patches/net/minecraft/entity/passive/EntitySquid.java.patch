@@ -9,8 +9,8 @@
  public class EntitySquid extends EntityWaterMob
  {
      public float squidPitch;
-@@ -82,19 +84,26 @@
-     // JAVADOC METHOD $$ func_70628_a
+@@ -71,18 +73,25 @@
+ 
      protected void dropFewItems(boolean par1, int par2)
      {
 -        int j = this.rand.nextInt(3 + par2) + 1;
@@ -29,7 +29,6 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_70090_H
 +    /* CraftBukkit start - Delegate to Entity to use existing inWater value
      public boolean isInWater()
      {
@@ -37,9 +36,9 @@
      }
 +    // CraftBukkit end */
  
-     // JAVADOC METHOD $$ func_70636_d
      public void onLivingUpdate()
-@@ -150,10 +159,12 @@
+     {
+@@ -137,10 +146,12 @@
              }
  
              f = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);

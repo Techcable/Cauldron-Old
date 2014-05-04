@@ -13,7 +13,7 @@
  public class EntityLeashKnot extends EntityHanging
  {
      private static final String __OBFID = "CL_00001548";
-@@ -90,6 +96,14 @@
+@@ -84,6 +90,14 @@
  
                      if (entityliving.getLeashed() && entityliving.getLeashedToEntity() == par1EntityPlayer)
                      {
@@ -28,7 +28,7 @@
                          entityliving.setLeashedToEntity(this, true);
                          flag = true;
                      }
-@@ -99,9 +113,12 @@
+@@ -93,9 +107,12 @@
  
          if (!this.worldObj.isRemote && !flag)
          {
@@ -43,7 +43,7 @@
              {
                  d0 = 7.0D;
                  list = this.worldObj.getEntitiesWithinAABB(EntityLiving.class, AxisAlignedBB.getAABBPool().getAABB(this.posX - d0, this.posY - d0, this.posZ - d0, this.posX + d0, this.posY + d0, this.posZ + d0));
-@@ -116,11 +133,27 @@
+@@ -110,11 +127,27 @@
  
                          if (entityliving.getLeashed() && entityliving.getLeashedToEntity() == this)
                          {

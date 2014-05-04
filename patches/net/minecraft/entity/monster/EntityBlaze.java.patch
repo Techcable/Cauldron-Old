@@ -1,7 +1,7 @@
 --- ../src-base/minecraft/net/minecraft/entity/monster/EntityBlaze.java
 +++ ../src-work/minecraft/net/minecraft/entity/monster/EntityBlaze.java
-@@ -182,15 +182,21 @@
-     // JAVADOC METHOD $$ func_70628_a
+@@ -171,15 +171,21 @@
+ 
      protected void dropFewItems(boolean par1, int par2)
      {
 +        // CraftBukkit start

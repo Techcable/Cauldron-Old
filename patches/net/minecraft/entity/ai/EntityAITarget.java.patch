@@ -11,8 +11,8 @@
 +
  public abstract class EntityAITarget extends EntityAIBase
  {
-     // JAVADOC FIELD $$ field_75299_d
-@@ -165,6 +170,51 @@
+     protected EntityCreature taskOwner;
+@@ -156,6 +161,51 @@
                      }
                  }
  

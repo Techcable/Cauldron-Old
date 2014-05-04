@@ -12,7 +12,7 @@
  
  public class BlockDropper extends BlockDispenser
  {
-@@ -39,7 +44,7 @@
+@@ -38,7 +43,7 @@
          return new TileEntityDropper();
      }
  
@@ -21,7 +21,7 @@
      {
          BlockSourceImpl blocksourceimpl = new BlockSourceImpl(p_149941_1_, p_149941_2_, p_149941_3_, p_149941_4_);
          TileEntityDispenser tileentitydispenser = (TileEntityDispenser)blocksourceimpl.getBlockTileEntity();
-@@ -61,10 +66,33 @@
+@@ -60,10 +65,33 @@
  
                  if (iinventory != null)
                  {

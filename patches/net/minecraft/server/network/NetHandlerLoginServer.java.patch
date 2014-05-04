@@ -42,8 +42,8 @@
          this.field_147334_j = "";
          this.field_147327_f = p_i45298_1_;
          this.field_147333_a = p_i45298_2_;
-@@ -56,7 +65,7 @@
-     // JAVADOC METHOD $$ func_147233_a
+@@ -55,7 +64,7 @@
+ 
      public void onNetworkTick()
      {
 -        if (this.field_147328_g == NetHandlerLoginServer.LoginState.READY_TO_ACCEPT)
@@ -51,7 +51,7 @@
          {
              this.func_147326_c();
          }
-@@ -86,21 +95,35 @@
+@@ -85,21 +94,35 @@
      {
          if (!this.field_147337_i.isComplete())
          {
@@ -94,8 +94,8 @@
          }
      }
  
-@@ -118,29 +141,29 @@
-     // JAVADOC METHOD $$ func_147232_a
+@@ -115,29 +138,29 @@
+ 
      public void onConnectionStateTransition(EnumConnectionState p_147232_1_, EnumConnectionState p_147232_2_)
      {
 -        Validate.validState(this.field_147328_g == NetHandlerLoginServer.LoginState.ACCEPTED || this.field_147328_g == NetHandlerLoginServer.LoginState.HELLO, "Unexpected change in protocol", new Object[0]);
@@ -129,7 +129,7 @@
          PrivateKey privatekey = this.field_147327_f.getKeyPair().getPrivate();
  
          if (!Arrays.equals(this.field_147330_e, p_147315_1_.func_149299_b(privatekey)))
-@@ -150,39 +173,43 @@
+@@ -147,39 +170,43 @@
          else
          {
              this.field_147335_k = p_147315_1_.func_149300_a(privatekey);

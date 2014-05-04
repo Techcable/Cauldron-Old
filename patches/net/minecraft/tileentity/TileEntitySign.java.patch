@@ -1,15 +1,15 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntitySign.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntitySign.java
-@@ -13,7 +13,7 @@
+@@ -11,7 +11,7 @@
+ {
      public String[] signText = new String[] {"", "", "", ""};
-     // JAVADOC FIELD $$ field_145918_i
      public int lineBeingEdited = -1;
 -    private boolean field_145916_j = true;
 +    public boolean field_145916_j = true; // CraftBukkit - private -> public
      private EntityPlayer field_145917_k;
      private static final String __OBFID = "CL_00000363";
  
-@@ -46,7 +46,19 @@
+@@ -43,7 +43,19 @@
      public Packet getDescriptionPacket()
      {
          String[] astring = new String[4];
@@ -30,7 +30,7 @@
          return new S33PacketUpdateSign(this.xCoord, this.yCoord, this.zCoord, astring);
      }
  
-@@ -76,4 +88,12 @@
+@@ -72,4 +84,12 @@
      {
          return this.field_145917_k;
      }

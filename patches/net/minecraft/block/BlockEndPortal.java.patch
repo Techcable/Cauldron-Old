@@ -9,7 +9,7 @@
  public class BlockEndPortal extends BlockContainer
  {
      public static boolean field_149948_a;
-@@ -72,6 +74,10 @@
+@@ -64,6 +66,10 @@
      {
          if (p_149670_5_.ridingEntity == null && p_149670_5_.riddenByEntity == null && !p_149670_1_.isRemote)
          {

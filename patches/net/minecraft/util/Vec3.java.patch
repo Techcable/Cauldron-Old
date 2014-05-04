@@ -1,17 +1,17 @@
 --- ../src-base/minecraft/net/minecraft/util/Vec3.java
 +++ ../src-work/minecraft/net/minecraft/util/Vec3.java
-@@ -14,6 +14,7 @@
+@@ -10,6 +10,7 @@
+     public double xCoord;
      public double yCoord;
-     // JAVADOC FIELD $$ field_72449_c
      public double zCoord;
 +    public Vec3 next; // CraftBukkit
      private static final String __OBFID = "CL_00000612";
  
-     // JAVADOC METHOD $$ func_72443_a
-@@ -46,7 +47,7 @@
+     public static Vec3 createVectorHelper(double par0, double par2, double par4)
+@@ -40,7 +41,7 @@
+         this.myVec3LocalPool = par1Vec3Pool;
      }
  
-     // JAVADOC METHOD $$ func_72439_b
 -    protected Vec3 setComponents(double par1, double par3, double par5)
 +    public Vec3 setComponents(double par1, double par3, double par5) // CraftBukkit - protected -> public
      {

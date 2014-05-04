@@ -1,18 +1,15 @@
 --- ../src-base/minecraft/net/minecraft/world/chunk/NibbleArray.java
 +++ ../src-work/minecraft/net/minecraft/world/chunk/NibbleArray.java
-@@ -1,18 +1,161 @@
+@@ -1,15 +1,158 @@
  package net.minecraft.world.chunk;
  
 +import java.util.Arrays; // Spigot
 +
  public class NibbleArray
  {
-     // JAVADOC FIELD $$ field_76585_a
 -    public final byte[] data;
 +    private byte[] data; // Spigot - remove final, make private (anyone directly accessing this is broken already)
-     // JAVADOC FIELD $$ field_76583_b
      private final int depthBits;
-     // JAVADOC FIELD $$ field_76584_c
      private final int depthBitsPlusFour;
      private static final String __OBFID = "CL_00000371";
  
@@ -164,14 +161,13 @@
          this.depthBits = par2;
          this.depthBitsPlusFour = par2 + 4;
      }
-@@ -22,11 +165,17 @@
+@@ -19,10 +162,16 @@
          this.data = par1ArrayOfByte;
          this.depthBits = par2;
          this.depthBitsPlusFour = par2 + 4;
 +        detectAndProcessTrivialArray(); // Spigot
      }
  
-     // JAVADOC METHOD $$ func_76582_a
      public int get(int par1, int par2, int par3)
      {
 +        if (this.data == null)
@@ -182,8 +178,8 @@
          int l = par2 << this.depthBitsPlusFour | par3 << this.depthBits | par1;
          int i1 = l >> 1;
          int j1 = l & 1;
-@@ -36,6 +185,25 @@
-     // JAVADOC METHOD $$ func_76581_a
+@@ -31,6 +180,25 @@
+ 
      public void set(int par1, int par2, int par3, int par4)
      {
 +        // Spigot start

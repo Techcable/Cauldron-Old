@@ -1,7 +1,7 @@
 --- ../src-base/minecraft/net/minecraft/util/AABBPool.java
 +++ ../src-work/minecraft/net/minecraft/util/AABBPool.java
-@@ -30,6 +30,12 @@
-     // JAVADOC METHOD $$ func_72299_a
+@@ -23,6 +23,12 @@
+ 
      public AxisAlignedBB getAABB(double par1, double par3, double par5, double par7, double par9, double par11)
      {
 +        // CraftBukkit - don't pool objects indefinitely if thread doesn't adhere to contract
@@ -13,7 +13,7 @@
          AxisAlignedBB axisalignedbb;
  
          if (this.nextPoolIndex >= this.listAABB.size())
-@@ -55,19 +61,26 @@
+@@ -47,19 +53,26 @@
              this.maxPoolIndex = this.nextPoolIndex;
          }
  

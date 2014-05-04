@@ -8,8 +8,8 @@
  import net.minecraft.block.Block;
  import net.minecraft.block.material.Material;
  import net.minecraft.entity.Entity;
-@@ -233,20 +234,25 @@
-     // JAVADOC METHOD $$ func_70628_a
+@@ -222,20 +223,25 @@
+ 
      protected void dropFewItems(boolean par1, int par2)
      {
 +        // CraftBukkit start

@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockIce.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockIce.java
-@@ -85,6 +85,14 @@
+@@ -80,6 +80,14 @@
      {
          if (p_149674_1_.getSavedLightValue(EnumSkyBlock.Block, p_149674_2_, p_149674_3_, p_149674_4_) > 11 - this.getLightOpacity())
          {

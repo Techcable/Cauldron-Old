@@ -48,10 +48,10 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_70302_i_
      public int getSizeInventory()
      {
-@@ -83,6 +120,11 @@
+         return 9;
+@@ -79,6 +116,11 @@
          {
              if (this.field_146022_i[k] != null && this.field_146021_j.nextInt(j++) == 0)
              {
@@ -63,16 +63,16 @@
                  i = k;
              }
          }
-@@ -184,7 +226,7 @@
-     // JAVADOC METHOD $$ func_70297_j_
+@@ -176,7 +218,7 @@
+ 
      public int getInventoryStackLimit()
      {
 -        return 64;
 +        return maxStack; // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_70300_a
-@@ -202,4 +244,12 @@
+     public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer)
+@@ -192,4 +234,12 @@
      {
          return true;
      }

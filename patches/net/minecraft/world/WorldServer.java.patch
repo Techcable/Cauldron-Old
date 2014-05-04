@@ -27,8 +27,8 @@
 +    public EntityTracker theEntityTracker; // CraftBukkit - private final -> public
      private final PlayerManager thePlayerManager;
      private Set pendingTickListEntriesHashSet;
-     // JAVADOC FIELD $$ field_73065_O
-@@ -92,6 +107,9 @@
+     private TreeSet pendingTickListEntriesTreeSet;
+@@ -87,6 +102,9 @@
      private IntHashMap entityIdMap;
      private static final String __OBFID = "CL_00001437";
  
@@ -38,7 +38,7 @@
      /** Stores the recently processed (lighting) chunks */
      protected Set<ChunkCoordIntPair> doneChunks = new HashSet<ChunkCoordIntPair>();
      public List<Teleporter> customTeleporters = new ArrayList<Teleporter>();
-@@ -99,6 +117,7 @@
+@@ -94,6 +112,7 @@
      public WorldServer(MinecraftServer p_i45284_1_, ISaveHandler p_i45284_2_, String p_i45284_3_, int p_i45284_4_, WorldSettings p_i45284_5_, Profiler p_i45284_6_)
      {
          super(p_i45284_2_, p_i45284_3_, p_i45284_5_, WorldProvider.getProviderForDimension(p_i45284_4_), p_i45284_6_);
@@ -46,7 +46,7 @@
          this.mcServer = p_i45284_1_;
          this.theEntityTracker = new EntityTracker(this);
          this.thePlayerManager = new PlayerManager(this, p_i45284_1_.getConfigurationManager().getViewDistance());
-@@ -128,6 +147,46 @@
+@@ -123,6 +142,46 @@
              this.mapStorage.setData("scoreboard", scoreboardsavedata);
          }
  
@@ -93,7 +93,7 @@
          if (!(this instanceof WorldServerMulti)) //Forge: We fix the global mapStorage, which causes us to share scoreboards early. So don't associate the save data with the temporary scoreboard
          {
              scoreboardsavedata.func_96499_a(this.worldScoreboard);
-@@ -136,6 +195,30 @@
+@@ -131,6 +190,30 @@
          DimensionManager.setWorld(p_i45284_4_, this);
      }
  
@@ -121,10 +121,10 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_72835_b
      public void tick()
      {
-@@ -160,12 +243,18 @@
+         super.tick();
+@@ -154,12 +237,18 @@
          }
  
          this.theProfiler.startSection("mobSpawner");
@@ -145,7 +145,7 @@
          this.theProfiler.endStartSection("chunkSource");
          this.chunkProvider.unloadQueuedChunks();
          int j = this.calculateSkylightSubtracted(1.0F);
-@@ -182,23 +271,39 @@
+@@ -176,23 +265,39 @@
              this.worldInfo.setWorldTime(this.worldInfo.getWorldTime() + 1L);
          }
  
@@ -184,8 +184,8 @@
 +        timings.doChunkGC.stopTiming(); // Spigot
      }
  
-     // JAVADOC METHOD $$ func_73057_a
-@@ -219,7 +324,7 @@
+     public BiomeGenBase.SpawnListEntry spawnRandomCreature(EnumCreatureType par1EnumCreatureType, int par2, int par3, int par4)
+@@ -211,7 +316,7 @@
          {
              EntityPlayer entityplayer = (EntityPlayer)iterator.next();
  
@@ -194,7 +194,7 @@
              {
                  this.allPlayersSleeping = false;
                  break;
-@@ -247,7 +352,26 @@
+@@ -239,7 +344,26 @@
  
      private void resetRainAndThunder()
      {
@@ -222,7 +222,7 @@
      }
  
      public boolean areAllPlayersAsleep()
-@@ -255,19 +379,28 @@
+@@ -247,19 +371,28 @@
          if (this.allPlayersSleeping && !this.isRemote)
          {
              Iterator iterator = this.playerEntities.iterator();
@@ -254,7 +254,7 @@
              return false;
          }
          else
-@@ -310,30 +443,32 @@
+@@ -301,30 +434,32 @@
          super.func_147456_g();
          int i = 0;
          int j = 0;
@@ -305,7 +305,7 @@
              this.theProfiler.endStartSection("thunder");
              int i1;
              int j1;
-@@ -366,12 +501,34 @@
+@@ -357,12 +492,34 @@
  
                  if (this.isBlockFreezableNaturally(j1 + k, l1 - 1, k1 + l))
                  {
@@ -342,7 +342,7 @@
                  }
  
                  if (this.isRaining())
-@@ -395,20 +552,21 @@
+@@ -386,20 +543,21 @@
  
                  if (extendedblockstorage != null && extendedblockstorage.getNeedsRandomTick())
                  {
@@ -371,7 +371,7 @@
                          }
                      }
                  }
-@@ -416,6 +574,15 @@
+@@ -407,6 +565,15 @@
  
              this.theProfiler.endSection();
          }
@@ -386,9 +386,9 @@
 +        // Spigot End
      }
  
-     // JAVADOC METHOD $$ func_147477_a
-@@ -497,7 +664,7 @@
-     // JAVADOC METHOD $$ func_72939_s
+     public boolean isBlockTickScheduledThisTick(int p_147477_1_, int p_147477_2_, int p_147477_3_, Block p_147477_4_)
+@@ -485,7 +652,7 @@
+ 
      public void updateEntities()
      {
 -        if (this.playerEntities.isEmpty() && getPersistentChunks().isEmpty())
@@ -396,7 +396,7 @@
          {
              if (this.updateEntityTick++ >= 1200)
              {
-@@ -531,7 +698,17 @@
+@@ -517,7 +684,17 @@
          {
              if (i > 1000)
              {
@@ -415,7 +415,7 @@
              }
  
              this.theProfiler.startSection("cleaning");
-@@ -678,7 +855,36 @@
+@@ -662,7 +839,36 @@
      protected IChunkProvider createChunkProvider()
      {
          IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
@@ -453,7 +453,7 @@
          return this.theChunkProviderServer;
      }
  
-@@ -686,29 +892,31 @@
+@@ -670,29 +876,31 @@
      {
          ArrayList arraylist = new ArrayList();
  
@@ -499,7 +499,7 @@
          return arraylist;
      }
  
-@@ -762,6 +970,29 @@
+@@ -744,6 +952,29 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 0;
  
@@ -529,8 +529,8 @@
              if (chunkposition != null)
              {
                  i = chunkposition.chunkPosX;
-@@ -899,6 +1130,20 @@
-     // JAVADOC METHOD $$ func_72942_c
+@@ -874,6 +1105,20 @@
+ 
      public boolean addWeatherEffect(Entity par1Entity)
      {
 +        // MCPC+ start - vanilla compatibility
@@ -550,8 +550,8 @@
          if (super.addWeatherEffect(par1Entity))
          {
              this.mcServer.getConfigurationManager().sendToAllNear(par1Entity.posX, par1Entity.posY, par1Entity.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(par1Entity));
-@@ -919,11 +1164,22 @@
-     // JAVADOC METHOD $$ func_72885_a
+@@ -892,11 +1137,22 @@
+ 
      public Explosion newExplosion(Entity par1Entity, double par2, double par4, double par6, float par8, boolean par9, boolean par10)
      {
 +        // CraftBukkit start
@@ -573,7 +573,7 @@
  
          if (!par10)
          {
-@@ -1005,6 +1261,7 @@
+@@ -975,6 +1231,7 @@
          boolean flag = this.isRaining();
          super.updateWeather();
  
@@ -581,7 +581,7 @@
          if (this.prevRainingStrength != this.rainingStrength)
          {
              this.mcServer.getConfigurationManager().sendPacketToAllPlayersInDimension(new S2BPacketChangeGameState(7, this.rainingStrength), this.provider.dimensionId);
-@@ -1029,6 +1286,20 @@
+@@ -999,6 +1256,20 @@
              this.mcServer.getConfigurationManager().sendPacketToAllPlayers(new S2BPacketChangeGameState(7, this.rainingStrength));
              this.mcServer.getConfigurationManager().sendPacketToAllPlayers(new S2BPacketChangeGameState(8, this.thunderingStrength));
          }
@@ -602,7 +602,7 @@
      }
  
      public MinecraftServer func_73046_m()
-@@ -1072,20 +1343,48 @@
+@@ -1041,20 +1312,48 @@
          }
      }
  

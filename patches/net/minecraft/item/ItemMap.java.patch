@@ -23,7 +23,7 @@
          }
  
          return mapdata;
-@@ -281,6 +290,10 @@
+@@ -279,6 +288,10 @@
              mapdata1.dimension = mapdata.dimension;
              mapdata1.markDirty();
              par2World.setItemData("map_" + par1ItemStack.getItemDamage(), mapdata1);

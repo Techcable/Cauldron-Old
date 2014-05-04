@@ -9,7 +9,7 @@
  public class BlockRedstoneWire extends Block
  {
      private boolean field_150181_a = true;
-@@ -165,8 +167,17 @@
+@@ -159,8 +161,17 @@
              i3 = l1;
          }
  
@@ -27,7 +27,7 @@
              p_150175_1_.setBlockMetadataWithNotify(p_150175_2_, p_150175_3_, p_150175_4_, i3, 2);
              this.field_150179_b.add(new ChunkPosition(p_150175_2_, p_150175_3_, p_150175_4_));
              this.field_150179_b.add(new ChunkPosition(p_150175_2_ - 1, p_150175_3_, p_150175_4_));
-@@ -301,7 +312,8 @@
+@@ -294,7 +305,8 @@
          }
      }
  

@@ -45,7 +45,7 @@
              this.func_96551_b();
              return true;
          }
-@@ -96,7 +96,7 @@
+@@ -95,7 +95,7 @@
      public void removePlayerFromTeam(String par1Str, ScorePlayerTeam par2ScorePlayerTeam)
      {
          super.removePlayerFromTeam(par1Str, par2ScorePlayerTeam);
@@ -54,7 +54,7 @@
          this.func_96551_b();
      }
  
-@@ -112,7 +112,7 @@
+@@ -111,7 +111,7 @@
  
          if (this.field_96553_b.contains(par1ScoreObjective))
          {
@@ -63,7 +63,7 @@
          }
  
          this.func_96551_b();
-@@ -134,7 +134,7 @@
+@@ -132,21 +132,21 @@
      public void broadcastTeamCreated(ScorePlayerTeam par1ScorePlayerTeam)
      {
          super.broadcastTeamCreated(par1ScorePlayerTeam);
@@ -72,7 +72,6 @@
          this.func_96551_b();
      }
  
-@@ -142,14 +142,14 @@
      public void broadcastTeamRemoved(ScorePlayerTeam par1ScorePlayerTeam)
      {
          super.broadcastTeamRemoved(par1ScorePlayerTeam);
@@ -89,7 +88,7 @@
          this.func_96551_b();
      }
  
-@@ -197,7 +197,13 @@
+@@ -194,7 +194,13 @@
  
          while (iterator.hasNext())
          {
@@ -104,7 +103,7 @@
              Iterator iterator1 = list.iterator();
  
              while (iterator1.hasNext())
-@@ -233,7 +239,13 @@
+@@ -230,7 +236,13 @@
  
          while (iterator.hasNext())
          {
@@ -119,7 +118,7 @@
              Iterator iterator1 = list.iterator();
  
              while (iterator1.hasNext())
-@@ -260,4 +272,17 @@
+@@ -257,4 +269,17 @@
  
          return i;
      }

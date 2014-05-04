@@ -1,12 +1,13 @@
 --- ../src-base/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
 +++ ../src-work/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
-@@ -49,9 +49,54 @@
+@@ -48,8 +48,53 @@
          this.chunkSaveLocation = par1File;
      }
  
+-    public Chunk loadChunk(World par1World, int par2, int par3) throws IOException
 +    // CraftBukkit start
 +    public boolean chunkExists(World world, int i, int j)
-+    {
+     {
 +        ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(i, j);
 +
 +        synchronized (this.syncLockObject)
@@ -48,15 +49,13 @@
 +        return null;
 +    }
 +
-     // JAVADOC METHOD $$ func_75815_a
--    public Chunk loadChunk(World par1World, int par2, int par3) throws IOException
 +    public Object[] loadChunk__Async_CB(World par1World, int par2, int par3)
-     {
++    {
 +        // CraftBukkit end
          NBTTagCompound nbttagcompound = null;
          ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(par2, par3);
          Object object = this.syncLockObject;
-@@ -62,9 +107,9 @@
+@@ -60,9 +105,9 @@
              {
                  for (int k = 0; k < this.chunksToRemove.size(); ++k)
                  {
@@ -68,7 +67,7 @@
                          break;
                      }
                  }
-@@ -80,14 +125,20 @@
+@@ -78,13 +123,19 @@
                  return null;
              }
  
@@ -86,13 +85,12 @@
 +        return this.checkedReadChunkFromNBT_CB(par1World, par2, par3, nbttagcompound);
      }
  
-     // JAVADOC METHOD $$ func_75822_a
 -    protected Chunk checkedReadChunkFromNBT(World par1World, int par2, int par3, NBTTagCompound par4NBTTagCompound)
 +    protected Object[] checkedReadChunkFromNBT_CB(World par1World, int par2, int par3, NBTTagCompound par4NBTTagCompound) // CraftBukkit - return Chunk -> Object[]
      {
          if (!par4NBTTagCompound.hasKey("Level", 10))
          {
-@@ -106,20 +157,51 @@
+@@ -103,20 +154,51 @@
              if (!chunk.isAtLocation(par2, par3))
              {
                  logger.error("Chunk file at " + par2 + "," + par3 + " is in the wrong location; relocating. (Expected " + par2 + ", " + par3 + ", got " + chunk.xPosition + ", " + chunk.zPosition + ")");
@@ -150,7 +148,7 @@
          try
          {
              NBTTagCompound nbttagcompound = new NBTTagCompound();
-@@ -145,15 +227,15 @@
+@@ -142,15 +224,15 @@
              {
                  for (int i = 0; i < this.chunksToRemove.size(); ++i)
                  {
@@ -169,8 +167,8 @@
              this.pendingAnvilChunksCoordinates.add(par1ChunkCoordIntPair);
              ThreadedFileIOBase.threadedIOInstance.queueIO(this);
          }
-@@ -162,7 +244,7 @@
-     // JAVADOC METHOD $$ func_75814_c
+@@ -158,7 +240,7 @@
+ 
      public boolean writeNextIO()
      {
 -        AnvilChunkLoader.PendingChunk pendingchunk = null;
@@ -178,7 +176,7 @@
          Object object = this.syncLockObject;
  
          synchronized (this.syncLockObject)
-@@ -172,15 +254,15 @@
+@@ -168,15 +250,15 @@
                  return false;
              }
  
@@ -198,7 +196,7 @@
              }
              catch (Exception exception)
              {
-@@ -191,7 +273,7 @@
+@@ -187,7 +269,7 @@
          return true;
      }
  
@@ -207,7 +205,7 @@
      {
          DataOutputStream dataoutputstream = RegionFileCache.getChunkOutputStream(this.chunkSaveLocation, par1AnvilChunkLoaderPending.chunkCoordinate.chunkXPos, par1AnvilChunkLoaderPending.chunkCoordinate.chunkZPos);
          CompressedStreamTools.write(par1AnvilChunkLoaderPending.nbtTags, dataoutputstream);
-@@ -243,19 +325,19 @@
+@@ -235,19 +317,19 @@
  
                  if (extendedblockstorage.getBlockMSBArray() != null)
                  {
@@ -232,7 +230,7 @@
                  }
  
                  nbttaglist.appendTag(nbttagcompound1);
-@@ -386,6 +468,13 @@
+@@ -377,6 +459,13 @@
              chunk.setBiomeArray(par2NBTTagCompound.getByteArray("Biomes"));
          }
  
@@ -246,7 +244,7 @@
          NBTTagList nbttaglist1 = par2NBTTagCompound.getTagList("Entities", 10);
  
          if (nbttaglist1 != null)
-@@ -447,7 +536,7 @@
+@@ -438,7 +527,7 @@
              }
          }
  

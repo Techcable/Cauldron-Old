@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockNetherWart.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockNetherWart.java
-@@ -48,7 +48,7 @@
+@@ -45,7 +45,7 @@
          if (l < 3 && p_149674_5_.nextInt(10) == 0)
          {
              ++l;

@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntity.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntity.java
-@@ -22,15 +22,18 @@
+@@ -22,18 +22,22 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -10,26 +10,22 @@
  public class TileEntity
  {
      private static final Logger logger = LogManager.getLogger();
-     // JAVADOC FIELD $$ field_145855_i
      private static Map nameToClassMap = new HashMap();
-     // JAVADOC FIELD $$ field_145853_j
 -    private static Map classToNameMap = new HashMap();
-+    public static Map classToNameMap = new HashMap(); // MCPC+ - private -> public
-     // JAVADOC FIELD $$ field_145850_b
 -    protected World worldObj;
++    public static Map classToNameMap = new HashMap(); // MCPC+ - private -> public
 +    public World worldObj; // CraftBukkit - protected -> public
      public int xCoord;
      public int yCoord;
      public int zCoord;
-@@ -38,6 +41,7 @@
+     protected boolean tileEntityInvalid;
      public int blockMetadata = -1;
-     // JAVADOC FIELD $$ field_145854_h
      public Block blockType;
 +    public CustomTimingsHandler tickTimer = org.bukkit.craftbukkit.SpigotTimings.getTileEntityTimings(this); // Spigot
      private static final String __OBFID = "CL_00000340";
  
-     // JAVADOC METHOD $$ func_145826_a
-@@ -300,6 +304,20 @@
+     public static void addMapping(Class p_145826_0_, String p_145826_1_)
+@@ -282,6 +286,20 @@
          addMapping(TileEntityFlowerPot.class, "FlowerPot");
      }
  

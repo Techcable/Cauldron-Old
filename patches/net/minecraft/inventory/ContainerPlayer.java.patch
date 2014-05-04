@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/inventory/ContainerPlayer.java
 +++ ../src-work/minecraft/net/minecraft/inventory/ContainerPlayer.java
-@@ -12,6 +12,13 @@
+@@ -12,19 +12,34 @@
  import net.minecraft.item.crafting.CraftingManager;
  import net.minecraft.util.IIcon;
  
@@ -13,9 +13,8 @@
 +
  public class ContainerPlayer extends Container
  {
-     // JAVADOC FIELD $$ field_75181_e
-@@ -20,13 +27,21 @@
-     // JAVADOC FIELD $$ field_75180_g
+     public InventoryCrafting craftMatrix = new InventoryCrafting(this, 2, 2);
+     public IInventory craftResult = new InventoryCraftResult();
      public boolean isLocalWorld;
      private final EntityPlayer thePlayer;
 +    // CraftBukkit start
@@ -37,7 +36,7 @@
          int i;
          int j;
  
-@@ -77,13 +92,25 @@
+@@ -72,12 +87,24 @@
              this.addSlotToContainer(new Slot(par1InventoryPlayer, i, 8 + i * 18, 142));
          }
  
@@ -45,7 +44,6 @@
 +       // this.onCraftMatrixChanged(this.craftMatrix); // CraftBukkit - unneeded since it just sets result slot to empty
      }
  
-     // JAVADOC METHOD $$ func_75130_a
      public void onCraftMatrixChanged(IInventory par1IInventory)
      {
 -        this.craftResult.setInventorySlotContents(0, CraftingManager.getInstance().findMatchingRecipe(this.craftMatrix, this.thePlayer.worldObj));
@@ -64,8 +62,8 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_75134_a
-@@ -195,4 +222,18 @@
+     public void onContainerClosed(EntityPlayer par1EntityPlayer)
+@@ -187,4 +214,18 @@
      {
          return par2Slot.inventory != this.craftResult && super.func_94530_a(par1ItemStack, par2Slot);
      }

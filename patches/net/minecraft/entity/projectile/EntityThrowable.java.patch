@@ -1,9 +1,9 @@
 --- ../src-base/minecraft/net/minecraft/entity/projectile/EntityThrowable.java
 +++ ../src-work/minecraft/net/minecraft/entity/projectile/EntityThrowable.java
-@@ -25,8 +25,8 @@
+@@ -24,8 +24,8 @@
+     private Block field_145785_f;
      protected boolean inGround;
      public int throwableShake;
-     // JAVADOC FIELD $$ field_70192_c
 -    private EntityLivingBase thrower;
 -    private String throwerName;
 +    public EntityLivingBase thrower; // CraftBukkit - private -> public
@@ -11,7 +11,7 @@
      private int ticksInGround;
      private int ticksInAir;
      private static final String __OBFID = "CL_00001723";
-@@ -52,6 +52,7 @@
+@@ -50,6 +50,7 @@
      {
          super(par1World);
          this.thrower = par2EntityLivingBase;
@@ -19,7 +19,7 @@
          this.setSize(0.25F, 0.25F);
          this.setLocationAndAngles(par2EntityLivingBase.posX, par2EntityLivingBase.posY + (double)par2EntityLivingBase.getEyeHeight(), par2EntityLivingBase.posZ, par2EntityLivingBase.rotationYaw, par2EntityLivingBase.rotationPitch);
          this.posX -= (double)(MathHelper.cos(this.rotationYaw / 180.0F * (float)Math.PI) * 0.16F);
-@@ -192,7 +193,7 @@
+@@ -187,7 +188,7 @@
  
                      if (movingobjectposition1 != null)
                      {
@@ -28,7 +28,7 @@
  
                          if (d1 < d0 || d0 == 0.0D)
                          {
-@@ -218,6 +219,14 @@
+@@ -213,6 +214,14 @@
              else
              {
                  this.onImpact(movingobjectposition);

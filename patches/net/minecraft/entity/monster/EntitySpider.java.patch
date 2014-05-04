@@ -12,7 +12,7 @@
  public class EntitySpider extends EntityMob
  {
      private static final String __OBFID = "CL_00001699";
-@@ -94,7 +99,25 @@
+@@ -88,7 +93,25 @@
  
          if (f1 > 0.5F && this.rand.nextInt(100) == 0)
          {
@@ -39,8 +39,8 @@
          }
          else
          {
-@@ -125,12 +148,27 @@
-     // JAVADOC METHOD $$ func_70628_a
+@@ -118,12 +141,27 @@
+ 
      protected void dropFewItems(boolean par1, int par2)
      {
 -        super.dropFewItems(par1, par2);
@@ -68,4 +68,4 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_70617_f_
+     public boolean isOnLadder()

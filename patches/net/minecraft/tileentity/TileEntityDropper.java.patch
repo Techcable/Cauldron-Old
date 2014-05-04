@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntityDropper.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityDropper.java
-@@ -9,4 +9,12 @@
+@@ -8,4 +8,12 @@
      {
          return this.hasCustomInventoryName() ? this.field_146020_a : "container.dropper";
      }

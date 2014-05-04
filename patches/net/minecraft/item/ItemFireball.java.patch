@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/item/ItemFireball.java
 +++ ../src-work/minecraft/net/minecraft/item/ItemFireball.java
-@@ -62,6 +62,18 @@
+@@ -61,6 +61,18 @@
              {
                  if (par3World.getBlock(par4, par5, par6).getMaterial() == Material.air)
                  {

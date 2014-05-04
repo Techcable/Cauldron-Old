@@ -20,15 +20,15 @@
  public class EntityDragon extends EntityLiving implements IBossDisplayData, IEntityMultiPart, IMob
  {
      public double targetX;
-@@ -54,6 +67,7 @@
+@@ -44,6 +57,7 @@
+     private Entity target;
      public int deathTicks;
-     // JAVADOC FIELD $$ field_70992_bH
      public EntityEnderCrystal healingEnderCrystal;
 +    private Explosion explosionSource = new Explosion(null, this, Double.NaN, Double.NaN, Double.NaN, Float.NaN); // CraftBukkit - reusable source for CraftTNTPrimed.getSource()
      private static final String __OBFID = "CL_00001659";
  
      public EntityDragon(World par1World)
-@@ -368,14 +382,33 @@
+@@ -355,14 +369,33 @@
              {
                  if (!this.worldObj.isRemote)
                  {
@@ -64,7 +64,7 @@
              }
          }
  
-@@ -445,7 +478,24 @@
+@@ -429,7 +462,24 @@
  
          if (this.rand.nextInt(2) == 0 && !this.worldObj.playerEntities.isEmpty())
          {
@@ -90,7 +90,7 @@
          }
          else
          {
-@@ -486,6 +536,10 @@
+@@ -468,6 +518,10 @@
          int j1 = MathHelper.floor_double(par1AxisAlignedBB.maxZ);
          boolean flag = false;
          boolean flag1 = false;
@@ -101,7 +101,7 @@
  
          for (int k1 = i; k1 <= l; ++k1)
          {
-@@ -499,7 +553,11 @@
+@@ -481,7 +535,11 @@
                      {
                          if (block.canEntityDestroy(worldObj, k1, l1, i2, this) && this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing"))
                          {
@@ -114,7 +114,7 @@
                          }
                          else
                          {
-@@ -512,10 +570,56 @@
+@@ -494,10 +552,56 @@
  
          if (flag1)
          {
@@ -175,7 +175,7 @@
          }
  
          return flag;
-@@ -550,7 +654,7 @@
+@@ -531,13 +635,18 @@
          return false;
      }
  
@@ -184,8 +184,7 @@
      {
          return super.attackEntityFrom(par1DamageSource, par2);
      }
-@@ -558,6 +662,11 @@
-     // JAVADOC METHOD $$ func_70609_aI
+ 
      protected void onDeathUpdate()
      {
 +        if (this.isDead)
@@ -196,7 +195,7 @@
          ++this.deathTicks;
  
          if (this.deathTicks >= 180 && this.deathTicks <= 200)
-@@ -575,7 +684,7 @@
+@@ -555,7 +664,7 @@
          {
              if (this.deathTicks > 150 && this.deathTicks % 5 == 0)
              {
@@ -205,7 +204,7 @@
  
                  while (i > 0)
                  {
-@@ -596,7 +705,7 @@
+@@ -576,7 +685,7 @@
  
          if (this.deathTicks == 200 && !this.worldObj.isRemote)
          {
@@ -214,7 +213,7 @@
  
              while (i > 0)
              {
-@@ -616,6 +725,8 @@
+@@ -595,6 +704,8 @@
          byte b0 = 64;
          BlockEndPortal.field_149948_a = true;
          byte b1 = 4;
@@ -223,7 +222,7 @@
  
          for (int k = b0 - 1; k <= b0 + 32; ++k)
          {
-@@ -633,35 +744,64 @@
+@@ -612,35 +723,64 @@
                          {
                              if (d2 <= ((double)(b1 - 1) - 0.5D) * ((double)(b1 - 1) - 0.5D))
                              {
@@ -301,7 +300,7 @@
          BlockEndPortal.field_149948_a = false;
      }
  
-@@ -702,4 +842,13 @@
+@@ -675,4 +815,13 @@
      {
          return 5.0F;
      }

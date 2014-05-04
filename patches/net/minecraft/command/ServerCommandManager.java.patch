@@ -71,4 +71,4 @@
 +        // MCPC+ end
      }
  
-     // JAVADOC METHOD $$ func_71563_a
+     public void notifyAdmins(ICommandSender par1ICommandSender, int par2, String par3Str, Object ... par4ArrayOfObj)

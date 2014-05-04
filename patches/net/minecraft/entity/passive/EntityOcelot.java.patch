@@ -1,27 +1,27 @@
 --- ../src-base/minecraft/net/minecraft/entity/passive/EntityOcelot.java
 +++ ../src-work/minecraft/net/minecraft/entity/passive/EntityOcelot.java
-@@ -92,7 +92,7 @@
-     // JAVADOC METHOD $$ func_70692_ba
+@@ -89,7 +89,7 @@
+ 
      protected boolean canDespawn()
      {
 -        return !this.isTamed() && this.ticksExisted > 2400;
 +        return !this.isTamed(); // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_70650_aV
-@@ -174,7 +174,10 @@
+     public boolean isAIEnabled()
+@@ -161,7 +161,10 @@
+         }
      }
  
-     // JAVADOC METHOD $$ func_70628_a
 -    protected void dropFewItems(boolean par1, int par2) {}
 +    protected void dropFewItems(boolean par1, int par2)
 +    {
 +        org.bukkit.craftbukkit.event.CraftEventFactory.callEntityDeathEvent(this); // CraftBukkit - Call EntityDeathEvent
 +    }
  
-     // JAVADOC METHOD $$ func_70085_c
      public boolean interact(EntityPlayer par1EntityPlayer)
-@@ -202,7 +205,8 @@
+     {
+@@ -188,7 +191,8 @@
  
              if (!this.worldObj.isRemote)
              {

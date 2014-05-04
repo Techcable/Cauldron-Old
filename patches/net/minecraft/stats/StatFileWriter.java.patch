@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/stats/StatFileWriter.java
 +++ ../src-work/minecraft/net/minecraft/stats/StatFileWriter.java
-@@ -29,6 +29,12 @@
+@@ -27,6 +27,12 @@
      {
          if (!p_150871_2_.isAchievement() || this.canUnlockAchievement((Achievement)p_150871_2_))
          {

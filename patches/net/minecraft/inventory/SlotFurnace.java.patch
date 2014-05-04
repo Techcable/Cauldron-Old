@@ -12,8 +12,8 @@
 +
  public class SlotFurnace extends Slot
  {
-     // JAVADOC FIELD $$ field_75229_a
-@@ -79,6 +85,15 @@
+     private EntityPlayer thePlayer;
+@@ -74,6 +80,15 @@
                  i = j;
              }
  

@@ -13,7 +13,7 @@
  public class EntityGhast extends EntityFlying implements IMob
  {
      public int courseChangeCooldown;
-@@ -120,13 +126,50 @@
+@@ -117,13 +123,50 @@
  
          if (this.targetedEntity != null && this.targetedEntity.isDead)
          {
@@ -66,7 +66,7 @@
              if (this.targetedEntity != null)
              {
                  this.aggroCooldown = 20;
-@@ -155,7 +198,8 @@
+@@ -152,7 +195,8 @@
                  {
                      this.worldObj.playAuxSFXAtEntity((EntityPlayer)null, 1008, (int)this.posX, (int)this.posY, (int)this.posZ, 0);
                      EntityLargeFireball entitylargefireball = new EntityLargeFireball(this.worldObj, this, d5, d6, d7);
@@ -76,8 +76,8 @@
                      double d8 = 4.0D;
                      Vec3 vec3 = this.getLook(1.0F);
                      entitylargefireball.posX = this.posX + vec3.xCoord * d8;
-@@ -239,20 +283,25 @@
-     // JAVADOC METHOD $$ func_70628_a
+@@ -231,20 +275,25 @@
+ 
      protected void dropFewItems(boolean par1, int par2)
      {
 +        // CraftBukkit start
@@ -105,4 +105,4 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_70599_aP
+     protected float getSoundVolume()

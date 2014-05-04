@@ -12,16 +12,16 @@
  import net.minecraft.world.WorldManager;
  import net.minecraft.world.WorldServer;
  import net.minecraft.world.WorldServerMulti;
-@@ -80,7 +82,7 @@
+@@ -78,7 +80,7 @@
+         this.initialWorldChunkLoad();
      }
  
-     // JAVADOC METHOD $$ func_71197_b
 -    protected boolean startServer() throws IOException
 +    protected boolean startServer() throws java.net.UnknownHostException // MCPC+
      {
          logger.info("Starting integrated minecraft server version 1.7.2");
          this.setOnlineMode(false);
-@@ -106,7 +108,15 @@
+@@ -103,7 +105,15 @@
          {
              logger.info("Saving and pausing game...");
              this.getConfigurationManager().saveAllPlayerData();
@@ -38,7 +38,7 @@
          }
  
          if (!this.isGamePaused)
-@@ -279,4 +289,10 @@
+@@ -266,4 +276,10 @@
      {
          return 4;
      }

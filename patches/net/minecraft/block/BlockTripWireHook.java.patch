@@ -9,7 +9,7 @@
  public class BlockTripWireHook extends Block
  {
      private static final String __OBFID = "CL_00000329";
-@@ -220,6 +222,17 @@
+@@ -210,6 +212,17 @@
              this.func_150135_a(p_150136_1_, l2, p_150136_3_, i3, flag4, flag5, flag2, flag3);
          }
  

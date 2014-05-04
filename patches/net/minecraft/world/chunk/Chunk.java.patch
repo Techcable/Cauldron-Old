@@ -18,16 +18,16 @@
  public class Chunk
  {
      private static final Logger logger = LogManager.getLogger();
-@@ -81,6 +92,8 @@
+@@ -62,6 +73,8 @@
+     public int heightMapMinimum;
      public long inhabitedTime;
-     // JAVADOC FIELD $$ field_76649_t
      private int queuedLightChecks;
 +    public gnu.trove.map.hash.TObjectIntHashMap<Class> entityCount = new gnu.trove.map.hash.TObjectIntHashMap<Class>(); // Spigot (MCPC+ protected -> public)
 +    public int lastAccessedTick; // MCPC+ track last time the chunk was accessed
      private static final String __OBFID = "CL_00000373";
  
      public Chunk(World par1World, int par2, int par3)
-@@ -99,13 +112,23 @@
+@@ -80,13 +93,23 @@
  
          for (int k = 0; k < this.entityLists.length; ++k)
          {
@@ -52,7 +52,7 @@
      public Chunk(World p_i45446_1_, Block[] p_i45446_2_, int p_i45446_3_, int p_i45446_4_)
      {
          this(p_i45446_1_, p_i45446_3_, p_i45446_4_);
-@@ -620,7 +643,12 @@
+@@ -590,7 +613,12 @@
                  block1.onBlockPreDestroy(this.worldObj, l1, p_150807_2_, i2, k1);
              }
  
@@ -66,7 +66,7 @@
              extendedblockstorage.setExtBlockMetadata(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_5_); // Move this above to prevent other mods/tile entites from creating invalid ones for the wrong metadata
  
              if (!this.worldObj.isRemote)
-@@ -636,6 +664,14 @@
+@@ -606,6 +634,14 @@
                  }
              }
  
@@ -81,7 +81,7 @@
              if (extendedblockstorage.getBlockByExtId(p_150807_1_, p_150807_2_ & 15, p_150807_3_) != p_150807_4_)
              {
                  return false;
-@@ -803,8 +839,12 @@
+@@ -768,8 +804,12 @@
  
          if (i != this.xPosition || j != this.zPosition)
          {
@@ -96,7 +96,7 @@
          }
  
          int k = MathHelper.floor_double(par1Entity.posY / 16.0D);
-@@ -825,6 +865,28 @@
+@@ -790,6 +830,28 @@
          par1Entity.chunkCoordY = k;
          par1Entity.chunkCoordZ = this.zPosition;
          this.entityLists[k].add(par1Entity);
@@ -124,8 +124,8 @@
 +        // Spigot end
      }
  
-     // JAVADOC METHOD $$ func_76622_b
-@@ -847,6 +909,28 @@
+     public void removeEntity(Entity par1Entity)
+@@ -810,6 +872,28 @@
          }
  
          this.entityLists[par2].remove(par1Entity);
@@ -153,8 +153,8 @@
 +        // Spigot end
      }
  
-     // JAVADOC METHOD $$ func_76619_d
-@@ -914,7 +998,16 @@
+     public boolean canBlockSeeTheSky(int par1, int par2, int par3)
+@@ -876,7 +960,16 @@
  
              p_150812_4_.validate();
              this.chunkTileEntityMap.put(chunkposition, p_150812_4_);
@@ -171,7 +171,7 @@
      }
  
      public void removeTileEntity(int p_150805_1_, int p_150805_2_, int p_150805_3_)
-@@ -961,12 +1054,28 @@
+@@ -921,12 +1014,28 @@
  
          while (iterator.hasNext())
          {
@@ -201,7 +201,7 @@
              this.worldObj.unloadEntities(this.entityLists[i]);
          }
          MinecraftForge.EVENT_BUS.post(new ChunkEvent.Unload(this));
-@@ -1223,8 +1332,8 @@
+@@ -1175,8 +1284,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getMetadataArray();
@@ -212,7 +212,7 @@
              }
          }
  
-@@ -1233,8 +1342,8 @@
+@@ -1185,8 +1294,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getBlocklightArray();
@@ -223,7 +223,7 @@
              }
          }
  
-@@ -1245,8 +1354,8 @@
+@@ -1197,8 +1306,8 @@
                  if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
                  {
                      nibblearray = this.storageArrays[l].getSkylightArray();
@@ -234,7 +234,7 @@
                  }
              }
          }
-@@ -1268,8 +1377,8 @@
+@@ -1220,8 +1329,8 @@
                          nibblearray = this.storageArrays[l].createBlockMSBArray();
                      }
  

@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/chunk/storage/RegionFile.java
 +++ ../src-work/minecraft/net/minecraft/world/chunk/storage/RegionFile.java
-@@ -105,6 +105,61 @@
+@@ -104,6 +104,61 @@
          }
      }
  
@@ -59,6 +59,6 @@
 +
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_76704_a
      public synchronized DataInputStream getChunkDataInputStream(int par1, int par2)
      {
+         if (this.outOfBounds(par1, par2))

@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/inventory/ContainerWorkbench.java
 +++ ../src-work/minecraft/net/minecraft/inventory/ContainerWorkbench.java
-@@ -7,19 +7,36 @@
+@@ -7,18 +7,35 @@
  import net.minecraft.item.crafting.CraftingManager;
  import net.minecraft.world.World;
  
@@ -13,7 +13,6 @@
 +
  public class ContainerWorkbench extends Container
  {
-     // JAVADOC FIELD $$ field_75162_e
 -    public InventoryCrafting craftMatrix = new InventoryCrafting(this, 3, 3);
 -    public IInventory craftResult = new InventoryCraftResult();
 +    public InventoryCrafting craftMatrix; // CraftBukkit - move initialization into constructor
@@ -39,8 +38,8 @@
          this.worldObj = par2World;
          this.posX = par3;
          this.posY = par4;
-@@ -55,7 +72,19 @@
-     // JAVADOC METHOD $$ func_75130_a
+@@ -53,7 +70,19 @@
+ 
      public void onCraftMatrixChanged(IInventory par1IInventory)
      {
 -        this.craftResult.setInventorySlotContents(0, CraftingManager.getInstance().findMatchingRecipe(this.craftMatrix, this.worldObj));
@@ -59,8 +58,8 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_75134_a
-@@ -79,6 +108,11 @@
+     public void onContainerClosed(EntityPlayer par1EntityPlayer)
+@@ -76,6 +105,11 @@
  
      public boolean canInteractWith(EntityPlayer par1EntityPlayer)
      {
@@ -72,7 +71,7 @@
          return this.worldObj.getBlock(this.posX, this.posY, this.posZ) != Blocks.crafting_table ? false : par1EntityPlayer.getDistanceSq((double)this.posX + 0.5D, (double)this.posY + 0.5D, (double)this.posZ + 0.5D) <= 64.0D;
      }
  
-@@ -145,4 +179,18 @@
+@@ -141,4 +175,18 @@
      {
          return par2Slot.inventory != this.craftResult && super.func_94530_a(par1ItemStack, par2Slot);
      }

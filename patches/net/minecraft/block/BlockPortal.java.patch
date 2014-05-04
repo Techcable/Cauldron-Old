@@ -12,7 +12,7 @@
  public class BlockPortal extends BlockBreakable
  {
      public static final int[][] field_150001_a = new int[][] {new int[0], {3, 1}, {2, 0}};
-@@ -30,7 +35,7 @@
+@@ -29,7 +34,7 @@
      {
          super.updateTick(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, p_149674_5_);
  
@@ -21,7 +21,7 @@
          {
              int l;
  
-@@ -108,13 +113,15 @@
+@@ -104,13 +109,15 @@
  
          if (size.func_150860_b() && size.field_150864_e == 0)
          {
@@ -41,7 +41,7 @@
          }
          else
          {
-@@ -189,6 +196,10 @@
+@@ -181,6 +188,10 @@
      {
          if (p_149670_5_.ridingEntity == null && p_149670_5_.riddenByEntity == null)
          {
@@ -52,7 +52,7 @@
              p_149670_5_.setInPortal();
          }
      }
-@@ -250,175 +261,223 @@
+@@ -239,175 +250,223 @@
      }
  
      public static class Size

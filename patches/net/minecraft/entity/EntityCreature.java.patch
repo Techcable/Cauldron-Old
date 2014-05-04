@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/EntityCreature.java
 +++ ../src-work/minecraft/net/minecraft/entity/EntityCreature.java
-@@ -13,13 +13,19 @@
+@@ -13,12 +13,18 @@
  import net.minecraft.util.Vec3;
  import net.minecraft.world.World;
  
@@ -15,14 +15,13 @@
      public static final UUID field_110179_h = UUID.fromString("E199AD21-BA8A-4C53-8D13-6182D5C69D3A");
      public static final AttributeModifier field_110181_i = (new AttributeModifier(field_110179_h, "Fleeing speed bonus", 2.0D, 2)).setSaved(false);
 -    private PathEntity pathToEntity;
-+    public PathEntity pathToEntity; // CraftBukkit - private -> public
-     // JAVADOC FIELD $$ field_70789_a
 -    protected Entity entityToAttack;
++    public PathEntity pathToEntity; // CraftBukkit - private -> public
 +    public Entity entityToAttack; // CraftBukkit - protected -> public
-     // JAVADOC FIELD $$ field_70787_b
      protected boolean hasAttacked;
-     // JAVADOC FIELD $$ field_70788_c
-@@ -57,8 +63,29 @@
+     protected int fleeingTick;
+     private ChunkCoordinates homePosition = new ChunkCoordinates(0, 0, 0);
+@@ -52,8 +58,29 @@
  
          if (this.entityToAttack == null)
          {
@@ -53,7 +52,7 @@
              if (this.entityToAttack != null)
              {
                  this.pathToEntity = this.worldObj.getPathEntityToEntity(this, this.entityToAttack, f4, true, false, false, true);
-@@ -75,7 +102,23 @@
+@@ -70,7 +97,23 @@
          }
          else
          {
@@ -78,7 +77,7 @@
          }
  
          if (this.entityToAttack instanceof EntityPlayerMP && ((EntityPlayerMP)this.entityToAttack).theItemInWorldManager.isCreative())
-@@ -127,7 +170,8 @@
+@@ -122,7 +165,8 @@
                  double d1 = vec3.xCoord - this.posX;
                  double d2 = vec3.zCoord - this.posZ;
                  double d3 = vec3.yCoord - (double)i;
@@ -88,7 +87,7 @@
                  float f2 = MathHelper.wrapAngleTo180_float(f1 - this.rotationYaw);
                  this.moveForward = (float)this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue();
  
-@@ -320,6 +364,7 @@
+@@ -303,6 +347,7 @@
              {
                  if (f > 10.0F)
                  {
@@ -96,7 +95,7 @@
                      this.clearLeashed(true, true);
                  }
  
-@@ -352,6 +397,7 @@
+@@ -335,6 +380,7 @@
  
              if (f > 10.0F)
              {

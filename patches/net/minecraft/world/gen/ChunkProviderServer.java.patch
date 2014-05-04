@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/gen/ChunkProviderServer.java
 +++ ../src-work/minecraft/net/minecraft/world/gen/ChunkProviderServer.java
-@@ -23,29 +23,50 @@
+@@ -23,27 +23,48 @@
  import net.minecraft.world.chunk.Chunk;
  import net.minecraft.world.chunk.EmptyChunk;
  import net.minecraft.world.chunk.IChunkProvider;
@@ -31,7 +31,6 @@
  public class ChunkProviderServer implements IChunkProvider
  {
      private static final Logger logger = LogManager.getLogger();
-     // JAVADOC FIELD $$ field_73248_b
 -    private Set chunksToUnload = new HashSet();
 -    private Chunk defaultEmptyChunk;
 -    private IChunkProvider currentChunkProvider;
@@ -39,7 +38,6 @@
 +    public Chunk defaultEmptyChunk;
 +    public IChunkProvider currentChunkProvider;
      public IChunkLoader currentChunkLoader;
-     // JAVADOC FIELD $$ field_73250_a
 -    public boolean loadChunkOnProvideRequest = true;
 -    private LongHashMap loadedChunkHashMap = new LongHashMap();
 -    private List loadedChunks = new ArrayList();
@@ -58,16 +56,16 @@
          this.defaultEmptyChunk = new EmptyChunk(par1WorldServer, 0, 0);
          this.worldObj = par1WorldServer;
          this.currentChunkLoader = par2IChunkLoader;
-@@ -55,7 +76,7 @@
-     // JAVADOC METHOD $$ func_73149_a
+@@ -52,7 +73,7 @@
+ 
      public boolean chunkExists(int par1, int par2)
      {
 -        return this.loadedChunkHashMap.containsItem(ChunkCoordIntPair.chunkXZ2Int(par1, par2));
 +        return this.loadedChunkHashMap.containsKey(LongHash.toLong(par1, par2)); // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_73241_b
-@@ -68,21 +89,40 @@
+     public void unloadChunksIfNotNearSpawn(int par1, int par2)
+@@ -64,20 +85,39 @@
              int l = par2 * 16 + 8 - chunkcoordinates.posZ;
              short short1 = 128;
  
@@ -103,7 +101,6 @@
          }
      }
  
-     // JAVADOC METHOD $$ func_73240_a
      public void unloadAllChunks()
      {
 -        Iterator iterator = this.loadedChunks.iterator();
@@ -111,12 +108,11 @@
  
          while (iterator.hasNext())
          {
-@@ -91,19 +131,69 @@
+@@ -86,18 +126,68 @@
          }
      }
  
 +    // CraftBukkit start - Add async variant, provide compatibility
-     // JAVADOC METHOD $$ func_73158_c
      public Chunk loadChunk(int par1, int par2)
      {
 -        long k = ChunkCoordIntPair.chunkXZ2Int(par1, par2);
@@ -186,7 +182,7 @@
              }
  
              if (chunk == null)
-@@ -116,24 +206,45 @@
+@@ -110,24 +200,45 @@
                  {
                      try
                      {
@@ -239,8 +235,8 @@
          }
  
          return chunk;
-@@ -142,12 +253,30 @@
-     // JAVADOC METHOD $$ func_73154_d
+@@ -135,11 +246,29 @@
+ 
      public Chunk provideChunk(int par1, int par2)
      {
 -        Chunk chunk = (Chunk)this.loadedChunkHashMap.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(par1, par2));
@@ -267,13 +263,12 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_73239_e
 -    private Chunk safeLoadChunk(int par1, int par2)
 +    public Chunk safeLoadChunk(int par1, int par2)   // CraftBukkit - private -> public
      {
          if (this.currentChunkLoader == null)
          {
-@@ -157,6 +286,8 @@
+@@ -149,6 +278,8 @@
          {
              try
              {
@@ -282,7 +277,7 @@
                  Chunk chunk = this.currentChunkLoader.loadChunk(this.worldObj, par1, par2);
  
                  if (chunk != null)
-@@ -167,6 +298,7 @@
+@@ -159,6 +290,7 @@
                      {
                          this.currentChunkProvider.recreateStructures(par1, par2);
                      }
@@ -290,25 +285,25 @@
                  }
  
                  return chunk;
-@@ -180,7 +312,7 @@
+@@ -171,7 +303,7 @@
+         }
      }
  
-     // JAVADOC METHOD $$ func_73243_a
 -    private void safeSaveExtraChunkData(Chunk par1Chunk)
 +    public void safeSaveExtraChunkData(Chunk par1Chunk)   // CraftBukkit - private -> public
      {
          if (this.currentChunkLoader != null)
          {
-@@ -196,7 +328,7 @@
+@@ -186,7 +318,7 @@
+         }
      }
  
-     // JAVADOC METHOD $$ func_73242_b
 -    private void safeSaveChunk(Chunk par1Chunk)
 +    public void safeSaveChunk(Chunk par1Chunk)   // CraftBukkit - private -> public
      {
          if (this.currentChunkLoader != null)
          {
-@@ -204,15 +336,18 @@
+@@ -194,15 +326,18 @@
              {
                  par1Chunk.lastSaveTime = this.worldObj.getTotalWorldTime();
                  this.currentChunkLoader.saveChunk(this.worldObj, par1Chunk);
@@ -328,7 +323,7 @@
          }
      }
  
-@@ -228,6 +363,35 @@
+@@ -217,6 +352,35 @@
              if (this.currentChunkProvider != null)
              {
                  this.currentChunkProvider.populate(par1IChunkProvider, par2, par3);
@@ -364,7 +359,7 @@
                  GameRegistry.generateWorld(par2, par3, worldObj, currentChunkProvider, par1IChunkProvider);
                  chunk.setChunkModified();
              }
-@@ -238,10 +402,13 @@
+@@ -226,10 +390,13 @@
      public boolean saveChunks(boolean par1, IProgressUpdate par2IProgressUpdate)
      {
          int i = 0;
@@ -380,7 +375,7 @@
  
              if (par1)
              {
-@@ -278,31 +445,60 @@
+@@ -264,31 +431,60 @@
      {
          if (!this.worldObj.levelSaving)
          {
@@ -452,8 +447,8 @@
              if (this.currentChunkLoader != null)
              {
                  this.currentChunkLoader.chunkTick();
-@@ -321,7 +517,8 @@
-     // JAVADOC METHOD $$ func_73148_d
+@@ -305,7 +501,8 @@
+ 
      public String makeString()
      {
 -        return "ServerChunkCache: " + this.loadedChunkHashMap.getNumHashElements() + " Drop: " + this.chunksToUnload.size();
@@ -461,8 +456,8 @@
 +        return "ServerChunkCache: " + this.loadedChunkHashMap.values().size() + " Drop: " + this.chunksToUnload.size();
      }
  
-     // JAVADOC METHOD $$ func_73155_a
-@@ -337,8 +534,32 @@
+     public List getPossibleCreatures(EnumCreatureType par1EnumCreatureType, int par2, int par3, int par4)
+@@ -320,8 +517,32 @@
  
      public int getLoadedChunkCount()
      {

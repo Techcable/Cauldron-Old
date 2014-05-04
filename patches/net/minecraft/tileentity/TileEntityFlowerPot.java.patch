@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntityFlowerPot.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityFlowerPot.java
-@@ -56,4 +56,12 @@
+@@ -55,4 +55,12 @@
      {
          return this.flowerPotData;
      }

@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/projectile/EntityPotion.java
 +++ ../src-work/minecraft/net/minecraft/entity/projectile/EntityPotion.java
-@@ -14,10 +14,17 @@
+@@ -14,9 +14,16 @@
  import net.minecraft.util.MovingObjectPosition;
  import net.minecraft.world.World;
  
@@ -13,13 +13,12 @@
 +
  public class EntityPotion extends EntityThrowable
  {
-     // JAVADOC FIELD $$ field_70197_d
 -    private ItemStack potionDamage;
 +    public ItemStack potionDamage; // CraftBukkit private --> public
      private static final String __OBFID = "CL_00001727";
  
      public EntityPotion(World par1World)
-@@ -92,14 +99,16 @@
+@@ -88,14 +95,16 @@
          {
              List list = Items.potionitem.getEffects(this.potionDamage);
  
@@ -38,7 +37,7 @@
  
                      while (iterator.hasNext())
                      {
-@@ -115,6 +124,25 @@
+@@ -111,6 +120,25 @@
                                  d1 = 1.0D;
                              }
  
@@ -64,7 +63,7 @@
                              Iterator iterator1 = list.iterator();
  
                              while (iterator1.hasNext())
-@@ -122,9 +150,22 @@
+@@ -118,9 +146,22 @@
                                  PotionEffect potioneffect = (PotionEffect)iterator1.next();
                                  int i = potioneffect.getPotionID();
  

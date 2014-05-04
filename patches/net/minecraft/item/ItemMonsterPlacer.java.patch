@@ -1,7 +1,7 @@
 --- ../src-base/minecraft/net/minecraft/item/ItemMonsterPlacer.java
 +++ ../src-work/minecraft/net/minecraft/item/ItemMonsterPlacer.java
-@@ -56,7 +56,7 @@
-     // JAVADOC METHOD $$ func_77648_a
+@@ -55,7 +55,7 @@
+ 
      public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
      {
 -        if (par3World.isRemote)
@@ -9,7 +9,7 @@
          {
              return true;
          }
-@@ -171,7 +171,7 @@
+@@ -168,7 +168,7 @@
                      entityliving.rotationYawHead = entityliving.rotationYaw;
                      entityliving.renderYawOffset = entityliving.rotationYaw;
                      entityliving.onSpawnWithEgg((IEntityLivingData)null);

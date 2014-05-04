@@ -11,7 +11,7 @@
  
  public abstract class BlockButton extends Block
  {
-@@ -220,6 +224,19 @@
+@@ -209,6 +213,19 @@
          }
          else
          {
@@ -31,7 +31,7 @@
              p_149727_1_.setBlockMetadataWithNotify(p_149727_2_, p_149727_3_, p_149727_4_, j1 + k1, 3);
              p_149727_1_.markBlockRangeForRenderUpdate(p_149727_2_, p_149727_3_, p_149727_4_, p_149727_2_, p_149727_3_, p_149727_4_);
              p_149727_1_.playSoundEffect((double)p_149727_2_ + 0.5D, (double)p_149727_3_ + 0.5D, (double)p_149727_4_ + 0.5D, "random.click", 0.3F, 0.6F);
-@@ -275,6 +292,18 @@
+@@ -262,6 +279,18 @@
  
              if ((l & 8) != 0)
              {
@@ -50,7 +50,7 @@
                  if (this.field_150047_a)
                  {
                      this.func_150046_n(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_);
-@@ -324,6 +353,36 @@
+@@ -309,6 +338,36 @@
          List list = p_150046_1_.getEntitiesWithinAABB(EntityArrow.class, AxisAlignedBB.getAABBPool().getAABB((double)p_150046_2_ + this.minX, (double)p_150046_3_ + this.minY, (double)p_150046_4_ + this.minZ, (double)p_150046_2_ + this.maxX, (double)p_150046_3_ + this.maxY, (double)p_150046_4_ + this.maxZ));
          boolean flag1 = !list.isEmpty();
  

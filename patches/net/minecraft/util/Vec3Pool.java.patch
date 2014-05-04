@@ -1,9 +1,9 @@
 --- ../src-base/minecraft/net/minecraft/util/Vec3Pool.java
 +++ ../src-work/minecraft/net/minecraft/util/Vec3Pool.java
-@@ -10,7 +10,14 @@
+@@ -9,7 +9,14 @@
+ {
      private final int truncateArrayResetThreshold;
      private final int minimumSize;
-     // JAVADOC FIELD $$ field_72350_c
 -    private final List vec3Cache = new ArrayList();
 +    // CraftBukkit start
 +    // private final List vec3Cache = new ArrayList();
@@ -13,13 +13,13 @@
 +    private Vec3 alloclisthead = null;
 +    private int total_size = 0;
 +    // CraftBukkit end
-     // JAVADOC FIELD $$ field_72347_d
      private int nextFreeSpace;
      private int maximumSizeSinceLastTruncation;
-@@ -24,57 +31,109 @@
+     private int resetCount;
+@@ -21,56 +28,108 @@
+         this.minimumSize = par2;
      }
  
-     // JAVADOC METHOD $$ func_72345_a
 -    public Vec3 getVecFromPool(double par1, double par3, double par5)
 +    public final Vec3 getVecFromPool(double par1, double par3, double par5)   // CraftBukkit - Add final
      {
@@ -90,7 +90,6 @@
      }
 +    // CraftBukkit end
  
-     // JAVADOC METHOD $$ func_72343_a
      public void clear()
      {
 -        if (!this.skipCache())
@@ -151,7 +150,7 @@
      }
  
      @SideOnly(Side.CLIENT)
-@@ -83,14 +142,14 @@
+@@ -79,13 +138,13 @@
          if (!this.skipCache())
          {
              this.nextFreeSpace = 0;
@@ -160,11 +159,10 @@
          }
      }
  
-     // JAVADOC METHOD $$ func_82591_c
      public int getPoolSize()
      {
 -        return this.vec3Cache.size();
 +        return this.total_size; // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_82590_d
+     public int getNextFreeSpace()

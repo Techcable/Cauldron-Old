@@ -1,7 +1,7 @@
 --- ../src-base/minecraft/net/minecraft/entity/monster/EntityMagmaCube.java
 +++ ../src-work/minecraft/net/minecraft/entity/monster/EntityMagmaCube.java
-@@ -67,6 +67,8 @@
-     // JAVADOC METHOD $$ func_70628_a
+@@ -62,6 +62,8 @@
+ 
      protected void dropFewItems(boolean par1, int par2)
      {
 +        // CraftBukkit start - Whole method
@@ -9,7 +9,7 @@
          Item item = this.getDropItem();
  
          if (item != null && this.getSlimeSize() > 1)
-@@ -78,11 +80,14 @@
+@@ -73,11 +75,14 @@
                  j += this.rand.nextInt(par2 + 1);
              }
  
@@ -25,4 +25,4 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_70027_ad
+     public boolean isBurning()

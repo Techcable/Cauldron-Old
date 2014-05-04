@@ -9,7 +9,7 @@
  public class BlockVine extends Block implements IShearable
  {
      private static final String __OBFID = "CL_00000330";
-@@ -279,7 +281,11 @@
+@@ -268,7 +270,11 @@
  
                      if (j2 > 0)
                      {
@@ -22,7 +22,7 @@
                      }
                  }
              }
-@@ -301,27 +307,34 @@
+@@ -290,27 +296,34 @@
                      {
                          l1 = k1 + 1 & 3;
                          i2 = k1 + 3 & 3;
@@ -62,7 +62,7 @@
                      }
                      else if (block.blockMaterial.isOpaque() && block.renderAsNormalBlock())
                      {
-@@ -338,7 +351,11 @@
+@@ -327,7 +340,11 @@
  
                          if (l1 > 0)
                          {

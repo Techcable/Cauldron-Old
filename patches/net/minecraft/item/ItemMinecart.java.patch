@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/item/ItemMinecart.java
 +++ ../src-work/minecraft/net/minecraft/item/ItemMinecart.java
-@@ -82,6 +82,15 @@
+@@ -79,6 +79,15 @@
          {
              if (!par3World.isRemote)
              {

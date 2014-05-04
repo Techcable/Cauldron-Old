@@ -28,7 +28,7 @@
      private final MinecraftServer field_147387_a;
      private final NetworkManager field_147386_b;
      private static final String __OBFID = "CL_00001456";
-@@ -40,21 +52,87 @@
+@@ -39,21 +51,87 @@
                  this.field_147386_b.setConnectionState(EnumConnectionState.LOGIN);
                  ChatComponentText chatcomponenttext;
  

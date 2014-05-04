@@ -11,8 +11,8 @@
 +
  public class ShapedRecipes implements IRecipe
  {
-     // JAVADOC FIELD $$ field_77576_b
-@@ -26,6 +31,77 @@
+     public final int recipeWidth;
+@@ -22,6 +27,77 @@
          this.recipeOutput = par4ItemStack;
      }
  

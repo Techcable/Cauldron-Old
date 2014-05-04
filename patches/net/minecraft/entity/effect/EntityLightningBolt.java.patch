@@ -8,8 +8,8 @@
 +
  public class EntityLightningBolt extends EntityWeatherEffect
  {
-     // JAVADOC FIELD $$ field_70262_b
-@@ -20,15 +22,26 @@
+     private int lightningState;
+@@ -17,15 +19,26 @@
      private int boltLivingTime;
      private static final String __OBFID = "CL_00001666";
  
@@ -37,7 +37,7 @@
          {
              int i = MathHelper.floor_double(par2);
              int j = MathHelper.floor_double(par4);
-@@ -36,7 +49,13 @@
+@@ -33,7 +46,13 @@
  
              if (par1World.getBlock(i, j, k).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(par1World, i, j, k))
              {
@@ -52,7 +52,7 @@
              }
  
              for (i = 0; i < 4; ++i)
-@@ -47,7 +66,13 @@
+@@ -44,7 +63,13 @@
  
                  if (par1World.getBlock(j, k, l).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(par1World, j, k, l))
                  {
@@ -67,7 +67,7 @@
                  }
              }
          }
-@@ -78,7 +103,8 @@
+@@ -74,7 +99,8 @@
                  this.lightningState = 1;
                  this.boltVertex = this.rand.nextLong();
  
@@ -77,7 +77,7 @@
                  {
                      int i = MathHelper.floor_double(this.posX);
                      int j = MathHelper.floor_double(this.posY);
-@@ -86,13 +112,19 @@
+@@ -82,13 +108,19 @@
  
                      if (this.worldObj.getBlock(i, j, k).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(this.worldObj, i, j, k))
                      {

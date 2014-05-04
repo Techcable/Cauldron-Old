@@ -9,7 +9,7 @@
  public abstract class BlockLeaves extends BlockLeavesBase implements IShearable
  {
      int[] field_150128_a;
-@@ -226,6 +228,16 @@
+@@ -222,6 +224,16 @@
  
      private void removeLeaves(World p_150126_1_, int p_150126_2_, int p_150126_3_, int p_150126_4_)
      {

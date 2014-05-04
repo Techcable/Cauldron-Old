@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockCocoa.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockCocoa.java
-@@ -53,7 +53,8 @@
+@@ -51,7 +51,8 @@
              if (i1 < 2)
              {
                  ++i1;

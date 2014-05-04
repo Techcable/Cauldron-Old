@@ -23,23 +23,23 @@
      private static final Logger logger = LogManager.getLogger();
 -    private String translator = "en_US";
 +    public String translator = "en_US"; // CraftBukkit - private -> public
-     // JAVADOC FIELD $$ field_71135_a
      public NetHandlerPlayServer playerNetServerHandler;
-     // JAVADOC FIELD $$ field_71133_b
-@@ -132,8 +146,8 @@
-     // JAVADOC FIELD $$ field_71147_cj
+     public final MinecraftServer mcServer;
+     public final ItemInWorldManager theItemInWorldManager;
+@@ -121,8 +135,8 @@
+     private float lastHealth = -1.0E8F;
+     private int lastFoodLevel = -99999999;
      private boolean wasHungry = true;
-     // JAVADOC FIELD $$ field_71144_ck
 -    private int lastExperience = -99999999;
 -    private int field_147101_bU = 60;
 +    public int lastExperience = -99999999; // CraftBukkit - private -> public
 +    public int field_147101_bU = 60; // CraftBukkit - private -> public
-     // JAVADOC FIELD $$ field_71142_cm
      private int renderDistance;
      private EntityPlayer.EnumChatVisibility chatVisibility;
-@@ -146,6 +160,39 @@
+     private boolean chatColours = true;
+@@ -131,6 +145,39 @@
+     public boolean isChangingQuantityOnly;
      public int ping;
-     // JAVADOC FIELD $$ field_71136_j
      public boolean playerConqueredTheEnd;
 +    // CraftBukkit start
 +    public String displayName;
@@ -77,7 +77,7 @@
      private static final String __OBFID = "CL_00001440";
  
      public EntityPlayerMP(MinecraftServer p_i45285_1_, WorldServer p_i45285_2_, GameProfile p_i45285_3_, ItemInWorldManager p_i45285_4_)
-@@ -169,6 +216,13 @@
+@@ -154,6 +201,13 @@
          {
              this.setPosition(this.posX, this.posY + 1.0D, this.posZ);
          }
@@ -90,8 +90,8 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_70037_a
-@@ -187,6 +241,8 @@
+     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
+@@ -171,14 +225,57 @@
                  this.theItemInWorldManager.setGameType(WorldSettings.GameType.getByID(par1NBTTagCompound.getInteger("playerGameType")));
              }
          }
@@ -99,8 +99,7 @@
 +        this.getBukkitEntity().readExtraData(par1NBTTagCompound); // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_70014_b
-@@ -194,8 +250,49 @@
+     public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound)
      {
          super.writeEntityToNBT(par1NBTTagCompound);
          par1NBTTagCompound.setInteger("playerGameType", this.theItemInWorldManager.getGameType().getID());
@@ -147,10 +146,10 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_82242_a
      public void addExperienceLevel(int par1)
      {
-@@ -261,7 +358,7 @@
+         super.addExperienceLevel(par1);
+@@ -241,7 +338,7 @@
              ArrayList arraylist1 = new ArrayList();
              Chunk chunk;
  
@@ -159,7 +158,7 @@
              {
                  ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair)iterator1.next();
  
-@@ -274,8 +371,7 @@
+@@ -254,8 +351,7 @@
                          if (chunk.func_150802_k())
                          {
                              arraylist.add(chunk);
@@ -169,7 +168,7 @@
                              iterator1.remove();
                          }
                      }
-@@ -335,9 +431,10 @@
+@@ -315,9 +411,10 @@
                  }
              }
  
@@ -181,7 +180,7 @@
                  this.lastHealth = this.getHealth();
                  this.lastFoodLevel = this.foodStats.getFoodLevel();
                  this.wasHungry = this.foodStats.getSaturationLevel() == 0.0F;
-@@ -346,16 +443,18 @@
+@@ -326,16 +423,18 @@
              if (this.getHealth() + this.getAbsorptionAmount() != this.field_130068_bO)
              {
                  this.field_130068_bO = this.getHealth() + this.getAbsorptionAmount();
@@ -207,7 +206,7 @@
              if (this.experienceTotal != this.lastExperience)
              {
                  this.lastExperience = this.experienceTotal;
-@@ -366,6 +465,20 @@
+@@ -346,6 +445,20 @@
              {
                  this.func_147098_j();
              }
@@ -228,8 +227,8 @@
          }
          catch (Throwable throwable)
          {
-@@ -429,34 +542,88 @@
-     // JAVADOC METHOD $$ func_70645_a
+@@ -408,34 +521,88 @@
+ 
      public void onDeath(DamageSource par1DamageSource)
      {
 -        if (ForgeHooks.onLivingDeath(this, par1DamageSource)) return;
@@ -326,7 +325,7 @@
              score.func_96648_a();
          }
  
-@@ -522,7 +689,8 @@
+@@ -500,7 +667,8 @@
  
      public boolean canAttackPlayer(EntityPlayer par1EntityPlayer)
      {
@@ -335,8 +334,8 @@
 +        return !this.worldObj.pvpMode ? false : super.canAttackPlayer(par1EntityPlayer);
      }
  
-     // JAVADOC METHOD $$ func_71027_c
-@@ -540,6 +708,8 @@
+     public void travelToDimension(int par1)
+@@ -517,6 +685,8 @@
              if (this.dimension == 0 && par1 == 1)
              {
                  this.triggerAchievement(AchievementList.theEnd);
@@ -345,7 +344,7 @@
                  ChunkCoordinates chunkcoordinates = this.mcServer.worldServerForDimension(par1).getEntrancePortalLocation();
  
                  if (chunkcoordinates != null)
-@@ -548,13 +718,18 @@
+@@ -525,13 +695,18 @@
                  }
  
                  par1 = 1;
@@ -365,8 +364,8 @@
              this.lastExperience = -1;
              this.lastHealth = -1.0F;
              this.lastFoodLevel = -1;
-@@ -600,6 +775,11 @@
-     // JAVADOC METHOD $$ func_70999_a
+@@ -574,6 +749,11 @@
+ 
      public void wakeUpPlayer(boolean par1, boolean par2, boolean par3)
      {
 +        if (this.fauxSleeping && !this.sleeping)
@@ -377,8 +376,8 @@
          if (this.isPlayerSleeping())
          {
              this.getServerForPlayer().getEntityTracker().func_151248_b(this, new S0BPacketAnimation(this, 2));
-@@ -616,11 +796,27 @@
-     // JAVADOC METHOD $$ func_70078_a
+@@ -589,11 +769,27 @@
+ 
      public void mountEntity(Entity par1Entity)
      {
 -        super.mountEntity(par1Entity);
@@ -405,10 +404,10 @@
 +        // CraftBukkit end
 +    }
 +
-     // JAVADOC METHOD $$ func_70064_a
      protected void updateFallState(double par1, boolean par3) {}
  
-@@ -645,21 +841,47 @@
+     public void handleFalling(double par1, boolean par3)
+@@ -615,29 +811,64 @@
          this.currentWindowId = this.currentWindowId % 100 + 1;
      }
  
@@ -420,7 +419,6 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_71058_b
      public void displayGUIWorkbench(int par1, int par2, int par3)
      {
 -        this.getNextWindowId();
@@ -460,8 +458,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -667,9 +889,18 @@
-     // JAVADOC METHOD $$ func_82244_d
+ 
      public void displayGUIAnvil(int par1, int par2, int par3)
      {
 -        this.getNextWindowId();
@@ -481,7 +478,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -682,71 +913,150 @@
+@@ -649,71 +880,150 @@
              this.closeScreen();
          }
  
@@ -648,7 +645,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
          InventoryMerchant inventorymerchant = ((ContainerMerchant)this.openContainer).getMerchantInventory();
-@@ -762,7 +1072,7 @@
+@@ -729,7 +1039,7 @@
                  merchantrecipelist.func_151391_a(packetbuffer);
                  this.playerNetServerHandler.sendPacket(new S3FPacketCustomPayload("MC|TrList", packetbuffer));
              }
@@ -657,7 +654,7 @@
              {
                  logger.error("Couldn\'t send trade list", ioexception);
              }
-@@ -771,14 +1081,25 @@
+@@ -738,14 +1048,25 @@
  
      public void displayGUIHorse(EntityHorse par1EntityHorse, IInventory par2IInventory)
      {
@@ -685,7 +682,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -804,6 +1125,15 @@
+@@ -770,6 +1091,15 @@
      {
          this.playerNetServerHandler.sendPacket(new S30PacketWindowItems(par1Container.windowId, par2List));
          this.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, this.inventory.getItemStack()));
@@ -700,16 +697,16 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_71112_a
-@@ -815,6 +1145,7 @@
-     // JAVADOC METHOD $$ func_71053_j
+     public void sendProgressBarUpdate(Container par1Container, int par2, int par3)
+@@ -779,6 +1109,7 @@
+ 
      public void closeScreen()
      {
 +        CraftEventFactory.handleInventoryCloseEvent(this); // CraftBukkit
          this.playerNetServerHandler.sendPacket(new S2EPacketCloseWindow(this.openContainer.windowId));
          this.closeContainer();
      }
-@@ -892,6 +1223,7 @@
+@@ -852,6 +1183,7 @@
      public void setPlayerHealthUpdated()
      {
          this.lastHealth = -1.0E8F;
@@ -717,7 +714,7 @@
      }
  
      public void addChatComponentMessage(IChatComponent p_146105_1_)
-@@ -983,6 +1315,16 @@
+@@ -936,6 +1268,16 @@
          this.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(3, (float)par1EnumGameType.getID()));
      }
  
@@ -731,10 +728,10 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_145747_a
      public void addChatMessage(IChatComponent p_145747_1_)
      {
-@@ -1052,6 +1394,114 @@
+         this.playerNetServerHandler.sendPacket(new S02PacketChat(p_145747_1_));
+@@ -1000,6 +1342,114 @@
          return this.field_147103_bO;
      }
  
