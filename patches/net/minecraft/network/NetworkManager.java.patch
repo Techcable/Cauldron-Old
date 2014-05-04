@@ -1,16 +1,16 @@
 --- ../src-base/minecraft/net/minecraft/network/NetworkManager.java
 +++ ../src-work/minecraft/net/minecraft/network/NetworkManager.java
-@@ -56,7 +56,8 @@
-     // JAVADOC FIELD $$ field_150746_k
+@@ -51,7 +51,8 @@
+     private final Queue receivedPacketsQueue = Queues.newConcurrentLinkedQueue();
+     private final Queue outboundPacketsQueue = Queues.newConcurrentLinkedQueue();
      private Channel channel;
-     // JAVADOC FIELD $$ field_150743_l
 -    private SocketAddress socketAddress;
 +    public SocketAddress socketAddress; // Spigot
 +    public String spoofedUUID; // Spigot
-     // JAVADOC FIELD $$ field_150744_m
      private INetHandler netHandler;
-     // JAVADOC FIELD $$ field_150741_n
-@@ -207,7 +208,15 @@
+     private EnumConnectionState connectionState;
+     private IChatComponent terminationReason;
+@@ -193,7 +194,15 @@
          {
              for (int i = 1000; !this.receivedPacketsQueue.isEmpty() && i >= 0; --i)
              {

@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/item/EntityTNTPrimed.java
 +++ ../src-work/minecraft/net/minecraft/entity/item/EntityTNTPrimed.java
-@@ -7,12 +7,16 @@
+@@ -7,11 +7,15 @@
  import net.minecraft.nbt.NBTTagCompound;
  import net.minecraft.world.World;
  
@@ -8,7 +8,6 @@
 +
  public class EntityTNTPrimed extends Entity
  {
-     // JAVADOC FIELD $$ field_70516_a
      public int fuse;
      private EntityLivingBase tntPlacedBy;
      private static final String __OBFID = "CL_00001681";
@@ -17,7 +16,7 @@
  
      public EntityTNTPrimed(World par1World)
      {
-@@ -72,12 +76,14 @@
+@@ -68,12 +72,14 @@
  
          if (this.fuse-- <= 0)
          {
@@ -34,7 +33,7 @@
          }
          else
          {
-@@ -87,8 +93,19 @@
+@@ -83,8 +89,19 @@
  
      private void explode()
      {
@@ -55,4 +54,4 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_70014_b
+     protected void writeEntityToNBT(NBTTagCompound par1NBTTagCompound)

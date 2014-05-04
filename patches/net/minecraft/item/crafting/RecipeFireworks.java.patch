@@ -17,6 +17,6 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_77569_a
      public boolean matches(InventoryCrafting par1InventoryCrafting, World par2World)
      {
+         this.field_92102_a = null;

@@ -40,8 +40,8 @@
  public class ItemInWorldManager
  {
      /** Forge reach distance */
-@@ -142,52 +158,93 @@
-     // JAVADOC METHOD $$ func_73074_a
+@@ -135,52 +151,93 @@
+ 
      public void onBlockClicked(int par1, int par2, int par3, int par4)
      {
 +        // CraftBukkit start
@@ -150,7 +150,7 @@
                  if (!block.isAir(theWorld, par1, par2, par3) && f >= 1.0F)
                  {
                      this.tryHarvestBlock(par1, par2, par3);
-@@ -274,7 +331,14 @@
+@@ -264,7 +321,14 @@
              {
                  return false;
              }
@@ -165,8 +165,8 @@
              int l = this.theWorld.getBlockMetadata(par1, par2, par3);
              this.theWorld.playAuxSFXAtEntity(this.thisPlayerMP, 2001, par1, par2, par3, Block.getIdFromBlock(block) + (this.theWorld.getBlockMetadata(par1, par2, par3) << 12));
              boolean flag = false;
-@@ -358,57 +422,105 @@
-     // JAVADOC METHOD $$ func_73078_a
+@@ -346,57 +410,105 @@
+ 
      public boolean activateBlockOrUseItem(EntityPlayer par1EntityPlayer, World par2World, ItemStack par3ItemStack, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
      {
 -        PlayerInteractEvent event = ForgeEventFactory.onPlayerInteract(par1EntityPlayer, Action.RIGHT_CLICK_BLOCK, par4, par5, par6, par7);
@@ -306,4 +306,4 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_73080_a
+     public void setWorld(WorldServer par1WorldServer)

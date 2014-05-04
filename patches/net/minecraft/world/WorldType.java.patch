@@ -8,7 +8,7 @@
  
  public class WorldType
  {
-@@ -60,6 +61,12 @@
+@@ -49,6 +50,12 @@
          this.canBeCreated = true;
          this.worldTypeId = par1;
          worldTypes[par1] = this;

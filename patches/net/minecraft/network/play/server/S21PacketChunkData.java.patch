@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/network/play/server/S21PacketChunkData.java
 +++ ../src-work/minecraft/net/minecraft/network/play/server/S21PacketChunkData.java
-@@ -202,8 +202,10 @@
+@@ -198,8 +198,10 @@
              if (aextendedblockstorage[l] != null && (!p_149269_1_ || !aextendedblockstorage[l].isEmpty()) && (p_149269_2_ & 1 << l) != 0)
              {
                  nibblearray = aextendedblockstorage[l].getMetadataArray();
@@ -13,7 +13,7 @@
              }
          }
  
-@@ -212,8 +214,10 @@
+@@ -208,8 +210,10 @@
              if (aextendedblockstorage[l] != null && (!p_149269_1_ || !aextendedblockstorage[l].isEmpty()) && (p_149269_2_ & 1 << l) != 0)
              {
                  nibblearray = aextendedblockstorage[l].getBlocklightArray();
@@ -26,7 +26,7 @@
              }
          }
  
-@@ -224,8 +228,10 @@
+@@ -220,8 +224,10 @@
                  if (aextendedblockstorage[l] != null && (!p_149269_1_ || !aextendedblockstorage[l].isEmpty()) && (p_149269_2_ & 1 << l) != 0)
                  {
                      nibblearray = aextendedblockstorage[l].getSkylightArray();
@@ -39,7 +39,7 @@
                  }
              }
          }
-@@ -237,8 +243,10 @@
+@@ -233,8 +239,10 @@
                  if (aextendedblockstorage[l] != null && (!p_149269_1_ || !aextendedblockstorage[l].isEmpty()) && aextendedblockstorage[l].getBlockMSBArray() != null && (p_149269_2_ & 1 << l) != 0)
                  {
                      nibblearray = aextendedblockstorage[l].getBlockMSBArray();

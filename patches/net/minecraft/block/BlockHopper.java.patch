@@ -8,7 +8,7 @@
  
  public class BlockHopper extends BlockContainer
  {
-@@ -223,7 +224,7 @@
+@@ -210,7 +211,7 @@
  
      public static int getDirectionFromMetadata(int p_149918_0_)
      {

@@ -22,41 +22,39 @@
 -    private final HashMap activePotionsMap = new HashMap();
 +    public CombatTracker _combatTracker = new CombatTracker(this); // CraftBukkit - private -> public, remove final
 +    public final HashMap activePotionsMap = new HashMap(); // CraftBukkit - protected -> public
-     // JAVADOC FIELD $$ field_82180_bT
      private final ItemStack[] previousEquipment = new ItemStack[5];
-     // JAVADOC FIELD $$ field_82175_bq
-@@ -94,7 +103,7 @@
-     // JAVADOC FIELD $$ field_70747_aH
+     public boolean isSwingInProgress;
+     public int swingProgressInt;
+@@ -83,7 +92,7 @@
+     public float rotationYawHead;
+     public float prevRotationYawHead;
      public float jumpMovementFactor = 0.02F;
-     // JAVADOC FIELD $$ field_70717_bb
 -    protected EntityPlayer attackingPlayer;
 +    public EntityPlayer attackingPlayer; // CraftBukkit - protected -> public
-     // JAVADOC FIELD $$ field_70718_bc
      protected int recentlyHit;
-     // JAVADOC FIELD $$ field_70729_aU
-@@ -109,7 +118,7 @@
-     // JAVADOC FIELD $$ field_70744_aE
+     protected boolean dead;
+     protected int entityAge;
+@@ -93,7 +102,7 @@
+     protected float field_70763_ax;
+     protected float field_70741_aB;
      protected int scoreValue;
-     // JAVADOC FIELD $$ field_110153_bc
 -    protected float lastDamage;
 +    public float lastDamage; // CraftBukkit - protected -> public
-     // JAVADOC FIELD $$ field_70703_bu
      protected boolean isJumping;
      public float moveStrafing;
-@@ -127,9 +136,9 @@
-     // JAVADOC FIELD $$ field_70705_bn
+     public float moveForward;
+@@ -104,21 +113,26 @@
+     protected double newPosZ;
+     protected double newRotationYaw;
      protected double newRotationPitch;
-     // JAVADOC FIELD $$ field_70752_e
 -    private boolean potionsNeedUpdate = true;
-+    public boolean potionsNeedUpdate = true; // CraftBukkit - private -> public
-     // JAVADOC FIELD $$ field_70755_b
 -    private EntityLivingBase entityLivingToAttack;
++    public boolean potionsNeedUpdate = true; // CraftBukkit - private -> public
 +    public EntityLivingBase entityLivingToAttack; // CraftBukkit - private -> public
      private int revengeTimer;
      private EntityLivingBase lastAttacker;
-     // JAVADOC FIELD $$ field_142016_bo
-@@ -139,13 +148,18 @@
-     // JAVADOC FIELD $$ field_70773_bE
+     private int lastAttackerTime;
+     private float landMovementFactor;
      private int jumpTicks;
      private float field_110151_bq;
 +    // CraftBukkit start
@@ -75,7 +73,7 @@
          this.preventEntitySpawning = true;
          this.field_70770_ap = (float)(Math.random() + 1.0D) * 0.01F;
          this.setPosition(this.posX, this.posY, this.posZ);
-@@ -201,7 +215,18 @@
+@@ -173,7 +187,18 @@
              }
              else if (!this.worldObj.isRemote && this.fallDistance > 3.0F)
              {
@@ -95,7 +93,7 @@
              }
  
              block.onFallenUpon(this.worldObj, i, j, k, this, this.fallDistance);
-@@ -263,7 +288,13 @@
+@@ -234,7 +259,13 @@
          }
          else
          {
@@ -110,7 +108,7 @@
          }
  
          if (this.isEntityAlive() && this.isWet())
-@@ -328,6 +359,22 @@
+@@ -299,6 +330,22 @@
          this.worldObj.theProfiler.endSection();
      }
  
@@ -130,10 +128,10 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_70631_g_
      public boolean isChild()
      {
-@@ -339,22 +386,21 @@
+         return false;
+@@ -308,22 +355,21 @@
      {
          ++this.deathTime;
  
@@ -165,7 +163,7 @@
              this.setDead();
  
              for (i = 0; i < 20; ++i)
-@@ -521,6 +567,23 @@
+@@ -485,6 +531,23 @@
              }
          }
  
@@ -189,7 +187,7 @@
          if (par1NBTTagCompound.hasKey("HealF", 99))
          {
              this.setHealth(par1NBTTagCompound.getFloat("HealF"));
-@@ -650,12 +713,14 @@
+@@ -614,12 +677,14 @@
  
      public boolean isPotionActive(int par1)
      {
@@ -205,11 +203,11 @@
 +        return this.activePotionsMap.size() != 0 && this.activePotionsMap.containsKey(Integer.valueOf(par1Potion.id));
      }
  
-     // JAVADOC METHOD $$ func_70660_b
-@@ -752,23 +817,66 @@
+     public PotionEffect getActivePotionEffect(Potion par1Potion)
+@@ -710,23 +775,66 @@
+         }
      }
  
-     // JAVADOC METHOD $$ func_70691_i
 +    // CraftBukkit start - Delegate so we can handle providing a reason for health being regained
      public void heal(float par1)
      {
@@ -274,7 +272,7 @@
          this.dataWatcher.updateObject(6, Float.valueOf(MathHelper.clamp_float(par1, 0.0F, this.getMaxHealth())));
      }
  
-@@ -806,9 +914,23 @@
+@@ -763,9 +871,23 @@
  
                  this.limbSwingAmount = 1.5F;
                  boolean flag = true;
@@ -299,7 +297,7 @@
                      if (par2 <= this.lastDamage)
                      {
                          return false;
-@@ -980,6 +1102,21 @@
+@@ -935,6 +1057,21 @@
  
              if (!ForgeHooks.onLivingDrops(this, par1DamageSource, capturedDrops, i, recentlyHit > 0, j))
              {
@@ -321,7 +319,7 @@
                  for (EntityItem item : capturedDrops)
                  {
                      worldObj.spawnEntityInWorld(item);
-@@ -1056,11 +1193,31 @@
+@@ -1003,11 +1140,31 @@
          super.fall(par1);
          PotionEffect potioneffect = this.getActivePotionEffect(Potion.jump);
          float f1 = potioneffect != null ? (float)(potioneffect.getAmplifier() + 1) : 0.0F;
@@ -355,7 +353,7 @@
              this.attackEntityFrom(DamageSource.fall, (float)i);
              int j = MathHelper.floor_double(this.posX);
              int k = MathHelper.floor_double(this.posY - 0.20000000298023224D - (double)this.yOffset);
-@@ -1695,7 +1852,8 @@
+@@ -1613,7 +1770,8 @@
          {
              f3 = 1.0F;
              f2 = (float)Math.sqrt((double)f) * 3.0F;
@@ -365,7 +363,7 @@
          }
  
          if (this.swingProgress > 0.0F)
-@@ -1904,17 +2062,37 @@
+@@ -1821,17 +1979,37 @@
      {
          List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
  

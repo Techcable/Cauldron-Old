@@ -21,15 +21,15 @@
  public class SaveHandler implements ISaveHandler, IPlayerFileData
  {
      private static final Logger logger = LogManager.getLogger();
-@@ -31,6 +38,7 @@
+@@ -27,6 +34,7 @@
+     private final File mapDataDir;
      private final long initializationTime = MinecraftServer.getSystemTimeMillis();
-     // JAVADOC FIELD $$ field_75767_f
      private final String saveDirectoryName;
 +    private UUID uuid = null; // CraftBukkit
      private static final String __OBFID = "CL_00000585";
  
      public SaveHandler(File par1File, String par2Str, boolean par3)
-@@ -70,7 +78,7 @@
+@@ -65,7 +73,7 @@
          catch (IOException ioexception)
          {
              ioexception.printStackTrace();
@@ -38,7 +38,7 @@
          }
      }
  
-@@ -92,7 +100,7 @@
+@@ -85,7 +93,7 @@
              {
                  if (datainputstream.readLong() != this.initializationTime)
                  {
@@ -47,7 +47,7 @@
                  }
              }
              finally
-@@ -102,7 +110,10 @@
+@@ -95,7 +103,10 @@
          }
          catch (IOException ioexception)
          {
@@ -59,7 +59,7 @@
          }
      }
  
-@@ -279,6 +290,14 @@
+@@ -266,6 +277,14 @@
  
          if (nbttagcompound != null)
          {
@@ -74,7 +74,7 @@
              par1EntityPlayer.readFromNBT(nbttagcompound);
          }
  
-@@ -341,4 +360,80 @@
+@@ -322,4 +341,80 @@
      {
          return this.saveDirectoryName;
      }

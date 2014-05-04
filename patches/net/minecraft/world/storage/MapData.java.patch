@@ -15,8 +15,8 @@
  public class MapData extends WorldSavedData
  {
      public int xCenter;
-@@ -27,11 +35,21 @@
-     // JAVADOC FIELD $$ field_76202_j
+@@ -24,11 +32,21 @@
+     public List playersArrayList = new ArrayList();
      private Map playersHashMap = new HashMap();
      public Map playersVisibleOnMap = new LinkedHashMap();
 +
@@ -36,8 +36,8 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_76184_a
-@@ -113,7 +131,7 @@
+     public void readFromNBT(NBTTagCompound par1NBTTagCompound)
+@@ -107,7 +125,7 @@
      {
          if (!this.playersHashMap.containsKey(par1EntityPlayer))
          {
@@ -46,7 +46,7 @@
              this.playersHashMap.put(par1EntityPlayer, mapinfo);
              this.playersArrayList.add(mapinfo);
          }
-@@ -274,7 +292,7 @@
+@@ -265,7 +283,7 @@
  
          if (mapinfo == null)
          {
@@ -55,7 +55,7 @@
              this.playersHashMap.put(par1EntityPlayer, mapinfo);
              this.playersArrayList.add(mapinfo);
          }
-@@ -312,10 +330,13 @@
+@@ -300,10 +318,13 @@
          private byte[] lastPlayerLocationOnMap;
          public int field_82569_d;
          private boolean field_82570_i;
@@ -70,9 +70,9 @@
              this.entityplayerObj = par2EntityPlayer;
  
              for (int i = 0; i < this.field_76209_b.length; ++i)
-@@ -341,20 +362,37 @@
+@@ -328,20 +349,37 @@
                  int i;
-                 int l;
+                 int i1;
  
 +                // Spigot start
 +                boolean custom = this.mapDataObj.mapView.renderers.size() > 1 || !(this.mapDataObj.mapView.renderers.get(0) instanceof org.bukkit.craftbukkit.map.CraftMapRenderer);

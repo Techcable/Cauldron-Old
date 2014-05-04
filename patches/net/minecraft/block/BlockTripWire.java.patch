@@ -9,7 +9,7 @@
  public class BlockTripWire extends Block
  {
      private static final String __OBFID = "CL_00000328";
-@@ -221,6 +223,51 @@
+@@ -208,6 +210,51 @@
              }
          }
  

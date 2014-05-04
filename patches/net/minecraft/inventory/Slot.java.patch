@@ -1,11 +1,11 @@
 --- ../src-base/minecraft/net/minecraft/inventory/Slot.java
 +++ ../src-work/minecraft/net/minecraft/inventory/Slot.java
-@@ -11,7 +11,7 @@
+@@ -10,7 +10,7 @@
+ 
  public class Slot
  {
-     // JAVADOC FIELD $$ field_75225_a
 -    private final int slotIndex;
 +    public final int slotIndex; // CraftBukkit - private -> public
-     // JAVADOC FIELD $$ field_75224_c
      public final IInventory inventory;
-     // JAVADOC FIELD $$ field_75222_d
+     public int slotNumber;
+     public int xDisplayPosition;

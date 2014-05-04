@@ -37,7 +37,7 @@
      private static final String __OBFID = "CL_00001530";
  
      public EntityAgeable(World par1World)
-@@ -38,7 +68,7 @@
+@@ -37,7 +67,7 @@
                      {
                          entityageable.setGrowingAge(-24000);
                          entityageable.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
@@ -46,7 +46,7 @@
  
                          if (itemstack.hasDisplayName())
                          {
-@@ -49,7 +79,7 @@
+@@ -48,7 +78,7 @@
                          {
                              --itemstack.stackSize;
  
@@ -55,23 +55,21 @@
                              {
                                  par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack)null);
                              }
-@@ -104,6 +134,7 @@
+@@ -99,19 +129,21 @@
      {
          super.writeEntityToNBT(par1NBTTagCompound);
          par1NBTTagCompound.setInteger("Age", this.getGrowingAge());
 +        par1NBTTagCompound.setBoolean("AgeLocked", this.ageLocked); // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_70037_a
-@@ -111,6 +142,7 @@
+     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
      {
          super.readEntityFromNBT(par1NBTTagCompound);
          this.setGrowingAge(par1NBTTagCompound.getInteger("Age"));
 +        this.ageLocked = par1NBTTagCompound.getBoolean("AgeLocked"); // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_70636_d
-@@ -118,7 +150,7 @@
+     public void onLivingUpdate()
      {
          super.onLivingUpdate();
  

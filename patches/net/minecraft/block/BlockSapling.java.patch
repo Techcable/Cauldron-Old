@@ -19,7 +19,7 @@
      private static final String __OBFID = "CL_00000305";
  
      protected BlockSapling()
-@@ -42,9 +50,31 @@
+@@ -41,9 +49,31 @@
          {
              super.updateTick(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, p_149674_5_);
  
@@ -52,7 +52,7 @@
              }
          }
      }
-@@ -75,7 +105,20 @@
+@@ -73,7 +103,20 @@
      {
          if (!net.minecraftforge.event.terraingen.TerrainGen.saplingGrowTree(p_149878_1_, p_149878_5_, p_149878_2_, p_149878_3_, p_149878_4_)) return;
          int l = p_149878_1_.getBlockMetadata(p_149878_2_, p_149878_3_, p_149878_4_) & 7;
@@ -74,7 +74,7 @@
          int i1 = 0;
          int j1 = 0;
          boolean flag = false;
-@@ -86,6 +129,7 @@
+@@ -84,6 +127,7 @@
              default:
                  break;
              case 1:
@@ -82,7 +82,7 @@
                  label78:
  
                  for (i1 = 0; i1 >= -1; --i1)
-@@ -110,6 +154,7 @@
+@@ -108,6 +152,7 @@
  
                  break;
              case 2:
@@ -90,7 +90,7 @@
                  object = new WorldGenForest(true, false);
                  break;
              case 3:
-@@ -121,6 +166,7 @@
+@@ -119,6 +164,7 @@
                      {
                          if (this.func_149880_a(p_149878_1_, p_149878_2_ + i1, p_149878_3_, p_149878_4_ + j1, 3) && this.func_149880_a(p_149878_1_, p_149878_2_ + i1 + 1, p_149878_3_, p_149878_4_ + j1, 3) && this.func_149880_a(p_149878_1_, p_149878_2_ + i1, p_149878_3_, p_149878_4_ + j1 + 1, 3) && this.func_149880_a(p_149878_1_, p_149878_2_ + i1 + 1, p_149878_3_, p_149878_4_ + j1 + 1, 3))
                          {
@@ -98,7 +98,7 @@
                              object = new WorldGenMegaJungle(true, 10, 20, 3, 3);
                              flag = true;
                              break label93;
-@@ -132,11 +178,13 @@
+@@ -130,11 +176,13 @@
                  {
                      j1 = 0;
                      i1 = 0;
@@ -112,7 +112,7 @@
                  object = new WorldGenSavannaTree(true);
                  break;
              case 5:
-@@ -149,6 +197,7 @@
+@@ -147,6 +195,7 @@
                          if (this.func_149880_a(p_149878_1_, p_149878_2_ + i1, p_149878_3_, p_149878_4_ + j1, 5) && this.func_149880_a(p_149878_1_, p_149878_2_ + i1 + 1, p_149878_3_, p_149878_4_ + j1, 5) && this.func_149880_a(p_149878_1_, p_149878_2_ + i1, p_149878_3_, p_149878_4_ + j1 + 1, 5) && this.func_149880_a(p_149878_1_, p_149878_2_ + i1 + 1, p_149878_3_, p_149878_4_ + j1 + 1, 5))
                          {
                              object = new WorldGenCanopyTree(true);

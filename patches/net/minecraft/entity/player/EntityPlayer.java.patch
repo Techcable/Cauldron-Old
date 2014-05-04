@@ -23,23 +23,22 @@
  public abstract class EntityPlayer extends EntityLivingBase implements ICommandSender
  {
      public static final String PERSISTED_NBT_TAG = "PlayerPersisted";
-@@ -107,7 +123,7 @@
-     // JAVADOC FIELD $$ field_71070_bA
+@@ -103,7 +119,7 @@
+     private InventoryEnderChest theInventoryEnderChest = new InventoryEnderChest();
+     public Container inventoryContainer;
      public Container openContainer;
-     // JAVADOC FIELD $$ field_71100_bB
 -    protected FoodStats foodStats = new FoodStats();
 +    protected FoodStats foodStats = new FoodStats(this);
-     // JAVADOC FIELD $$ field_71101_bC
      protected int flyToggleTimer;
      public float prevCameraYaw;
-@@ -120,11 +136,22 @@
+     public float cameraYaw;
+@@ -114,9 +130,20 @@
      public double field_71094_bP;
      public double field_71095_bQ;
      public double field_71085_bR;
+-    protected boolean sleeping;
 +    // CraftBukkit start
 +
-     // JAVADOC FIELD $$ field_71083_bS
--    protected boolean sleeping;
 +    public boolean sleeping; // protected -> public
 +    public boolean fauxSleeping;
 +    public String spawnWorld = "";
@@ -50,22 +49,21 @@
 +        return (CraftHumanEntity) super.getBukkitEntity();
 +    }
 +    // CraftBukkit end
-     // JAVADOC FIELD $$ field_71081_bT
      public ChunkCoordinates playerLocation;
 -    private int sleepTimer;
 +    public int sleepTimer; // CraftBukkit - private -> public
      public float field_71079_bU;
      @SideOnly(Side.CLIENT)
      public float field_71082_cx;
-@@ -137,6 +164,7 @@
+@@ -125,6 +152,7 @@
+     private boolean spawnForced;
      private ChunkCoordinates startMinecartRidingCoordinate;
-     // JAVADOC FIELD $$ field_71075_bZ
      public PlayerCapabilities capabilities = new PlayerCapabilities();
 +    public int oldLevel = -1; // CraftBukkit
-     // JAVADOC FIELD $$ field_71068_ca
      public int experienceLevel;
-     // JAVADOC FIELD $$ field_71067_cb
-@@ -444,6 +472,41 @@
+     public int experienceTotal;
+     public float experience;
+@@ -417,6 +445,41 @@
          {
              this.updateItemUse(this.itemInUse, 16);
              int i = this.itemInUse.stackSize;
@@ -107,18 +105,17 @@
              ItemStack itemstack = this.itemInUse.onFoodEaten(this.worldObj, this);
  
              itemstack = ForgeEventFactory.onItemUseFinish(this, itemInUse, itemInUseCount, itemstack);
-@@ -482,7 +545,8 @@
+@@ -453,30 +516,50 @@
+         return this.getHealth() <= 0.0F || this.isPlayerSleeping();
      }
  
-     // JAVADOC METHOD $$ func_71053_j
 -    protected void closeScreen()
 +    // CraftBukkit - protected -> public
 +    public void closeScreen()
      {
          this.openContainer = this.inventoryContainer;
      }
-@@ -490,23 +554,42 @@
-     // JAVADOC METHOD $$ func_70078_a
+ 
      public void mountEntity(Entity par1Entity)
      {
 -        if (this.ridingEntity != null && par1Entity == null)
@@ -168,7 +165,7 @@
          }
      }
  
-@@ -566,7 +649,8 @@
+@@ -533,7 +616,8 @@
  
          if (this.worldObj.difficultySetting == EnumDifficulty.PEACEFUL && this.getHealth() < this.getMaxHealth() && this.worldObj.getGameRules().getGameRuleBooleanValue("naturalRegeneration") && this.ticksExisted % 20 * 12 == 0)
          {
@@ -178,7 +175,7 @@
          }
  
          this.inventory.decrementAnimations();
-@@ -588,7 +672,8 @@
+@@ -555,7 +639,8 @@
  
          this.setAIMoveSpeed((float)iattributeinstance.getAttributeValue());
          float f = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
@@ -188,7 +185,7 @@
  
          if (f > 0.1F)
          {
-@@ -623,7 +708,7 @@
+@@ -590,7 +675,7 @@
  
              List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, axisalignedbb);
  
@@ -197,7 +194,7 @@
              {
                  for (int i = 0; i < list.size(); ++i)
                  {
-@@ -727,12 +812,14 @@
+@@ -688,12 +773,14 @@
      public void addToPlayerScore(Entity par1Entity, int par2)
      {
          this.addScore(par2);
@@ -214,7 +211,7 @@
          }
          else
          {
-@@ -743,8 +830,7 @@
+@@ -704,8 +791,7 @@
  
          while (iterator.hasNext())
          {
@@ -224,7 +221,7 @@
              score.func_96648_a();
          }
      }
-@@ -819,6 +905,19 @@
+@@ -778,6 +864,19 @@
                  entityitem.motionZ += Math.sin((double)f1) * (double)f;
              }
  
@@ -244,7 +241,7 @@
              this.joinEntityItemWithWorld(entityitem);
              this.addStat(StatList.dropStat, 1);
              return entityitem;
-@@ -921,6 +1020,16 @@
+@@ -876,6 +975,16 @@
              this.wakeUpPlayer(true, true, false);
          }
  
@@ -261,7 +258,7 @@
          if (par1NBTTagCompound.hasKey("SpawnX", 99) && par1NBTTagCompound.hasKey("SpawnY", 99) && par1NBTTagCompound.hasKey("SpawnZ", 99))
          {
              this.spawnChunk = new ChunkCoordinates(par1NBTTagCompound.getInteger("SpawnX"), par1NBTTagCompound.getInteger("SpawnY"), par1NBTTagCompound.getInteger("SpawnZ"));
-@@ -966,6 +1075,7 @@
+@@ -920,6 +1029,7 @@
              par1NBTTagCompound.setInteger("SpawnY", this.spawnChunk.posY);
              par1NBTTagCompound.setInteger("SpawnZ", this.spawnChunk.posZ);
              par1NBTTagCompound.setBoolean("SpawnForced", this.spawnForced);
@@ -269,7 +266,7 @@
          }
  
          NBTTagList spawnlist = new NBTTagList();
-@@ -1049,7 +1159,7 @@
+@@ -998,7 +1108,7 @@
                  {
                      if (this.worldObj.difficultySetting == EnumDifficulty.PEACEFUL)
                      {
@@ -278,7 +275,7 @@
                      }
  
                      if (this.worldObj.difficultySetting == EnumDifficulty.EASY)
-@@ -1063,7 +1173,7 @@
+@@ -1012,7 +1122,7 @@
                      }
                  }
  
@@ -287,7 +284,7 @@
                  {
                      return false;
                  }
-@@ -1085,9 +1195,39 @@
+@@ -1034,9 +1144,39 @@
  
      public boolean canAttackPlayer(EntityPlayer par1EntityPlayer)
      {
@@ -330,7 +327,7 @@
      }
  
      protected void damageArmor(float par1)
-@@ -1184,7 +1324,8 @@
+@@ -1129,7 +1269,8 @@
  
                  if (itemstack.interactWithEntity(this, (EntityLivingBase)par1Entity))
                  {
@@ -340,7 +337,7 @@
                      {
                          this.destroyCurrentEquippedItem();
                      }
-@@ -1335,7 +1476,8 @@
+@@ -1276,7 +1417,8 @@
                          {
                              itemstack.hitEntity((EntityLivingBase)object, this);
  
@@ -350,7 +347,7 @@
                              {
                                  this.destroyCurrentEquippedItem();
                              }
-@@ -1347,7 +1489,16 @@
+@@ -1288,7 +1430,16 @@
  
                              if (j > 0)
                              {
@@ -368,7 +365,7 @@
                              }
                          }
  
-@@ -1378,6 +1529,10 @@
+@@ -1317,6 +1468,10 @@
  
          if (this.openContainer != null)
          {
@@ -379,7 +376,7 @@
              this.openContainer.onContainerClosed(this);
          }
      }
-@@ -1440,6 +1595,21 @@
+@@ -1376,6 +1531,21 @@
              this.mountEntity((Entity)null);
          }
  
@@ -401,7 +398,7 @@
          this.setSize(0.2F, 0.2F);
          this.yOffset = 0.2F;
  
-@@ -1535,6 +1705,27 @@
+@@ -1470,6 +1640,27 @@
              this.worldObj.updateAllPlayersSleepingFlag();
          }
  
@@ -429,7 +426,7 @@
          if (par1)
          {
              this.sleepTimer = 0;
-@@ -1672,11 +1863,13 @@
+@@ -1600,11 +1791,13 @@
          {
              this.spawnChunk = new ChunkCoordinates(par1ChunkCoordinates);
              this.spawnForced = par2;

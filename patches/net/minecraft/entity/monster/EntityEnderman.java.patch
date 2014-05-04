@@ -13,7 +13,7 @@
  public class EntityEnderman extends EntityMob
  {
      private static final UUID attackingSpeedBoostModifierUUID = UUID.fromString("020E0DFB-87AE-4653-9556-831010E291A0");
-@@ -168,9 +174,15 @@
+@@ -161,9 +167,15 @@
  
                      if (EntityEnderman.getCarriable(block))
                      {
@@ -32,7 +32,7 @@
                      }
                  }
              }
-@@ -184,8 +196,14 @@
+@@ -177,8 +189,14 @@
  
                  if (block.getMaterial() == Material.air && block1.getMaterial() != Material.air && block1.renderAsNormalBlock())
                  {
@@ -49,7 +49,7 @@
                  }
              }
          }
-@@ -316,8 +334,19 @@
+@@ -306,8 +324,19 @@
  
              if (flag1)
              {
@@ -70,7 +70,7 @@
                  if (this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox).isEmpty() && !this.worldObj.isAnyLiquid(this.boundingBox))
                  {
                      flag = true;
-@@ -382,12 +411,17 @@
+@@ -368,12 +397,17 @@
  
          if (item != null)
          {

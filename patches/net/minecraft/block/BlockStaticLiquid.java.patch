@@ -9,7 +9,7 @@
  public class BlockStaticLiquid extends BlockLiquid
  {
      private static final String __OBFID = "CL_00000315";
-@@ -46,6 +48,11 @@
+@@ -43,6 +45,11 @@
          {
              int l = p_149674_5_.nextInt(3);
              int i1;
@@ -21,7 +21,7 @@
  
              for (i1 = 0; i1 < l; ++i1)
              {
-@@ -58,6 +65,16 @@
+@@ -55,6 +62,16 @@
                  {
                      if (this.isFlammable(p_149674_1_, p_149674_2_ - 1, p_149674_3_, p_149674_4_) || this.isFlammable(p_149674_1_, p_149674_2_ + 1, p_149674_3_, p_149674_4_) || this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ - 1) || this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ + 1) || this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_) || this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_ + 1, p_149674_4_))
                      {
@@ -38,7 +38,7 @@
                          p_149674_1_.setBlock(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.fire);
                          return;
                      }
-@@ -80,6 +97,16 @@
+@@ -77,6 +94,16 @@
  
                      if (p_149674_1_.isAirBlock(p_149674_2_, p_149674_3_ + 1, p_149674_4_) && this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_))
                      {

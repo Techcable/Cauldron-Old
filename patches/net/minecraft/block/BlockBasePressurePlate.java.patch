@@ -9,7 +9,7 @@
  public abstract class BlockBasePressurePlate extends Block
  {
      private String field_150067_a;
-@@ -131,7 +133,20 @@
+@@ -122,7 +124,20 @@
          int i1 = this.func_150065_e(p_150062_1_, p_150062_2_, p_150062_3_, p_150062_4_);
          boolean flag = p_150062_5_ > 0;
          boolean flag1 = i1 > 0;

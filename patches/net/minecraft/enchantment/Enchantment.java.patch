@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/enchantment/Enchantment.java
 +++ ../src-work/minecraft/net/minecraft/enchantment/Enchantment.java
-@@ -79,6 +79,8 @@
+@@ -55,6 +55,8 @@
          {
              enchantmentsList[par1] = this;
          }

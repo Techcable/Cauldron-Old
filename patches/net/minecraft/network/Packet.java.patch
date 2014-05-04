@@ -7,4 +7,4 @@
 +    public final long timestamp = System.currentTimeMillis(); // CraftBukkit
      private static final String __OBFID = "CL_00001272";
  
-     // JAVADOC METHOD $$ func_148839_a
+     public static Packet generatePacket(BiMap p_148839_0_, int p_148839_1_)

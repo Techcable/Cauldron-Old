@@ -9,7 +9,7 @@
  public class BlockDragonEgg extends Block
  {
      private static final String __OBFID = "CL_00000232";
-@@ -46,7 +48,8 @@
+@@ -43,7 +45,8 @@
  
              if (!BlockFalling.fallInstantly && p_150018_1_.checkChunksExist(p_150018_2_ - b0, p_150018_3_ - b0, p_150018_4_ - b0, p_150018_2_ + b0, p_150018_3_ + b0, p_150018_4_ + b0))
              {
@@ -19,7 +19,7 @@
                  p_150018_1_.spawnEntityInWorld(entityfallingblock);
              }
              else
-@@ -91,6 +94,22 @@
+@@ -86,6 +89,22 @@
  
                  if (p_150019_1_.getBlock(i1, j1, k1).blockMaterial == Material.air)
                  {

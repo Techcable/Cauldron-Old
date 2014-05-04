@@ -43,16 +43,16 @@
          Thread thread = new Thread("Server Infinisleeper")
          {
              private static final String __OBFID = "CL_00001787";
-@@ -80,7 +93,7 @@
+@@ -79,7 +92,7 @@
+         };
      }
  
-     // JAVADOC METHOD $$ func_71197_b
 -    protected boolean startServer() throws IOException
 +    protected boolean startServer() throws java.net.UnknownHostException   // CraftBukkit - throws UnknownHostException
      {
          Thread thread = new Thread("Server console handler")
          {
-@@ -105,6 +118,30 @@
+@@ -104,6 +117,30 @@
          };
          thread.setDaemon(true);
          thread.start();
@@ -83,7 +83,7 @@
          field_155771_h.info("Starting minecraft server version 1.7.2");
  
          if (Runtime.getRuntime().maxMemory() / 1024L / 1024L < 512L)
-@@ -115,7 +152,7 @@
+@@ -114,7 +151,7 @@
          FMLCommonHandler.instance().onServerStart(this);
  
          field_155771_h.info("Loading properties");
@@ -92,7 +92,7 @@
  
          if (this.isSinglePlayer())
          {
-@@ -161,22 +198,39 @@
+@@ -160,22 +197,39 @@
              this.setServerPort(this.settings.getIntProperty("server-port", 25565));
          }
  
@@ -141,7 +141,7 @@
          if (!this.isServerInOnlineMode())
          {
              field_155771_h.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
-@@ -187,7 +241,8 @@
+@@ -186,7 +240,8 @@
  
          FMLCommonHandler.instance().onServerStarted();
  
@@ -151,7 +151,7 @@
          long j = System.nanoTime();
  
          if (this.getFolderName() == null)
-@@ -239,6 +294,21 @@
+@@ -238,6 +293,21 @@
          String s3 = String.format("%.3fs", new Object[] {Double.valueOf((double)i1 / 1.0E9D)});
          field_155771_h.info("Done (" + s3 + ")! For help, type \"help\" or \"?\"");
  
@@ -173,7 +173,7 @@
          if (this.settings.getBooleanProperty("enable-query", false))
          {
              field_155771_h.info("Starting GS4 status listener");
-@@ -251,12 +321,30 @@
+@@ -250,12 +320,30 @@
              field_155771_h.info("Starting remote control listener");
              this.theRConThreadMain = new RConThreadMain(this);
              this.theRConThreadMain.startThread();
@@ -205,7 +205,7 @@
      public boolean canStructuresSpawn()
      {
          return this.canSpawnStructures;
-@@ -364,8 +452,14 @@
+@@ -358,8 +446,14 @@
      {
          while (!this.pendingCommandList.isEmpty())
          {

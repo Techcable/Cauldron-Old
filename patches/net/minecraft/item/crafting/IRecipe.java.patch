@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/item/crafting/IRecipe.java
 +++ ../src-work/minecraft/net/minecraft/item/crafting/IRecipe.java
-@@ -16,4 +16,6 @@
+@@ -13,4 +13,6 @@
      int getRecipeSize();
  
      ItemStack getRecipeOutput();

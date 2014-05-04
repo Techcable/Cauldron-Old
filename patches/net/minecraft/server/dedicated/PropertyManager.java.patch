@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/server/dedicated/PropertyManager.java
 +++ ../src-work/minecraft/net/minecraft/server/dedicated/PropertyManager.java
-@@ -10,12 +10,14 @@
+@@ -10,11 +10,13 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -10,13 +10,12 @@
  public class PropertyManager
  {
      private static final Logger field_164440_a = LogManager.getLogger();
-     // JAVADOC FIELD $$ field_73672_b
 -    private final Properties serverProperties = new Properties();
 +    public final Properties serverProperties = new Properties(); // CraftBukkit - private -> public
-     // JAVADOC FIELD $$ field_73673_c
      private final File serverPropertiesFile;
      private static final String __OBFID = "CL_00001782";
-@@ -60,6 +62,26 @@
+ 
+@@ -58,6 +60,26 @@
          }
      }
  
@@ -40,10 +39,10 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_73666_a
      public void generateNewProperties()
      {
-@@ -74,6 +96,13 @@
+         field_164440_a.info("Generating new properties file");
+@@ -70,6 +92,13 @@
  
          try
          {
@@ -57,7 +56,7 @@
              fileoutputstream = new FileOutputStream(this.serverPropertiesFile);
              this.serverProperties.store(fileoutputstream, "Minecraft server properties");
          }
-@@ -114,7 +143,7 @@
+@@ -108,20 +137,20 @@
              this.saveProperties();
          }
  
@@ -65,8 +64,7 @@
 +        return this.getOverride(par1Str, this.serverProperties.getProperty(par1Str, par2Str)); // CraftBukkit
      }
  
-     // JAVADOC METHOD $$ func_73669_a
-@@ -122,13 +151,13 @@
+     public int getIntProperty(String par1Str, int par2)
      {
          try
          {
@@ -82,7 +80,7 @@
          }
      }
  
-@@ -137,13 +166,13 @@
+@@ -129,13 +158,13 @@
      {
          try
          {

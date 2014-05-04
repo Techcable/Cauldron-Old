@@ -11,9 +11,9 @@
 +
  public class EntityPig extends EntityAnimal
  {
-     // JAVADOC FIELD $$ field_82184_d
-@@ -139,24 +144,29 @@
-     // JAVADOC METHOD $$ func_70628_a
+     private final EntityAIControlledByPlayer aiControlledByPlayer;
+@@ -129,24 +134,29 @@
+ 
      protected void dropFewItems(boolean par1, int par2)
      {
 +        // CraftBukkit start
@@ -45,8 +45,8 @@
 +        // CraftBukkit end
      }
  
-     // JAVADOC METHOD $$ func_70901_n
-@@ -184,9 +194,23 @@
+     public boolean getSaddled()
+@@ -171,9 +181,23 @@
          if (!this.worldObj.isRemote)
          {
              EntityPigZombie entitypigzombie = new EntityPigZombie(this.worldObj);

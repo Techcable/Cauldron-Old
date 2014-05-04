@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/item/ItemEmptyMap.java
 +++ ../src-work/minecraft/net/minecraft/item/ItemEmptyMap.java
-@@ -28,6 +28,7 @@
+@@ -27,6 +27,7 @@
          mapdata.zCenter = (int)(Math.round(par3EntityPlayer.posZ / (double)i) * (long)i);
          mapdata.dimension = par2World.provider.dimensionId;
          mapdata.markDirty();

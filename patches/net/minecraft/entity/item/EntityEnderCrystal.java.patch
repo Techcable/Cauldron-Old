@@ -8,8 +8,8 @@
 +
  public class EntityEnderCrystal extends Entity
  {
-     // JAVADOC FIELD $$ field_70261_a
-@@ -59,7 +61,13 @@
+     public int innerRotation;
+@@ -56,7 +58,13 @@
  
          if (this.worldObj.provider instanceof WorldProviderEnd && this.worldObj.getBlock(i, j, k) != Blocks.fire)
          {
@@ -24,7 +24,7 @@
          }
      }
  
-@@ -92,6 +100,13 @@
+@@ -85,6 +93,13 @@
          {
              if (!this.isDead && !this.worldObj.isRemote)
              {
@@ -38,7 +38,7 @@
                  this.health = 0;
  
                  if (this.health <= 0)
-@@ -100,7 +115,7 @@
+@@ -93,7 +108,7 @@
  
                      if (!this.worldObj.isRemote)
                      {

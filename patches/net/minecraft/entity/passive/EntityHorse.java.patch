@@ -12,7 +12,7 @@
  public class EntityHorse extends EntityAnimal implements IInvBasic
  {
      private static final IEntitySelector horseBreedingSelector = new IEntitySelector()
-@@ -51,7 +56,7 @@
+@@ -50,7 +55,7 @@
              return par1Entity instanceof EntityHorse && ((EntityHorse)par1Entity).func_110205_ce();
          }
      };
@@ -21,16 +21,16 @@
      private static final String[] horseArmorTextures = new String[] {null, "textures/entity/horse/armor/horse_armor_iron.png", "textures/entity/horse/armor/horse_armor_gold.png", "textures/entity/horse/armor/horse_armor_diamond.png"};
      private static final String[] field_110273_bx = new String[] {"", "meo", "goo", "dio"};
      private static final int[] armorValues = new int[] {0, 5, 7, 11};
-@@ -65,7 +70,7 @@
+@@ -64,7 +69,7 @@
      public int field_110278_bp;
      public int field_110279_bq;
      protected boolean horseJumping;
 -    private AnimalChest horseChest;
 +    public AnimalChest horseChest; // CraftBukkit - private -> public
      private boolean hasReproduced;
-     // JAVADOC FIELD $$ field_110274_bs
      protected int temper;
-@@ -80,6 +85,7 @@
+     protected float jumpPower;
+@@ -78,6 +83,7 @@
      private int field_110285_bP;
      private String field_110286_bQ;
      private String[] field_110280_bR = new String[3];
@@ -38,7 +38,7 @@
      private static final String __OBFID = "CL_00001641";
  
      public EntityHorse(World par1World)
-@@ -393,11 +399,36 @@
+@@ -383,11 +389,36 @@
  
          if (i > 0)
          {
@@ -77,7 +77,7 @@
              }
  
              Block block = this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY - 0.2D - (double)this.prevRotationYaw), MathHelper.floor_double(this.posZ));
-@@ -413,13 +444,13 @@
+@@ -403,13 +434,13 @@
      private int func_110225_cC()
      {
          int i = this.getHorseType();
@@ -94,8 +94,8 @@
          this.horseChest.func_110133_a(this.getCommandSenderName());
  
          if (animalchest != null)
-@@ -1209,7 +1240,7 @@
-     // JAVADOC METHOD $$ func_70612_e
+@@ -1184,7 +1215,7 @@
+ 
      public void moveEntityWithHeading(float par1, float par2)
      {
 -        if (this.riddenByEntity != null && this.isHorseSaddled())
@@ -103,7 +103,7 @@
          {
              this.prevRotationYaw = this.rotationYaw = this.riddenByEntity.rotationYaw;
              this.rotationPitch = this.riddenByEntity.rotationPitch * 0.5F;
-@@ -1303,6 +1334,7 @@
+@@ -1277,6 +1308,7 @@
          par1NBTTagCompound.setInteger("Temper", this.getTemper());
          par1NBTTagCompound.setBoolean("Tame", this.isTame());
          par1NBTTagCompound.setString("OwnerName", this.getOwnerName());
@@ -111,7 +111,7 @@
  
          if (this.isChested())
          {
-@@ -1353,6 +1385,13 @@
+@@ -1326,6 +1358,13 @@
              this.setOwnerName(par1NBTTagCompound.getString("OwnerName"));
          }
  
@@ -125,7 +125,7 @@
          IAttributeInstance iattributeinstance = this.getAttributeMap().getAttributeInstanceByName("Speed");
  
          if (iattributeinstance != null)
-@@ -1590,28 +1629,38 @@
+@@ -1561,28 +1600,38 @@
          return true;
      }
  

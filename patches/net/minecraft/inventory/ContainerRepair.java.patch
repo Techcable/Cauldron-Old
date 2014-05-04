@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/inventory/ContainerRepair.java
 +++ ../src-work/minecraft/net/minecraft/inventory/ContainerRepair.java
-@@ -16,22 +16,15 @@
+@@ -16,19 +16,13 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -9,13 +9,10 @@
  public class ContainerRepair extends Container
  {
      private static final Logger logger = LogManager.getLogger();
-     // JAVADOC FIELD $$ field_82852_f
      private IInventory outputSlot = new InventoryCraftResult();
-     // JAVADOC FIELD $$ field_82853_g
 -    private IInventory inputSlots = new InventoryBasic("Repair", true, 2)
 -    {
 -        private static final String __OBFID = "CL_00001733";
--        // JAVADOC METHOD $$ func_70296_d
 -        public void markDirty()
 -        {
 -            super.markDirty();
@@ -26,8 +23,8 @@
      private World theWorld;
      private int field_82861_i;
      private int field_82858_j;
-@@ -44,9 +37,14 @@
-     // JAVADOC FIELD $$ field_82855_n
+@@ -38,9 +32,14 @@
+     private String repairedItemName;
      private final EntityPlayer thePlayer;
      private static final String __OBFID = "CL_00001732";
 +    // CraftBukkit start
@@ -41,7 +38,7 @@
          this.theWorld = par2World;
          this.field_82861_i = par3;
          this.field_82858_j = par4;
-@@ -467,6 +465,11 @@
+@@ -456,6 +455,11 @@
  
      public boolean canInteractWith(EntityPlayer par1EntityPlayer)
      {
@@ -53,7 +50,7 @@
          return this.theWorld.getBlock(this.field_82861_i, this.field_82858_j, this.field_82859_k) != Blocks.anvil ? false : par1EntityPlayer.getDistanceSq((double)this.field_82861_i + 0.5D, (double)this.field_82858_j + 0.5D, (double)this.field_82859_k + 0.5D) <= 64.0D;
      }
  
-@@ -543,4 +546,18 @@
+@@ -530,4 +534,18 @@
  
          this.updateRepairOutput();
      }

@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/item/Item.java
 +++ ../src-work/minecraft/net/minecraft/item/Item.java
-@@ -407,7 +407,13 @@
+@@ -399,7 +399,13 @@
              else if (block == Blocks.double_plant)
              {
                  object = (new ItemDoublePlant(Blocks.double_plant, Blocks.double_plant, BlockDoublePlant.field_149892_a)).setUnlocalizedName("doublePlant");

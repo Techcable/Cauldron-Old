@@ -8,8 +8,8 @@
 +
  public class ContainerMerchant extends Container
  {
-     // JAVADOC FIELD $$ field_75178_e
-@@ -17,6 +19,22 @@
+     private IMerchant theMerchant;
+@@ -15,6 +17,22 @@
      private final World theWorld;
      private static final String __OBFID = "CL_00001757";
  
@@ -32,7 +32,7 @@
      public ContainerMerchant(InventoryPlayer par1InventoryPlayer, IMerchant par2IMerchant, World par3World)
      {
          this.theMerchant = par2IMerchant;
-@@ -25,6 +43,7 @@
+@@ -23,6 +41,7 @@
          this.addSlotToContainer(new Slot(this.merchantInventory, 0, 36, 53));
          this.addSlotToContainer(new Slot(this.merchantInventory, 1, 62, 53));
          this.addSlotToContainer(new SlotMerchantResult(par1InventoryPlayer.player, par2IMerchant, this.merchantInventory, 2, 120, 53));

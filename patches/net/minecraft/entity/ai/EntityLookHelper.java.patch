@@ -9,7 +9,7 @@
  public class EntityLookHelper
  {
      private EntityLiving entity;
-@@ -67,8 +69,10 @@
+@@ -61,8 +63,10 @@
              double d1 = this.posY - (this.entity.posY + (double)this.entity.getEyeHeight());
              double d2 = this.posZ - this.entity.posZ;
              double d3 = (double)MathHelper.sqrt_double(d0 * d0 + d2 * d2);

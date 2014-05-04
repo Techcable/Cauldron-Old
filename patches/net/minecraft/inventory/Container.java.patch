@@ -17,8 +17,8 @@
 +
  public abstract class Container
  {
-     // JAVADOC FIELD $$ field_75153_a
-@@ -23,13 +34,28 @@
+     public List inventoryItemStacks = new ArrayList();
+@@ -21,12 +32,27 @@
      @SideOnly(Side.CLIENT)
      private short transactionID;
      private int field_94535_f = -1;
@@ -27,7 +27,6 @@
      private final Set field_94537_h = new HashSet();
 +    public InventoryView bukkitView = null; // MCPC+
 +
-     // JAVADOC FIELD $$ field_75149_d
      protected List crafters = new ArrayList();
      private Set playerList = new HashSet();
      private static final String __OBFID = "CL_00001730";
@@ -45,10 +44,10 @@
 +    }
 +    // CraftBukkit end
 +
-     // JAVADOC METHOD $$ func_75146_a
      protected Slot addSlotToContainer(Slot par1Slot)
      {
-@@ -117,6 +143,10 @@
+         par1Slot.slotNumber = this.inventorySlots.size();
+@@ -109,6 +135,10 @@
  
      public Slot getSlot(int par1)
      {
@@ -59,7 +58,7 @@
          return (Slot)this.inventorySlots.get(par1);
      }
  
-@@ -177,6 +207,7 @@
+@@ -168,6 +198,7 @@
                      itemstack3 = inventoryplayer.getItemStack().copy();
                      i1 = inventoryplayer.getItemStack().stackSize;
                      Iterator iterator = this.field_94537_h.iterator();
@@ -67,7 +66,7 @@
  
                      while (iterator.hasNext())
                      {
-@@ -199,18 +230,55 @@
+@@ -190,18 +221,55 @@
                              }
  
                              i1 -= itemstack1.stackSize - j1;
@@ -128,7 +127,7 @@
                  }
  
                  this.func_94533_d();
-@@ -244,10 +312,17 @@
+@@ -235,10 +303,17 @@
  
                          if (par2 == 1)
                          {

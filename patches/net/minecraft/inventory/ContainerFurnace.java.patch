@@ -43,7 +43,7 @@
          int i;
  
          for (i = 0; i < 3; ++i)
-@@ -97,6 +120,10 @@
+@@ -96,6 +119,10 @@
  
      public boolean canInteractWith(EntityPlayer par1EntityPlayer)
      {

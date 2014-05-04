@@ -13,7 +13,7 @@
  public class Teleporter
  {
      private final WorldServer worldServerInstance;
-@@ -42,83 +48,155 @@
+@@ -38,82 +44,154 @@
          }
          else
          {
@@ -101,7 +101,6 @@
      }
 +    // CraftBukkit end
  
-     // JAVADOC METHOD $$ func_77184_b
      public boolean placeInExistingPortal(Entity par1Entity, double par2, double par4, double par6, float par8)
      {
 -        short short1 = 128;
@@ -205,7 +204,7 @@
                                  j = i2;
                                  k = l1;
                              }
-@@ -132,61 +210,93 @@
+@@ -127,61 +205,93 @@
          {
              if (flag)
              {
@@ -329,7 +328,7 @@
                  }
  
                  float f1 = 0.5F;
-@@ -205,24 +315,24 @@
+@@ -200,24 +310,24 @@
                      f2 = 0.0F;
                  }
  
@@ -359,7 +358,7 @@
                  {
                      f5 = 1.0F;
                      f6 = -1.0F;
-@@ -233,33 +343,77 @@
+@@ -228,33 +338,77 @@
                      f6 = 1.0F;
                  }
  
@@ -436,7 +435,7 @@
 +            this.createEndPortal(x, y, z);
 +            return true;
 +        }
-+
++ 
 +        // CraftBukkit end
          double d0 = -1.0D;
 -        int i = MathHelper.floor_double(par1Entity.posX);
@@ -450,41 +449,43 @@
          int l = i;
          int i1 = j;
          int j1 = k;
-@@ -268,59 +422,59 @@
+@@ -262,8 +416,10 @@
+         int l1 = this.random.nextInt(4);
          int i2;
          double d1;
+-        int k2;
          double d2;
 +        int j2;
-         int k2;
++        int k2;
 +        int l2;
          int i3;
--        int k3;
          int j3;
--        int i4;
-+        int k3;
-         int l3;
--        int k4;
-+        int i4;
+         int k3;
+@@ -271,125 +427,123 @@
+         int i4;
          int j4;
--        int i5;
+         int k4;
 -        int l4;
-+        int k4;
+-        int i5;
          double d3;
          double d4;
- 
+-
++ 
          for (i2 = i - b0; i2 <= i + b0; ++i2)
          {
 -            d1 = (double)i2 + 0.5D - par1Entity.posX;
-+            d1 = (double) i2 + 0.5D - x; // CraftBukkit
- 
+-
 -            for (k2 = k - b0; k2 <= k + b0; ++k2)
++            d1 = (double) i2 + 0.5D - x; // CraftBukkit
++ 
 +            for (j2 = k - b0; j2 <= k + b0; ++j2)
              {
 -                d2 = (double)k2 + 0.5D - par1Entity.posZ;
 +                d2 = (double) j2 + 0.5D - z; // CraftBukkit
                  label274:
- 
+-
 -                for (i3 = this.worldServerInstance.getActualHeight() - 1; i3 >= 0; --i3)
++ 
 +                for (k2 = this.worldServerInstance.getActualHeight() - 1; k2 >= 0; --k2)
                  {
 -                    if (this.worldServerInstance.isAirBlock(i2, i3, k2))
@@ -496,24 +497,27 @@
 -                            --i3;
 +                            --k2;
                          }
- 
+-
 -                        for (j3 = l1; j3 < l1 + 4; ++j3)
++ 
 +                        for (i3 = l1; i3 < l1 + 4; ++i3)
                          {
 -                            k3 = j3 % 2;
 -                            l3 = 1 - k3;
+-
+-                            if (j3 % 4 >= 2)
 +                            l2 = i3 % 2;
 +                            k3 = 1 - l2;
- 
--                            if (j3 % 4 >= 2)
++ 
 +                            if (i3 % 4 >= 2)
                              {
 +                                l2 = -l2;
                                  k3 = -k3;
 -                                l3 = -l3;
                              }
- 
+-
 -                            for (i4 = 0; i4 < 3; ++i4)
++ 
 +                            for (j3 = 0; j3 < 3; ++j3)
                              {
 -                                for (j4 = 0; j4 < 4; ++j4)
@@ -525,29 +529,29 @@
 -                                        l4 = i2 + (j4 - 1) * k3 + i4 * l3;
 -                                        i5 = i3 + k4;
 -                                        int j5 = k2 + (j4 - 1) * l3 - i4 * k3;
+-
+-                                        if (k4 < 0 && !this.worldServerInstance.getBlock(l4, i5, j5).getMaterial().isSolid() || k4 >= 0 && !this.worldServerInstance.isAirBlock(l4, i5, j5))
 +                                        k4 = i2 + (i4 - 1) * l2 + j3 * k3;
 +                                        j4 = k2 + l3;
 +                                        int l4 = j2 + (i4 - 1) * k3 - j3 * l2;
- 
--                                        if (k4 < 0 && !this.worldServerInstance.getBlock(l4, i5, j5).getMaterial().isSolid() || k4 >= 0 && !this.worldServerInstance.isAirBlock(l4, i5, j5))
++ 
 +                                        if (l3 < 0 && !this.worldServerInstance.getBlock(k4, j4, l4).getMaterial().isSolid() || l3 >= 0 && !this.worldServerInstance.isAirBlock(k4, j4, l4))
                                          {
                                              continue label274;
                                          }
-@@ -328,16 +482,16 @@
+                                     }
                                  }
                              }
- 
--                            d4 = (double)i3 + 0.5D - par1Entity.posY;
--                            d3 = d1 * d1 + d4 * d4 + d2 * d2;
+-
+-                            d3 = (double)i3 + 0.5D - par1Entity.posY;
++ 
 +                            d3 = (double) k2 + 0.5D - y; // CraftBukkit
-+                            d4 = d1 * d1 + d3 * d3 + d2 * d2;
- 
--                            if (d0 < 0.0D || d3 < d0)
-+                            if (d0 < 0.0D || d4 < d0)
+                             d4 = d1 * d1 + d3 * d3 + d2 * d2;
+-
++ 
+                             if (d0 < 0.0D || d4 < d0)
                              {
--                                d0 = d3;
-+                                d0 = d4;
+                                 d0 = d4;
                                  l = i2;
 -                                i1 = i3;
 -                                j1 = k2;
@@ -558,21 +562,28 @@
                              }
                          }
                      }
-@@ -349,52 +503,52 @@
+                 }
+             }
+         }
+-
++ 
+         if (d0 < 0.0D)
          {
              for (i2 = i - b0; i2 <= i + b0; ++i2)
              {
 -                d1 = (double)i2 + 0.5D - par1Entity.posX;
-+                d1 = (double) i2 + 0.5D - x; // CraftBukkit
- 
+-
 -                for (k2 = k - b0; k2 <= k + b0; ++k2)
++                d1 = (double) i2 + 0.5D - x; // CraftBukkit
++ 
 +                for (j2 = k - b0; j2 <= k + b0; ++j2)
                  {
 -                    d2 = (double)k2 + 0.5D - par1Entity.posZ;
 +                    d2 = (double) j2 + 0.5D - z; // CraftBukkit
                      label222:
- 
+-
 -                    for (i3 = this.worldServerInstance.getActualHeight() - 1; i3 >= 0; --i3)
++ 
 +                    for (k2 = this.worldServerInstance.getActualHeight() - 1; k2 >= 0; --k2)
                      {
 -                        if (this.worldServerInstance.isAirBlock(i2, i3, k2))
@@ -584,16 +595,18 @@
 -                                --i3;
 +                                --k2;
                              }
- 
+-
 -                            for (j3 = l1; j3 < l1 + 2; ++j3)
++ 
 +                            for (i3 = l1; i3 < l1 + 2; ++i3)
                              {
 -                                k3 = j3 % 2;
 -                                l3 = 1 - k3;
+-
+-                                for (i4 = 0; i4 < 4; ++i4)
 +                                l2 = i3 % 2;
 +                                k3 = 1 - l2;
- 
--                                for (i4 = 0; i4 < 4; ++i4)
++ 
 +                                for (j3 = 0; j3 < 4; ++j3)
                                  {
 -                                    for (j4 = -1; j4 < 4; ++j4)
@@ -602,28 +615,28 @@
 -                                        k4 = i2 + (i4 - 1) * k3;
 -                                        l4 = i3 + j4;
 -                                        i5 = k2 + (i4 - 1) * l3;
+-
+-                                        if (j4 < 0 && !this.worldServerInstance.getBlock(k4, l4, i5).getMaterial().isSolid() || j4 >= 0 && !this.worldServerInstance.isAirBlock(k4, l4, i5))
 +                                        l3 = i2 + (j3 - 1) * l2;
 +                                        k4 = k2 + i4;
 +                                        j4 = j2 + (j3 - 1) * k3;
- 
--                                        if (j4 < 0 && !this.worldServerInstance.getBlock(k4, l4, i5).getMaterial().isSolid() || j4 >= 0 && !this.worldServerInstance.isAirBlock(k4, l4, i5))
++ 
 +                                        if (i4 < 0 && !this.worldServerInstance.getBlock(l3, k4, j4).getMaterial().isSolid() || i4 >= 0 && !this.worldServerInstance.isAirBlock(l3, k4, j4))
                                          {
                                              continue label222;
                                          }
                                      }
                                  }
- 
--                                d4 = (double)i3 + 0.5D - par1Entity.posY;
--                                d3 = d1 * d1 + d4 * d4 + d2 * d2;
+-
+-                                d3 = (double)i3 + 0.5D - par1Entity.posY;
++ 
 +                                d3 = (double) k2 + 0.5D - y; // CraftBukkit
-+                                d4 = d1 * d1 + d3 * d3 + d2 * d2;
- 
--                                if (d0 < 0.0D || d3 < d0)
-+                                if (d0 < 0.0D || d4 < d0)
+                                 d4 = d1 * d1 + d3 * d3 + d2 * d2;
+-
++ 
+                                 if (d0 < 0.0D || d4 < d0)
                                  {
--                                    d0 = d3;
-+                                    d0 = d4;
+                                     d0 = d4;
                                      l = i2;
 -                                    i1 = i3;
 -                                    j1 = k2;
@@ -634,37 +647,54 @@
                                  }
                              }
                          }
-@@ -403,16 +557,16 @@
+@@ -397,77 +551,77 @@
+                 }
              }
          }
- 
+-
 -        int k5 = l;
 -        int j2 = i1;
 -        k2 = j1;
 -        int l5 = k1 % 2;
 -        int l2 = 1 - l5;
+-
++ 
 +        int i5 = l;
 +        int j5 = i1;
 +        j2 = j1;
 +        int k5 = k1 % 2;
 +        int l5 = 1 - k5;
- 
++ 
          if (k1 % 4 >= 2)
          {
 +            k5 = -k5;
              l5 = -l5;
 -            l2 = -l2;
          }
- 
+-
++ 
          boolean flag;
-@@ -429,46 +583,46 @@
+-
++ 
+         if (d0 < 0.0D)
+         {
+             if (i1 < 70)
+             {
+                 i1 = 70;
+             }
+-
++ 
+             if (i1 > this.worldServerInstance.getActualHeight() - 10)
+             {
                  i1 = this.worldServerInstance.getActualHeight() - 10;
              }
- 
+-
 -            j2 = i1;
-+            j5 = i1;
- 
+-
 -            for (i3 = -1; i3 <= 1; ++i3)
++ 
++            j5 = i1;
++ 
 +            for (k2 = -1; k2 <= 1; ++k2)
              {
 -                for (j3 = 1; j3 < 3; ++j3)
@@ -687,8 +717,9 @@
                  }
              }
          }
- 
+-
 -        for (i3 = 0; i3 < 4; ++i3)
++ 
 +        for (k2 = 0; k2 < 4; ++k2)
          {
 -            for (j3 = 0; j3 < 4; ++j3)
@@ -709,8 +740,9 @@
 +                    this.worldServerInstance.setBlock(k3, j3, i4, flag ? Blocks.obsidian : Blocks.portal, 0, 2);
                  }
              }
- 
+-
 -            for (j3 = 0; j3 < 4; ++j3)
++ 
 +            for (i3 = 0; i3 < 4; ++i3)
              {
 -                for (k3 = -1; k3 < 4; ++k3)
@@ -727,17 +759,42 @@
                  }
              }
          }
-@@ -486,10 +640,10 @@
+-
++ 
+         return true;
+     }
  
+@@ -477,13 +631,13 @@
+         {
+             Iterator iterator = this.destinationCoordinateKeys.iterator();
+             long j = par1 - 600L;
+-
++ 
              while (iterator.hasNext())
              {
 -                Long olong = (Long)iterator.next();
 -                Teleporter.PortalPosition portalposition = (Teleporter.PortalPosition)this.destinationCoordinateCache.getValueByKey(olong.longValue());
+-
+-                if (portalposition == null || portalposition.lastUpdateTime < j)
 +                Long olong = (Long) iterator.next();
 +                PortalPosition chunkcoordinatesportal = (PortalPosition) this.destinationCoordinateCache.getValueByKey(olong.longValue());
- 
--                if (portalposition == null || portalposition.lastUpdateTime < j)
++ 
 +                if (chunkcoordinatesportal == null || chunkcoordinatesportal.lastUpdateTime < j)
                  {
                      iterator.remove();
                      this.destinationCoordinateCache.remove(olong.longValue());
+@@ -491,12 +645,12 @@
+             }
+         }
+     }
+-
++ 
+     public class PortalPosition extends ChunkCoordinates
+     {
+         public long lastUpdateTime;
+         private static final String __OBFID = "CL_00000154";
+-
++ 
+         public PortalPosition(int par2, int par3, int par4, long par5)
+         {
+             super(par2, par3, par4);

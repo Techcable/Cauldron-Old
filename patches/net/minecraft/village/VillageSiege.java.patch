@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/village/VillageSiege.java
 +++ ../src-work/minecraft/net/minecraft/village/VillageSiege.java
-@@ -198,7 +198,7 @@
+@@ -196,7 +196,7 @@
              }
  
              entityzombie.setLocationAndAngles(vec3.xCoord, vec3.yCoord, vec3.zCoord, this.worldObj.rand.nextFloat() * 360.0F, 0.0F);
@@ -9,7 +9,7 @@
              ChunkCoordinates chunkcoordinates = this.theVillage.getCenter();
              entityzombie.setHomeArea(chunkcoordinates.posX, chunkcoordinates.posY, chunkcoordinates.posZ, this.theVillage.getVillageRadius());
              return true;
-@@ -215,7 +215,8 @@
+@@ -213,7 +213,8 @@
  
              if (this.theVillage.isInRange(i1, j1, k1) && SpawnerAnimals.canCreatureTypeSpawnAtLocation(EnumCreatureType.monster, this.worldObj, i1, j1, k1))
              {

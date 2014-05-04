@@ -9,7 +9,7 @@
  public class EntityMooshroom extends EntityCow implements IShearable
  {
      private static final String __OBFID = "CL_00001645";
-@@ -42,7 +44,42 @@
+@@ -41,7 +43,42 @@
              }
          }
  

@@ -11,9 +11,9 @@
 +
  public class EntityAIArrowAttack extends EntityAIBase
  {
-     // JAVADOC FIELD $$ field_75322_b
-@@ -74,6 +79,10 @@
-     // JAVADOC METHOD $$ func_75251_c
+     private final EntityLiving entityHost;
+@@ -67,6 +72,10 @@
+ 
      public void resetTask()
      {
 +        // CraftBukkit start

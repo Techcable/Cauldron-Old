@@ -97,8 +97,8 @@
  
      public static int func_149258_c()
      {
-@@ -157,16 +176,7 @@
-     // JAVADOC METHOD $$ func_148840_b
+@@ -155,16 +174,7 @@
+ 
      public void writePacketData(PacketBuffer p_148840_1_) throws IOException
      {
 -        if (this.field_149263_e == null)

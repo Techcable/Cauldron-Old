@@ -9,8 +9,8 @@
  public class EntityChicken extends EntityAnimal
  {
      public float field_70886_e;
-@@ -131,21 +133,26 @@
-     // JAVADOC METHOD $$ func_70628_a
+@@ -123,21 +125,26 @@
+ 
      protected void dropFewItems(boolean par1, int par2)
      {
 +        // CraftBukkit start - Whole method

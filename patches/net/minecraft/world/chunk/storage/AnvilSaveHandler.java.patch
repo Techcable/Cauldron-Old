@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/chunk/storage/AnvilSaveHandler.java
 +++ ../src-work/minecraft/net/minecraft/world/chunk/storage/AnvilSaveHandler.java
-@@ -22,18 +22,12 @@
+@@ -21,18 +21,12 @@
      public IChunkLoader getChunkLoader(WorldProvider par1WorldProvider)
      {
          File file1 = this.getWorldDirectory();
@@ -24,4 +24,4 @@
 +        // MCPC+ end
      }
  
-     // JAVADOC METHOD $$ func_75755_a
+     public void saveWorldInfoWithPlayer(WorldInfo par1WorldInfo, NBTTagCompound par2NBTTagCompound)

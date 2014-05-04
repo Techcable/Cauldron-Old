@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/network/NetworkSystem.java
 +++ ../src-work/minecraft/net/minecraft/network/NetworkSystem.java
-@@ -147,6 +147,14 @@
+@@ -139,6 +139,14 @@
  
          synchronized (this.networkManagers)
          {

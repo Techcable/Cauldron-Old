@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/SpawnerAnimals.java
 +++ ../src-work/minecraft/net/minecraft/world/SpawnerAnimals.java
-@@ -22,10 +22,16 @@
+@@ -22,9 +22,15 @@
  import cpw.mods.fml.common.eventhandler.Event.Result;
  import net.minecraftforge.event.ForgeEventFactory;
  
@@ -12,13 +12,12 @@
 +
  public final class SpawnerAnimals
  {
-     // JAVADOC FIELD $$ field_77193_b
 -    private HashMap eligibleChunksForSpawning = new HashMap();
 +    private LongObjectHashMap<Boolean> eligibleChunksForSpawning = new LongObjectHashMap<Boolean>(); // CraftBukkit - HashMap -> LongObjectHashMap
      private static final String __OBFID = "CL_00000152";
  
      protected static ChunkPosition func_151350_a(World p_151350_0_, int p_151350_1_, int p_151350_2_)
-@@ -56,22 +62,30 @@
+@@ -54,22 +60,30 @@
                  int j = MathHelper.floor_double(entityplayer.posX / 16.0D);
                  k = MathHelper.floor_double(entityplayer.posZ / 16.0D);
                  byte b0 = 8;
@@ -53,7 +52,7 @@
                      }
                  }
              }
-@@ -84,22 +98,46 @@
+@@ -82,22 +96,46 @@
              for (int k3 = 0; k3 < k; ++k3)
              {
                  EnumCreatureType enumcreaturetype = aenumcreaturetype[k3];
@@ -107,7 +106,7 @@
                              int j1 = chunkposition.chunkPosX;
                              int k1 = chunkposition.chunkPosY;
                              int l1 = chunkposition.chunkPosZ;
-@@ -172,11 +210,12 @@
+@@ -170,11 +208,12 @@
                                                              if (canSpawn == Result.ALLOW || (canSpawn == Result.DEFAULT && entityliving.getCanSpawnHere()))
                                                              {
                                                                  ++i2;
@@ -121,7 +120,7 @@
  
                                                                  if (j2 >= ForgeEventFactory.getMaxSpawnPackSize(entityliving))
                                                                  {
-@@ -270,8 +309,10 @@
+@@ -266,8 +305,10 @@
                              }
  
                              entityliving.setLocationAndAngles((double)f, (double)f1, (double)f2, par6Random.nextFloat() * 360.0F, 0.0F);

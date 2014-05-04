@@ -14,25 +14,24 @@
  public class EntityArrow extends Entity implements IProjectile
  {
      private int field_145791_d = -1;
-@@ -30,7 +37,7 @@
+@@ -30,14 +37,14 @@
      private int field_145789_f = -1;
      private Block field_145790_g;
      private int inData;
 -    private boolean inGround;
 +    public boolean inGround = false; // Spigot - private -> public
-     // JAVADOC FIELD $$ field_70251_a
      public int canBePickedUp;
-     // JAVADOC FIELD $$ field_70249_b
-@@ -41,7 +48,7 @@
+     public int arrowShake;
+     public Entity shootingEntity;
+     private int ticksInGround;
      private int ticksInAir;
      private double damage = 2.0D;
-     // JAVADOC FIELD $$ field_70256_ap
 -    private int knockbackStrength;
 +    public int knockbackStrength; // CraftBukkit - private -> public
      private static final String __OBFID = "CL_00001715";
  
      public EntityArrow(World par1World)
-@@ -65,6 +72,7 @@
+@@ -61,6 +68,7 @@
          super(par1World);
          this.renderDistanceWeight = 10.0D;
          this.shootingEntity = par2EntityLivingBase;
@@ -40,7 +39,7 @@
  
          if (par2EntityLivingBase instanceof EntityPlayer)
          {
-@@ -95,6 +103,7 @@
+@@ -91,6 +99,7 @@
          super(par1World);
          this.renderDistanceWeight = 10.0D;
          this.shootingEntity = par2EntityLivingBase;
@@ -48,7 +47,7 @@
  
          if (par2EntityLivingBase instanceof EntityPlayer)
          {
-@@ -207,7 +216,7 @@
+@@ -199,7 +208,7 @@
              {
                  ++this.ticksInGround;
  
@@ -57,7 +56,7 @@
                  {
                      this.setDead();
                  }
-@@ -254,7 +263,7 @@
+@@ -246,7 +255,7 @@
  
                      if (movingobjectposition1 != null)
                      {
@@ -66,7 +65,7 @@
  
                          if (d1 < d0 || d0 == 0.0D)
                          {
-@@ -285,6 +294,8 @@
+@@ -277,6 +286,8 @@
  
              if (movingobjectposition != null)
              {
@@ -75,7 +74,7 @@
                  if (movingobjectposition.entityHit != null)
                  {
                      f2 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-@@ -306,13 +317,23 @@
+@@ -298,13 +309,23 @@
                          damagesource = DamageSource.causeArrowDamage(this, this.shootingEntity);
                      }
  
@@ -104,7 +103,7 @@
                          if (movingobjectposition.entityHit instanceof EntityLivingBase)
                          {
                              EntityLivingBase entitylivingbase = (EntityLivingBase)movingobjectposition.entityHit;
-@@ -366,7 +387,7 @@
+@@ -358,7 +379,7 @@
                      this.field_145791_d = movingobjectposition.blockX;
                      this.field_145792_e = movingobjectposition.blockY;
                      this.field_145789_f = movingobjectposition.blockZ;
@@ -113,7 +112,7 @@
                      this.inData = this.worldObj.getBlockMetadata(this.field_145791_d, this.field_145792_e, this.field_145789_f);
                      this.motionX = (double)((float)(movingobjectposition.hitVec.xCoord - this.posX));
                      this.motionY = (double)((float)(movingobjectposition.hitVec.yCoord - this.posY));
-@@ -498,6 +519,23 @@
+@@ -487,6 +508,23 @@
      {
          if (!this.worldObj.isRemote && this.inGround && this.arrowShake <= 0)
          {
@@ -137,7 +136,7 @@
              boolean flag = this.canBePickedUp == 1 || this.canBePickedUp == 2 && par1EntityPlayer.capabilities.isCreativeMode;
  
              if (this.canBePickedUp == 1 && !par1EntityPlayer.inventory.addItemStackToInventory(new ItemStack(Items.arrow, 1)))
-@@ -569,4 +607,11 @@
+@@ -553,4 +591,11 @@
          byte b0 = this.dataWatcher.getWatchableObjectByte(16);
          return (b0 & 1) != 0;
      }

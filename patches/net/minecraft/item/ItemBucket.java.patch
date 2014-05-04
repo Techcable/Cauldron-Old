@@ -13,8 +13,8 @@
 +
  public class ItemBucket extends Item
  {
-     // JAVADOC FIELD $$ field_77876_a
-@@ -37,13 +44,14 @@
+     private Block isFull;
+@@ -35,13 +42,14 @@
          }
          else
          {
@@ -32,7 +32,7 @@
              {
                  if (par3EntityPlayer.capabilities.isCreativeMode)
                  {
-@@ -52,14 +60,14 @@
+@@ -50,14 +58,14 @@
  
                  if (--par1ItemStack.stackSize <= 0)
                  {
@@ -51,7 +51,7 @@
                  return par1ItemStack;
              }
              if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
-@@ -85,23 +93,52 @@
+@@ -83,23 +91,52 @@
  
                      if (material == Material.water && l == 0)
                      {
@@ -107,7 +107,7 @@
                      if (movingobjectposition.sideHit == 0)
                      {
                          --j;
-@@ -137,9 +174,19 @@
+@@ -135,9 +172,19 @@
                          return par1ItemStack;
                      }
  
@@ -128,7 +128,7 @@
                      }
                  }
              }
-@@ -148,24 +195,32 @@
+@@ -146,24 +193,32 @@
          }
      }
  

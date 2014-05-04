@@ -9,7 +9,7 @@
  public class ItemLead extends Item
  {
      private static final String __OBFID = "CL_00000045";
-@@ -62,8 +64,26 @@
+@@ -61,8 +63,26 @@
                      if (entityleashknot == null)
                      {
                          entityleashknot = EntityLeashKnot.func_110129_a(p_150909_1_, p_150909_2_, p_150909_3_, p_150909_4_);
