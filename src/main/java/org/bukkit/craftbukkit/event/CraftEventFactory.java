@@ -388,7 +388,7 @@ public class CraftEventFactory {
         victim.newExp = event.getNewExp();
 
         for (org.bukkit.inventory.ItemStack stack : event.getDrops()) {
-            if (stack == null || stack.getType() == Material.AIR) continue;
+            if (stack == null) continue; // MCPC+ - temp fix until I find out why modded items from bukkit show up as AIR at this point
 
             // MCPC+ start - add support for Forge's PlayerDropsEvent
             //world.dropItemNaturally(entity.getLocation(), stack); // handle world drop in EntityPlayerMP
