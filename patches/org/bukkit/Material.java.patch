@@ -67,24 +67,26 @@
      }
  
      /**
-@@ -624,7 +650,167 @@
+@@ -624,7 +650,169 @@
          return result;
      }
  
 +    /* ===============================  MCPC+ START ============================= */
-+    public static void addMaterial(int id, boolean isBlock)
++    public static Material addMaterial(int id, boolean isBlock)
 +    {
-+        addMaterial(id, "X" + String.valueOf(id), isBlock);
++        return addMaterial(id, "X" + String.valueOf(id), isBlock);
 +    }
 +
-+    public static void addMaterial(int id, String name, boolean isBlock) {
++    public static Material addMaterial(int id, String name, boolean isBlock) {
 +      if (byId[id] == null) {
 +        String material_name = name.toUpperCase().trim();
 +        material_name = material_name.replaceAll("[^A-Za-z0-9]", "_");
 +        Material material = (Material) EnumHelper.addEnum(Material.class, material_name, new Class[]{Integer.TYPE, Boolean.TYPE}, new Object[]{Integer.valueOf(id), isBlock});
 +        byId[id] = material;
 +        BY_NAME.put(material_name, material);
++        return material;
 +      }
++      return null;
 +    }
 +
 +    public static void setMaterialName(int id, String name, boolean flag) {

@@ -1,0 +1,24 @@
+--- ../src-base/minecraft/cpw/mods/fml/common/registry/GameData.java
++++ ../src-work/minecraft/cpw/mods/fml/common/registry/GameData.java
+@@ -514,6 +514,21 @@
+                             newId = newData.registerItem(frozen.iItemRegistry.getRaw(itemName), itemName, currId);
+                         }
+ 
++                        // MCPC+ start - register item/block materials for Bukkit
++                        org.bukkit.Material material = org.bukkit.Material.addMaterial(newId, itemName, isBlock);
++                        if (material != null)
++                        {
++                            if (isBlock)
++                            {
++                                FMLLog.info("Injected new Bukkit block material %s with ID %d.", material.name(), material.getId());
++                            }
++                            else
++                            {
++                                FMLLog.info("Injected new Bukkit item material %s with ID %d.", material.name(), material.getId());
++                            }
++                        }
++                        // MCPC+ end
++
+                         FMLLog.info("Injected new block/item %s: %d (init) -> %d (map).", itemName, currId, newId);
+ 
+                         if (newId != currId) // a new id was assigned
