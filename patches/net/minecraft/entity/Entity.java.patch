@@ -420,7 +420,7 @@
              this.prevPosX = this.lastTickPosX = this.posX = nbttaglist.func_150309_d(0);
              this.prevPosY = this.lastTickPosY = this.posY = nbttaglist.func_150309_d(1);
              this.prevPosZ = this.lastTickPosZ = this.posZ = nbttaglist.func_150309_d(2);
-@@ -1436,6 +1670,72 @@
+@@ -1436,6 +1670,78 @@
              {
                  this.setPosition(this.posX, this.posY, this.posZ);
              }
@@ -483,6 +483,12 @@
 +                if (bworld == null)
 +                {
 +                    EntityPlayerMP entityPlayer = (EntityPlayerMP) this;
++                    // MCPC+ start - validate dimension exists. if dimension does not exist, set to overworld.
++                    if ( ((org.bukkit.craftbukkit.CraftServer) server).getServer().worldServerForDimension(entityPlayer.dimension) == null)
++                    {
++                        entityPlayer.dimension = 0;
++                    }
++                    // MCPC+ end
 +                    bworld = ((org.bukkit.craftbukkit.CraftServer) server).getServer().worldServerForDimension(entityPlayer.dimension).getWorld();
 +                }
 +
@@ -493,7 +499,7 @@
          }
          catch (Throwable throwable)
          {
-@@ -1653,13 +1953,52 @@
+@@ -1653,13 +1959,52 @@
  
      public void mountEntity(Entity par1Entity)
      {
@@ -547,7 +553,7 @@
                  this.setLocationAndAngles(this.ridingEntity.posX, this.ridingEntity.boundingBox.minY + (double)this.ridingEntity.height, this.ridingEntity.posZ, this.rotationYaw, this.rotationPitch);
                  this.ridingEntity.riddenByEntity = null;
              }
-@@ -1668,13 +2007,63 @@
+@@ -1668,13 +2013,63 @@
          }
          else
          {
@@ -613,7 +619,7 @@
          }
      }
  
-@@ -1849,12 +2238,48 @@
+@@ -1849,12 +2244,48 @@
  
      public void onStruckByLightning(EntityLightningBolt par1EntityLightningBolt)
      {
@@ -664,7 +670,7 @@
          }
      }
  
-@@ -2027,36 +2452,62 @@
+@@ -2027,36 +2458,62 @@
          {
              this.worldObj.theProfiler.startSection("changeDimension");
              MinecraftServer minecraftserver = MinecraftServer.getServer();
@@ -743,7 +749,7 @@
              }
  
              this.isDead = true;
-@@ -2066,7 +2517,6 @@
+@@ -2066,7 +2523,6 @@
              this.worldObj.theProfiler.endSection();
          }
      }
