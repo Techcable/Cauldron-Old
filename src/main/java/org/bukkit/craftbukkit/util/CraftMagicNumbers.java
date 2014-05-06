@@ -70,6 +70,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
     }
 
     public static net.minecraft.block.Block getBlock(Material material) {
+        material = material == null ? Material.AIR : material; // MCPC+ - BOP sometimes ends up with a null material here
         // TODO: Don't use ID
         net.minecraft.block.Block block = net.minecraft.block.Block.getBlockById(material.getId());
 
