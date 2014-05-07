@@ -1,0 +1,24 @@
+--- ../src-base/minecraft/cpw/mods/fml/common/registry/FMLControlledNamespacedRegistry.java
++++ ../src-work/minecraft/cpw/mods/fml/common/registry/FMLControlledNamespacedRegistry.java
+@@ -375,6 +375,21 @@
+         if (thing == null) throw new NullPointerException("The object to be added to the registry is null. This can only happen with a corrupted registry state. Reflection/ASM hackery? Registry bug?");
+         if (!superType.isInstance(thing)) throw new IllegalArgumentException("The object to be added to the registry is not of the right type. Reflection/ASM hackery? Registry bug?");
+ 
++        // MCPC+ start - register item/block materials for Bukkit
++        boolean isBlock = thing instanceof net.minecraft.block.Block ? true : false;
++        org.bukkit.Material material = org.bukkit.Material.addMaterial(id, name, isBlock);
++        if (material != null)
++        {
++            if (isBlock)
++            {
++                FMLLog.info("Injected new Forge block material %s with ID %d.", material.name(), material.getId());
++            }
++            else
++            {
++                FMLLog.info("Injected new Forge item material %s with ID %d.", material.name(), material.getId());
++            }
++        }
++        // MCPC+ end
+         underlyingIntegerMap.func_148746_a(thing, id); // obj <-> id
+         super.putObject(name, thing); // name <-> obj
+     }
