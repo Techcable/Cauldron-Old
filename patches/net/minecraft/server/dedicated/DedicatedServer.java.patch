@@ -43,7 +43,7 @@
          Thread thread = new Thread("Server Infinisleeper")
          {
              private static final String __OBFID = "CL_00001787";
-@@ -79,7 +92,7 @@
+@@ -79,31 +92,70 @@
          };
      }
  
@@ -52,7 +52,48 @@
      {
          Thread thread = new Thread("Server console handler")
          {
-@@ -104,6 +117,32 @@
+             private static final String __OBFID = "CL_00001786";
++            final DedicatedServer server = DedicatedServer.this;
++
+             public void run()
+             {
+-                BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(System.in));
+-                String s4;
++                // CraftBukkit start
++                if (!useConsole) {
++                    return;
++                }
++                // CraftBukkit end
+ 
+-                try
+-                {
+-                    while (!DedicatedServer.this.isServerStopped() && DedicatedServer.this.isServerRunning() && (s4 = bufferedreader.readLine()) != null)
+-                    {
+-                        DedicatedServer.this.addPendingCommand(s4, DedicatedServer.this);
++                jline.console.ConsoleReader bufferedreader = this.server.reader; // CraftBukkit
++                String s;
++
++                try {
++                    // CraftBukkit start - JLine disabling compatibility
++                    while (!this.server.isServerStopped() && this.server.isServerRunning()) {
++                        if (useJline) {
++                            s = bufferedreader.readLine(">", null);
++                        } else {
++                            s = bufferedreader.readLine();
++                        }
++                        if (s != null) {
++                            this.server.addPendingCommand(s, this.server);
++                        }
++                        // CraftBukkit end
+                     }
++                } catch (IOException ioexception) {
++                    DedicatedServer.field_155771_h.error("Exception handling console input", ioexception);
+                 }
+-                catch (IOException ioexception1)
+-                {
+-                    DedicatedServer.field_155771_h.error("Exception handling console input", ioexception1);
+-                }
+             }
          };
          thread.setDaemon(true);
          thread.start();
@@ -85,7 +126,7 @@
          field_155771_h.info("Starting minecraft server version 1.7.2");
  
          if (Runtime.getRuntime().maxMemory() / 1024L / 1024L < 512L)
-@@ -114,7 +153,7 @@
+@@ -114,7 +166,7 @@
          FMLCommonHandler.instance().onServerStart(this);
  
          field_155771_h.info("Loading properties");
@@ -94,7 +135,7 @@
  
          if (this.isSinglePlayer())
          {
-@@ -160,22 +199,39 @@
+@@ -160,22 +212,39 @@
              this.setServerPort(this.settings.getIntProperty("server-port", 25565));
          }
  
@@ -143,7 +184,7 @@
          if (!this.isServerInOnlineMode())
          {
              field_155771_h.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
-@@ -186,7 +242,8 @@
+@@ -186,7 +255,8 @@
  
          FMLCommonHandler.instance().onServerStarted();
  
@@ -153,7 +194,7 @@
          long j = System.nanoTime();
  
          if (this.getFolderName() == null)
-@@ -238,6 +295,21 @@
+@@ -238,6 +308,21 @@
          String s3 = String.format("%.3fs", new Object[] {Double.valueOf((double)i1 / 1.0E9D)});
          field_155771_h.info("Done (" + s3 + ")! For help, type \"help\" or \"?\"");
  
@@ -175,7 +216,7 @@
          if (this.settings.getBooleanProperty("enable-query", false))
          {
              field_155771_h.info("Starting GS4 status listener");
-@@ -250,12 +322,30 @@
+@@ -250,12 +335,30 @@
              field_155771_h.info("Starting remote control listener");
              this.theRConThreadMain = new RConThreadMain(this);
              this.theRConThreadMain.startThread();
@@ -207,7 +248,7 @@
      public boolean canStructuresSpawn()
      {
          return this.canSpawnStructures;
-@@ -358,8 +448,14 @@
+@@ -358,8 +461,14 @@
      {
          while (!this.pendingCommandList.isEmpty())
          {
