@@ -1,19 +1,19 @@
 --- ../src-base/minecraft/org/bukkit/command/defaults/ReloadCommand.java
 +++ ../src-work/minecraft/org/bukkit/command/defaults/ReloadCommand.java
-@@ -18,16 +18,11 @@
+@@ -18,11 +18,16 @@
  
      @Override
      public boolean execute(CommandSender sender, String currentAlias, String[] args) {
--        // MCPC+ start - disable reload as it causes many issues with mods
--        /*
++        // MCPC+ start - disable reload as it causes many issues with mods
++        /*
          if (!testPermission(sender)) return true;
  
          org.spigotmc.CustomTimingsHandler.reload(); // Spigot: TODO: Why is this here?
          Bukkit.reload();
          Command.broadcastCommandMessage(sender, ChatColor.GREEN + "Reload complete.");
--        */
--        sender.sendMessage(ChatColor.RED + "Reload not allowed on an MCPC+ server.");
--        // MCPC+ end
++        */
++        sender.sendMessage(ChatColor.RED + "Reload not allowed on an MCPC+ server.");
++        // MCPC+ end
  
          return true;
      }
