@@ -47,7 +47,7 @@
 +        if (list != null)
 +            customCommand.setAliases(list);
 +        commandMap.register(par1ICommand.getCommandName(), customCommand);
-+        FMLCommonHandler.instance().getMinecraftServerInstance().server.getLogger().info("Registered command " + par1ICommand.getCommandName() + " with permission node " + permissionNode);
++        LogManager.getLogger().info("Registered command " + par1ICommand.getCommandName() + " with permission node " + permissionNode);
 +        // MCPC+ end
  
          if (list != null)

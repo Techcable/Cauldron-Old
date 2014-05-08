@@ -172,7 +172,7 @@ public class SpigotConfig
         outdatedServerMessage = transform( getString( "messages.outdated-server", outdatedServerMessage ) );
     }
 
-    public static int timeoutTime = 60;
+    public static int timeoutTime = 90; // MCPC+ - raise to 90
     public static boolean restartOnCrash = true;
     public static String restartScript = "./start.sh";
     public static String restartMessage;
