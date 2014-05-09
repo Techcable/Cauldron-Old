@@ -326,7 +326,15 @@
      }
  
      protected String getSwimSound()
-@@ -935,7 +1129,16 @@
+@@ -928,6 +1122,7 @@
+         return null;
+     }
+ 
++    // MCPC+ start - vanilla compatibility
+     protected void dealFireDamage(int par1)
+     {
+         if (!this.isImmuneToFire)
+@@ -935,7 +1130,16 @@
              this.attackEntityFrom(DamageSource.inFire, (float)par1);
          }
      }
@@ -343,23 +351,7 @@
      public final boolean isImmuneToFire()
      {
          return this.isImmuneToFire;
-@@ -1113,6 +1316,15 @@
- 
-     public void setWorld(World par1World)
-     {
-+        // CraftBukkit start
-+        if (par1World == null)
-+        {
-+            this.setDead();
-+            this.worldObj = ((CraftWorld) Bukkit.getServer().getWorlds().get(0)).getHandle();
-+            return;
-+        }
-+
-+        // CraftBukkit end
-         this.worldObj = par1World;
-     }
- 
-@@ -1184,6 +1396,8 @@
+@@ -1184,6 +1388,8 @@
  
      public void onCollideWithPlayer(EntityPlayer par1EntityPlayer) {}
  
@@ -368,7 +360,7 @@
      public void applyEntityCollision(Entity par1Entity)
      {
          if (par1Entity.riddenByEntity != this && par1Entity.ridingEntity != this)
-@@ -1310,6 +1524,20 @@
+@@ -1310,6 +1516,20 @@
          {
              par1NBTTagCompound.setTag("Pos", this.newDoubleNBTList(new double[] {this.posX, this.posY + (double)this.ySize, this.posZ}));
              par1NBTTagCompound.setTag("Motion", this.newDoubleNBTList(new double[] {this.motionX, this.motionY, this.motionZ}));
@@ -389,7 +381,7 @@
              par1NBTTagCompound.setTag("Rotation", this.newFloatNBTList(new float[] {this.rotationYaw, this.rotationPitch}));
              par1NBTTagCompound.setFloat("FallDistance", this.fallDistance);
              par1NBTTagCompound.setShort("Fire", (short)this.fire);
-@@ -1320,6 +1548,12 @@
+@@ -1320,6 +1540,12 @@
              par1NBTTagCompound.setInteger("PortalCooldown", this.timeUntilPortal);
              par1NBTTagCompound.setLong("UUIDMost", this.getUniqueID().getMostSignificantBits());
              par1NBTTagCompound.setLong("UUIDLeast", this.getUniqueID().getLeastSignificantBits());
@@ -402,7 +394,7 @@
              if (customEntityData != null)
              {
                  par1NBTTagCompound.setTag("ForgeData", customEntityData);
-@@ -1370,7 +1604,7 @@
+@@ -1370,7 +1596,7 @@
              this.motionX = nbttaglist1.func_150309_d(0);
              this.motionY = nbttaglist1.func_150309_d(1);
              this.motionZ = nbttaglist1.func_150309_d(2);
@@ -411,7 +403,7 @@
              if (Math.abs(this.motionX) > 10.0D)
              {
                  this.motionX = 0.0D;
-@@ -1385,7 +1619,7 @@
+@@ -1385,7 +1611,7 @@
              {
                  this.motionZ = 0.0D;
              }
@@ -420,7 +412,7 @@
              this.prevPosX = this.lastTickPosX = this.posX = nbttaglist.func_150309_d(0);
              this.prevPosY = this.lastTickPosY = this.posY = nbttaglist.func_150309_d(1);
              this.prevPosZ = this.lastTickPosZ = this.posZ = nbttaglist.func_150309_d(2);
-@@ -1436,6 +1670,78 @@
+@@ -1436,6 +1662,76 @@
              {
                  this.setPosition(this.posX, this.posY, this.posZ);
              }
@@ -483,23 +475,21 @@
 +                if (bworld == null)
 +                {
 +                    EntityPlayerMP entityPlayer = (EntityPlayerMP) this;
-+                    // MCPC+ start - validate dimension exists. if dimension does not exist, set to overworld.
-+                    if ( ((org.bukkit.craftbukkit.CraftServer) server).getServer().worldServerForDimension(entityPlayer.dimension) == null)
-+                    {
-+                        entityPlayer.dimension = 0;
-+                    }
-+                    // MCPC+ end
-+                    bworld = ((org.bukkit.craftbukkit.CraftServer) server).getServer().worldServerForDimension(entityPlayer.dimension).getWorld();
++                    // MCPC+ start - use CraftBukkit's fallback world code if no valid world is found.
++                    entityPlayer.setWorld(MinecraftServer.getServer().worldServerForDimension(entityPlayer.dimension));
 +                }
-+
-+                this.setWorld(bworld == null ? null : ((CraftWorld) bworld).getHandle());
++                else
++                {
++                    this.setWorld(((CraftWorld) bworld).getHandle());
++                    // MCPC+ end
++                }
 +            }
 +
 +            // CraftBukkit end
          }
          catch (Throwable throwable)
          {
-@@ -1653,13 +1959,52 @@
+@@ -1653,13 +1949,52 @@
  
      public void mountEntity(Entity par1Entity)
      {
@@ -553,7 +543,7 @@
                  this.setLocationAndAngles(this.ridingEntity.posX, this.ridingEntity.boundingBox.minY + (double)this.ridingEntity.height, this.ridingEntity.posZ, this.rotationYaw, this.rotationPitch);
                  this.ridingEntity.riddenByEntity = null;
              }
-@@ -1668,13 +2013,63 @@
+@@ -1668,13 +2003,63 @@
          }
          else
          {
@@ -619,7 +609,7 @@
          }
      }
  
-@@ -1849,12 +2244,48 @@
+@@ -1849,12 +2234,48 @@
  
      public void onStruckByLightning(EntityLightningBolt par1EntityLightningBolt)
      {
@@ -670,7 +660,7 @@
          }
      }
  
-@@ -2027,36 +2458,62 @@
+@@ -2027,36 +2448,62 @@
          {
              this.worldObj.theProfiler.startSection("changeDimension");
              MinecraftServer minecraftserver = MinecraftServer.getServer();
@@ -749,7 +739,7 @@
              }
  
              this.isDead = true;
-@@ -2066,7 +2523,6 @@
+@@ -2066,7 +2513,6 @@
              this.worldObj.theProfiler.endSection();
          }
      }
