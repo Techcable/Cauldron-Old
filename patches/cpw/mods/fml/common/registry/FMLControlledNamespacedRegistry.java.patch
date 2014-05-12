@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/cpw/mods/fml/common/registry/FMLControlledNamespacedRegistry.java
 +++ ../src-work/minecraft/cpw/mods/fml/common/registry/FMLControlledNamespacedRegistry.java
-@@ -375,6 +375,21 @@
+@@ -417,6 +417,21 @@
          if (thing == null) throw new NullPointerException("The object to be added to the registry is null. This can only happen with a corrupted registry state. Reflection/ASM hackery? Registry bug?");
          if (!superType.isInstance(thing)) throw new IllegalArgumentException("The object to be added to the registry is not of the right type. Reflection/ASM hackery? Registry bug?");
  

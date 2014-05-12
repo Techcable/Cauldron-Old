@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/cpw/mods/fml/common/network/handshake/NetworkDispatcher.java
 +++ ../src-work/minecraft/cpw/mods/fml/common/network/handshake/NetworkDispatcher.java
-@@ -201,7 +201,7 @@
+@@ -202,7 +202,7 @@
          }
          else
          {
@@ -9,7 +9,7 @@
          }
          return false;
      }
-@@ -453,7 +453,7 @@
+@@ -464,7 +464,7 @@
          // Stop the epic channel closed spam at close
          if (!(cause instanceof ClosedChannelException))
          {

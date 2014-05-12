@@ -85,7 +85,7 @@
 +    public boolean fromMobSpawner;
 +    public void inactiveTick() { }
 +    // Spigot end
-     private HashMap<String, IExtendedEntityProperties> extendedProperties;
+     protected HashMap<String, IExtendedEntityProperties> extendedProperties;
  
      public int getEntityId()
 @@ -159,7 +205,7 @@
@@ -746,4 +746,4 @@
 -
      public float func_145772_a(Explosion p_145772_1_, World p_145772_2_, int p_145772_3_, int p_145772_4_, int p_145772_5_, Block p_145772_6_)
      {
-         return p_145772_6_.getExplosionResistance(this, p_145772_2_, p_145772_3_, p_145772_3_, p_145772_4_, posX, posY + getEyeHeight(), posZ);
+         return p_145772_6_.getExplosionResistance(this, p_145772_2_, p_145772_3_, p_145772_4_, p_145772_5_, posX, posY + getEyeHeight(), posZ);
