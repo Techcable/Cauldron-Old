@@ -37,12 +37,12 @@
         </Routing>
     </Appenders>
     <Loggers>
-        <Root level="all">
+        <Root level="info">
             <AppenderRef ref="SysOut" level="INFO" />
             <AppenderRef ref="TerminalConsole" level="INFO" />
             <AppenderRef ref="File" level="INFO" />
 	    <AppenderRef ref="FmlSysOut" level="INFO" />
-            <AppenderRef ref="FmlFile"/>
+            <AppenderRef ref="FmlFile" level="INFO"/>
         </Root>
     </Loggers>
 </Configuration>
