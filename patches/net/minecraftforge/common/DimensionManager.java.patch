@@ -28,7 +28,7 @@
  
      public static boolean registerProviderType(int id, Class<? extends WorldProvider> provider, boolean keepLoaded)
      {
-@@ -53,6 +67,24 @@
+@@ -53,7 +67,25 @@
          {
              return false;
          }
@@ -48,11 +48,12 @@
 +        za.co.mcportcentral.MCPCConfig.init();
 +        keepLoaded = za.co.mcportcentral.MCPCConfig.getBoolean("world-environment-settings." + worldType + ".keep-world-loaded", keepLoaded);
 +        za.co.mcportcentral.MCPCConfig.save();
-+        classToProviders.put(provider, id);
 +        // MCPC+ end
          providers.put(id, provider);
++        classToProviders.put(provider, id);
          spawnSettings.put(id, keepLoaded);
          return true;
+     }
 @@ -157,28 +189,33 @@
  
      public static Integer[] getIDs(boolean check)
@@ -286,7 +287,7 @@
      {
          int id = getProviderType(dim);
 -        return spawnSettings.containsKey(id) && spawnSettings.get(id);
-+        return ((spawnSettings.containsKey(id) && spawnSettings.get(id)) || getWorld(dim).keepSpawnInMemory); // MCPC+ added bukkit check
++        return ((spawnSettings.containsKey(id) && spawnSettings.get(id)) || (getWorld(dim) != null && getWorld(dim).keepSpawnInMemory)); // MCPC+ added bukkit check
      }
  
      static

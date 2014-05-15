@@ -57,7 +57,7 @@
 +    // Add env and gen to constructor
 +    public WorldServer(MinecraftServer p_i45284_1_, ISaveHandler p_i45284_2_, String p_i45284_3_, int p_i45284_4_, WorldSettings p_i45284_5_, Profiler p_i45284_6_, org.bukkit.World.Environment env, org.bukkit.generator.ChunkGenerator gen)
 +    {
-+        super(p_i45284_2_, p_i45284_3_, p_i45284_5_, WorldProvider.getProviderForDimension(env.getId()), p_i45284_6_, gen, env);
++        super(p_i45284_2_, p_i45284_3_, p_i45284_5_, WorldProvider.getProviderForDimension(p_i45284_4_), p_i45284_6_, gen, env);
 +        this.dimension = p_i45284_4_;
 +        this.pvpMode = p_i45284_1_.isPVPEnabled();
 +        // CraftBukkit end
