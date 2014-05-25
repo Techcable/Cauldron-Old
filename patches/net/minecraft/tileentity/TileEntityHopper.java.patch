@@ -53,7 +53,7 @@
      private static final String __OBFID = "CL_00000359";
  
      public void readFromNBT(NBTTagCompound p_145839_1_)
-@@ -232,11 +273,44 @@
+@@ -232,11 +273,64 @@
                  if (this.getStackInSlot(i) != null)
                  {
                      ItemStack itemstack = this.getStackInSlot(i).copy();
@@ -69,7 +69,27 @@
 +                    }
 +                    else
 +                    {
-+                        destinationInventory = iinventory.getOwner().getInventory();
++                        // MCPC+ start - support mod inventories, with no owners
++                        try {
++                            if (iinventory.getOwner() != null) {
++                                destinationInventory = iinventory.getOwner().getInventory();
++                            } else {
++                                // TODO: create a mod inventory for passing to the event, instead of null
++                                destinationInventory = null;
++                            }
++                         } catch (AbstractMethodError e) { // fixes openblocks AbstractMethodError
++                            if (iinventory instanceof net.minecraft.tileentity.TileEntity) {
++                                org.bukkit.inventory.InventoryHolder holder = za.co.mcportcentral.MCPCUtils.getOwner((net.minecraft.tileentity.TileEntity)iinventory);
++                                if (holder != null) {
++                                    destinationInventory = holder.getInventory();
++                                } else {
++                                    destinationInventory = null;
++                                }
++                            } else {
++                                destinationInventory = null;
++                            }
++                        }
++                        // MCPC+ end
 +                    }
 +
 +                    InventoryMoveItemEvent event = new InventoryMoveItemEvent(this.getOwner().getInventory(), oitemstack.clone(), destinationInventory, true);
@@ -100,7 +120,7 @@
                          return true;
                      }
  
-@@ -302,11 +376,53 @@
+@@ -302,11 +396,53 @@
          if (itemstack != null && func_145890_b(p_145892_1_, itemstack, p_145892_2_, p_145892_3_))
          {
              ItemStack itemstack1 = itemstack.copy();
@@ -156,7 +176,7 @@
                  return true;
              }
  
-@@ -326,6 +442,16 @@
+@@ -326,6 +462,16 @@
          }
          else
          {

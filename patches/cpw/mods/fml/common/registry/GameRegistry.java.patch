@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/cpw/mods/fml/common/registry/GameRegistry.java
 +++ ../src-work/minecraft/cpw/mods/fml/common/registry/GameRegistry.java
-@@ -49,6 +49,7 @@
+@@ -53,6 +53,7 @@
  import cpw.mods.fml.common.LoaderException;
  import cpw.mods.fml.common.LoaderState;
  import cpw.mods.fml.common.ObfuscationReflectionHelper;
@@ -8,7 +8,7 @@
  
  public class GameRegistry
  {
-@@ -56,6 +57,10 @@
+@@ -60,6 +61,10 @@
      private static Map<IWorldGenerator, Integer> worldGeneratorIndex = Maps.newHashMap();
      private static List<IFuelHandler> fuelHandlers = Lists.newArrayList();
      private static List<IWorldGenerator> sortedGeneratorList;
@@ -19,7 +19,7 @@
  
      /**
       * Register a world generator - something that inserts new block types into the world
-@@ -66,12 +71,18 @@
+@@ -70,12 +75,18 @@
       */
      public static void registerWorldGenerator(IWorldGenerator generator, int modGenerationWeight)
      {
@@ -38,7 +38,7 @@
      }
  
      /**
-@@ -96,11 +107,28 @@
+@@ -100,11 +111,28 @@
          long zSeed = fmlRandom.nextLong() >> 2 + 1L;
          long chunkSeed = (xSeed * chunkX + zSeed * chunkZ) ^ worldSeed;
  

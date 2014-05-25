@@ -996,7 +996,7 @@
      }
  
      public boolean isAllowedToLogin(String par1Str)
-@@ -810,8 +1513,16 @@
+@@ -810,14 +1513,29 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -1014,7 +1014,20 @@
              if (entityplayermp != p_148543_1_ && entityplayermp.dimension == p_148543_10_)
              {
                  double d4 = p_148543_2_ - entityplayermp.posX;
-@@ -862,16 +1573,19 @@
+                 double d5 = p_148543_4_ - entityplayermp.posY;
+                 double d6 = p_148543_6_ - entityplayermp.posZ;
+ 
++                // MCPC+ start - send packets only to players within configured player tracking range)
++                if (p_148543_8_ > org.spigotmc.TrackingRange.getEntityTrackingRange(entityplayermp, 512))
++                {
++                    p_148543_8_ = org.spigotmc.TrackingRange.getEntityTrackingRange(entityplayermp, 512);
++                }
++                // MCPC+ end
++
+                 if (d4 * d4 + d5 * d5 + d6 * d6 < p_148543_8_ * p_148543_8_)
+                 {
+                     entityplayermp.playerNetServerHandler.sendPacket(p_148543_11_);
+@@ -862,16 +1580,19 @@
  
          if (par2WorldServer.isRaining())
          {
@@ -1038,7 +1051,7 @@
          par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(par1EntityPlayerMP.inventory.currentItem));
      }
  
-@@ -887,7 +1601,10 @@
+@@ -887,7 +1608,10 @@
  
      public String[] getAvailablePlayerDat()
      {
@@ -1050,7 +1063,7 @@
      }
  
      public void setWhiteListEnabled(boolean par1)
-@@ -956,12 +1673,31 @@
+@@ -956,12 +1680,31 @@
  
      public void removeAllPlayers()
      {

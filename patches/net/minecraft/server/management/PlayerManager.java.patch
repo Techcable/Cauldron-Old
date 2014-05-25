@@ -191,7 +191,7 @@
              }
          }
      }
-@@ -276,23 +344,87 @@
+@@ -276,23 +344,93 @@
          return par0 * 16 - 16;
      }
  
@@ -266,7 +266,13 @@
 +        // CraftBukkit start
 +        private final HashMap<EntityPlayerMP, Runnable> players = new HashMap<EntityPlayerMP, Runnable>();
 +        public boolean loaded = false;
-+        private Runnable loadedRunnable = new PlayerInstanceRunnable(this); // MCPC+ - fix ClassNotFoundException with LaunchClassLoader
++        private Runnable loadedRunnable = new Runnable()
++        {
++            public void run()
++            {
++                PlayerInstance.this.loaded = true;
++            }
++        };
 +        // CraftBukkit end
          private static final String __OBFID = "CL_00001435";
  
@@ -284,7 +290,7 @@
          {
              if (this.playersWatchingChunk.contains(par1EntityPlayerMP))
              {
-@@ -306,7 +438,22 @@
+@@ -306,7 +444,28 @@
                  }
  
                  this.playersWatchingChunk.add(par1EntityPlayerMP);
@@ -299,7 +305,13 @@
 +                }
 +                else
 +                {
-+                    playerRunnable = new PlayerInstanceRunnable2(par1EntityPlayerMP, this); // MCPC+ - fix ClassNotFoundException with LaunchClassLoader
++                    playerRunnable = new Runnable()
++                    {
++                        public void run()
++                        {
++                            par1EntityPlayerMP.loadedChunks.add(PlayerInstance.this.chunkLocation);
++                        }
++                    };
 +                    PlayerManager.this.getWorldServer().theChunkProviderServer.getChunkAt(this.chunkLocation.chunkXPos, this.chunkLocation.chunkZPos, playerRunnable);
 +                }
 +
@@ -308,7 +320,7 @@
              }
          }
  
-@@ -314,6 +461,25 @@
+@@ -314,6 +473,25 @@
          {
              if (this.playersWatchingChunk.contains(par1EntityPlayerMP))
              {
@@ -334,7 +346,7 @@
                  Chunk chunk = PlayerManager.this.theWorldServer.getChunkFromChunkCoords(this.chunkLocation.chunkXPos, this.chunkLocation.chunkZPos);
  
                  if (chunk.func_150802_k())
-@@ -321,6 +487,7 @@
+@@ -321,6 +499,7 @@
                      par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S21PacketChunkData(chunk, true, 0));
                  }
  
@@ -342,25 +354,12 @@
                  this.playersWatchingChunk.remove(par1EntityPlayerMP);
                  par1EntityPlayerMP.loadedChunks.remove(this.chunkLocation);
  
-@@ -424,10 +591,10 @@
+@@ -424,7 +603,7 @@
                      {
                          i = this.chunkLocation.chunkXPos * 16;
                          j = this.chunkLocation.chunkZPos * 16;
 -                        this.sendToAllPlayersWatchingChunk(new S21PacketChunkData(PlayerManager.this.theWorldServer.getChunkFromChunkCoords(this.chunkLocation.chunkXPos, this.chunkLocation.chunkZPos), false, this.flagsYAreasToUpdate));
 +                        this.sendToAllPlayersWatchingChunk(new S21PacketChunkData(PlayerManager.this.theWorldServer.getChunkFromChunkCoords(this.chunkLocation.chunkXPos, this.chunkLocation.chunkZPos), (this.flagsYAreasToUpdate == 0xFFFF), this.flagsYAreasToUpdate)); // CraftBukkit - send everything (including biome) if all sections flagged
  
--                        // Forge: Grabs ALL tile entities is costly on a modded server, only send needed ones
--                        for (k = 0; false && k < 16; ++k)
-+                        /* Forge: Grabs ALL tile entities is costly on a modded server, only send needed ones
-+                        for (k = 0; k < 16; ++k)
-                         {
-                             if ((this.flagsYAreasToUpdate & 1 << k) != 0)
-                             {
-@@ -440,6 +607,7 @@
-                                 }
-                             }
-                         }
-+                        */
-                     }
-                     else
-                     {
+                         // Forge: Grabs ALL tile entities is costly on a modded server, only send needed ones
+                         for (k = 0; false && k < 16; ++k)

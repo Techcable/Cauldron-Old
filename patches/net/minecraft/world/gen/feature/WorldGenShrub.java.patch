@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/gen/feature/WorldGenShrub.java
 +++ ../src-work/minecraft/net/minecraft/world/gen/feature/WorldGenShrub.java
-@@ -60,7 +60,13 @@
+@@ -62,7 +62,13 @@
                      }
                  }
              }

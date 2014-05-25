@@ -25,7 +25,7 @@ apply plugin: 'mcpc'
 
 minecraft {
     version = '1.7.2'
-    mcpVersion = '9.01-pre'
+    mcpVersion = '9.03'
     mainClass = 'cpw.mods.fml.relauncher.ServerLaunchWrapper'
     tweakClass = 'cpw.mods.fml.common.launcher.FMLTweaker'
     installerVersion = "1.4"
@@ -45,7 +45,7 @@ minecraft {
 }
 
 group = 'net.minecraftforge'
-version = "1.7.2-R0.4-forge1083"
+version = "1.7.2-R0.4-forge1091"
 
 jenkins {
     job = 'MCPC'
@@ -70,7 +70,7 @@ tasks.packageUniversal.manifest {
     'Implementation-Vendor': 'MCPC',
     'Implementation-Title': 'MCPC Plus',
     'Implementation-Version': 'git-MCPC-Plus-'+project.version+getBuild(),
-    'Forge-Version': '10.12.1.1083',
+    'Forge-Version': '10.12.1.1091',
     'Specification-Vendor': 'Bukkit Team',
     'Specification-Title': 'Bukkit',
     'Specification-Version': '1.7.2-R0.4-SNAPSHOT'
