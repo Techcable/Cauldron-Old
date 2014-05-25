@@ -7,7 +7,8 @@
   "filePath":"@universal_jar@",
   "welcome":"Welcome to the simple @project@ installer.",
   "minecraft":"@minecraft_version@",
-  "logo":"/big_logo.png"
+  "logo":"/big_logo.png",
+  "hideClient":true
 },
 "versionInfo": {
   "id": "@minecraft_version@-@project@@version@",

@@ -13,18 +13,23 @@
  public class SlotFurnace extends Slot
  {
      private EntityPlayer thePlayer;
-@@ -74,6 +80,15 @@
+@@ -74,6 +80,20 @@
                  i = j;
              }
  
-+            // CraftBukkit start
-+            Player player = (Player) thePlayer.getBukkitEntity();
-+            TileEntityFurnace furnace = ((TileEntityFurnace) this.inventory);
-+            org.bukkit.block.Block block = thePlayer.worldObj.getWorld().getBlockAt(furnace.xCoord, furnace.yCoord, furnace.zCoord);
-+            FurnaceExtractEvent event = new FurnaceExtractEvent(player, block, org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(par1ItemStack.getItem()), par1ItemStack.stackSize, i);
-+            thePlayer.worldObj.getServer().getPluginManager().callEvent(event);
-+            i = event.getExpToDrop();
-+            // CraftBukkit end
++            // MCPC+ start - validate inventory before attempting to cast it
++            if (this.inventory instanceof TileEntityFurnace) 
++            {
++                // CraftBukkit start
++                Player player = (Player) thePlayer.getBukkitEntity();
++                TileEntityFurnace furnace = ((TileEntityFurnace) this.inventory);
++                org.bukkit.block.Block block = thePlayer.worldObj.getWorld().getBlockAt(furnace.xCoord, furnace.yCoord, furnace.zCoord);
++                FurnaceExtractEvent event = new FurnaceExtractEvent(player, block, org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(par1ItemStack.getItem()), par1ItemStack.stackSize, i);
++                thePlayer.worldObj.getServer().getPluginManager().callEvent(event);
++                i = event.getExpToDrop();
++                // CraftBukkit end
++            }
++            // MCPC+ end
 +
              while (i > 0)
              {

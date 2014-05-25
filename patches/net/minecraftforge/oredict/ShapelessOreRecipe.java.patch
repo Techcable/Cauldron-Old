@@ -28,7 +28,7 @@
          output = recipe.getRecipeOutput();
  
          for(ItemStack ingred : ((List<ItemStack>)recipe.recipeItems))
-@@ -150,4 +157,13 @@
+@@ -146,4 +153,13 @@
      {
          return this.input;
      }
