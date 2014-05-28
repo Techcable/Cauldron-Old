@@ -53,7 +53,27 @@
      private static final String __OBFID = "CL_00000359";
  
      public void readFromNBT(NBTTagCompound p_145839_1_)
-@@ -232,11 +273,64 @@
+@@ -203,12 +244,18 @@
+ 
+                 if (flag)
+                 {
+-                    this.func_145896_c(8);
++                    this.func_145896_c(this.worldObj.spigotConfig.hopperTransfer); // Spigot
+                     this.markDirty();
+                     return true;
+                 }
+             }
+ 
++            // Spigot start
++            if (!this.func_145888_j())
++            {
++                this.func_145896_c(this.worldObj.spigotConfig.hopperCheck);
++            }
++            // Spigot end
+             return false;
+         }
+         else
+@@ -232,11 +279,64 @@
                  if (this.getStackInSlot(i) != null)
                  {
                      ItemStack itemstack = this.getStackInSlot(i).copy();
@@ -120,7 +140,7 @@
                          return true;
                      }
  
-@@ -302,11 +396,53 @@
+@@ -302,11 +402,70 @@
          if (itemstack != null && func_145890_b(p_145892_1_, itemstack, p_145892_2_, p_145892_3_))
          {
              ItemStack itemstack1 = itemstack.copy();
@@ -136,7 +156,24 @@
 +            }
 +            else
 +            {
-+                sourceInventory = p_145892_1_.getOwner().getInventory();
++                // MCPC+ start - support mod inventories, with no owners
++                try
++                {
++                    if (p_145892_1_.getOwner() != null)
++                    {
++                        sourceInventory = p_145892_1_.getOwner().getInventory();
++                    } 
++                    else
++                    {
++                        // TODO: create a mod inventory for passing to the event, instead of null
++                        sourceInventory = null;
++                    }
++                }
++                catch (AbstractMethodError e)
++                {
++                    sourceInventory = null;
++                }
++                // MCPC+ end
 +            }
 +
 +            InventoryMoveItemEvent event = new InventoryMoveItemEvent(sourceInventory, oitemstack.clone(), p_145892_0_.getOwner().getInventory(), false);
@@ -176,19 +213,23 @@
                  return true;
              }
  
-@@ -326,6 +462,16 @@
+@@ -326,6 +485,20 @@
          }
          else
          {
 +            // CraftBukkit start
-+            InventoryPickupItemEvent event = new InventoryPickupItemEvent(p_145898_0_.getOwner().getInventory(), (org.bukkit.entity.Item) p_145898_1_.getBukkitEntity());
-+            p_145898_1_.worldObj.getServer().getPluginManager().callEvent(event);
-+
-+            if (event.isCancelled())
++            // MCPC+ start - vanilla compatibility
++            if (p_145898_0_.getOwner() != null && p_145898_1_.getBukkitEntity() != null)
 +            {
-+                return false;
-+            }
++                InventoryPickupItemEvent event = new InventoryPickupItemEvent(p_145898_0_.getOwner().getInventory(), (org.bukkit.entity.Item) p_145898_1_.getBukkitEntity());
++                p_145898_1_.worldObj.getServer().getPluginManager().callEvent(event);
 +
++                if (event.isCancelled())
++                {
++                    return false;
++                }
++            }
++            // MCPC+ end
 +            // CraftBukkit end
              ItemStack itemstack = p_145898_1_.getEntityItem().copy();
              ItemStack itemstack1 = func_145889_a(p_145898_0_, itemstack, -1);

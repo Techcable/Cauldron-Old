@@ -28,28 +28,29 @@
                  p_149674_1_.setBlock(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.dirt);
              }
          }
-@@ -82,6 +96,25 @@
+@@ -82,6 +96,26 @@
                  return;
              }
  
 +            // CraftBukkit start - Interact soil
-+            org.bukkit.event.Cancellable cancellable;
++            // MCPC+ start - validate data before sending event
++            org.bukkit.event.Cancellable cancellable = null;
 +
 +            if (p_149746_5_ instanceof EntityPlayer)
 +            {
 +                cancellable = CraftEventFactory.callPlayerInteractEvent((EntityPlayer) p_149746_5_, org.bukkit.event.block.Action.PHYSICAL, p_149746_2_, p_149746_3_, p_149746_4_, -1, null);
 +            }
-+            else
++            else if (p_149746_1_ != null && p_149746_1_.getWorld() != null && p_149746_5_ != null)
 +            {
 +                cancellable = new EntityInteractEvent(p_149746_5_.getBukkitEntity(), p_149746_1_.getWorld().getBlockAt(p_149746_2_, p_149746_3_, p_149746_4_));
 +                p_149746_1_.getServer().getPluginManager().callEvent((EntityInteractEvent) cancellable);
 +            }
 +
-+            if (cancellable.isCancelled())
++            if (cancellable != null && cancellable.isCancelled())
 +            {
 +                return;
 +            }
-+
++            // MCPC+ end
 +            // CraftBukkit end
              p_149746_1_.setBlock(p_149746_2_, p_149746_3_, p_149746_4_, Blocks.dirt);
          }

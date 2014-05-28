@@ -183,7 +183,7 @@
          try {
              Class<?> jarClass;
              try {
-@@ -62,30 +212,256 @@
+@@ -62,30 +212,261 @@
          return findClass(name, true);
      }
  
@@ -253,6 +253,11 @@
 +                jarMapping.packages.put("com/google/common", "guava10/com/google/common");
 +            }
 +            jarMapping.packages.put(org_bukkit_craftbukkit + "/libs/com/google/gson", "com/google/gson"); // Handle Gson being in a "normal" place
++            // Bukkit moves these packages to nms while we keep them in root so we must relocate them for plugins that rely on them
++            jarMapping.packages.put("net/minecraft/util/io", "io");
++            jarMapping.packages.put("net/minecraft/util/com", "com");
++            jarMapping.packages.put("net/minecraft/util/gnu", "gnu");
++            jarMapping.packages.put("net/minecraft/util/org", "org");
 +
 +            if ((flags & F_REMAP_NMS172) != 0) {
 +                loadNmsMappings(jarMapping, "v1_7_R1");

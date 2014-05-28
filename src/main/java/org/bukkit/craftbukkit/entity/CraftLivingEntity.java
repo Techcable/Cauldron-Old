@@ -280,6 +280,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
             if (!(raw instanceof net.minecraft.potion.PotionEffect))
                 continue;
             net.minecraft.potion.PotionEffect handle = (net.minecraft.potion.PotionEffect) raw;
+            if (PotionEffectType.getById(handle.getPotionID()) == null) continue; // MCPC+ - ignore null types
             effects.add(new PotionEffect(PotionEffectType.getById(handle.getPotionID()), handle.getDuration(), handle.getAmplifier(), handle.getIsAmbient()));
         }
         return effects;

@@ -95,7 +95,7 @@
 +            maxPlayers = 60;
 +        }
 +
-+        // MCPC+ - send DimensionRegisterMessage to client before attempting to login to a Bukkit dimension
++        // MCPC+ start - send DimensionRegisterMessage to client before attempting to login to a Bukkit dimension
 +        if (DimensionManager.isBukkitDimension(par2EntityPlayerMP.dimension))
 +        {
 +            FMLEmbeddedChannel serverChannel = ForgeNetworkHandler.getServerChannel();
@@ -996,7 +996,15 @@
      }
  
      public boolean isAllowedToLogin(String par1Str)
-@@ -810,14 +1513,29 @@
+@@ -648,6 +1351,7 @@
+ 
+     public boolean isPlayerOpped(String par1Str)
+     {
++        if (par1Str == null) return false; // MCPC+ - fixes Aether ServerPlayerAPI initialization which passes a null username
+         return this.ops.contains(par1Str.trim().toLowerCase()) || this.mcServer.isSinglePlayer() && this.mcServer.worldServers[0].getWorldInfo().areCommandsAllowed() && this.mcServer.getServerOwner().equalsIgnoreCase(par1Str) || this.commandsAllowedForAll;
+     }
+ 
+@@ -810,14 +1514,29 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -1027,7 +1035,7 @@
                  if (d4 * d4 + d5 * d5 + d6 * d6 < p_148543_8_ * p_148543_8_)
                  {
                      entityplayermp.playerNetServerHandler.sendPacket(p_148543_11_);
-@@ -862,16 +1580,19 @@
+@@ -862,16 +1581,19 @@
  
          if (par2WorldServer.isRaining())
          {
@@ -1051,7 +1059,7 @@
          par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(par1EntityPlayerMP.inventory.currentItem));
      }
  
-@@ -887,7 +1608,10 @@
+@@ -887,7 +1609,10 @@
  
      public String[] getAvailablePlayerDat()
      {
@@ -1063,7 +1071,7 @@
      }
  
      public void setWhiteListEnabled(boolean par1)
-@@ -956,12 +1680,31 @@
+@@ -956,12 +1681,31 @@
  
      public void removeAllPlayers()
      {

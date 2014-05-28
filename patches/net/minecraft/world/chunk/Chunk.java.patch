@@ -52,7 +52,11 @@
      public Chunk(World p_i45446_1_, Block[] p_i45446_2_, int p_i45446_3_, int p_i45446_4_)
      {
          this(p_i45446_1_, p_i45446_3_, p_i45446_4_);
-@@ -590,7 +613,12 @@
+@@ -587,10 +610,16 @@
+ 
+             if (!this.worldObj.isRemote)
+             {
++                if (block1 == null) return false; // MCPC+
                  block1.onBlockPreDestroy(this.worldObj, l1, p_150807_2_, i2, k1);
              }
  
@@ -66,7 +70,7 @@
              extendedblockstorage.setExtBlockMetadata(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_5_); // Move this above to prevent other mods/tile entites from creating invalid ones for the wrong metadata
  
              if (!this.worldObj.isRemote)
-@@ -606,6 +634,14 @@
+@@ -606,6 +635,14 @@
                  }
              }
  
@@ -81,7 +85,7 @@
              if (extendedblockstorage.getBlockByExtId(p_150807_1_, p_150807_2_ & 15, p_150807_3_) != p_150807_4_)
              {
                  return false;
-@@ -768,8 +804,12 @@
+@@ -768,8 +805,12 @@
  
          if (i != this.xPosition || j != this.zPosition)
          {
@@ -96,7 +100,7 @@
          }
  
          int k = MathHelper.floor_double(par1Entity.posY / 16.0D);
-@@ -790,6 +830,28 @@
+@@ -790,6 +831,28 @@
          par1Entity.chunkCoordY = k;
          par1Entity.chunkCoordZ = this.zPosition;
          this.entityLists[k].add(par1Entity);
@@ -125,7 +129,7 @@
      }
  
      public void removeEntity(Entity par1Entity)
-@@ -810,6 +872,28 @@
+@@ -810,6 +873,28 @@
          }
  
          this.entityLists[par2].remove(par1Entity);
@@ -154,7 +158,7 @@
      }
  
      public boolean canBlockSeeTheSky(int par1, int par2, int par3)
-@@ -876,7 +960,16 @@
+@@ -876,7 +961,16 @@
  
              p_150812_4_.validate();
              this.chunkTileEntityMap.put(chunkposition, p_150812_4_);
@@ -171,7 +175,7 @@
      }
  
      public void removeTileEntity(int p_150805_1_, int p_150805_2_, int p_150805_3_)
-@@ -921,12 +1014,28 @@
+@@ -921,12 +1015,28 @@
  
          while (iterator.hasNext())
          {
@@ -201,7 +205,7 @@
              this.worldObj.unloadEntities(this.entityLists[i]);
          }
          MinecraftForge.EVENT_BUS.post(new ChunkEvent.Unload(this));
-@@ -1175,8 +1284,8 @@
+@@ -1175,8 +1285,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getMetadataArray();
@@ -212,7 +216,7 @@
              }
          }
  
-@@ -1185,8 +1294,8 @@
+@@ -1185,8 +1295,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getBlocklightArray();
@@ -223,7 +227,7 @@
              }
          }
  
-@@ -1197,8 +1306,8 @@
+@@ -1197,8 +1307,8 @@
                  if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
                  {
                      nibblearray = this.storageArrays[l].getSkylightArray();
@@ -234,7 +238,7 @@
                  }
              }
          }
-@@ -1220,8 +1329,8 @@
+@@ -1220,8 +1330,8 @@
                          nibblearray = this.storageArrays[l].createBlockMSBArray();
                      }
  

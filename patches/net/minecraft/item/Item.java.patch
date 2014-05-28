@@ -1,6 +1,14 @@
 --- ../src-base/minecraft/net/minecraft/item/Item.java
 +++ ../src-work/minecraft/net/minecraft/item/Item.java
-@@ -399,7 +399,13 @@
+@@ -54,6 +54,7 @@
+ import net.minecraft.util.WeightedRandomChestContent;
+ import net.minecraft.world.World;
+ import net.minecraftforge.common.ChestGenHooks;
++import net.minecraftforge.common.DimensionManager; // MCPC+
+ import net.minecraftforge.common.util.EnumHelper;
+ 
+ public class Item
+@@ -399,7 +400,13 @@
              else if (block == Blocks.double_plant)
              {
                  object = (new ItemDoublePlant(Blocks.double_plant, Blocks.double_plant, BlockDoublePlant.field_149892_a)).setUnlocalizedName("doublePlant");
@@ -14,3 +22,22 @@
              else
              {
                  if (hashset.contains(block))
+@@ -921,7 +928,17 @@
+      */
+     public int getEntityLifespan(ItemStack itemStack, World world)
+     {
+-        return 6000;
++        // MCPC+ start - fixes MFR proxy worlds used with grinder/slaughterhouse
++        if (world == null)
++        {
++            return 6000;
++        }
++        else if (world.spigotConfig == null)
++        {
++            return DimensionManager.getWorld(0).spigotConfig.itemDespawnRate;
++        }
++        // MCPC+ end
++        return world.spigotConfig.itemDespawnRate; // Spigot
+     }
+ 
+     /**
