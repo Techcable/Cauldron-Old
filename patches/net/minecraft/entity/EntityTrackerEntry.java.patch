@@ -141,19 +141,7 @@
                  this.func_151261_b(new S20PacketEntityProperties(this.myEntity.getEntityId(), set));
              }
  
-@@ -346,6 +408,11 @@
- 
-     public void tryStartWachingThis(EntityPlayerMP par1EntityPlayerMP)
-     {
-+        if (Thread.currentThread() != MinecraftServer.getServer().primaryThread)
-+        {
-+            throw new IllegalStateException("Asynchronous player tracker update!");    // Spigot
-+        }
-+
-         if (par1EntityPlayerMP != this.myEntity)
-         {
-             double d0 = par1EntityPlayerMP.posX - (double)(this.lastScaledXPosition / 32);
-@@ -355,6 +422,19 @@
+@@ -355,6 +417,19 @@
              {
                  if (!this.trackingPlayers.contains(par1EntityPlayerMP) && (this.isPlayerWatchingThisChunk(par1EntityPlayerMP) || this.myEntity.forceSpawn))
                  {
@@ -173,7 +161,7 @@
                      this.trackingPlayers.add(par1EntityPlayerMP);
                      Packet packet = this.func_151260_c();
                      par1EntityPlayerMP.playerNetServerHandler.sendPacket(packet);
-@@ -369,6 +449,13 @@
+@@ -369,6 +444,13 @@
                          ServersideAttributeMap serversideattributemap = (ServersideAttributeMap)((EntityLivingBase)this.myEntity).getAttributeMap();
                          Collection collection = serversideattributemap.getWatchedAttributes();
  
@@ -187,7 +175,7 @@
                          if (!collection.isEmpty())
                          {
                              par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S20PacketEntityProperties(this.myEntity.getEntityId(), collection));
-@@ -397,6 +484,14 @@
+@@ -397,6 +479,14 @@
                          par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, this.myEntity, this.myEntity.ridingEntity));
                      }
  
@@ -202,7 +190,7 @@
                      if (this.myEntity instanceof EntityLiving && ((EntityLiving)this.myEntity).getLeashedToEntity() != null)
                      {
                          par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this.myEntity, ((EntityLiving)this.myEntity).getLeashedToEntity()));
-@@ -425,6 +520,11 @@
+@@ -425,6 +515,11 @@
                          }
                      }
  
@@ -214,7 +202,7 @@
                      if (this.myEntity instanceof EntityLivingBase)
                      {
                          EntityLivingBase entitylivingbase = (EntityLivingBase)this.myEntity;
-@@ -463,7 +563,10 @@
+@@ -463,7 +558,10 @@
      {
          if (this.myEntity.isDead)
          {
@@ -226,15 +214,3 @@
          }
  
          Packet pkt = FMLNetworkHandler.getEntitySpawningPacket(this.myEntity);
-@@ -616,6 +719,11 @@
- 
-     public void removePlayerFromTracker(EntityPlayerMP par1EntityPlayerMP)
-     {
-+        if (Thread.currentThread() != MinecraftServer.getServer().primaryThread)
-+        {
-+            throw new IllegalStateException("Asynchronous player tracker clear!");    // Spigot
-+        }
-+
-         if (this.trackingPlayers.contains(par1EntityPlayerMP))
-         {
-             this.trackingPlayers.remove(par1EntityPlayerMP);

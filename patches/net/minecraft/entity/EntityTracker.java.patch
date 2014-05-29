@@ -17,29 +17,12 @@
      private int entityViewDistance;
      private static final String __OBFID = "CL_00001431";
  
-@@ -184,6 +185,13 @@
+@@ -184,6 +185,8 @@
  
      public void addEntityToTracker(Entity par1Entity, int par2, final int par3, boolean par4)
      {
-+        if (Thread.currentThread() != MinecraftServer.getServer().primaryThread)
-+        {
-+            throw new IllegalStateException("Asynchronous entity track!");    // Spigot
-+        }
-+
 +        par2 = org.spigotmc.TrackingRange.getEntityTrackingRange(par1Entity, par2); // Spigot
 +
          if (par2 > this.entityViewDistance)
          {
              par2 = this.entityViewDistance;
-@@ -238,6 +246,11 @@
- 
-     public void removeEntityFromAllTrackingPlayers(Entity par1Entity)
-     {
-+        if (Thread.currentThread() != MinecraftServer.getServer().primaryThread)
-+        {
-+            throw new IllegalStateException("Asynchronous entity untrack!");    // Spigot
-+        }
-+
-         if (par1Entity instanceof EntityPlayerMP)
-         {
-             EntityPlayerMP entityplayermp = (EntityPlayerMP)par1Entity;
