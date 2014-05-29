@@ -639,7 +639,7 @@
          {
              ChatComponentTranslation chatcomponenttranslation = new ChatComponentTranslation("chat.cannotSend", new Object[0]);
              chatcomponenttranslation.getChatStyle().setColor(EnumChatFormatting.RED);
-@@ -700,15 +1078,75 @@
+@@ -700,51 +1078,386 @@
              {
                  if (!ChatAllowedCharacters.isAllowedCharacter(s.charAt(i)))
                  {
@@ -681,10 +681,11 @@
                  }
              }
  
-             if (s.startsWith("/"))
+-            if (s.startsWith("/"))
++            // CraftBukkit start
++            if (!p_147354_1_.hasPriority())
              {
 -                this.handleSlashCommand(s);
-+                // CraftBukkit start
 +                try
 +                {
 +                    this.serverController.server.playerCommandState = true;
@@ -695,10 +696,15 @@
 +                    this.serverController.server.playerCommandState = false;
 +                }
              }
+-            else
 +            else if (s.isEmpty())
-+            {
+             {
+-                ChatComponentTranslation chatcomponenttranslation1 = new ChatComponentTranslation("chat.type.text", new Object[] {this.playerEntity.func_145748_c_(), s});
+-                chatcomponenttranslation1 = ForgeHooks.onServerChatEvent(this, s, chatcomponenttranslation1);
+-                if (chatcomponenttranslation1 == null) return;
+-                this.serverController.getConfigurationManager().sendChatMsgImpl(chatcomponenttranslation1, false);
 +                logger.warn(this.playerEntity.getCommandSenderName() + " tried to send an empty message");
-+            }
+             }
 +            else if (getPlayerB().isConversing())
 +            {
 +                getPlayerB().acceptConversationInput(s);
@@ -711,15 +717,9 @@
 +            }
 +            else if (true)
 +            {
-+                this.chat(s, p_147354_1_.hasPriority());
++                this.chat(s, true);
 +                // CraftBukkit end - the below is for reference. :)
 +            }
-             else
-             {
-                 ChatComponentTranslation chatcomponenttranslation1 = new ChatComponentTranslation("chat.type.text", new Object[] {this.playerEntity.func_145748_c_(), s});
-@@ -717,34 +1155,306 @@
-                 this.serverController.getConfigurationManager().sendChatMsgImpl(chatcomponenttranslation1, false);
-             }
  
 -            this.chatSpamThresholdCount += 20;
 +            // CraftBukkit start - replaced with thread safe throttle
@@ -771,7 +771,7 @@
 +            return;
 +        }
 +
-+        if (s.startsWith("/"))
++        if (!async && s.startsWith("/"))
 +        {
 +            this.handleSlashCommand(s);
 +        }
@@ -781,13 +781,23 @@
 +        }
 +        else
 +        {
-+            Player player = this.getPlayerB();
-+            AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(async, player, s, new LazyPlayerSet());
-+            this.server.getPluginManager().callEvent(event);
-+
-+            if (PlayerChatEvent.getHandlerList().getRegisteredListeners().length != 0)
++            // MCPC+ start - handle Forge event
++            ChatComponentTranslation chatcomponenttranslation1 = new ChatComponentTranslation("chat.type.text", new Object[] {this.playerEntity.func_145748_c_(), s});
++            chatcomponenttranslation1 = ForgeHooks.onServerChatEvent(this, s, chatcomponenttranslation1);
++            String message = s;
++            if (chatcomponenttranslation1 != null && chatcomponenttranslation1.getFormatArgs()[chatcomponenttranslation1.getFormatArgs().length - 1] instanceof String)
              {
 -                this.kickPlayerFromServer("disconnect.spam");
++                // use event message from Forge
++                message = (String)chatcomponenttranslation1.getFormatArgs()[chatcomponenttranslation1.getFormatArgs().length - 1];
+             }
++            // MCPC+ end
++            Player player = this.getPlayerB();
++            AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(async, player, message, new LazyPlayerSet()); // MCPC+ - pass changed message if any from Forge
++            event.setCancelled(chatcomponenttranslation1 == null); // MCPC+ - pre-cancel event if forge event was cancelled
++            this.server.getPluginManager().callEvent(event);
++            if (PlayerChatEvent.getHandlerList().getRegisteredListeners().length != 0)
++            {
 +                // Evil plugins still listening to deprecated event
 +                final PlayerChatEvent queueEvent = new PlayerChatEvent(player, event.getMessage(), event.getFormat(), event.getRecipients());
 +                queueEvent.setCancelled(event.isCancelled());
@@ -810,7 +820,7 @@
 +                        {
 +                            for (Object player : NetHandlerPlayServer.this.serverController.getConfigurationManager().playerEntityList)
 +                            {
-+                                ((EntityPlayerMP) player).sendMessage(CraftChatMessage.fromString(message));
++                                ((EntityPlayerMP) player).sendMessage(CraftChatMessage.fromString(message), queueEvent.getMessage()); // MCPC+ - pass untouched message
 +                            }
 +                        }
 +                        else
@@ -846,7 +856,7 @@
 +                {
 +                    throw new RuntimeException("Exception processing chat event", e.getCause());
 +                }
-             }
++            }
 +            else
 +            {
 +                if (event.isCancelled())
@@ -861,7 +871,7 @@
 +                {
 +                    for (Object recipient : serverController.getConfigurationManager().playerEntityList)
 +                    {
-+                        ((EntityPlayerMP) recipient).sendMessage(CraftChatMessage.fromString(s));
++                        ((EntityPlayerMP) recipient).sendMessage(CraftChatMessage.fromString(s), event.getMessage()); // MCPC+ - pass untouched message
 +                    }
 +                }
 +                else
@@ -1028,7 +1038,7 @@
          if (p_147357_1_.func_149513_d() == 1)
          {
              this.playerEntity.setSneaking(true);
-@@ -764,7 +1474,7 @@
+@@ -764,7 +1477,7 @@
          else if (p_147357_1_.func_149513_d() == 3)
          {
              this.playerEntity.wakeUpPlayer(false, true, true);
@@ -1037,7 +1047,7 @@
          }
          else if (p_147357_1_.func_149513_d() == 6)
          {
-@@ -781,8 +1491,22 @@
+@@ -781,8 +1494,22 @@
  
      public void processUseEntity(C02PacketUseEntity p_147340_1_)
      {
@@ -1061,7 +1071,7 @@
          this.playerEntity.func_143004_u();
  
          if (entity != null)
-@@ -797,9 +1521,49 @@
+@@ -797,9 +1524,49 @@
  
              if (this.playerEntity.getDistanceSqToEntity(entity) < d0)
              {
@@ -1111,7 +1121,7 @@
                  }
                  else if (p_147340_1_.func_149565_c() == C02PacketUseEntity.Action.ATTACK)
                  {
-@@ -811,6 +1575,14 @@
+@@ -811,6 +1578,14 @@
                      }
  
                      this.playerEntity.attackTargetEntityWithCurrentItem(entity);
@@ -1126,7 +1136,7 @@
                  }
              }
          }
-@@ -826,7 +1598,7 @@
+@@ -826,7 +1601,7 @@
              case 1:
                  if (this.playerEntity.playerConqueredTheEnd)
                  {
@@ -1135,7 +1145,7 @@
                  }
                  else if (this.playerEntity.getServerForPlayer().getWorldInfo().isHardcoreModeEnabled())
                  {
-@@ -864,17 +1636,450 @@
+@@ -864,17 +1639,450 @@
  
      public void processCloseWindow(C0DPacketCloseWindow p_147356_1_)
      {
@@ -1587,7 +1597,7 @@
              if (ItemStack.areItemStacksEqual(p_147351_1_.func_149546_g(), itemstack))
              {
                  this.playerEntity.playerNetServerHandler.sendPacket(new S32PacketConfirmTransaction(p_147351_1_.func_149548_c(), p_147351_1_.func_149547_f(), true));
-@@ -896,6 +2101,14 @@
+@@ -896,6 +2104,14 @@
                  }
  
                  this.playerEntity.sendContainerAndContentsToPlayer(this.playerEntity.openContainer, arraylist);
@@ -1602,7 +1612,7 @@
              }
          }
      }
-@@ -918,9 +2131,60 @@
+@@ -918,9 +2134,60 @@
              boolean flag = p_147344_1_.func_149627_c() < 0;
              ItemStack itemstack = p_147344_1_.func_149625_d();
              boolean flag1 = p_147344_1_.func_149627_c() >= 1 && p_147344_1_.func_149627_c() < 36 + InventoryPlayer.getHotbarSize();
@@ -1664,7 +1674,7 @@
              if (flag1 && flag2 && flag3)
              {
                  if (itemstack == null)
-@@ -949,8 +2213,13 @@
+@@ -949,8 +2216,13 @@
  
      public void processConfirmTransaction(C0FPacketConfirmTransaction p_147339_1_)
      {
@@ -1679,7 +1689,7 @@
          if (oshort != null && p_147339_1_.func_149533_d() == oshort.shortValue() && this.playerEntity.openContainer.windowId == p_147339_1_.func_149532_c() && !this.playerEntity.openContainer.isPlayerNotUsingContainer(this.playerEntity))
          {
              this.playerEntity.openContainer.setPlayerIsPresent(this.playerEntity, true);
-@@ -959,6 +2228,11 @@
+@@ -959,6 +2231,11 @@
  
      public void processUpdateSign(C12PacketUpdateSign p_147343_1_)
      {
@@ -1691,7 +1701,7 @@
          this.playerEntity.func_143004_u();
          WorldServer worldserver = this.serverController.worldServerForDimension(this.playerEntity.dimension);
  
-@@ -973,6 +2247,7 @@
+@@ -973,6 +2250,7 @@
                  if (!tileentitysign.func_145914_a() || tileentitysign.func_145911_b() != this.playerEntity)
                  {
                      this.serverController.logWarning("Player " + this.playerEntity.getCommandSenderName() + " just tried to change non-editable sign");
@@ -1699,7 +1709,7 @@
                      return;
                  }
              }
-@@ -983,6 +2258,7 @@
+@@ -983,6 +2261,7 @@
              for (j = 0; j < 4; ++j)
              {
                  boolean flag = true;
@@ -1707,7 +1717,7 @@
  
                  if (p_147343_1_.func_149589_f()[j].length() > 15)
                  {
-@@ -1010,8 +2286,29 @@
+@@ -1010,8 +2289,29 @@
                  j = p_147343_1_.func_149588_c();
                  int k = p_147343_1_.func_149586_d();
                  i = p_147343_1_.func_149585_e();
@@ -1739,7 +1749,7 @@
                  tileentitysign1.markDirty();
                  worldserver.markBlockForUpdate(j, k, i);
              }
-@@ -1034,7 +2331,23 @@
+@@ -1034,7 +2334,23 @@
  
      public void processPlayerAbilities(C13PacketPlayerAbilities p_147348_1_)
      {
@@ -1764,7 +1774,7 @@
      }
  
      public void processTabComplete(C14PacketTabComplete p_147341_1_)
-@@ -1061,6 +2374,14 @@
+@@ -1061,6 +2377,14 @@
          ItemStack itemstack;
          ItemStack itemstack1;
  
@@ -1779,7 +1789,7 @@
          if ("MC|BEdit".equals(p_147349_1_.func_149559_c()))
          {
              try
-@@ -1076,12 +2397,16 @@
+@@ -1076,12 +2400,16 @@
  
                  if (itemstack.getItem() == Items.writable_book && itemstack.getItem() == itemstack1.getItem())
                  {
@@ -1799,7 +1809,7 @@
              }
          }
          else if ("MC|BSign".equals(p_147349_1_.func_149559_c()))
-@@ -1099,15 +2424,16 @@
+@@ -1099,15 +2427,16 @@
  
                  if (itemstack.getItem() == Items.written_book && itemstack1.getItem() == Items.writable_book)
                  {
@@ -1822,7 +1832,7 @@
              }
          }
          else
-@@ -1127,10 +2453,14 @@
+@@ -1127,10 +2456,14 @@
                      {
                          ((ContainerMerchant)container).setCurrentRecipeIndex(i);
                      }
@@ -1838,7 +1848,7 @@
                  }
              }
              else if ("MC|AdvCdm".equals(p_147349_1_.func_149559_c()))
-@@ -1174,10 +2504,14 @@
+@@ -1174,10 +2507,14 @@
                              commandblocklogic.func_145756_e();
                              this.playerEntity.addChatMessage(new ChatComponentTranslation("advMode.setCommand.success", new Object[] {s1}));
                          }
@@ -1855,7 +1865,7 @@
                      }
                  }
                  else
-@@ -1205,10 +2539,14 @@
+@@ -1205,10 +2542,14 @@
                              tileentitybeacon.setSecondaryEffect(j);
                              tileentitybeacon.markDirty();
                          }
@@ -1872,7 +1882,7 @@
                      }
                  }
              }
-@@ -1230,6 +2568,45 @@
+@@ -1230,6 +2571,45 @@
                      containerrepair.updateItemName("");
                  }
              }
@@ -1918,7 +1928,7 @@
          }
      }
  
-@@ -1241,39 +2618,46 @@
+@@ -1241,39 +2621,46 @@
          }
      }
  
