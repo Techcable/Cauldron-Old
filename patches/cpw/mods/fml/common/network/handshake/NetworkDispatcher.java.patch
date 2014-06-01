@@ -9,7 +9,23 @@
          }
          return false;
      }
-@@ -464,7 +464,7 @@
+@@ -287,6 +287,7 @@
+             state = ConnectionState.HANDSHAKING;
+         }
+         String channelName = msg.func_149559_c();
++        player.getBukkitEntity().addChannel(channelName); // Cauldron - register channel for bukkit player
+         if ("FML|HS".equals(channelName) || "REGISTER".equals(channelName) || "UNREGISTER".equals(channelName))
+         {
+             FMLProxyPacket proxy = new FMLProxyPacket(msg);
+@@ -308,6 +309,7 @@
+         else if (NetworkRegistry.INSTANCE.hasChannel(channelName, Side.SERVER))
+         {
+             FMLProxyPacket proxy = new FMLProxyPacket(msg);
++            serverHandler.getCraftServer().getMessenger().dispatchIncomingMessage(player.getBukkitEntity(), msg.func_149559_c(), msg.func_149558_e()); // pass msg to bukkit
+             proxy.setDispatcher(this);
+             context.fireChannelRead(proxy);
+             return true;
+@@ -464,7 +466,7 @@
          // Stop the epic channel closed spam at close
          if (!(cause instanceof ClosedChannelException))
          {
