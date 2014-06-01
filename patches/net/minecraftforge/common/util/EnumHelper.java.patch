@@ -4,7 +4,7 @@
  import net.minecraft.world.EnumSkyBlock;
  import net.minecraft.world.gen.structure.StructureStrongholdPieces.Stronghold.Door;
  import net.minecraftforge.classloading.FMLForgePlugin;
-+// MCPC+ start
++// Cauldron start
 +import cpw.mods.fml.relauncher.ReflectionHelper;
 +import net.minecraft.inventory.IInventory;
 +import net.minecraft.server.MinecraftServer;
@@ -19,7 +19,7 @@
 +import org.bukkit.craftbukkit.entity.CraftEntity;
 +import org.bukkit.entity.EntityType;
 +import org.bukkit.event.inventory.InventoryType;
-+// MCPC+ end
++// Cauldron end
 +
  public class EnumHelper
  {
@@ -36,7 +36,7 @@
          {ToolMaterial.class, int.class, int.class, float.class, float.class, int.class}
      }; 
  
-+    // MCPC+ start
++    // Cauldron start
 +    public static Biome addBukkitBiome(String name) 
 +    {
 +        return (Biome)addEnum(Biome.class, name, new Class[0], new Object[0]);
@@ -95,7 +95,7 @@
 +            return addEnum(org.bukkit.event.inventory.InventoryType.class, id, new Class[]{Integer.TYPE, String.class}, new Object[]{9, id});
 +        }
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
      public static EnumAction addAction(String name)
      {
@@ -104,7 +104,7 @@
          }
      }
  
-+    // MCPC+ start
++    // Cauldron start
 +    @SuppressWarnings("unchecked")
 +    public static <T extends Enum<?>> T replaceEnum(Class<T> enumType, String enumName, int ordinal,  Class<?>[] paramTypes, Object[] paramValues)
 +    {
@@ -182,7 +182,7 @@
 +            throw new RuntimeException(e.getMessage(), e);
 +        }
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
      static
      {

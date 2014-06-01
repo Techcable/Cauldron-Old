@@ -5,7 +5,7 @@
                  ShapedRecipes recipe = (ShapedRecipes)obj;
                  ItemStack output = recipe.getRecipeOutput();
 -                if (output != null && containsMatch(false, exclusions, output))
-+                if ((output != null && containsMatch(false, exclusions, output)) || output == null) // MCPC+ - fixes NPE's with null recipes being added to forge
++                if ((output != null && containsMatch(false, exclusions, output)) || output == null) // Cauldron - fixes NPE's with null recipes being added to forge
                  {
                      continue;
                  }
@@ -14,7 +14,7 @@
                  ShapelessRecipes recipe = (ShapelessRecipes)obj;
                  ItemStack output = recipe.getRecipeOutput();
 -                if (output != null && containsMatch(false, exclusions, output))
-+                if ((output != null && containsMatch(false, exclusions, output)) || output == null) // MCPC+ - fixes NPE's with null recipes being added to forge
++                if ((output != null && containsMatch(false, exclusions, output)) || output == null) // Cauldron - fixes NPE's with null recipes being added to forge
                  {
                      continue;
                  }

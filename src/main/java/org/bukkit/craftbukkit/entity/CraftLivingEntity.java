@@ -40,23 +40,23 @@ import org.bukkit.util.BlockIterator;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
 
-import cpw.mods.fml.common.registry.EntityRegistry; // MCPC+
+import cpw.mods.fml.common.registry.EntityRegistry; // Cauldron
 
 public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     private CraftEntityEquipment equipment;
-    // MCPC+ start
+    // Cauldron start
     public Class<? extends net.minecraft.entity.EntityLivingBase> entityClass;
     public String entityName;
-    // MCPC+ end
+    // Cauldron end
 
     public CraftLivingEntity(final CraftServer server, final net.minecraft.entity.EntityLivingBase entity) {
         super(server, entity);
-        // MCPC+ start
+        // Cauldron start
         this.entityClass = entity.getClass();
         this.entityName = EntityRegistry.getCustomEntityTypeName(entityClass);
         if (entityName == null)
             entityName = entity.getCommandSenderName();
-        // MCPC+ end
+        // Cauldron end
 
         if (entity instanceof net.minecraft.entity.EntityLiving) {
             equipment = new CraftEntityEquipment(this);
@@ -236,7 +236,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     @Override
     public String toString() {
-        return this.entityName; // MCPC+
+        return this.entityName; // Cauldron
     }
 
     public Player getKiller() {
@@ -280,7 +280,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
             if (!(raw instanceof net.minecraft.potion.PotionEffect))
                 continue;
             net.minecraft.potion.PotionEffect handle = (net.minecraft.potion.PotionEffect) raw;
-            if (PotionEffectType.getById(handle.getPotionID()) == null) continue; // MCPC+ - ignore null types
+            if (PotionEffectType.getById(handle.getPotionID()) == null) continue; // Cauldron - ignore null types
             effects.add(new PotionEffect(PotionEffectType.getById(handle.getPotionID()), handle.getDuration(), handle.getAmplifier(), handle.getIsAmbient()));
         }
         return effects;
@@ -336,12 +336,12 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public EntityType getType() {
-        // MCPC+ start
+        // Cauldron start
         EntityType type = EntityType.fromName(this.entityName);
         if (type != null)
             return type;
         else return EntityType.UNKNOWN;
-        // MCPC+ end
+        // Cauldron end
     }
 
     public boolean hasLineOfSight(Entity other) {

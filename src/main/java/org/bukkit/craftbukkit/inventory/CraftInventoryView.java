@@ -74,7 +74,7 @@ public class CraftInventoryView extends InventoryView {
 
     public static SlotType getSlotType(InventoryView inventory, int slot) {
         SlotType type = SlotType.CONTAINER;
-        if (inventory == null) return type; // MCPC+ - modded inventories with no Bukkit wrapper
+        if (inventory == null) return type; // Cauldron - modded inventories with no Bukkit wrapper
         if (slot >= 0 && slot < inventory.getTopInventory().getSize()) {
             switch(inventory.getType()) {
             case FURNACE:

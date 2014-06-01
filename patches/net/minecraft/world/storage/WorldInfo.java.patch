@@ -4,7 +4,7 @@
          this.thunderTime = par1NBTTagCompound.getInteger("thunderTime");
          this.thundering = par1NBTTagCompound.getBoolean("thundering");
          this.hardcore = par1NBTTagCompound.getBoolean("hardcore");
-+        this.dimension = par1NBTTagCompound.getInteger("dimension"); // MCPC+
++        this.dimension = par1NBTTagCompound.getInteger("dimension"); // Cauldron
  
          if (par1NBTTagCompound.hasKey("initialized", 99))
          {
@@ -12,7 +12,7 @@
          this.allowCommands = par1WorldInfo.allowCommands;
          this.initialized = par1WorldInfo.initialized;
          this.theGameRules = par1WorldInfo.theGameRules;
-+        this.dimension = par1WorldInfo.dimension; // MCPC+
++        this.dimension = par1WorldInfo.dimension; // Cauldron
      }
  
      public NBTTagCompound getNBTTagCompound()
@@ -20,7 +20,7 @@
          par1NBTTagCompound.setBoolean("allowCommands", this.allowCommands);
          par1NBTTagCompound.setBoolean("initialized", this.initialized);
          par1NBTTagCompound.setTag("GameRules", this.theGameRules.writeGameRulesToNBT());
-+        par1NBTTagCompound.setInteger("dimension", this.dimension); // MCPC+
++        par1NBTTagCompound.setInteger("dimension", this.dimension); // Cauldron
  
          if (par2NBTTagCompound != null)
          {
@@ -28,7 +28,7 @@
          return this.playerTag;
      }
  
-+    // MCPC+ start
++    // Cauldron start
 +    /**
 +     * Sets the Dimension.
 +     */
@@ -41,7 +41,7 @@
 +    {
 +        return this.dimension;
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
      public int getVanillaDimension()
      {

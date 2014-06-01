@@ -86,7 +86,7 @@
          super.onStruckByLightning(par1EntityLightningBolt);
 -        this.dataWatcher.updateObject(17, Byte.valueOf((byte)1));
 +
-+        // MCPC+ start
++        // Cauldron start
 +        if (par1EntityLightningBolt != null)
 +        {
 +            // CraftBukkit start
@@ -95,7 +95,7 @@
 +                return;
 +            }
 +        }
-+        // MCPC+ end
++        // Cauldron end
 +
 +        this.setPowered(true);
      }

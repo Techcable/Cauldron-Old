@@ -1,6 +1,6 @@
-MCPC-Plus
+Cauldron
 ===========
-Note: 1.6.4 repository has been moved to [branch v164](https://github.com/MinecraftPortCentral/MCPC-Plus/tree/v164)
+Note: 1.6.4 repository has been moved to [branch v164](https://github.com/MinecraftPortCentral/Cauldron/tree/v164)
 
 A Forge/Bukkit/Spigot Minecraft Server
 
@@ -11,7 +11,7 @@ We use Gradle to handle our dependencies.
 
 1. Checkout project.
 2. Init submodules : git submodule update --init --recursive
-3. Setup workspace : gradlew setupMCPC
+3. Setup workspace : gradlew setupCauldron
 4. Build binaries  : gradlew buildPackages
 Note: all binaries will be in distributions folder
 
@@ -48,10 +48,10 @@ If you make changes to or add upstream classes (net.minecraft, net.minecraftforg
 * Make a separate commit adding the new net.minecraft classes (commit message: "Added x for diff visibility" or so).
 * Then make further commits with your changes.
 * Mark your changes with:
-    * 1 line; add a trailing: `// MCPC+ [- Optional reason]`
+    * 1 line; add a trailing: `// Cauldron [- Optional reason]`
     * 2+ lines; add
-        * Before: `// MCPC+ start [- Optional comment]`
-        * After: `// MCPC+ end`
+        * Before: `// Cauldron start [- Optional comment]`
+        * After: `// Cauldron end`
 * Keep the diffs to a minimum (*somewhat* important)
 
 Tips to get your pull request accepted
@@ -71,7 +71,7 @@ Making sure you follow the above conventions is important, but just the beginnin
 Credits
 -------
 
-* [MCP](http://mcp.ocean-labs.de) - permission to use data to make MCPC+.
+* [MCP](http://mcp.ocean-labs.de) - permission to use data to make Cauldron.
 * [Forge](http://www.minecraftforge.net) - mod support.
 * [CraftBukkit](http://bukkit.org) - plugin support.
 * [Spigot](http://www.spigotmc.org) - performance optimizations.

@@ -42,7 +42,7 @@
          if (!this.playersHashMap.containsKey(par1EntityPlayer))
          {
 -            MapData.MapInfo mapinfo = new MapData.MapInfo(par1EntityPlayer);
-+            MapData.MapInfo mapinfo = new MapData.MapInfo(this, par1EntityPlayer); // MCPC+
++            MapData.MapInfo mapinfo = new MapData.MapInfo(this, par1EntityPlayer); // Cauldron
              this.playersHashMap.put(par1EntityPlayer, mapinfo);
              this.playersArrayList.add(mapinfo);
          }
@@ -51,7 +51,7 @@
          if (mapinfo == null)
          {
 -            mapinfo = new MapData.MapInfo(par1EntityPlayer);
-+            mapinfo = new MapData.MapInfo(this, par1EntityPlayer); // MCPC+
++            mapinfo = new MapData.MapInfo(this, par1EntityPlayer); // Cauldron
              this.playersHashMap.put(par1EntityPlayer, mapinfo);
              this.playersArrayList.add(mapinfo);
          }
@@ -60,7 +60,7 @@
          public int field_82569_d;
          private boolean field_82570_i;
 +        /** reference in MapInfo to MapData object */
-+        final MapData mapDataObj; // MCPC+
++        final MapData mapDataObj; // Cauldron
          private static final String __OBFID = "CL_00000578";
  
 -        public MapInfo(EntityPlayer par2EntityPlayer)

@@ -57,9 +57,9 @@
                      this.entityAge = 0;
                  }
              }
-+            else // MCPC+ start - Despawn entities when a player isn't in the world
++            else // Cauldron start - Despawn entities when a player isn't in the world
 +            {
-+                if (this.worldObj.mcpcConfig.getBoolean("despawn-immediate", true) && this.canDespawn()) // Use flag for the assumption that being in another dimension entirely means no player is anywhere near
++                if (this.worldObj.cauldronConfig.getBoolean("despawn-immediate", true) && this.canDespawn()) // Use flag for the assumption that being in another dimension entirely means no player is anywhere near
 +                {
 +                    this.despawn("No Player : Immediate");
 +                }
@@ -67,16 +67,16 @@
 +                {
 +                    this.despawn("No Player : Random Aged");
 +                }
-+            } // MCPC+ end
++            } // Cauldron end
          }
      }
  
-+    // MCPC+ start
++    // Cauldron start
 +    private void despawn(String reason) {
 +        this.setDead();
-+        za.co.mcportcentral.MCPCHooks.logEntityDespawn(this, reason);
++        net.minecraftforge.cauldron.CauldronHooks.logEntityDespawn(this, reason);
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
      protected void updateAITasks()
      {

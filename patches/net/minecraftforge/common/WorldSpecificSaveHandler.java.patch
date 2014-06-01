@@ -12,11 +12,11 @@
          return new File(dataDir, name + ".dat");
      }
  
-+    // MCPC+ start
++    // Cauldron start
 +    @Override
 +    public UUID getUUID()
 +    {
 +        return parent.getUUID();
 +    }
-+    // MCPC+ end
++    // Cauldron end
  }

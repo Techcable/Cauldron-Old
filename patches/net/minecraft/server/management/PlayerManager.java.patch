@@ -258,7 +258,7 @@
 -        private final ChunkCoordIntPair chunkLocation;
 -        private short[] locationOfBlockChange = new short[64];
 +        private List playersWatchingChunk;
-+        final ChunkCoordIntPair chunkLocation; // MCPC+ - remove private
++        final ChunkCoordIntPair chunkLocation; // Cauldron - remove private
 +        private short[] locationOfBlockChange;
          private int numberOfTilesToUpdate;
          private int flagsYAreasToUpdate;

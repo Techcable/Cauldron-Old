@@ -28,14 +28,14 @@
 -            size.func_150859_c();
 -            return true;
 +            // CraftBukkit start - return portalcreator
-+            return size.CB_func_150859_c(); // MCPC+
++            return size.CB_func_150859_c(); // Cauldron
 +            //return true;
          }
          else if (size1.func_150860_b() && size1.field_150864_e == 0)
          {
 -            size1.func_150859_c();
 -            return true;
-+            return size1.CB_func_150859_c(); // MCPC+
++            return size1.CB_func_150859_c(); // Cauldron
 +            //return true;
 +            // CraftBukkit end
          }
@@ -329,12 +329,12 @@
 +            return this.field_150861_f != null && this.field_150868_h >= 2 && this.field_150868_h <= 21 && this.field_150862_g >= 3 && this.field_150862_g <= 21;
 +        }
 +
-+        // MCPC+ start - vanilla compatibility
++        // Cauldron start - vanilla compatibility
 +        public void func_150859_c()
 +        {
 +            this.CB_func_150859_c();
 +        }
-+        // MCPC+ end
++        // Cauldron end
 +
 +        public boolean CB_func_150859_c()
 +        {

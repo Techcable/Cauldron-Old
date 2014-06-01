@@ -35,14 +35,14 @@
 +     */
 +    public Chunk loadChunk(World par1World, int par2, int par3)
 +    {
-+        Object[] data = this.loadChunk__Async_CB(par1World, par2, par3); // MCPC+
++        Object[] data = this.loadChunk__Async_CB(par1World, par2, par3); // Cauldron
 +
 +        if (data != null)
 +        {
 +            Chunk chunk = (Chunk) data[0];
 +            NBTTagCompound nbttagcompound = (NBTTagCompound) data[1];
 +            this.loadEntities(chunk, nbttagcompound.getCompoundTag("Level"), par1World);
-+            MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, nbttagcompound)); // MCPC+ - Don't call ChunkDataEvent.Load async
++            MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, nbttagcompound)); // Cauldron - Don't call ChunkDataEvent.Load async
 +            return chunk;
 +        }
 +
@@ -72,13 +72,13 @@
              }
  
 -            nbttagcompound = CompressedStreamTools.read(datainputstream);
-+            // MCPC+ start - catch exception for MCP binary compatibility
++            // Cauldron start - catch exception for MCP binary compatibility
 +            try {
 +                nbttagcompound = CompressedStreamTools.read(datainputstream);
 +            } catch (Throwable t) {
 +                t.printStackTrace();
 +            }
-+            // MCPC+ end
++            // Cauldron end
          }
  
 -        return this.checkedReadChunkFromNBT(par1World, par2, par3, nbttagcompound);
@@ -123,7 +123,7 @@
 +            Object[] data = new Object[2];
 +            data[0] = chunk;
 +            data[1] = par4NBTTagCompound;
-+            // MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, par4NBTTagCompound)); // MCPC+ Don't call ChunkDataEvent.Load async
++            // MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, par4NBTTagCompound)); // Cauldron Don't call ChunkDataEvent.Load async
 +            return data;
 +            // CraftBukkit end
          }

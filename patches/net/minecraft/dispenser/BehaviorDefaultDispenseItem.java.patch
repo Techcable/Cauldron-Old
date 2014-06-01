@@ -28,7 +28,7 @@
          return par2ItemStack;
      }
  
-+    // MCPC+ start - vanilla compatibility
++    // Cauldron start - vanilla compatibility
      public static void doDispense(World par0World, ItemStack par1ItemStack, int par2, EnumFacing par3EnumFacing, IPosition par4IPosition)
      {
          double d0 = par4IPosition.getX();
@@ -38,7 +38,7 @@
          par0World.spawnEntityInWorld(entityitem);
 +        // TODO: add CB event?
      }
-+    // MCPC+ end
++    // Cauldron end
  
 +    // CraftBukkit start - void -> boolean return, IPosition -> ISourceBlock last argument
 +    public static boolean a(World world, ItemStack itemstack, int i, EnumFacing enumfacing, IBlockSource iblocksource)

@@ -4,7 +4,7 @@
  import net.minecraftforge.event.entity.player.PlayerOpenContainerEvent;
  import net.minecraftforge.event.world.BlockEvent;
  import static net.minecraft.init.Blocks.*;
-+import net.minecraftforge.common.util.FakePlayer; // MCPC+
++import net.minecraftforge.common.util.FakePlayer; // Cauldron
  
  public class ForgeHooks
  {
@@ -12,12 +12,12 @@
      {
          player.captureDrops = true;
          EntityItem ret = player.func_146097_a(item, false, includeName);
-+        // MCPC+ start - dropPlayerItemWithRandomChoice() returns null if a Bukkit plugin cancels PlayerDropItemEvent
++        // Cauldron start - dropPlayerItemWithRandomChoice() returns null if a Bukkit plugin cancels PlayerDropItemEvent
 +        if (ret == null)
 +        {
 +            return null;
 +        }
-+        // MCPC+ end
++        // Cauldron end
          player.capturedDrops.clear();
          player.captureDrops = false;
  
@@ -25,7 +25,7 @@
  
      public static BlockEvent.BreakEvent onBlockBreakEvent(World world, GameType gameType, EntityPlayerMP entityPlayer, int x, int y, int z)
      {
-+        // MCPC+ - pre-cancel handled in BreakEvent
++        // Cauldron - pre-cancel handled in BreakEvent
 +        /*
          // Logic from tryHarvestBlock for pre-canceling the event
          boolean preCancelEvent = false;
@@ -38,7 +38,7 @@
 +        */
          // Tell client the block is gone immediately then process events
 -        if (world.getTileEntity(x, y, z) == null)
-+        if (world.getTileEntity(x, y, z) == null && !(entityPlayer instanceof FakePlayer)) // MCPC+ - don't send packets to fakeplayers
++        if (world.getTileEntity(x, y, z) == null && !(entityPlayer instanceof FakePlayer)) // Cauldron - don't send packets to fakeplayers
          {
              S23PacketBlockChange packet = new S23PacketBlockChange(x, y, z, world);
              packet.field_148883_d = Blocks.air;
@@ -47,12 +47,12 @@
          int blockMetadata = world.getBlockMetadata(x, y, z);
          BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(x, y, z, world, block, blockMetadata, entityPlayer);
 -        event.setCanceled(preCancelEvent);
-+        //event.setCanceled(preCancelEvent); // MCPC+
++        //event.setCanceled(preCancelEvent); // Cauldron
          MinecraftForge.EVENT_BUS.post(event);
  
          // Handle if the event is canceled
 -        if (event.isCanceled())
-+        if (event.isCanceled() && !(entityPlayer instanceof FakePlayer)) // MCPC+ - don't send packets to fakeplayers
++        if (event.isCanceled() && !(entityPlayer instanceof FakePlayer)) // Cauldron - don't send packets to fakeplayers
          {
              // Let the client know the block still exists
              entityPlayer.playerNetServerHandler.sendPacket(new S23PacketBlockChange(x, y, z, world));

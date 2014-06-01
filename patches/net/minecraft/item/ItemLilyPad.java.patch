@@ -1,14 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/item/ItemLilyPad.java
 +++ ../src-work/minecraft/net/minecraft/item/ItemLilyPad.java
-@@ -33,6 +33,7 @@
-                 int i = movingobjectposition.blockX;
-                 int j = movingobjectposition.blockY;
-                 int k = movingobjectposition.blockZ;
-+                final int clickedX = i, clickedY = j, clickedZ = k; // CraftBukkit
- 
-                 if (!par2World.canMineBlock(par3EntityPlayer, i, j, k))
-                 {
-@@ -46,7 +47,15 @@
+@@ -46,7 +46,15 @@
  
                  if (par2World.getBlock(i, j, k).getMaterial() == Material.water && par2World.getBlockMetadata(i, j, k) == 0 && par2World.isAirBlock(i, j + 1, k))
                  {
@@ -24,7 +16,7 @@
  
                      if (!par3EntityPlayer.capabilities.isCreativeMode)
                      {
-@@ -59,6 +68,12 @@
+@@ -59,6 +67,12 @@
          }
      }
  

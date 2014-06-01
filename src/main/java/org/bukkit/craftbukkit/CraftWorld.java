@@ -49,10 +49,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.StandardMessenger;
 import org.bukkit.util.Vector;
 
-import cpw.mods.fml.common.registry.EntityRegistry; // MCPC+
+import cpw.mods.fml.common.registry.EntityRegistry; // Cauldron
 
 public class CraftWorld implements World {
-    //public static final int CUSTOM_DIMENSION_OFFSET = 10; // MCPC+ - disabled
+    //public static final int CUSTOM_DIMENSION_OFFSET = 10; // Cauldron - disabled
 
     private final net.minecraft.world.WorldServer world;
     private Environment environment;
@@ -191,7 +191,7 @@ public class CraftWorld implements World {
 
         world.theChunkProviderServer.chunksToUnload.remove(x, z);
         world.theChunkProviderServer.loadedChunkHashMap.remove(LongHash.toLong(x, z));
-        world.theChunkProviderServer.loadedChunks.remove(chunk); // MCPC+  vanilla compatibility
+        world.theChunkProviderServer.loadedChunks.remove(chunk); // Cauldron  vanilla compatibility
 
         return true;
     }
@@ -262,7 +262,7 @@ public class CraftWorld implements World {
     private void chunkLoadPostProcess(net.minecraft.world.chunk.Chunk chunk, int x, int z) {
         if (chunk != null) {
             world.theChunkProviderServer.loadedChunkHashMap.put(LongHash.toLong(x, z), chunk);
-            world.theChunkProviderServer.loadedChunks.add(chunk); // MCPC+ - vanilla compatibility
+            world.theChunkProviderServer.loadedChunks.add(chunk); // Cauldron - vanilla compatibility
 
             chunk.onChunkLoad();
 
@@ -342,7 +342,7 @@ public class CraftWorld implements World {
     }
 
     public Entity spawnEntity(Location loc, EntityType entityType) {
-        // MCPC+ start - handle custom entity spawns from plugins
+        // Cauldron start - handle custom entity spawns from plugins
         if (EntityRegistry.entityClassMap.get(entityType.getName()) != null)
         {
             net.minecraft.entity.Entity entity = null;
@@ -354,11 +354,11 @@ public class CraftWorld implements World {
                 return entity.getBukkitEntity();
             }
         }
-        // MCPC+ end
+        // Cauldron end
         return spawn(loc, entityType.getEntityClass());
     }
 
-    // MCPC+ start
+    // Cauldron start
     public net.minecraft.entity.Entity getEntity(Class<? extends net.minecraft.entity.Entity> clazz, net.minecraft.world.World world)
     {
         System.out.println("getEntity " + clazz);
@@ -372,7 +372,7 @@ public class CraftWorld implements World {
         }
         return entity;
     }
-    // MCPC+ end
+    // Cauldron end
 
     public LightningStrike strikeLightning(Location loc) {
         net.minecraft.entity.effect.EntityLightningBolt lightning = new net.minecraft.entity.effect.EntityLightningBolt(world, loc.getX(), loc.getY(), loc.getZ());

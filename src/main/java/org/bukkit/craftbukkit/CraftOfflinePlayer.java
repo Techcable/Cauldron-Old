@@ -100,7 +100,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
         for (Object obj : server.getHandle().playerEntityList) {
             net.minecraft.entity.player.EntityPlayerMP player = (net.minecraft.entity.player.EntityPlayerMP) obj;
             if (player.getCommandSenderName().equalsIgnoreCase(getName())) {
-                return (player.playerNetServerHandler != null) ? player.playerNetServerHandler.getPlayerB() : null; // MCPC+
+                return (player.playerNetServerHandler != null) ? player.playerNetServerHandler.getPlayerB() : null; // Cauldron
             }
         }
 

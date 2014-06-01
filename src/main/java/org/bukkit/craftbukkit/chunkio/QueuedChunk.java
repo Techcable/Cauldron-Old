@@ -32,7 +32,7 @@ class QueuedChunk {
         return false;
     }
 
-    // MCPC+ start - add more debug info
+    // Cauldron start - add more debug info
     @Override
     public String toString()
     {
@@ -50,5 +50,5 @@ class QueuedChunk {
 
         return result.toString();
     }
-    // MCPC+ end
+    // Cauldron end
 }

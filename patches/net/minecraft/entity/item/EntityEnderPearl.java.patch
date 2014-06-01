@@ -24,12 +24,12 @@
 -                    {
 -                        this.getThrower().mountEntity((Entity)null);
 +                    EnderTeleportEvent event = new EnderTeleportEvent(entityplayermp, this.posX, this.posY, this.posZ, 5);
-+                    // MCPC+ start - invert condition; return if cancelled otherwise fall through to CB event
++                    // Cauldron start - invert condition; return if cancelled otherwise fall through to CB event
 +                    if (MinecraftForge.EVENT_BUS.post(event)){
 +                        this.setDead();
 +                        return;
                      }
-+                    // MCPC+ end
++                    // Cauldron end
 +                    // CraftBukkit start
 +                    org.bukkit.craftbukkit.entity.CraftPlayer player = entityplayermp.getBukkitEntity();
 +                    org.bukkit.Location location = getBukkitEntity().getLocation();

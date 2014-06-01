@@ -58,12 +58,12 @@
              }
  
 -            return new ItemStack(itemstack.getItem(), 1, i1);
-+            // MCPC+ start - vanilla compatibility
++            // Cauldron start - vanilla compatibility
 +            if (par1InventoryCrafting.resultInventory == null)
 +            {
 +                return new ItemStack(itemstack.getItem(), 1, j1);
 +            }
-+            // MCPC+ end
++            // Cauldron end
 +            // CraftBukkit start - Construct a dummy repair recipe
 +            ItemStack result = new ItemStack(itemstack.getItem(), 1, j1);
 +            List<ItemStack> ingredients = new ArrayList<ItemStack>();
@@ -82,7 +82,7 @@
                  IRecipe irecipe = (IRecipe)this.recipes.get(j);
  
 -                if (irecipe.matches(par1InventoryCrafting, par2World))
-+                if (irecipe.matches(par1InventoryCrafting, par2World) && par1InventoryCrafting.resultInventory != null) // MCPC+ - add null check for vanilla compatibility
++                if (irecipe.matches(par1InventoryCrafting, par2World) && par1InventoryCrafting.resultInventory != null) // Cauldron - add null check for vanilla compatibility
                  {
 +                    // CraftBukkit start - INVENTORY_PRE_CRAFT event
 +                    par1InventoryCrafting.currentRecipe = irecipe;
@@ -90,12 +90,12 @@
 +                    return CraftEventFactory.callPreCraftEvent(par1InventoryCrafting, result, lastCraftView, false);
 +                    // CraftBukkit end
 +                }
-+                // MCPC+ start - vanilla
++                // Cauldron start - vanilla
 +                else if (irecipe.matches(par1InventoryCrafting, par2World))
 +                {
                      return irecipe.getCraftingResult(par1InventoryCrafting);
                  }
-+                // MCPC+ end
++                // Cauldron end
              }
  
 +            par1InventoryCrafting.currentRecipe = null; // CraftBukkit - Clear recipe when no recipe is found

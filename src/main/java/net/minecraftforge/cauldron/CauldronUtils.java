@@ -1,4 +1,4 @@
-package za.co.mcportcentral;
+package net.minecraftforge.cauldron;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import org.bukkit.inventory.InventoryHolder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 
-public class MCPCUtils {
+public class CauldronUtils {
     private static boolean deobfuscated = false;
 
     public static boolean isOverridingUpdateEntity(Class<? extends TileEntity> c) 
@@ -74,8 +74,8 @@ public class MCPCUtils {
         if ((!newWorld.isDirectory()) && (oldWorld.isDirectory()))
         {
             MinecraftServer.getServer().logInfo("---- Migration of old " + worldType + " folder required ----");
-            MinecraftServer.getServer().logInfo("MCPC has moved back to using the Forge World structure, your " + worldType + " folder will be moved to a new location in order to operate correctly.");
-            MinecraftServer.getServer().logInfo("We will move this folder for you, but it will mean that you need to move it back should you wish to stop using MCPC in the future.");
+            MinecraftServer.getServer().logInfo("Cauldron has moved back to using the Forge World structure, your " + worldType + " folder will be moved to a new location in order to operate correctly.");
+            MinecraftServer.getServer().logInfo("We will move this folder for you, but it will mean that you need to move it back should you wish to stop using Cauldron in the future.");
             MinecraftServer.getServer().logInfo("Attempting to move " + oldWorld + " to " + newWorld + "...");
 
             if (newWorld.exists())

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.ListIterator;
 
 
+import net.minecraftforge.cauldron.CauldronUtils;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryType;
@@ -13,7 +15,6 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.Material;
 
-import za.co.mcportcentral.MCPCUtils; // MCPC+
 
 public class CraftInventory implements Inventory {
     protected final net.minecraft.inventory.IInventory inventory;
@@ -41,14 +42,14 @@ public class CraftInventory implements Inventory {
 
     public ItemStack[] getContents() {
         ItemStack[] items = new ItemStack[getSize()];
-        // MCPC+ start - fixes appeng TileDrive AbstractMethodError
+        // Cauldron start - fixes appeng TileDrive AbstractMethodError
         net.minecraft.item.ItemStack[] mcItems = null;
         try {
             mcItems = getInventory().getContents();
         } catch (AbstractMethodError e) {
             return new ItemStack[0]; // return empty list
         }
-        // MCPC+ end
+        // Cauldron end
 
         int size = Math.min(items.length, mcItems.length);
         for (int i = 0; i < size; i++) {
@@ -413,13 +414,13 @@ public class CraftInventory implements Inventory {
     }
 
     public List<HumanEntity> getViewers() {
-        // MCPC+ start
+        // Cauldron start
         try {
             return this.inventory.getViewers();
         } catch (AbstractMethodError e) {
             return new java.util.ArrayList<HumanEntity>();
         }
-        // MCPC+ end
+        // Cauldron end
     }
 
     public String getTitle() {
@@ -460,17 +461,17 @@ public class CraftInventory implements Inventory {
     }
 
     public InventoryHolder getHolder() {
-        // MCPC+ start - fixes openblocks AbstractMethodError
+        // Cauldron start - fixes openblocks AbstractMethodError
         try {
             return inventory.getOwner();
         } catch (AbstractMethodError e) {
             if (inventory instanceof net.minecraft.tileentity.TileEntity) {
-                return MCPCUtils.getOwner((net.minecraft.tileentity.TileEntity)inventory);
+                return CauldronUtils.getOwner((net.minecraft.tileentity.TileEntity)inventory);
             } else {
                 return null;                
             }
         }
-        // MCPC+ end
+        // Cauldron end
     }
 
     public int getMaxStackSize() {

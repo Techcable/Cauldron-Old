@@ -114,29 +114,29 @@ import com.avaje.ebean.config.dbplatform.SQLitePlatform;
 import com.avaje.ebeaninternal.server.lib.sql.TransactionIsolation;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
-// MCPC+ start
+// Cauldron start
 import org.bukkit.craftbukkit.command.CraftSimpleCommandMap;
 
 import cpw.mods.fml.common.FMLLog;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.storage.SaveHandler;
+import net.minecraftforge.cauldron.CauldronConfig;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
-import za.co.mcportcentral.MCPCConfig;
-// MCPC+ end
+// Cauldron end
 
 import jline.console.ConsoleReader;
 
 public final class CraftServer implements Server {
-    private final String serverName = "MCPC+";
+    private final String serverName = "Cauldron";
     private final String serverVersion;
     private final String bukkitVersion = Versioning.getBukkitVersion();
     private final Logger logger = Logger.getLogger("Minecraft");
     private final ServicesManager servicesManager = new SimpleServicesManager();
     private final CraftScheduler scheduler = new CraftScheduler();
-    private final CraftSimpleCommandMap craftCommandMap = new CraftSimpleCommandMap(this); // MCPC+
+    private final CraftSimpleCommandMap craftCommandMap = new CraftSimpleCommandMap(this); // Cauldron
     private final SimpleCommandMap commandMap = new SimpleCommandMap(this);
     private final SimpleHelpMap helpMap = new SimpleHelpMap(this);
     private final StandardMessenger messenger = new StandardMessenger();
@@ -144,8 +144,8 @@ public final class CraftServer implements Server {
     protected final net.minecraft.server.MinecraftServer console;
     protected final net.minecraft.server.dedicated.DedicatedPlayerList playerList;
     private final Map<String, World> worlds = new LinkedHashMap<String, World>();
-    public YamlConfiguration configuration = MinecraftServer.configuration; // MCPC+
-    private YamlConfiguration commandsConfiguration = MinecraftServer.commandsConfiguration; // MCPC+
+    public YamlConfiguration configuration = MinecraftServer.configuration; // Cauldron
+    private YamlConfiguration commandsConfiguration = MinecraftServer.commandsConfiguration; // Cauldron
     private final Yaml yaml = new Yaml(new SafeConstructor());
     private final Map<String, OfflinePlayer> offlinePlayers = new MapMaker().softValues().makeMap();
     private final AutoUpdater updater;
@@ -186,18 +186,18 @@ public final class CraftServer implements Server {
 
         // Register all the Enchantments and PotionTypes now so we can stop new registration immediately after
         net.minecraft.enchantment.Enchantment.sharpness.getClass();
-        //org.bukkit.enchantments.Enchantment.stopAcceptingRegistrations(); // MCPC - allow registrations
+        //org.bukkit.enchantments.Enchantment.stopAcceptingRegistrations(); // Cauldron - allow registrations
 
         Potion.setPotionBrewer(new CraftPotionBrewer());
         net.minecraft.potion.Potion.blindness.getClass();
-        //PotionEffectType.stopAcceptingRegistrations(); // MCPC - allow registrations
+        //PotionEffectType.stopAcceptingRegistrations(); // Cauldron - allow registrations
         // Ugly hack :(
 
         if (!Main.useConsole) {
             getLogger().info("Console input is disabled due to --noconsole command argument");
         }
 
-        /* MCPC+ start - moved to MinecraftServer so FML/Forge can access during server startup
+        /* Cauldron start - moved to MinecraftServer so FML/Forge can access during server startup
         configuration = YamlConfiguration.loadConfiguration(getConfigFile());        
         configuration.options().copyDefaults(true);
         configuration.setDefaults(YamlConfiguration.loadConfiguration(getClass().getClassLoader().getResourceAsStream("configurations/bukkit.yml")));
@@ -234,7 +234,7 @@ public final class CraftServer implements Server {
         }
 
         saveCommandsConfig();
-        // MCPC+ end */
+        // Cauldron end */
         overrideAllCommandBlockCommands = commandsConfiguration.getStringList("command-block-overrides").contains("*");
         ((SimplePluginManager) pluginManager).useTimings(configuration.getBoolean("settings.plugin-profiling"));
         monsterSpawn = configuration.getInt("spawn-limits.monsters");
@@ -246,7 +246,7 @@ public final class CraftServer implements Server {
         chunkGCPeriod = configuration.getInt("chunk-gc.period-in-ticks");
         chunkGCLoadThresh = configuration.getInt("chunk-gc.load-threshold");
         loadIcon();
-        za.co.mcportcentral.MCPCConfig.init();
+        net.minecraftforge.cauldron.CauldronConfig.init();
 
         updater = new AutoUpdater(new BukkitDLUpdaterService(configuration.getString("auto-updater.host")), getLogger(), configuration.getString("auto-updater.preferred-channel"));
         updater.setEnabled(false); // Spigot
@@ -311,10 +311,10 @@ public final class CraftServer implements Server {
     }
 
     public void enablePlugins(PluginLoadOrder type) {
-        // MCPC+ start - initialize mod wrappers
+        // Cauldron start - initialize mod wrappers
         org.bukkit.craftbukkit.block.CraftBlock.initMappings();
         org.bukkit.craftbukkit.entity.CraftEntity.initMappings();
-        // MCPC+ end
+        // Cauldron end
         if (type == PluginLoadOrder.STARTUP) {
             helpMap.clear();
             helpMap.initializeGeneralTopics();
@@ -422,7 +422,7 @@ public final class CraftServer implements Server {
         Player[] players = new Player[online.size()];
 
         for (int i = 0; i < players.length; i++) {
-            players[i] = online.get(i).playerNetServerHandler.getPlayerB(); // MCPC+
+            players[i] = online.get(i).playerNetServerHandler.getPlayerB(); // Cauldron
         }
 
         return players;
@@ -619,7 +619,7 @@ public final class CraftServer implements Server {
         }
         try {
             this.playerCommandState = true;
-            // MCPC+ start - handle bukkit/vanilla console commands
+            // Cauldron start - handle bukkit/vanilla console commands
             int space = serverCommand.command.indexOf(" ");
             // if bukkit command exists then execute it over vanilla
             if (this.getCommandMap().getCommand(serverCommand.command.substring(0, space != -1 ? space : serverCommand.command.length())) != null)
@@ -630,7 +630,7 @@ public final class CraftServer implements Server {
                 craftCommandMap.setVanillaConsoleSender(serverCommand.sender);
                 return this.dispatchVanillaCommand(sender, serverCommand.command);
             }
-            // MCPC+ end
+            // Cauldron end
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Unexpected exception while parsing console command \"" + serverCommand.command + '"', ex);
             return false;
@@ -647,16 +647,16 @@ public final class CraftServer implements Server {
             return true;
         }
 
-        // MCPC+ start - handle vanilla commands called from plugins
+        // Cauldron start - handle vanilla commands called from plugins
         if(sender instanceof ConsoleCommandSender) {
             craftCommandMap.setVanillaConsoleSender(this.console);
         }
             
         return this.dispatchVanillaCommand(sender, commandLine);
-        // MCPC+ end
+        // Cauldron end
     }
     
-    // MCPC+ start
+    // Cauldron start
     // used to process vanilla commands
     public boolean dispatchVanillaCommand(CommandSender sender, String commandLine) {
         if (craftCommandMap.dispatch(sender, commandLine)) {
@@ -670,10 +670,10 @@ public final class CraftServer implements Server {
 
     public String getBukkitToForgeMapping(String name)
     {
-        String result = MCPCConfig.getString("bukkit-to-forge-mappings." + name, name, false);
+        String result = CauldronConfig.getString("bukkit-to-forge-mappings." + name, name, false);
         return result;
     }
-    // MCPC+ end    
+    // Cauldron end    
 
     public void reload() {
         configuration = YamlConfiguration.loadConfiguration(getConfigFile());
@@ -706,7 +706,7 @@ public final class CraftServer implements Server {
         playerList.getBannedPlayers().loadBanList();
 
         org.spigotmc.SpigotConfig.init(); // Spigot
-        za.co.mcportcentral.MCPCConfig.init(); // MCPC+
+        net.minecraftforge.cauldron.CauldronConfig.init(); // Cauldron
         for (net.minecraft.world.WorldServer world : console.worlds) {
             world.difficultySetting = difficulty;
             world.setAllowedSpawnTypes(monsters, animals);
@@ -862,8 +862,8 @@ public final class CraftServer implements Server {
         net.minecraft.world.WorldServer worldserver = DimensionManager.initDimension(creator, worldSettings);
 
         pluginManager.callEvent(new WorldInitEvent(worldserver.getWorld()));
-        za.co.mcportcentral.MCPCHooks.craftWorldLoading = true;
-        System.out.print("Preparing start region for level " + (console.worlds.size() - 1) + " (Dimension: " + worldserver.provider.dimensionId + ", Seed: " + worldserver.getSeed() + ")"); // MCPC+ - log dimension
+        net.minecraftforge.cauldron.CauldronHooks.craftWorldLoading = true;
+        System.out.print("Preparing start region for level " + (console.worlds.size() - 1) + " (Dimension: " + worldserver.provider.dimensionId + ", Seed: " + worldserver.getSeed() + ")"); // Cauldron - log dimension
 
         if (worldserver.getWorld().getKeepSpawnInMemory()) {
             short short1 = 196;
@@ -890,7 +890,7 @@ public final class CraftServer implements Server {
             }
         }
         pluginManager.callEvent(new WorldLoadEvent(worldserver.getWorld()));
-        za.co.mcportcentral.MCPCHooks.craftWorldLoading = false;
+        net.minecraftforge.cauldron.CauldronHooks.craftWorldLoading = false;
         return worldserver.getWorld();
     }
 
@@ -931,9 +931,9 @@ public final class CraftServer implements Server {
                 FMLLog.log(org.apache.logging.log4j.Level.ERROR, ex, "Failed to save world " + handle.getWorld().getName() + " while unloading it.");
             }
         }
-        MinecraftForge.EVENT_BUS.post(new WorldEvent.Unload(handle)); // MCPC+ - fire unload event before removing world
+        MinecraftForge.EVENT_BUS.post(new WorldEvent.Unload(handle)); // Cauldron - fire unload event before removing world
         worlds.remove(world.getName().toLowerCase());
-        DimensionManager.setWorld(handle.provider.dimensionId, null); // MCPC+ - remove world from DimensionManager
+        DimensionManager.setWorld(handle.provider.dimensionId, null); // Cauldron - remove world from DimensionManager
         return true;
     }
 
@@ -1022,7 +1022,7 @@ public final class CraftServer implements Server {
             }
         }
         toAdd.addToCraftingManager();
-        //net.minecraft.item.crafting.CraftingManager.getInstance().sort(); // MCPC+ - mod recipes not necessarily sortable
+        //net.minecraft.item.crafting.CraftingManager.getInstance().sort(); // Cauldron - mod recipes not necessarily sortable
         return true;
     }
 
@@ -1348,12 +1348,12 @@ public final class CraftServer implements Server {
     }
 
     public File getWorldContainer() {
-        // MCPC+ start - return the proper container
+        // Cauldron start - return the proper container
         if (DimensionManager.getWorld(0) != null)
         {
             return ((SaveHandler)DimensionManager.getWorld(0).getSaveHandler()).getWorldDirectory();
         }
-        // MCPC+ end
+        // Cauldron end
         if (container == null) {
             container = new File(configuration.getString("settings.world-container", "."));
         }
@@ -1429,11 +1429,11 @@ public final class CraftServer implements Server {
         return commandMap;
     }
     
-    // MCPC+ start
+    // Cauldron start
     public CraftSimpleCommandMap getCraftCommandMap() {
         return craftCommandMap;
     }
-    // MCPC+ end
+    // Cauldron end
     
     public int getMonsterSpawnLimit() {
         return monsterSpawn;

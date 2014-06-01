@@ -1,9 +1,9 @@
 package org.bukkit.craftbukkit.entity;
 
-// MCPC+ start - guava10
+// Cauldron start - guava10
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
-// MCPC+ end
+// Cauldron end
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

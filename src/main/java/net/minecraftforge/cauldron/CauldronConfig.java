@@ -1,4 +1,4 @@
-package za.co.mcportcentral;
+package net.minecraftforge.cauldron;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,17 +19,17 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.google.common.base.Throwables;
 
-public class MCPCConfig
+public class CauldronConfig
 {
 
-    private static final File CONFIG_FILE = new File("mcpc.yml");
-    private static final String HEADER = "This is the main configuration file for MCPC+.\n"
+    private static final File CONFIG_FILE = new File("cauldron.yml");
+    private static final String HEADER = "This is the main configuration file for Cauldron.\n"
             + "\n"
-            + "If you need help with the configuration or have any questions related to MCPC,\n"
+            + "If you need help with the configuration or have any questions related to Cauldron,\n"
             + "join us at the IRC or drop by our forums and leave a post.\n"
             + "\n"
-            + "IRC: #mcportcentral @ irc.esper.net ( http://webchat.esper.net/?channel=mcportcentral )\n"
-            + "Forums: http://http://www.mcportcentral.co.za/\n";
+            + "IRC: #cauldron @ irc.esper.net ( http://webchat.esper.net/?channel=cauldron )\n"
+            + "Forums: http://http://cauldron.minecraftforge.net/\n";
     
     /* ======================================================================== */
     
@@ -168,7 +168,7 @@ public class MCPCConfig
         if (config == null)
         {
             commands = new HashMap<String, Command>();
-            commands.put("mcpc", new MCPCCommand());
+            commands.put("cauldron", new CauldronCommand());
 
             load();
         }
@@ -178,7 +178,7 @@ public class MCPCConfig
     {
         for (Map.Entry<String, Command> entry : commands.entrySet())
         {
-            MinecraftServer.getServer().server.getCommandMap().register(entry.getKey(), "mcpc", entry.getValue());
+            MinecraftServer.getServer().server.getCommandMap().register(entry.getKey(), "cauldron", entry.getValue());
         }
     }
 
@@ -211,8 +211,8 @@ public class MCPCConfig
             version = getInt("config-version", 1);
             set("config-version", 1);
 
-            MCPCHooks.overrideTileTicks = Setting.overrideTileTicks.getValue();
-            readConfig(MCPCConfig.class, null);
+            CauldronHooks.overrideTileTicks = Setting.overrideTileTicks.getValue();
+            readConfig(CauldronConfig.class, null);
         }
         catch (Exception ex)
         {

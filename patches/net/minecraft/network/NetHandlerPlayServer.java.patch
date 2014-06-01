@@ -25,7 +25,7 @@
  import net.minecraft.network.play.server.S23PacketBlockChange;
  import net.minecraft.network.play.server.S2FPacketSetSlot;
  import net.minecraft.network.play.server.S32PacketConfirmTransaction;
-@@ -80,6 +84,7 @@
+@@ -80,19 +84,73 @@
  import net.minecraft.util.IChatComponent;
  import net.minecraft.util.IntHashMap;
  import net.minecraft.util.ReportedException;
@@ -33,8 +33,9 @@
  import net.minecraft.world.WorldServer;
  import org.apache.commons.lang3.StringUtils;
  import org.apache.logging.log4j.LogManager;
-@@ -87,12 +92,65 @@
+ import org.apache.logging.log4j.Logger;
  
++import net.minecraftforge.cauldron.CauldronUtils;
  import net.minecraftforge.common.ForgeHooks;
  import net.minecraftforge.common.MinecraftForge;
 -import cpw.mods.fml.common.eventhandler.Event;
@@ -94,9 +95,8 @@
 +import org.bukkit.inventory.InventoryView;
 +import org.bukkit.util.NumberConversions;
 +// CraftBukkit end
-+import org.bukkit.event.inventory.InventoryType; // MCPC+
++import org.bukkit.event.inventory.InventoryType; // Cauldron
 +
-+import za.co.mcportcentral.MCPCUtils;
 +
  public class NetHandlerPlayServer implements INetHandlerPlayServer
  {
@@ -106,8 +106,8 @@
      private static Random field_147376_j = new Random();
      private long field_147377_k;
 -    private int chatSpamThresholdCount;
-+    private volatile int chatSpamThresholdCount; // MCPC+ - set to volatile to fix multithreaded issues
-+    private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, MCPCUtils.deobfuscatedEnvironment() ? "chatSpamThresholdCount" : "fiel" + "d_147374_l"); // CraftBukkit - multithreaded field
++    private volatile int chatSpamThresholdCount; // Cauldron - set to volatile to fix multithreaded issues
++    private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, CauldronUtils.deobfuscatedEnvironment() ? "chatSpamThresholdCount" : "fiel" + "d_147374_l"); // CraftBukkit - multithreaded field
      private int field_147375_m;
      private IntHashMap field_147372_n = new IntHashMap();
 -    private double lastPosX;
@@ -147,7 +147,7 @@
 +    // Store the last block right clicked and what type it was
 +    private Item lastMaterial;
 +
-+    // MCPC+ - rename getPlayer -> getPlayerB() to disambiguate with FML's getPlayer() method of the same name (below)
++    // Cauldron - rename getPlayer -> getPlayerB() to disambiguate with FML's getPlayer() method of the same name (below)
 +    // Plugins calling this method will be remapped appropriately, but CraftBukkit code should be updated
 +    public CraftPlayer getPlayerB()
 +    {
@@ -473,7 +473,7 @@
  
 -            PlayerInteractEvent event = ForgeEventFactory.onPlayerInteract(playerEntity, PlayerInteractEvent.Action.RIGHT_CLICK_AIR, 0, 0, 0, -1);
 -            if (event.useItem != Event.Result.DENY)
-+            PlayerInteractEvent forgeEvent = ForgeEventFactory.onPlayerInteract(playerEntity, PlayerInteractEvent.Action.RIGHT_CLICK_AIR, 0, 0, 0, -1); // MCPC+ - rename event
++            PlayerInteractEvent forgeEvent = ForgeEventFactory.onPlayerInteract(playerEntity, PlayerInteractEvent.Action.RIGHT_CLICK_AIR, 0, 0, 0, -1); // Cauldron - rename event
 +            // CraftBukkit start
 +            int itemstackAmount = itemstack.stackSize;
 +            org.bukkit.event.player.PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(this.playerEntity, Action.RIGHT_CLICK_AIR, itemstack);
@@ -508,12 +508,12 @@
 +                return;
              }
  
-+            // MCPC+ start - record place result so we can update client inventory slot if place event is cancelled. Fixes stacksize client-side bug
++            // Cauldron start - record place result so we can update client inventory slot if place event is cancelled. Fixes stacksize client-side bug
 +            if (!this.playerEntity.theItemInWorldManager.activateBlockOrUseItem(this.playerEntity, worldserver, itemstack, i, j, k, l, p_147346_1_.func_149573_h(), p_147346_1_.func_149569_i(), p_147346_1_.func_149575_j()))
 +            {
 +                always = true;
 +            }
-+            // MCPC+ end
++            // Cauldron end
 +            // CraftBukkit end
              flag = true;
          }
@@ -522,13 +522,13 @@
              this.playerEntity.isChangingQuantityOnly = true;
              this.playerEntity.inventory.mainInventory[this.playerEntity.inventory.currentItem] = ItemStack.copyItemStack(this.playerEntity.inventory.mainInventory[this.playerEntity.inventory.currentItem]);
              Slot slot = this.playerEntity.openContainer.getSlotFromInventory(this.playerEntity.inventory, this.playerEntity.inventory.currentItem);
-+            // MCPC+ start - abort if no slot, fixes RP2 timer crash block place - see #181   
++            // Cauldron start - abort if no slot, fixes RP2 timer crash block place - see #181   
 +            if (slot == null) 
 +            {
 +                this.playerEntity.isChangingQuantityOnly = false; // set flag to false or it will cause inventory to glitch on death
 +                return;
 +            }
-+            // MCPC+ end
++            // Cauldron end
              this.playerEntity.openContainer.detectAndSendChanges();
              this.playerEntity.isChangingQuantityOnly = false;
  
@@ -781,7 +781,7 @@
 +        }
 +        else
 +        {
-+            // MCPC+ start - handle Forge event
++            // Cauldron start - handle Forge event
 +            ChatComponentTranslation chatcomponenttranslation1 = new ChatComponentTranslation("chat.type.text", new Object[] {this.playerEntity.func_145748_c_(), s});
 +            chatcomponenttranslation1 = ForgeHooks.onServerChatEvent(this, s, chatcomponenttranslation1);
 +            String message = s;
@@ -791,10 +791,10 @@
 +                // use event message from Forge
 +                message = (String)chatcomponenttranslation1.getFormatArgs()[chatcomponenttranslation1.getFormatArgs().length - 1];
              }
-+            // MCPC+ end
++            // Cauldron end
 +            Player player = this.getPlayerB();
-+            AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(async, player, message, new LazyPlayerSet()); // MCPC+ - pass changed message if any from Forge
-+            event.setCancelled(chatcomponenttranslation1 == null); // MCPC+ - pre-cancel event if forge event was cancelled
++            AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(async, player, message, new LazyPlayerSet()); // Cauldron - pass changed message if any from Forge
++            event.setCancelled(chatcomponenttranslation1 == null); // Cauldron - pre-cancel event if forge event was cancelled
 +            this.server.getPluginManager().callEvent(event);
 +            if (PlayerChatEvent.getHandlerList().getRegisteredListeners().length != 0)
 +            {
@@ -818,7 +818,7 @@
 +
 +                        if (((LazyPlayerSet) queueEvent.getRecipients()).isLazy())
 +                        {
-+                            // MCPC+ start - fix forge compatibility
++                            // Cauldron start - fix forge compatibility
 +                            EntityPlayerMP sender = ((CraftPlayer)queueEvent.getPlayer()).getHandle();
 +                            for (Object recipient : serverController.getConfigurationManager().playerEntityList)
 +                            {
@@ -829,7 +829,7 @@
 +                                    receiver.addChatMessage(chatcomponent);
 +                                }
 +                            }
-+                            // MCPC+ end
++                            // Cauldron end
 +                        }
 +                        else
 +                        {
@@ -877,7 +877,7 @@
 +
 +                if (((LazyPlayerSet) event.getRecipients()).isLazy())
 +                {
-+                    // MCPC+ start - fix forge compatibility
++                    // Cauldron start - fix forge compatibility
 +                    EntityPlayerMP sender = ((CraftPlayer)event.getPlayer()).getHandle();
 +                    for (Object recipient : serverController.getConfigurationManager().playerEntityList)
 +                    {
@@ -888,7 +888,7 @@
 +                            receiver.addChatMessage(chatcomponent);
 +                        }
 +                    }
-+                    // MCPC+ end
++                    // Cauldron end
 +                }
 +                else
 +                {
@@ -926,7 +926,7 @@
 +            }
 +
 +            // Spigot end
-+            // MCPC+ start - handle bukkit/vanilla commands
++            // Cauldron start - handle bukkit/vanilla commands
 +            int space = event.getMessage().indexOf(" ");
 +            // if bukkit command exists then execute it over vanilla
 +            if (this.server.getCommandMap().getCommand(event.getMessage().substring(1, space != -1 ? space : event.getMessage().length())) != null)
@@ -1170,7 +1170,7 @@
 +            return;    // CraftBukkit
 +        }
 +
-+        // MCPC+ start - vanilla compatibility
++        // Cauldron start - vanilla compatibility
 +        try 
 +        {
 +            if (this.playerEntity.openContainer.getBukkitView() != null)
@@ -1182,7 +1182,7 @@
 +        {
 +            // do nothing
 +        }
-+        // MCPC+ end
++        // Cauldron end
          this.playerEntity.closeContainer();
      }
  
@@ -1211,13 +1211,13 @@
 +            InventoryAction action = InventoryAction.UNKNOWN;
 +            ItemStack itemstack = null;
 +
-+            // MCPC+ start - some containers such as NEI's Creative Container does not have a view at this point so we need to create one
++            // Cauldron start - some containers such as NEI's Creative Container does not have a view at this point so we need to create one
 +            if (inventory == null)
 +            {
 +                inventory = new CraftInventoryView(this.playerEntity.getBukkitEntity(), MinecraftServer.getServer().server.createInventory(this.playerEntity.getBukkitEntity(), InventoryType.CHEST), this.playerEntity.openContainer);
 +                this.playerEntity.openContainer.bukkitView = inventory;
 +            }
-+            // MCPC+ end
++            // Cauldron end
 +
 +            if (p_147351_1_.func_149544_d() == -1)
 +            {
@@ -1488,7 +1488,7 @@
 +                    action = InventoryAction.NOTHING;
 +
 +                    // Quick check for if we have any of the item
-+                    // MCPC+ start - can't call getContents() on modded IInventory; CB-added method
++                    // Cauldron start - can't call getContents() on modded IInventory; CB-added method
 +                    try {
 +                    if (inventory.getTopInventory().contains(org.bukkit.Material.getMaterial(Item.getIdFromItem(cursor.getItem()))) || inventory.getBottomInventory().contains(org.bukkit.Material.getMaterial(Item.getIdFromItem(cursor.getItem()))))
 +                    {
@@ -1497,7 +1497,7 @@
 +                    } catch (AbstractMethodError ex) {
 +                        // nothing we can do
 +                    }
-+                    // MCPC+ end
++                    // Cauldron end
 +                }
 +            }
 +
@@ -1518,7 +1518,7 @@
 +
 +                if (p_147351_1_.func_149544_d() == 0 && top instanceof CraftingInventory)
 +                {
-+                    // MCPC+ start - vanilla compatibility (mod recipes)
++                    // Cauldron start - vanilla compatibility (mod recipes)
 +                    org.bukkit.inventory.Recipe recipe = null;
 +                    try
 +                    {
@@ -1528,7 +1528,7 @@
 +                    {
 +                        // do nothing
 +                    }
-+                    // MCPC+ end
++                    // Cauldron end
 +
 +                    if (recipe != null)
 +                    {

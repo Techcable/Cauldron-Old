@@ -21,7 +21,7 @@ configurations {
 }
 
 apply plugin: 'maven'
-apply plugin: 'mcpc'
+apply plugin: 'cauldron'
 
 minecraft {
     version = '1.7.2'
@@ -48,7 +48,7 @@ group = 'net.minecraftforge'
 version = "1.7.2-R0.4-forge1098"
 
 jenkins {
-    job = 'MCPC'
+    job = 'Cauldron'
 }
 
 launch4j {
@@ -67,9 +67,9 @@ def getBuild() {
 
 tasks.packageUniversal.manifest { 
     attributes([
-    'Implementation-Vendor': 'MCPC',
-    'Implementation-Title': 'MCPC Plus',
-    'Implementation-Version': 'git-MCPC-Plus-'+project.version+getBuild(),
+    'Implementation-Vendor': 'Cauldron',
+    'Implementation-Title': 'Cauldron',
+    'Implementation-Version': 'git-Cauldron-'+project.version+getBuild(),
     'Forge-Version': '10.12.1.1098',
     'Specification-Vendor': 'Bukkit Team',
     'Specification-Title': 'Bukkit',

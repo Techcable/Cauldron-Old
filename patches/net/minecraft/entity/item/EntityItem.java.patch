@@ -55,24 +55,24 @@
 +        this.lastTick = MinecraftServer.currentTick;
 +        // CraftBukkit end
 +
-+        boolean forceUpdate = this.ticksExisted > 0 && this.ticksExisted % 25 == 0; // MCPC+ - optimize item tick updates
++        boolean forceUpdate = this.ticksExisted > 0 && this.ticksExisted % 25 == 0; // Cauldron - optimize item tick updates
 +        this.prevPosX = this.posX;
 +        this.prevPosY = this.posY;
 +        this.prevPosZ = this.posZ;
 +        this.motionY -= 0.03999999910593033D;
-+        // MCPC+ start - if forced
++        // Cauldron start - if forced
 +        if (forceUpdate || noClip) {
 +            this.noClip = this.func_145771_j(this.posX, (this.boundingBox.minY + this.boundingBox.maxY) / 2.0D, this.posZ);
          }
 -        else
 -        {
 -            super.onUpdate();
-+        // MCPC+ end
++        // Cauldron end
 +        this.moveEntity(this.motionX, this.motionY, this.motionZ);
 +        boolean flag = (int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ;
  
 -            if (this.delayBeforeCanPickup > 0)
-+        if ((flag && this.ticksExisted % 5 == 0) || forceUpdate) // MCPC+ - if forced
++        if ((flag && this.ticksExisted % 5 == 0) || forceUpdate) // Cauldron - if forced
 +        {
 +            if (this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() == Material.lava)
              {
@@ -92,7 +92,7 @@
 -            boolean flag = (int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ;
 -
 -            if (flag || this.ticksExisted % 25 == 0)
-+            if (forceUpdate && !this.worldObj.isRemote) // MCPC+ - if forced
++            if (forceUpdate && !this.worldObj.isRemote) // Cauldron - if forced
              {
 -                if (this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() == Material.lava)
 -                {
@@ -146,7 +146,7 @@
 -            if (!this.worldObj.isRemote && this.age >= lifespan)
 +        ItemStack item = getDataWatcher().getWatchableObjectItemStack(10);
 +        
-+        if (!this.worldObj.isRemote && this.age >= lifespan - 1) // MCPC+ adjust for age being off by one when it is first dropped
++        if (!this.worldObj.isRemote && this.age >= lifespan - 1) // Cauldron adjust for age being off by one when it is first dropped
 +        {
 +            // CraftBukkit start
 +            if (org.bukkit.craftbukkit.event.CraftEventFactory.callItemDespawnEvent(this).isCancelled())
@@ -261,7 +261,7 @@
 +            if (this.delayBeforeCanPickup <= 0 && canHold > 0)
 +            {
 +                itemstack.stackSize = canHold;
-+                // MCPC+ start - rename to cbEvent to fix naming collision
++                // Cauldron start - rename to cbEvent to fix naming collision
 +                PlayerPickupItemEvent cbEvent = new PlayerPickupItemEvent((org.bukkit.entity.Player) par1EntityPlayer.getBukkitEntity(), (org.bukkit.entity.Item) this.getBukkitEntity(), remaining);
 +                //cbEvent.setCancelled(!par1EntityPlayer.canPickUpLoot); TODO
 +                this.worldObj.getServer().getPluginManager().callEvent(cbEvent);
@@ -271,7 +271,7 @@
 +                {
 +                    return;
 +                }
-+                // MCPC+ end
++                // Cauldron end
 +
 +                // Possibly < 0; fix here so we do not have to modify code below
 +                this.delayBeforeCanPickup = 0;

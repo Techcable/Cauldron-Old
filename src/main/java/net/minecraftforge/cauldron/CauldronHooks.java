@@ -1,4 +1,4 @@
-package za.co.mcportcentral;
+package net.minecraftforge.cauldron;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
@@ -37,7 +37,7 @@ import org.spigotmc.SpigotConfig;
 
 import com.google.gson.stream.JsonWriter;
 
-public class MCPCHooks
+public class CauldronHooks
 {
     // Some mods such as Twilight Forest listen for specific events as their WorldProvider loads to hotload its dimension. This prevents this from happening so MV can create worlds using the same provider without issue.
     public static boolean craftWorldLoading = false;
@@ -64,7 +64,7 @@ public class MCPCHooks
 
     public static void logStack()
     {
-        if (MCPCConfig.Setting.logWithStackTraces.getValue())
+        if (CauldronConfig.Setting.logWithStackTraces.getValue())
         {
             Throwable ex = new Throwable();
             ex.fillInStackTrace();
@@ -74,7 +74,7 @@ public class MCPCHooks
 
     public static void logEntityDeath(Entity entity)
     {
-        if (MCPCConfig.Setting.entityDeathLogging.getValue())
+        if (CauldronConfig.Setting.entityDeathLogging.getValue())
         {
             logInfo("Dim: {0} setDead(): {1}", entity.worldObj.provider.dimensionId, entity);
             logStack();
@@ -83,7 +83,7 @@ public class MCPCHooks
 
     public static void logEntityDespawn(Entity entity, String reason)
     {
-        if (MCPCConfig.Setting.entityDespawnLogging.getValue())
+        if (CauldronConfig.Setting.entityDespawnLogging.getValue())
         {
             logInfo("Dim: {0} Despawning ({1}): {2}", entity.worldObj.provider.dimensionId, reason, entity);
             //logInfo("Chunk Is Active: {0}", entity.worldObj.inActiveChunk(entity));
@@ -93,7 +93,7 @@ public class MCPCHooks
 
     public static void logEntitySpawn(World world, Entity entity, SpawnReason spawnReason)
     {
-        if (MCPCConfig.Setting.entitySpawnLogging.getValue())
+        if (CauldronConfig.Setting.entitySpawnLogging.getValue())
         {
             logInfo("Dim: {0} Spawning ({1}): {2}", world.provider.dimensionId, spawnReason, entity);
             logInfo("Dim: {0} Entities Last Tick: {1}", world.provider.dimensionId, world.entitiesTicked);
@@ -105,7 +105,7 @@ public class MCPCHooks
 
     public static void logChunkLoad(ChunkProviderServer provider, String msg, int x, int z, boolean logLoadOnRequest)
     {
-        if (MCPCConfig.Setting.chunkLoadLogging.getValue())
+        if (CauldronConfig.Setting.chunkLoadLogging.getValue())
         {
             logInfo("{0} Chunk At [{1}] ({2}, {3})", msg, provider.worldObj.provider.dimensionId, x, z);
             if (logLoadOnRequest)
@@ -118,7 +118,7 @@ public class MCPCHooks
 
     public static void logChunkUnload(ChunkProviderServer provider, int x, int z, String msg)
     {
-        if (MCPCConfig.Setting.chunkUnloadLogging.getValue())
+        if (CauldronConfig.Setting.chunkUnloadLogging.getValue())
         {
             logInfo("{0} [{1}] ({2}, {3})", msg, provider.worldObj.provider.dimensionId, x, z);
             long currentTick = MinecraftServer.getServer().getTickCounter();
@@ -137,7 +137,7 @@ public class MCPCHooks
         logInfo(" Finding Spawn Point: {0}", provider.worldObj.findingSpawnPoint);
         logInfo(" Load chunk on request: {0}", provider.loadChunkOnProvideRequest);
         logInfo(" Calling Forge Tick: {0}", MinecraftServer.callingForgeTick);
-        logInfo(" Load chunk on forge tick: {0}", MCPCConfig.Setting.loadChunkOnForgeTick.getValue());
+        logInfo(" Load chunk on forge tick: {0}", CauldronConfig.Setting.loadChunkOnForgeTick.getValue());
         long providerTickDiff = currentTick - provider.initialTick;
         if (providerTickDiff <= 100)
         {
@@ -147,8 +147,8 @@ public class MCPCHooks
 
     public static boolean checkBoundingBoxSize(Entity entity, AxisAlignedBB aabb)
     {
-        int logSize = MCPCConfig.Setting.largeBoundingBoxLogSize.getValue();
-        if (logSize <= 0 || !MCPCConfig.Setting.checkEntityBoundingBoxes.getValue()) return false;
+        int logSize = CauldronConfig.Setting.largeBoundingBoxLogSize.getValue();
+        if (logSize <= 0 || !CauldronConfig.Setting.checkEntityBoundingBoxes.getValue()) return false;
         int x = MathHelper.floor_double(aabb.minX);
         int x1 = MathHelper.floor_double(aabb.maxX + 1.0D);
         int y = MathHelper.floor_double(aabb.minY);
@@ -157,7 +157,7 @@ public class MCPCHooks
         int z1 = MathHelper.floor_double(aabb.maxZ + 1.0D);
         
         int size = Math.abs(x1-x) * Math.abs(y1-y) * Math.abs(z1-z);
-        if (size > MCPCConfig.Setting.largeBoundingBoxLogSize.getValue())
+        if (size > CauldronConfig.Setting.largeBoundingBoxLogSize.getValue())
         {
             logWarning("Entity being removed for bounding box restrictions");
             logWarning("BB Size: {0} > {1} avg edge: {2}", size, logSize, aabb.getAverageEdgeLength());
@@ -177,13 +177,13 @@ public class MCPCHooks
     
     public static boolean checkEntitySpeed(Entity entity, double x, double y, double z)
     {
-        int maxSpeed = MCPCConfig.Setting.entityMaxSpeed.getValue();
-        if (maxSpeed > 0 && MCPCConfig.Setting.checkEntityMaxSpeeds.getValue())
+        int maxSpeed = CauldronConfig.Setting.entityMaxSpeed.getValue();
+        if (maxSpeed > 0 && CauldronConfig.Setting.checkEntityMaxSpeeds.getValue())
         {
             double distance = x * x + z * z;
             if (distance > maxSpeed)
             {
-                if (MCPCConfig.Setting.logEntitySpeedRemoval.getValue())
+                if (CauldronConfig.Setting.logEntitySpeedRemoval.getValue())
                 {
                     logInfo("Speed violation: {0} was over {1} - Removing Entity: {2}", distance, maxSpeed, entity);
                     if (entity instanceof EntityLivingBase)
@@ -192,7 +192,7 @@ public class MCPCHooks
                         logInfo("Entity Motion: ({0}, {1}, {2}) Move Strafing: {3} Move Forward: {4}", entity.motionX, entity.motionY, entity.motionZ, livingBase.moveStrafing, livingBase.moveForward);
                     }
 
-                    if (MCPCConfig.Setting.logWithStackTraces.getValue())
+                    if (CauldronConfig.Setting.logWithStackTraces.getValue())
                     {
                         logInfo("Move offset: ({0}, {1}, {2})", x, y, z);
                         logInfo("Motion: ({0}, {1}, {2})", entity.motionX, entity.motionY, entity.motionZ);
@@ -220,19 +220,19 @@ public class MCPCHooks
     
     public static void logEntitySize(World world, Entity entity, List list)
     {
-        if (!MCPCConfig.Setting.logEntityCollisionChecks.getValue()) return;
-        long largeCountLogSize = MCPCConfig.Setting.largeCollisionLogSize.getValue();
+        if (!CauldronConfig.Setting.logEntityCollisionChecks.getValue()) return;
+        long largeCountLogSize = CauldronConfig.Setting.largeCollisionLogSize.getValue();
         if (largeCountLogSize > 0 && world.entitiesTicked > largeCountLogSize)
         {
             logWarning("Entity size > {0, number} at: {1}", largeCountLogSize, entity);
         }
         if (list == null) return;
-        long largeCollisionLogSize = MCPCConfig.Setting.largeCollisionLogSize.getValue();
+        long largeCollisionLogSize = CauldronConfig.Setting.largeCollisionLogSize.getValue();
         if (largeCollisionLogSize > 0 &&
                 (MinecraftServer.getServer().getTickCounter() % 10) == 0 &&
                 list.size() >= largeCollisionLogSize)
         {
-            MCPCHooks.CollisionWarning warning = new MCPCHooks.CollisionWarning(world, entity);
+            CauldronHooks.CollisionWarning warning = new CauldronHooks.CollisionWarning(world, entity);
             if (recentWarnings.contains(warning))
             {
                 long lastWarned = recentWarnings.get(warning);
@@ -272,15 +272,14 @@ public class MCPCHooks
     public static int getTileTickInterval(TileEntity tileEntity)
     {
         String path = "tick-intervals.tiles.update." + tileEntity.getClass().getName().replace(".", "-");
-        // if (!MCPCConfig.isSet(path)) return tileEntity.canUpdate() ? 1 : 0;
-        return MCPCConfig.getInt(path, tileEntity.canUpdate() ? 1 : 0);
+        return CauldronConfig.getInt(path, tileEntity.canUpdate() ? 1 : 0);
     }
 
     public static boolean canUpdate(TileEntity tileEntity)
     {
         if (tileEntity == null || !tileEntity.canUpdate() || MinecraftServer.bannedTileEntityUpdates.contains(tileEntity.getClass())) return false; // quick exit
-        if (MCPCConfig.Setting.overrideTileTicks.getValue())
-            return MCPCHooks.getTileTickInterval(tileEntity) != 0;
+        if (CauldronConfig.Setting.overrideTileTicks.getValue())
+            return CauldronHooks.getTileTickInterval(tileEntity) != 0;
         return true;
     }
 
@@ -440,7 +439,7 @@ public class MCPCHooks
 
     public static void enableThreadContentionMonitoring()
     {
-        if (!MCPCConfig.Setting.enableThreadContentionMonitoring.getValue()) return;
+        if (!CauldronConfig.Setting.enableThreadContentionMonitoring.getValue()) return;
         java.lang.management.ThreadMXBean mbean = java.lang.management.ManagementFactory.getThreadMXBean();
         mbean.setThreadContentionMonitoringEnabled(true);
     }

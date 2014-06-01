@@ -12,12 +12,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.cauldron.CauldronConfig;
+import net.minecraftforge.cauldron.CauldronHooks;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
-import za.co.mcportcentral.MCPCConfig;
-import za.co.mcportcentral.MCPCHooks;
 
 public class WatchdogThread extends Thread
 {
@@ -71,11 +71,11 @@ public class WatchdogThread extends Thread
             {
                 Logger log = Bukkit.getServer().getLogger();
                 log.log(Level.SEVERE, "The server has stopped responding!");
-                log.log(Level.SEVERE, "Please report this to https://github.com/MinecraftPortCentral/MCPC-Plus/issues");
+                log.log(Level.SEVERE, "Please report this to https://github.com/MinecraftPortCentral/Cauldron-Plus/issues");
                 log.log(Level.SEVERE, "Be sure to include ALL relevant console errors and Minecraft crash reports");
-                log.log(Level.SEVERE, "MCPC+ version: " + Bukkit.getServer().getVersion());
+                log.log(Level.SEVERE, "Cauldron version: " + Bukkit.getServer().getVersion());
                 
-                // MCPC+ start - add more logging info
+                // Cauldron start - add more logging info
                 log.log(Level.SEVERE, "The server is going slow. Last server tick was " + (currentTime - lastTick) + "ms ago");
                 double tps = Math.min(20, Math.round(net.minecraft.server.MinecraftServer.currentTps * 10) / 10.0);
                 log.log(Level.SEVERE, "Last Tick: " + lastTick + " Current Time: " + currentTime + " Warning: " + warningTime + " Timeout: " + timeoutTime);
@@ -97,32 +97,32 @@ public class WatchdogThread extends Thread
 
                 log.log(Level.SEVERE, "------------------------------");
 
-                if (MCPCConfig.Setting.dumpChunksOnDeadlock.getValue())
+                if (CauldronConfig.Setting.dumpChunksOnDeadlock.getValue())
                 {
                     // Dump detailed world info to a watchdog report log
                     File file = new File(new File(new File("."), "crash-reports"), "watchdog-chunks-"
                             + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-server.txt");
                     log.log(Level.SEVERE, "------------------------------");
                     log.log(Level.SEVERE, "Writing watchdog detailed info to: " + file);
-                    MCPCHooks.writeChunks(file, false);
+                    CauldronHooks.writeChunks(file, false);
                     log.log(Level.SEVERE, "Writing complete");
                     log.log(Level.SEVERE, "------------------------------");
                 }
-                if (MCPCConfig.Setting.dumpHeapOnDeadlock.getValue())
+                if (CauldronConfig.Setting.dumpHeapOnDeadlock.getValue())
                 {
                     // Dump detailed world info to a watchdog report log
                     File file = new File(new File(new File("."), "crash-reports"), "watchdog-heap-"
                             + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-server.bin");
                     log.log(Level.SEVERE, "------------------------------");
                     log.log(Level.SEVERE, "Writing heap dump to: " + file);
-                    MCPCHooks.dumpHeap(file, true);
+                    CauldronHooks.dumpHeap(file, true);
                     log.log(Level.SEVERE, "Writing complete");
                     log.log(Level.SEVERE, "------------------------------");
                 }
-                // MCPC+ end
+                // Cauldron end
                 
                 log.log(Level.SEVERE, "------------------------------");
-                log.log(Level.SEVERE, "Server thread dump (Look for plugins here before reporting to MCPC+!):");
+                log.log(Level.SEVERE, "Server thread dump (Look for plugins here before reporting to Cauldron!):");
                 dumpThread(ManagementFactory.getThreadMXBean().getThreadInfo(MinecraftServer.getServer().primaryThread.getId(), Integer.MAX_VALUE), log);
                 log.log(Level.SEVERE, "------------------------------");
                 //
@@ -140,7 +140,7 @@ public class WatchdogThread extends Thread
                 }
                 break;
             }
-            // MCPC + start - add warning info 
+            // Cauldron + start - add warning info 
             else if (lastTick != 0 && System.currentTimeMillis() > lastTick + warningTime)
             {
                 Logger log = Bukkit.getServer().getLogger();
@@ -160,14 +160,14 @@ public class WatchdogThread extends Thread
                     log.log(Level.WARNING, "  Entities Last Tick: " + world.entitiesTicked);
                     log.log(Level.WARNING, "  Tiles Last Tick: " + world.tilesTicked);
                 }
-                if (MCPCConfig.Setting.dumpThreadsOnWarn.getValue())
+                if (CauldronConfig.Setting.dumpThreadsOnWarn.getValue())
                 {
-                    log.log(Level.WARNING, "Server thread dump (Look for mods or plugins here before reporting to MCPC+!):");
+                    log.log(Level.WARNING, "Server thread dump (Look for mods or plugins here before reporting to Cauldron!):");
                     dumpThread(ManagementFactory.getThreadMXBean().getThreadInfo(MinecraftServer.getServer().primaryThread.getId(), Integer.MAX_VALUE), log,
                             Level.WARNING);
                 }
             }
-            // MCPC+ end
+            // Cauldron end
 
             try
             {
@@ -196,8 +196,8 @@ public class WatchdogThread extends Thread
                     + " | Suspended: " + thread.isSuspended()
                     + " | Native: " + thread.isInNative()
                     + " | State: " + thread.getThreadState() 
-                    + " | Blocked Time: " + thread.getBlockedTime()     // MCPC+ add info about blocked time
-                    + " | Blocked Count: " + thread.getBlockedCount()); // MCPC+ add info about blocked count
+                    + " | Blocked Time: " + thread.getBlockedTime()     // Cauldron add info about blocked time
+                    + " | Blocked Count: " + thread.getBlockedCount()); // Cauldron add info about blocked count
             
             if ( thread.getLockedMonitors().length != 0 )
             {
@@ -207,7 +207,7 @@ public class WatchdogThread extends Thread
                     log.log( level, "\t\tLocked on:" + monitor.getLockedStackFrame() );
                 }
             }
-            if ( thread.getLockOwnerId() != -1 ) log.log( level, "\tLock Owner Id: " + thread.getLockOwnerId()); // MCPC + add info about lock owner thread id
+            if ( thread.getLockOwnerId() != -1 ) log.log( level, "\tLock Owner Id: " + thread.getLockOwnerId()); // Cauldron + add info about lock owner thread id
             log.log( level, "\tStack:" );
             //
             StackTraceElement[] stack = thread.getStackTrace();

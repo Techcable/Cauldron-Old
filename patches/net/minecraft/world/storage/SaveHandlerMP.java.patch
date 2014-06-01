@@ -14,11 +14,11 @@
          return null;
      }
 +
-+    // MCPC+ start
++    // Cauldron start
 +    @Override
 +    public UUID getUUID()
 +    {
 +        return this.getUUID();
 +    }
-+    // MCPC+ end
++    // Cauldron end
  }

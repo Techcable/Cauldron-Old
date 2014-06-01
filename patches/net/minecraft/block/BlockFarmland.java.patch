@@ -33,7 +33,7 @@
              }
  
 +            // CraftBukkit start - Interact soil
-+            // MCPC+ start - validate data before sending event
++            // Cauldron start - validate data before sending event
 +            org.bukkit.event.Cancellable cancellable = null;
 +
 +            if (p_149746_5_ instanceof EntityPlayer)
@@ -50,7 +50,7 @@
 +            {
 +                return;
 +            }
-+            // MCPC+ end
++            // Cauldron end
 +            // CraftBukkit end
              p_149746_1_.setBlock(p_149746_2_, p_149746_3_, p_149746_4_, Blocks.dirt);
          }

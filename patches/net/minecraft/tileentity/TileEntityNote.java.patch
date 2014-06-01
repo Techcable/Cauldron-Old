@@ -17,11 +17,11 @@
          }
      }
 +
-+    // MCPC+ start
++    // Cauldron start
 +    @Override
 +    public boolean canUpdate()
 +    {
 +        return false;
 +    }
-+    // MCPC+ end
++    // Cauldron end
  }

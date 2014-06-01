@@ -4,7 +4,7 @@
  import net.minecraft.world.gen.layer.GenLayerZoom;
  import cpw.mods.fml.relauncher.Side;
  import cpw.mods.fml.relauncher.SideOnly;
-+import net.minecraftforge.common.util.EnumHelper; // MCPC+
++import net.minecraftforge.common.util.EnumHelper; // Cauldron
  
  public class WorldType
  {
@@ -12,12 +12,12 @@
          this.canBeCreated = true;
          this.worldTypeId = par1;
          worldTypes[par1] = this;
-+        // MCPC+ start - add worldtype for bukkit if it does not already exist
++        // Cauldron start - add worldtype for bukkit if it does not already exist
 +        if (org.bukkit.WorldType.getByName(par2Str) == null)
 +        {
 +            EnumHelper.addBukkitWorldType(par2Str);
 +        }
-+        // MCPC+ end
++        // Cauldron end
      }
  
      public String getWorldTypeName()

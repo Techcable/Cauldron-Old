@@ -6,16 +6,16 @@ import org.bukkit.entity.Minecart;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
 
-public class CraftMinecart extends CraftVehicle implements Minecart { // MCPC+ - concrete for modded minecarts
+public class CraftMinecart extends CraftVehicle implements Minecart { // Cauldron - concrete for modded minecarts
     public CraftMinecart(CraftServer server, net.minecraft.entity.item.EntityMinecart entity) {
         super(server, entity);
     }
 
-    // MCPC+ start
+    // Cauldron start
     public org.bukkit.entity.EntityType getType() {
         return org.bukkit.entity.EntityType.MINECART;
     }
-    // MCPC+ end
+    // Cauldron end
 
     public void setDamage(double damage) {
         getHandle().setDamage((float) damage);

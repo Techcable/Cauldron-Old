@@ -1,37 +1,37 @@
-package za.co.mcportcentral;
+package net.minecraftforge.cauldron;
 
 import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-public class MCPCWorldConfig
+public class CauldronWorldConfig
 {
     private final String worldName;
     private final YamlConfiguration config;
     private boolean verbose;
 
-    public MCPCWorldConfig(String worldName)
+    public CauldronWorldConfig(String worldName)
     {
         this.worldName = worldName.toLowerCase();
-        this.config = MCPCConfig.config;
+        this.config = CauldronConfig.config;
         if (worldName.toLowerCase().contains("dummy")) return;
         try {
             init();
         } catch (Throwable t) {
-            log( "Something bad happened while trying init the mcpc config for [" + worldName + "]");
+            log( "Something bad happened while trying init the cauldron config for [" + worldName + "]");
             t.printStackTrace();
         }
     }
 
     public void init()
     {
-        MCPCConfig.readConfig( MCPCWorldConfig.class, this );
+        CauldronConfig.readConfig( CauldronWorldConfig.class, this );
     }
 
     public void save()
     {
-        MCPCConfig.save();
+        CauldronConfig.save();
     }
 
     private void log(String s)

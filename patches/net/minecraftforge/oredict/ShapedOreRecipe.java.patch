@@ -1,22 +1,29 @@
 --- ../src-base/minecraft/net/minecraftforge/oredict/ShapedOreRecipe.java
 +++ ../src-work/minecraft/net/minecraftforge/oredict/ShapedOreRecipe.java
-@@ -6,6 +6,11 @@
+@@ -6,6 +6,10 @@
  import java.util.Map;
  import java.util.Map.Entry;
  
-+// MCPC+ start
-+import za.co.mcportcentral.potion.CustomModRecipe;
++// Cauldron start
 +import org.bukkit.inventory.Recipe;
-+// MCPC+ end
++// Cauldron end
 +
  import net.minecraft.block.Block;
  import net.minecraft.item.crafting.IRecipe;
  import net.minecraft.inventory.InventoryCrafting;
+@@ -13,6 +17,7 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.item.crafting.ShapedRecipes;
+ import net.minecraft.world.World;
++import net.minecraftforge.cauldron.potion.CustomModRecipe;
+ 
+ public class ShapedOreRecipe implements IRecipe
+ {
 @@ -25,6 +30,7 @@
      private int width = 0;
      private int height = 0;
      private boolean mirrored = true;
-+    private ShapedRecipes vanillaRecipe = null; // MCPC+ - bukkit compatibility
++    private ShapedRecipes vanillaRecipe = null; // Cauldron - bukkit compatibility
  
      public ShapedOreRecipe(Block     result, Object... recipe){ this(new ItemStack(result), recipe); }
      public ShapedOreRecipe(Item      result, Object... recipe){ this(new ItemStack(result), recipe); }
@@ -24,7 +31,7 @@
  
      ShapedOreRecipe(ShapedRecipes recipe, Map<ItemStack, String> replacements)
      {
-+        vanillaRecipe = recipe; // MCPC+ - bukkit compatibility
++        vanillaRecipe = recipe; // Cauldron - bukkit compatibility
          output = recipe.getRecipeOutput();
          width = recipe.recipeWidth;
          height = recipe.recipeHeight;
@@ -33,12 +40,12 @@
          return this.input;
      }
 +
-+    // MCPC+ start - required for Bukkit API
++    // Cauldron start - required for Bukkit API
 +    @Override
 +    public Recipe toBukkitRecipe() {
 +        if (vanillaRecipe != null)
 +            return vanillaRecipe.toBukkitRecipe();
 +        return new CustomModRecipe(this);
 +    }
-+    // MCPC+ end
++    // Cauldron end
  }

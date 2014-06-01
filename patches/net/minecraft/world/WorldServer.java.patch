@@ -218,7 +218,7 @@
 +        }
 +
 +        // CraftBukkit end
-+        if (!weather.isCancelled() && !thunder.isCancelled()) provider.resetRainAndThunder(); // MCPC+
++        if (!weather.isCancelled() && !thunder.isCancelled()) provider.resetRainAndThunder(); // Cauldron
      }
  
      public boolean areAllPlayersAsleep()
@@ -275,7 +275,7 @@
 +            // If unloaded, or in process of being unloaded, drop it
 +            if ((!this.chunkExists(chunkX, chunkZ)) || (this.theChunkProviderServer.chunksToUnload.contains(chunkX, chunkZ)))
 +            {
-+                activeChunkSet.remove(new ChunkCoordIntPair(chunkX, chunkZ)); // MCPC+ - vanilla compatibility
++                activeChunkSet.remove(new ChunkCoordIntPair(chunkX, chunkZ)); // Cauldron - vanilla compatibility
 +                iter.remove();
 +                continue;
 +            }
@@ -380,7 +380,7 @@
 +        if (spigotConfig.clearChunksOnTick)
 +        {
 +            activeChunkSet_CB.clear();
-+            activeChunkSet.clear(); // MCPC+
++            activeChunkSet.clear(); // Cauldron
 +        }
 +
 +        // Spigot End
@@ -392,7 +392,7 @@
      public void updateEntities()
      {
 -        if (this.playerEntities.isEmpty() && getPersistentChunks().isEmpty())
-+        if (this.playerEntities.isEmpty() && getPersistentChunks().isEmpty()) // MCPC+ Use Forge logic here
++        if (this.playerEntities.isEmpty() && getPersistentChunks().isEmpty()) // Cauldron Use Forge logic here
          {
              if (this.updateEntityTick++ >= 1200)
              {
@@ -420,7 +420,7 @@
      {
          IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
 -        this.theChunkProviderServer = new ChunkProviderServer(this, ichunkloader, this.provider.createChunkGenerator());
-+        // MCPC+ start - if provider is vanilla, proceed to create a bukkit compatible chunk generator
++        // Cauldron start - if provider is vanilla, proceed to create a bukkit compatible chunk generator
 +        if (this.provider.getClass().toString().length() <= 3 || this.provider.getClass().toString().contains("net.minecraft"))
 +        {
 +            // CraftBukkit start
@@ -449,7 +449,7 @@
 +        {
 +            this.theChunkProviderServer = new ChunkProviderServer(this, ichunkloader, this.provider.createChunkGenerator());
 +        }
-+        // MCPC+ end
++        // Cauldron end
          return this.theChunkProviderServer;
      }
  
@@ -533,7 +533,7 @@
  
      public boolean addWeatherEffect(Entity par1Entity)
      {
-+        // MCPC+ start - vanilla compatibility
++        // Cauldron start - vanilla compatibility
 +        if (par1Entity instanceof net.minecraft.entity.effect.EntityLightningBolt) 
 +        {
 +            // CraftBukkit start
@@ -546,7 +546,7 @@
 +            }
 +            // CraftBukkit end
 +        }
-+        // MCPC+ end
++        // Cauldron end
          if (super.addWeatherEffect(par1Entity))
          {
              this.mcServer.getConfigurationManager().sendToAllNear(par1Entity.posX, par1Entity.posY, par1Entity.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(par1Entity));

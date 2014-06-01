@@ -1,11 +1,13 @@
 --- ../src-base/minecraft/net/minecraft/world/gen/ChunkProviderServer.java
 +++ ../src-work/minecraft/net/minecraft/world/gen/ChunkProviderServer.java
-@@ -23,27 +23,48 @@
+@@ -23,27 +23,47 @@
  import net.minecraft.world.chunk.Chunk;
  import net.minecraft.world.chunk.EmptyChunk;
  import net.minecraft.world.chunk.IChunkProvider;
 +import net.minecraft.world.chunk.storage.AnvilChunkLoader;
  import net.minecraft.world.chunk.storage.IChunkLoader;
++import net.minecraftforge.cauldron.CauldronConfig;
++import net.minecraftforge.cauldron.CauldronHooks;
  import net.minecraftforge.common.DimensionManager;
  import net.minecraftforge.common.ForgeChunkManager;
  import org.apache.logging.log4j.LogManager;
@@ -21,12 +23,9 @@
 +import org.bukkit.craftbukkit.util.LongObjectHashMap;
 +import org.bukkit.event.world.ChunkUnloadEvent;
 +// CraftBukkit end
-+// MCPC+ start
++// Cauldron start
 +import cpw.mods.fml.common.FMLCommonHandler;
 +import net.minecraft.server.MinecraftServer;
-+import za.co.mcportcentral.MCPCConfig;
-+import za.co.mcportcentral.MCPCHooks;
-+// MCPC+ end
 +
  public class ChunkProviderServer implements IChunkProvider
  {
@@ -42,21 +41,21 @@
 -    private LongHashMap loadedChunkHashMap = new LongHashMap();
 -    private List loadedChunks = new ArrayList();
 -    private WorldServer worldObj;
-+    public boolean loadChunkOnProvideRequest = za.co.mcportcentral.MCPCConfig.Setting.loadChunkOnRequest.getValue(); // MCPC+ - if true, allows mods to force load chunks. to disable, set load-chunk-on-request in mcpc.yml to false
-+    public int initialTick; // MCPC+ counter to keep track of when this loader was created
++    public boolean loadChunkOnProvideRequest = net.minecraftforge.cauldron.CauldronConfig.Setting.loadChunkOnRequest.getValue(); // Cauldron - if true, allows mods to force load chunks. to disable, set load-chunk-on-request in cauldron.yml to false
++    public int initialTick; // Cauldron counter to keep track of when this loader was created
 +    public LongObjectHashMap<Chunk> loadedChunkHashMap = new LongObjectHashMap<Chunk>();
-+    public List loadedChunks = new ArrayList(); // MCPC+ - vanilla compatibility
++    public List loadedChunks = new ArrayList(); // Cauldron - vanilla compatibility
 +    public WorldServer worldObj;
 +    // CraftBukkit end
      private static final String __OBFID = "CL_00001436";
  
      public ChunkProviderServer(WorldServer par1WorldServer, IChunkLoader par2IChunkLoader, IChunkProvider par3IChunkProvider)
      {
-+        this.initialTick = MinecraftServer.currentTick; // MCPC+ keep track of when the loader was created
++        this.initialTick = MinecraftServer.currentTick; // Cauldron keep track of when the loader was created
          this.defaultEmptyChunk = new EmptyChunk(par1WorldServer, 0, 0);
          this.worldObj = par1WorldServer;
          this.currentChunkLoader = par2IChunkLoader;
-@@ -52,7 +73,7 @@
+@@ -52,7 +72,7 @@
  
      public boolean chunkExists(int par1, int par2)
      {
@@ -65,7 +64,7 @@
      }
  
      public void unloadChunksIfNotNearSpawn(int par1, int par2)
-@@ -64,20 +85,39 @@
+@@ -64,20 +84,39 @@
              int l = par2 * 16 + 8 - chunkcoordinates.posZ;
              short short1 = 128;
  
@@ -80,7 +79,7 @@
 +                {
 +                    c.mustSave = true;
 +                }
-+                MCPCHooks.logChunkUnload(this, par1, par2, "Chunk added to unload queue");
++                CauldronHooks.logChunkUnload(this, par1, par2, "Chunk added to unload queue");
              }
 +
 +            // CraftBukkit end
@@ -96,7 +95,7 @@
 +            {
 +                c.mustSave = true;
 +            }
-+            MCPCHooks.logChunkUnload(this, par1, par2, "Chunk added to unload queue");
++            CauldronHooks.logChunkUnload(this, par1, par2, "Chunk added to unload queue");
 +            // CraftBukkit end
          }
      }
@@ -108,7 +107,7 @@
  
          while (iterator.hasNext())
          {
-@@ -86,18 +126,68 @@
+@@ -86,18 +125,68 @@
          }
      }
  
@@ -133,7 +132,7 @@
 +            loader = (AnvilChunkLoader) this.currentChunkLoader;
 +        }
 +
-+        MCPCHooks.logChunkLoad(this, "Get", i, j, true);
++        CauldronHooks.logChunkLoad(this, "Get", i, j, true);
 +
 +        // We can only use the queue for already generated chunks
 +        if (chunk == null && loader != null && loader.chunkExists(this.worldObj, i, j))
@@ -182,7 +181,7 @@
              }
  
              if (chunk == null)
-@@ -110,24 +200,45 @@
+@@ -110,24 +199,45 @@
                  {
                      try
                      {
@@ -210,7 +209,7 @@
 -            chunk.onChunkLoad();
 -            chunk.populateChunk(this, this, par1, par2);
 +            this.loadedChunkHashMap.put(LongHash.toLong(i, j), chunk); // CraftBukkit
-+            this.loadedChunks.add(chunk); // MCPC+ - vanilla compatibility
++            this.loadedChunks.add(chunk); // Cauldron - vanilla compatibility
 +
 +            if (chunk != null)
 +            {
@@ -235,7 +234,7 @@
          }
  
          return chunk;
-@@ -135,11 +246,29 @@
+@@ -135,11 +245,29 @@
  
      public Chunk provideChunk(int par1, int par2)
      {
@@ -243,7 +242,7 @@
 -        return chunk == null ? (!this.worldObj.findingSpawnPoint && !this.loadChunkOnProvideRequest ? this.defaultEmptyChunk : this.loadChunk(par1, par2)) : chunk;
 +        // CraftBukkit start
 +        Chunk chunk = (Chunk) this.loadedChunkHashMap.get(LongHash.toLong(par1, par2));
-+        chunk = chunk == null ? (shouldLoadChunk() ? this.loadChunk(par1, par2) : this.defaultEmptyChunk) : chunk; //MCPC+ handle forge server tick events and load the chunk within 5 seconds of the world being loaded (for chunk loaders)
++        chunk = chunk == null ? (shouldLoadChunk() ? this.loadChunk(par1, par2) : this.defaultEmptyChunk) : chunk; //Cauldron handle forge server tick events and load the chunk within 5 seconds of the world being loaded (for chunk loaders)
 +
 +        if (chunk == this.defaultEmptyChunk)
 +        {
@@ -258,7 +257,7 @@
 +            ex.fillInStackTrace();
 +            ex.printStackTrace();
 +        }
-+        chunk.lastAccessedTick = MinecraftServer.getServer().getTickCounter(); // MCPC+
++        chunk.lastAccessedTick = MinecraftServer.getServer().getTickCounter(); // Cauldron
 +        return chunk;
 +        // CraftBukkit end
      }
@@ -268,24 +267,24 @@
      {
          if (this.currentChunkLoader == null)
          {
-@@ -149,6 +278,8 @@
+@@ -149,6 +277,8 @@
          {
              try
              {
-+                MCPCHooks.logChunkLoad(this, "Safe Load", par1, par2, false);
++                CauldronHooks.logChunkLoad(this, "Safe Load", par1, par2, false);
 +
                  Chunk chunk = this.currentChunkLoader.loadChunk(this.worldObj, par1, par2);
  
                  if (chunk != null)
-@@ -159,6 +290,7 @@
+@@ -159,6 +289,7 @@
                      {
                          this.currentChunkProvider.recreateStructures(par1, par2);
                      }
-+                    chunk.lastAccessedTick = MinecraftServer.getServer().getTickCounter(); // MCPC+
++                    chunk.lastAccessedTick = MinecraftServer.getServer().getTickCounter(); // Cauldron
                  }
  
                  return chunk;
-@@ -171,7 +303,7 @@
+@@ -171,7 +302,7 @@
          }
      }
  
@@ -294,7 +293,7 @@
      {
          if (this.currentChunkLoader != null)
          {
-@@ -186,7 +318,7 @@
+@@ -186,7 +317,7 @@
          }
      }
  
@@ -303,7 +302,7 @@
      {
          if (this.currentChunkLoader != null)
          {
-@@ -194,15 +326,18 @@
+@@ -194,15 +325,18 @@
              {
                  par1Chunk.lastSaveTime = this.worldObj.getTotalWorldTime();
                  this.currentChunkLoader.saveChunk(this.worldObj, par1Chunk);
@@ -323,7 +322,7 @@
          }
      }
  
-@@ -217,6 +352,35 @@
+@@ -217,6 +351,35 @@
              if (this.currentChunkProvider != null)
              {
                  this.currentChunkProvider.populate(par1IChunkProvider, par2, par3);
@@ -359,7 +358,7 @@
                  GameRegistry.generateWorld(par2, par3, worldObj, currentChunkProvider, par1IChunkProvider);
                  chunk.setChunkModified();
              }
-@@ -226,10 +390,13 @@
+@@ -226,10 +389,13 @@
      public boolean saveChunks(boolean par1, IProgressUpdate par2IProgressUpdate)
      {
          int i = 0;
@@ -375,12 +374,12 @@
  
              if (par1)
              {
-@@ -264,31 +431,60 @@
+@@ -264,31 +430,60 @@
      {
          if (!this.worldObj.levelSaving)
          {
 -            for (ChunkCoordIntPair forced : this.worldObj.getPersistentChunks().keySet())
-+            // MCPC+ start - remove any chunk that has a ticket associated with it
++            // Cauldron start - remove any chunk that has a ticket associated with it
 +            if (!this.chunksToUnload.isEmpty())
              {
 -                this.chunksToUnload.remove(ChunkCoordIntPair.chunkXZ2Int(forced.chunkXPos, forced.chunkZPos));
@@ -389,7 +388,7 @@
 +                    this.chunksToUnload.remove(forcedChunk.chunkXPos, forcedChunk.chunkZPos);
 +                }
              }
-+            // MCPC+ end
++            // Cauldron end
 +            // CraftBukkit start
 +            Server server = this.worldObj.getServer();
  
@@ -407,13 +406,13 @@
 +                    continue;
 +                }
 +
-+                // MCPC+ static - check if the chunk was accessed recently and keep it loaded if there are players in world
++                // Cauldron static - check if the chunk was accessed recently and keep it loaded if there are players in world
 +                if (!shouldUnloadChunk(chunk) && this.worldObj.playerEntities.size() > 0)
 +                {
-+                    MCPCHooks.logChunkUnload(this, chunk.xPosition, chunk.zPosition, "** Chunk kept from unloading due to recent activity");
++                    CauldronHooks.logChunkUnload(this, chunk.xPosition, chunk.zPosition, "** Chunk kept from unloading due to recent activity");
 +                    continue;
 +                }
-+                // MCPC+ end
++                // Cauldron end
 +
 +
 +                ChunkUnloadEvent event = new ChunkUnloadEvent(chunk.bukkitChunk);
@@ -421,7 +420,7 @@
 +
 +                if (!event.isCancelled())
 +                {
-+                    MCPCHooks.logChunkUnload(this, chunk.xPosition, chunk.zPosition, "Unloading Chunk at");
++                    CauldronHooks.logChunkUnload(this, chunk.xPosition, chunk.zPosition, "Unloading Chunk at");
 +
                      chunk.onChunkUnload();
                      this.safeSaveChunk(chunk);
@@ -433,7 +432,7 @@
 -                    if(loadedChunks.size() == 0 && ForgeChunkManager.getPersistentChunksFor(this.worldObj).size() == 0 && !DimensionManager.shouldLoadSpawn(this.worldObj.provider.dimensionId)){
 +                    // this.unloadQueue.remove(olong);
 +                    this.loadedChunkHashMap.remove(chunkcoordinates); // CraftBukkit
-+                    this.loadedChunks.remove(chunk); // MCPC+ - vanilla compatibility
++                    this.loadedChunks.remove(chunk); // Cauldron - vanilla compatibility
 +                    ForgeChunkManager.putDormantChunk(chunkcoordinates, chunk);
 +                    if(this.loadedChunkHashMap.size() == 0 && ForgeChunkManager.getPersistentChunksFor(this.worldObj).size() == 0 && !DimensionManager.shouldLoadSpawn(this.worldObj.provider.dimensionId)){
                          DimensionManager.unloadWorld(this.worldObj.provider.dimensionId);
@@ -447,7 +446,7 @@
              if (this.currentChunkLoader != null)
              {
                  this.currentChunkLoader.chunkTick();
-@@ -305,7 +501,8 @@
+@@ -305,7 +500,8 @@
  
      public String makeString()
      {
@@ -457,7 +456,7 @@
      }
  
      public List getPossibleCreatures(EnumCreatureType par1EnumCreatureType, int par2, int par3, int par4)
-@@ -320,8 +517,32 @@
+@@ -320,8 +516,32 @@
  
      public int getLoadedChunkCount()
      {
@@ -468,12 +467,12 @@
  
      public void recreateStructures(int par1, int par2) {}
 +
-+    // MCPC+ start
++    // Cauldron start
 +    private boolean shouldLoadChunk()
 +    {
 +        return this.worldObj.findingSpawnPoint ||
 +                this.loadChunkOnProvideRequest ||
-+                (MinecraftServer.callingForgeTick && MCPCConfig.Setting.loadChunkOnForgeTick.getValue()) ||
++                (MinecraftServer.callingForgeTick && CauldronConfig.Setting.loadChunkOnForgeTick.getValue()) ||
 +                (MinecraftServer.currentTick - initialTick <= 100);
 +    }
 +
@@ -487,7 +486,7 @@
 +    private boolean shouldUnloadChunk(Chunk chunk)
 +    {
 +        if (chunk == null) return false;
-+        return MinecraftServer.getServer().getTickCounter() - chunk.lastAccessedTick > MCPCConfig.Setting.chunkGCGracePeriod.getValue();
++        return MinecraftServer.getServer().getTickCounter() - chunk.lastAccessedTick > CauldronConfig.Setting.chunkGCGracePeriod.getValue();
 +    }
-+    // MCPC+ end
++    // Cauldron end
  }

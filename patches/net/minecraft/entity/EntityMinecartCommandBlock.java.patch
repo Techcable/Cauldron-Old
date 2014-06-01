@@ -32,7 +32,7 @@
 -        }
 -    };
 +    private final EntityMinecartCommandBlockListener field_145824_a_CB= new EntityMinecartCommandBlockListener(this); // CraftBukkit
-+    private final CommandBlockLogic field_145824_a = field_145824_a_CB; // MCPC+
++    private final CommandBlockLogic field_145824_a = field_145824_a_CB; // Cauldron
 +
      private int field_145823_b = 0;
      private static final String __OBFID = "CL_00001672";

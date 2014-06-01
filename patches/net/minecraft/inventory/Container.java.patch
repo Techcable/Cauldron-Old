@@ -25,7 +25,7 @@
 -    private int field_94536_g;
 +    public int field_94536_g; // CraftBukkit - private -> public
      private final Set field_94537_h = new HashSet();
-+    public InventoryView bukkitView = null; // MCPC+
++    public InventoryView bukkitView = null; // Cauldron
 +
      protected List crafters = new ArrayList();
      private Set playerList = new HashSet();
@@ -33,11 +33,11 @@
  
 +    // CraftBukkit start
 +    public boolean checkReachable = true;
-+    public InventoryView getBukkitView() { return bukkitView; } // MCPC+
++    public InventoryView getBukkitView() { return bukkitView; } // Cauldron
 +    public void transferTo(Container other, org.bukkit.craftbukkit.entity.CraftHumanEntity player)
 +    {
 +        InventoryView source = this.getBukkitView(), destination = other.getBukkitView();
-+        // MCPC+ start - add null checks to skip modded inventories with no Bukkit wrappers, and
++        // Cauldron start - add null checks to skip modded inventories with no Bukkit wrappers, and
 +        // catch AbstractMethodErrors for modded IInventory's with no onClose()
 +        if (source != null) {
 +            try {
@@ -65,7 +65,7 @@
 +                // modded
 +            }
 +        }
-+        // MCPC+ end
++        // Cauldron end
 +    }
 +    // CraftBukkit end
 +
@@ -76,10 +76,10 @@
  
      public Slot getSlot(int par1)
      {
-+        // MCPC+ start - vanilla compatibility. fixes NPE with ProjectRed's Item Stock Keeper
++        // Cauldron start - vanilla compatibility. fixes NPE with ProjectRed's Item Stock Keeper
 +        if (par1 < 0 || par1 >= this.inventorySlots.size())
 +            return null;
-+        // MCPC+ end
++        // Cauldron end
          return (Slot)this.inventorySlots.get(par1);
      }
  

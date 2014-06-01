@@ -4,12 +4,12 @@
      {
          super(data);
          this.server = (MinecraftServer) data[0];
-+        // MCPC+ start
++        // Cauldron start
 +        // since we modify bukkit enums, we need to guarantee that plugins are
 +        // loaded after all mods have been loaded by FML to avoid race conditions.
 +        MinecraftServer.getServer().server.loadPlugins();
 +        MinecraftServer.getServer().server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.STARTUP);
-+        // MCPC+ end        
++        // Cauldron end        
      }
      @Override
      public ModState getModState()

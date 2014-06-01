@@ -16,7 +16,7 @@
          int i1 = this.tickRate(p_149674_1_);
          int j1;
  
-+        // MCPC+ - move CB edit to after variable initialization for coremod compatibility
++        // Cauldron - move CB edit to after variable initialization for coremod compatibility
 +        // CraftBukkit start
 +        org.bukkit.World bworld = p_149674_1_.getWorld();
 +        org.bukkit.Server server = p_149674_1_.getServer();
@@ -30,8 +30,8 @@
              }
  
 -            if (this.field_149815_a >= 2 && this.blockMaterial == Material.water)
-+            // MCPC+ start - allow disabling infinite water sources
-+            if(za.co.mcportcentral.MCPCConfig.Setting.infiniteWaterSource.getValue())
++            // Cauldron start - allow disabling infinite water sources
++            if(net.minecraftforge.cauldron.CauldronConfig.Setting.infiniteWaterSource.getValue())
              {
 -                if (p_149674_1_.getBlock(p_149674_2_, p_149674_3_ - 1, p_149674_4_).getMaterial().isSolid())
 +                if (this.field_149815_a >= 2 && this.blockMaterial == Material.water)
@@ -51,7 +51,7 @@
 -                    j1 = 0;
 -                }
              }
-+            // MCPC+ end
++            // Cauldron end
  
              if (this.blockMaterial == Material.lava && l < 8 && j1 < 8 && j1 > l && p_149674_5_.nextInt(4) != 0)
              {
@@ -59,13 +59,13 @@
                  {
                      this.func_149811_n(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_);
                  }
-+                // MCPC+ start - allow lava decaying at a 'natural' rate - see https://mojang.atlassian.net/browse/MC-4631 Lava decay fails to schedule block update
-+                else if (za.co.mcportcentral.MCPCConfig.Setting.flowingLavaDecay.getValue())
++                // Cauldron start - allow lava decaying at a 'natural' rate - see https://mojang.atlassian.net/browse/MC-4631 Lava decay fails to schedule block update
++                else if (net.minecraftforge.cauldron.CauldronConfig.Setting.flowingLavaDecay.getValue())
 +                {
 +                    // Ensure that even if the flow decay was skipped, it will retry at the material's natural flow period.
 +                    p_149674_1_.scheduleBlockUpdate(p_149674_2_, p_149674_3_, p_149674_4_, this, this.tickRate(p_149674_1_));
 +                }
-+                // MCPC+ end
++                // Cauldron end
              }
              else
              {

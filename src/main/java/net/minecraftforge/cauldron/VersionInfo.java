@@ -1,4 +1,4 @@
-package za.co.mcportcentral;
+package net.minecraftforge.cauldron;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,7 +24,7 @@ public class VersionInfo {
 
     public VersionInfo()
     {
-        InputStream installProfile = getClass().getResourceAsStream("/mcpc_libs.json");
+        InputStream installProfile = getClass().getResourceAsStream("/cauldron_libs.json");
         JdomParser parser = new JdomParser();
 
         try

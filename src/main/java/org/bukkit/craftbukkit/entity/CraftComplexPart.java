@@ -12,7 +12,7 @@ public class CraftComplexPart extends CraftEntity implements ComplexEntityPart {
     }
 
     public ComplexLivingEntity getParent() {
-        // MCPC+ start - Fix twilight Hydra crashes
+        // Cauldron start - Fix twilight Hydra crashes
         org.bukkit.entity.Entity result = getParentEntity();
         return (result instanceof ComplexLivingEntity) ? (ComplexLivingEntity)result : null;
     }
@@ -29,7 +29,7 @@ public class CraftComplexPart extends CraftEntity implements ComplexEntityPart {
     @Override
     public EntityDamageEvent getLastDamageCause() {
         return getParentEntity().getLastDamageCause();
-        // MCPC+ end
+        // Cauldron end
     }
 
     @Override

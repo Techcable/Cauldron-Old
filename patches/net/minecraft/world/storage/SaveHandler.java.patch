@@ -34,7 +34,7 @@
          {
              ioexception.printStackTrace();
 -            throw new RuntimeException("Failed to check session lock, aborting");
-+            throw new RuntimeException("Failed to check session lock for world " + this.worldDirectory + ", aborting"); // MCPC+
++            throw new RuntimeException("Failed to check session lock for world " + this.worldDirectory + ", aborting"); // Cauldron
          }
      }
  
@@ -43,7 +43,7 @@
                  if (datainputstream.readLong() != this.initializationTime)
                  {
 -                    throw new MinecraftException("The save is being accessed from another location, aborting");
-+                    throw new MinecraftException("The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting"); // MCPC+
++                    throw new MinecraftException("The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting"); // Cauldron
                  }
              }
              finally
@@ -52,10 +52,10 @@
          catch (IOException ioexception)
          {
 -            throw new MinecraftException("Failed to check session lock, aborting");
-+            // MCPC+ start
++            // Cauldron start
 +            ioexception.printStackTrace();
 +            throw new MinecraftException("Failed to check session lock for world " + this.worldDirectory + ", aborting");
-+            // MCPC+ end
++            // Cauldron end
          }
      }
  
@@ -66,7 +66,7 @@
 +            // CraftBukkit start
 +            if (par1EntityPlayer instanceof EntityPlayerMP)
 +            {
-+                CraftPlayer player = (CraftPlayer) par1EntityPlayer.getBukkitEntity(); // MCPC+
++                CraftPlayer player = (CraftPlayer) par1EntityPlayer.getBukkitEntity(); // Cauldron
 +                player.setFirstPlayed(new File(playersDirectory, par1EntityPlayer.getCommandSenderName() + ".dat").lastModified());
 +            }
 +

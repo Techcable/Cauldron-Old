@@ -24,7 +24,7 @@
 +            // CraftBukkit start - set persistence for tame animals
 +            if (entityageable instanceof EntityTameable && ((EntityTameable) entityageable).isTamed())
 +            {
-+                ((EntityLiving)entityageable).persistenceRequired = true; // MCPC+ - fix illegal access error. SS bug?
++                ((EntityLiving)entityageable).persistenceRequired = true; // Cauldron - fix illegal access error. SS bug?
 +            }
 +
 +            // CraftBukkit end

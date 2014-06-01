@@ -16,14 +16,13 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
-// MCPC+ start
+// Cauldron start
 import java.util.Map;
 import net.minecraft.entity.Entity;
+import net.minecraftforge.cauldron.entity.CraftCustomEntity;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.common.util.FakePlayerFactory;
-import za.co.mcportcentral.entity.CraftCustomEntity;
-// MCPC+ end
 
 public abstract class CraftEntity implements org.bukkit.entity.Entity {
     protected final CraftServer server;
@@ -43,13 +42,13 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             // Players
             if (entity instanceof net.minecraft.entity.player.EntityPlayer) {
                 if (entity instanceof net.minecraft.entity.player.EntityPlayerMP) { return new CraftPlayer(server, (net.minecraft.entity.player.EntityPlayerMP) entity); }
-                // MCPC+ start - support fake player classes from mods
+                // Cauldron start - support fake player classes from mods
                 // This case is never hit in vanilla
                 //else { return new CraftHumanEntity(server, (net.minecraft.entity.player.EntityPlayer) entity); }
                 else {
                     return new CraftPlayer(server, FakePlayerFactory.get(DimensionManager.getWorld(entity.worldObj.provider.dimensionId), ((net.minecraft.entity.player.EntityPlayer) entity).getGameProfile()));
                 }
-                // MCPC+ end
+                // Cauldron end
             }
             else if (entity instanceof net.minecraft.entity.EntityCreature) {
                 // Animals
@@ -62,8 +61,8 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                     else if (entity instanceof net.minecraft.entity.passive.EntityPig) { return new CraftPig(server, (net.minecraft.entity.passive.EntityPig) entity); }
                     else if (entity instanceof net.minecraft.entity.passive.EntityTameable) {
                         if (entity instanceof net.minecraft.entity.passive.EntityWolf) { return new CraftWolf(server, (net.minecraft.entity.passive.EntityWolf) entity); }
-                        else if (entity instanceof net.minecraft.entity.passive.EntityOcelot) { return new CraftOcelot(server, (net.minecraft.entity.passive.EntityOcelot) entity); } // MCPC+
-                        else { return new CraftTameableAnimal(server, (net.minecraft.entity.passive.EntityTameable) entity); } // MCPC+
+                        else if (entity instanceof net.minecraft.entity.passive.EntityOcelot) { return new CraftOcelot(server, (net.minecraft.entity.passive.EntityOcelot) entity); } // Cauldron
+                        else { return new CraftTameableAnimal(server, (net.minecraft.entity.passive.EntityTameable) entity); } // Cauldron
                     }
                     else if (entity instanceof net.minecraft.entity.passive.EntitySheep) { return new CraftSheep(server, (net.minecraft.entity.passive.EntitySheep) entity); }
                     else if (entity instanceof net.minecraft.entity.passive.EntityHorse) { return new CraftHorse(server, (net.minecraft.entity.passive.EntityHorse) entity); }
@@ -98,7 +97,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                 else if (entity instanceof net.minecraft.entity.monster.EntityGolem) {
                     if (entity instanceof net.minecraft.entity.monster.EntitySnowman) { return new CraftSnowman(server, (net.minecraft.entity.monster.EntitySnowman) entity); }
                     else if (entity instanceof net.minecraft.entity.monster.EntityIronGolem) { return new CraftIronGolem(server, (net.minecraft.entity.monster.EntityIronGolem) entity); }
-                    else { return new CraftLivingEntity(server, (net.minecraft.entity.EntityLivingBase) entity); } // MCPC+
+                    else { return new CraftLivingEntity(server, (net.minecraft.entity.EntityLivingBase) entity); } // Cauldron
                 }
                 else if (entity instanceof net.minecraft.entity.passive.EntityVillager) { return new CraftVillager(server, (net.minecraft.entity.passive.EntityVillager) entity); }
                 else { return new CraftCreature(server, (net.minecraft.entity.EntityCreature) entity); }
@@ -137,7 +136,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             else if (entity instanceof net.minecraft.entity.projectile.EntityPotion) { return new CraftThrownPotion(server, (net.minecraft.entity.projectile.EntityPotion) entity); }
             else if (entity instanceof net.minecraft.entity.item.EntityEnderPearl) { return new CraftEnderPearl(server, (net.minecraft.entity.item.EntityEnderPearl) entity); }
             else if (entity instanceof net.minecraft.entity.item.EntityExpBottle) { return new CraftThrownExpBottle(server, (net.minecraft.entity.item.EntityExpBottle) entity); }
-            else { return new CraftProjectile(server, (net.minecraft.entity.projectile.EntityThrowable) entity); } // MCPC
+            else { return new CraftProjectile(server, (net.minecraft.entity.projectile.EntityThrowable) entity); } // Cauldron
         }
         else if (entity instanceof net.minecraft.entity.item.EntityFallingBlock) { return new CraftFallingSand(server, (net.minecraft.entity.item.EntityFallingBlock) entity); }
         else if (entity instanceof net.minecraft.entity.projectile.EntityFireball) {
@@ -162,7 +161,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             else if (entity instanceof net.minecraft.entity.ai.EntityMinecartMobSpawner) { return new CraftMinecartMobSpawner(server, (net.minecraft.entity.ai.EntityMinecartMobSpawner) entity); }
             else if (entity instanceof net.minecraft.entity.item.EntityMinecartEmpty) { return new CraftMinecartRideable(server, (net.minecraft.entity.item.EntityMinecartEmpty) entity); }
             else if (entity instanceof net.minecraft.entity.EntityMinecartCommandBlock) { return new CraftMinecartCommand(server, (net.minecraft.entity.EntityMinecartCommandBlock) entity); }
-            else { return new CraftMinecart(server, (net.minecraft.entity.item.EntityMinecart) entity); } // MCPC+ - other minecarts (Steve's Carts)
+            else { return new CraftMinecart(server, (net.minecraft.entity.item.EntityMinecart) entity); } // Cauldron - other minecarts (Steve's Carts)
         } else if (entity instanceof net.minecraft.entity.EntityHanging) {
             if (entity instanceof net.minecraft.entity.item.EntityPainting) { return new CraftPainting(server, (net.minecraft.entity.item.EntityPainting) entity); }
             else if (entity instanceof net.minecraft.entity.item.EntityItemFrame) { return new CraftItemFrame(server, (net.minecraft.entity.item.EntityItemFrame) entity); }
@@ -171,13 +170,13 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         }
         else if (entity instanceof net.minecraft.entity.item.EntityTNTPrimed) { return new CraftTNTPrimed(server, (net.minecraft.entity.item.EntityTNTPrimed) entity); }
         else if (entity instanceof net.minecraft.entity.item.EntityFireworkRocket) { return new CraftFirework(server, (net.minecraft.entity.item.EntityFireworkRocket) entity); }
-        // MCPC+ - used for custom entities that extend Entity directly
+        // Cauldron - used for custom entities that extend Entity directly
         else if (entity instanceof net.minecraft.entity.Entity) { return new CraftCustomEntity(server, (net.minecraft.entity.Entity) entity); }
 
-        throw new AssertionError("Unknown entity " + entity == null ? null : entity.getClass() + ": " + entity); // MCPC+ - show the entity that caused exception
+        throw new AssertionError("Unknown entity " + entity == null ? null : entity.getClass() + ": " + entity); // Cauldron - show the entity that caused exception
     }
 
-    // MCPC+ start - copy of getEntity() but operates on classes instead of instances, for EntityRegistry registerBukkitType
+    // Cauldron start - copy of getEntity() but operates on classes instead of instances, for EntityRegistry registerBukkitType
     public static Class<? extends org.bukkit.entity.Entity> getEntityClass(Class<? extends net.minecraft.entity.Entity> nmsClass) {
         /**
          * Order is *EXTREMELY* important -- keep it right! =D
@@ -205,7 +204,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                     else if (net.minecraft.entity.passive.EntityPig.class.isAssignableFrom(nmsClass)) { return CraftPig.class; }
                     else if (net.minecraft.entity.passive.EntityTameable.class.isAssignableFrom(nmsClass)) {
                         if (net.minecraft.entity.passive.EntityWolf.class.isAssignableFrom(nmsClass)) { return CraftWolf.class; }
-                        else if (net.minecraft.entity.passive.EntityOcelot.class.isAssignableFrom(nmsClass)) { return CraftOcelot.class; } // MCPC+
+                        else if (net.minecraft.entity.passive.EntityOcelot.class.isAssignableFrom(nmsClass)) { return CraftOcelot.class; } // Cauldron
                         else { return CraftTameableAnimal.class; }
                     }
                     else if (net.minecraft.entity.passive.EntitySheep.class.isAssignableFrom(nmsClass)) { return CraftSheep.class; }
@@ -267,7 +266,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             else  { return CraftLivingEntity.class; }
         }
         else if (net.minecraft.entity.boss.EntityDragonPart.class.isAssignableFrom(nmsClass)) {
-            /* MCPC+ - no instance, best we can say is this is a CraftComplexPart
+            /* Cauldron - no instance, best we can say is this is a CraftComplexPart
             net.minecraft.entity.boss.EntityDragonPart part = (net.minecraft.entity.boss.EntityDragonPart) entity;
             if (part.entityDragonObj instanceof net.minecraft.entity.boss.EntityDragon) { return CraftEnderDragonPart.class; }
             else { return CraftComplexPart.class; }
@@ -283,7 +282,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             else if (net.minecraft.entity.projectile.EntityPotion.class.isAssignableFrom(nmsClass)) { return CraftThrownPotion.class; }
             else if (net.minecraft.entity.item.EntityEnderPearl.class.isAssignableFrom(nmsClass)) { return CraftEnderPearl.class; }
             else if (net.minecraft.entity.item.EntityExpBottle.class.isAssignableFrom(nmsClass)) { return CraftThrownExpBottle.class; }
-            else { return CraftProjectile.class; } // MCPC
+            else { return CraftProjectile.class; } // Cauldron
         }
         else if (net.minecraft.entity.item.EntityFallingBlock.class.isAssignableFrom(nmsClass)) { return CraftFallingSand.class; }
         else if (net.minecraft.entity.projectile.EntityFireball.class.isAssignableFrom(nmsClass)) {
@@ -308,7 +307,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             else if (net.minecraft.entity.ai.EntityMinecartMobSpawner.class.isAssignableFrom(nmsClass)) { return CraftMinecartMobSpawner.class; }
             else if (net.minecraft.entity.item.EntityMinecartEmpty.class.isAssignableFrom(nmsClass)) { return CraftMinecartRideable.class; }
             else if (net.minecraft.entity.EntityMinecartCommandBlock.class.isAssignableFrom(nmsClass)) { return CraftMinecartCommand.class; }
-            else { return CraftMinecart.class; } // MCPC+ - other minecarts (Steve's Carts)
+            else { return CraftMinecart.class; } // Cauldron - other minecarts (Steve's Carts)
         } else if (net.minecraft.entity.EntityHanging.class.isAssignableFrom(nmsClass)) {
             if (net.minecraft.entity.item.EntityPainting.class.isAssignableFrom(nmsClass)) { return CraftPainting.class; }
             else if (net.minecraft.entity.item.EntityItemFrame.class.isAssignableFrom(nmsClass)) { return CraftItemFrame.class; }
@@ -317,10 +316,10 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         }
         else if (net.minecraft.entity.item.EntityTNTPrimed.class.isAssignableFrom(nmsClass)) { return CraftTNTPrimed.class; }
         else if (net.minecraft.entity.item.EntityFireworkRocket.class.isAssignableFrom(nmsClass)) { return CraftFirework.class; }
-        // MCPC+ - used for custom entities that extend Entity directly
+        // Cauldron - used for custom entities that extend Entity directly
         else if (net.minecraft.entity.Entity.class.isAssignableFrom(nmsClass)) { return CraftCustomEntity.class; }
 
-        throw new AssertionError("Unknown entity class " + nmsClass == null ? null : nmsClass); // MCPC - show the entity that caused exception
+        throw new AssertionError("Unknown entity class " + nmsClass == null ? null : nmsClass); // Cauldron - show the entity that caused exception
     }
 
     // add Bukkit wrappers
@@ -357,7 +356,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         // if there is no entity ID, choose a negative integer based on the class name
         return -Math.abs(entityClass.getName().hashCode()^(entityClass.getName().hashCode()>>>16));
     }
-    // MCPC+ end
+    // Cauldron end
 
     public Location getLocation() {
         return new Location(getWorld(), entity.posX, entity.posY, entity.posZ, entity.rotationYaw, entity.rotationPitch);
@@ -395,12 +394,12 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
     }
 
     public World getWorld() {
-        // MCPC+ start - fixes MFR proxy worlds used with grinder/slaughterhouse
+        // Cauldron start - fixes MFR proxy worlds used with grinder/slaughterhouse
         if (entity.worldObj.getWorld() == null)
         {
             return DimensionManager.getWorld(0).getWorld();
         }
-        // MCPC+ end
+        // Cauldron end
         return entity.worldObj.getWorld();
     }
 

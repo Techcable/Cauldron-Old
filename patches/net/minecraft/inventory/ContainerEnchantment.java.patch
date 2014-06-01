@@ -63,7 +63,7 @@
 +
 +        // CraftBukkit start
 +        player = (Player) par1InventoryPlayer.player.getBukkitEntity();
-+        tableInventory_CB.player = player; // MCPC+
++        tableInventory_CB.player = player; // Cauldron
 +        // CraftBukkit end
      }
  
@@ -85,7 +85,7 @@
 +                    CraftItemStack item = CraftItemStack.asCraftMirror(itemstack);
 +                    PrepareItemEnchantEvent event = new PrepareItemEnchantEvent(player, this.getBukkitView(), this.worldPointer.getWorld().getBlockAt(this.posX, this.posY, this.posZ), item, this.enchantLevels, i);
 +                    event.setCancelled(!itemstack.isItemEnchantable());
-+                    if (this.getBukkitView() != null) this.worldPointer.getServer().getPluginManager().callEvent(event); // MCPC+ - allow vanilla mods to byp
++                    if (this.getBukkitView() != null) this.worldPointer.getServer().getPluginManager().callEvent(event); // Cauldron - allow vanilla mods to byp
 +
 +                    if (event.isCancelled())
 +                    {
@@ -120,7 +120,7 @@
 -                    int j = flag && list.size() > 1 ? this.rand.nextInt(list.size()) : -1;
 +                    CraftItemStack item = CraftItemStack.asCraftMirror(itemstack);
 +                    EnchantItemEvent event = new EnchantItemEvent((Player) par1EntityPlayer.getBukkitEntity(), this.getBukkitView(), this.worldPointer.getWorld().getBlockAt(this.posX, this.posY, this.posZ), item, this.enchantLevels[par2], enchants, par2);
-+                    if (this.getBukkitView() != null) this.worldPointer.getServer().getPluginManager().callEvent(event); // MCPC+ - allow vanilla mods to bypass
++                    if (this.getBukkitView() != null) this.worldPointer.getServer().getPluginManager().callEvent(event); // Cauldron - allow vanilla mods to bypass
 +                    int level = event.getExpLevelCost();
  
 -                    for (int k = 0; k < list.size(); ++k)

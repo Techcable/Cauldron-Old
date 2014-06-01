@@ -38,7 +38,7 @@
 -        }
 -    };
 +    private final TileEntityCommandBlockListener field_145994_a_CB = new TileEntityCommandBlockListener(this); // CraftBukkit
-+    private final CommandBlockLogic field_145994_a = field_145994_a_CB; // MCPC+
++    private final CommandBlockLogic field_145994_a = field_145994_a_CB; // Cauldron
 +
      private static final String __OBFID = "CL_00000347";
  
@@ -48,11 +48,11 @@
          return this.field_145994_a;
      }
 +
-+    // MCPC+ start
++    // Cauldron start
 +    @Override
 +    public boolean canUpdate()
 +    {
 +        return false;
 +    }
-+    // MCPC+ end
++    // Cauldron end
  }

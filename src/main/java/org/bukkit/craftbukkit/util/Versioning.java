@@ -11,7 +11,7 @@ public final class Versioning {
     public static String getBukkitVersion() {
         String result = "Unknown-Version";
 
-        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/za.co.mcportcentral/mcpc-api/pom.properties"); // MCPC+
+        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/net.minecraftforge.cauldron/cauldron-api/pom.properties"); // Cauldron
         Properties properties = new Properties();
 
         if (stream != null) {

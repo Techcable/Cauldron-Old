@@ -4,7 +4,7 @@
  import net.minecraft.util.WeightedRandomChestContent;
  import net.minecraft.world.World;
  import net.minecraftforge.common.ChestGenHooks;
-+import net.minecraftforge.common.DimensionManager; // MCPC+
++import net.minecraftforge.common.DimensionManager; // Cauldron
  import net.minecraftforge.common.util.EnumHelper;
  
  public class Item
@@ -27,7 +27,7 @@
      public int getEntityLifespan(ItemStack itemStack, World world)
      {
 -        return 6000;
-+        // MCPC+ start - fixes MFR proxy worlds used with grinder/slaughterhouse
++        // Cauldron start - fixes MFR proxy worlds used with grinder/slaughterhouse
 +        if (world == null)
 +        {
 +            return 6000;
@@ -36,7 +36,7 @@
 +        {
 +            return DimensionManager.getWorld(0).spigotConfig.itemDespawnRate;
 +        }
-+        // MCPC+ end
++        // Cauldron end
 +        return world.spigotConfig.itemDespawnRate; // Spigot
      }
  

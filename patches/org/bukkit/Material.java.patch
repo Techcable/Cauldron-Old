@@ -4,7 +4,7 @@
  
  import java.lang.reflect.Constructor;
  import java.util.Map;
-+// MCPC+ start
++// Cauldron start
 +import java.lang.reflect.Array;
 +import java.lang.reflect.Constructor;
 +import java.lang.reflect.Field;
@@ -13,7 +13,7 @@
 +import java.util.Arrays;
 +import java.util.List;
 +import net.minecraftforge.common.util.EnumHelper;
-+// MCPC+ end
++// Cauldron end
  
  import org.apache.commons.lang.Validate;
  import org.bukkit.map.MapView;
@@ -22,7 +22,7 @@
  import org.bukkit.util.Java15Compat;
  
 -import com.google.common.collect.Maps;
-+import com.google.common.collect.Maps; // MCPC+ - guava10
++import com.google.common.collect.Maps; // Cauldron - guava10
  
  /**
   * An enum of all material ids accepted by the official server + client
@@ -31,10 +31,10 @@
      private final Constructor<? extends MaterialData> ctor;
      private static Material[] byId = new Material[383];
 -    private final static Map<String, Material> BY_NAME = Maps.newHashMap();
-+    private static Map<String, Material> BY_NAME = Maps.newHashMap(); // MCPC+ - remove final
++    private static Map<String, Material> BY_NAME = Maps.newHashMap(); // Cauldron - remove final
      private final int maxStack;
      private final short durability;
-+    // MCPC+ start
++    // Cauldron start
 +    private static Object reflectionFactory;
 +    private static Method newConstructorAccessor;
 +    private static Method newInstance;
@@ -42,18 +42,18 @@
 +    private static Method fieldAccessorSet;
 +    private static boolean isSetup;
 +    private boolean isForgeBlock = false;
-+    // MCPC+ end
++    // Cauldron end
  
      private Material(final int id) {
          this(id, 64);
      }
  
-+    // MCPC+ start - constructor used to set if the Material is a block or not
++    // Cauldron start - constructor used to set if the Material is a block or not
 +    private Material(final int id, boolean flag) {
 +        this(id, 64);
 +        this.isForgeBlock = flag;
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
      private Material(final int id, final int stack) {
          this(id, stack, MaterialData.class);
@@ -63,7 +63,7 @@
       */
      public boolean isBlock() {
 -        return id < 256;
-+        return id < 256 || isForgeBlock; // MCPC+
++        return id < 256 || isForgeBlock; // Cauldron
      }
  
      /**
@@ -71,7 +71,7 @@
          return result;
      }
  
-+    /* ===============================  MCPC+ START ============================= */
++    /* ===============================  Cauldron START ============================= */
 +    public static Material addMaterial(int id, boolean isBlock)
 +    {
 +        return addMaterial(id, "X" + String.valueOf(id), isBlock);
@@ -220,10 +220,10 @@
 +        throw new RuntimeException(e.getMessage(), e);
 +      }
 +    }
-+    /* ===============================  MCPC+ END============================= */
++    /* ===============================  Cauldron END============================= */
 +
      static {
-+        // MCPC+ start
++        // Cauldron start
 +        byId = new Material[32000];
 +        BY_NAME = Maps.newHashMap();
 +
@@ -233,7 +233,7 @@
 +        newFieldAccessor = null;
 +        fieldAccessorSet = null;
 +        isSetup = false;
-+        // MCPC+ end
++        // Cauldron end
          for (Material material : values()) {
              if (byId.length > material.id) {
                  byId[material.id] = material;

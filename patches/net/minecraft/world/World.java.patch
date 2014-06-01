@@ -12,7 +12,17 @@
  import net.minecraft.item.ItemStack;
  import net.minecraft.nbt.NBTTagCompound;
  import net.minecraft.pathfinding.PathEntity;
-@@ -70,6 +72,47 @@
+@@ -56,6 +58,9 @@
+ 
+ import com.google.common.collect.ImmutableSetMultimap;
+ 
++import net.minecraftforge.cauldron.CauldronConfig;
++import net.minecraftforge.cauldron.CauldronHooks;
++import net.minecraftforge.cauldron.CauldronWorldConfig;
+ import net.minecraftforge.client.ForgeHooksClient;
+ import net.minecraftforge.common.ForgeChunkManager;
+ import net.minecraftforge.common.ForgeChunkManager.Ticket;
+@@ -70,6 +75,43 @@
  import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
  import net.minecraft.entity.EnumCreatureType;
  
@@ -48,19 +58,15 @@
 +import net.minecraft.entity.item.EntityXPOrb;
 +import org.bukkit.craftbukkit.SpigotTimings;
 +// Spigot end
-+//MCPC+ start
++//Cauldron start
 +import net.minecraft.nbt.NBTTagCompound;
 +import net.minecraftforge.common.DimensionManager;
 +import org.bukkit.block.BlockState;
-+import za.co.mcportcentral.MCPCConfig;
-+import za.co.mcportcentral.MCPCHooks;
-+import za.co.mcportcentral.MCPCWorldConfig;
-+//MCPC+ end
 +
  public abstract class World implements IBlockAccess
  {
     /**
-@@ -82,11 +125,32 @@
+@@ -82,11 +124,32 @@
      public final MapStorage perWorldStorage;
  
      public boolean scheduledUpdatesAreImmediate;
@@ -89,15 +95,15 @@
 +            }
 +        }
 +    }; // Spigot end
-+    public List unloadedEntityList = new ArrayList(); // MCPC+
-+    public List loadedTileEntityList = new ArrayList(); // MCPC+ - vanilla compatibility
++    public List unloadedEntityList = new ArrayList(); // Cauldron
++    public List loadedTileEntityList = new ArrayList(); // Cauldron - vanilla compatibility
      private List addedTileEntityList = new ArrayList();
 -    private List field_147483_b = new ArrayList();
-+    public List field_147483_b = new ArrayList(); // MCPC+
++    public List field_147483_b = new ArrayList(); // Cauldron
      public List playerEntities = new ArrayList();
      public List weatherEffects = new ArrayList();
      private long cloudColour = 16777215L;
-@@ -100,11 +164,11 @@
+@@ -100,11 +163,11 @@
      public int lastLightningBolt;
      public EnumDifficulty difficultySetting;
      public Random rand = new Random();
@@ -112,7 +118,7 @@
      public boolean findingSpawnPoint;
      public MapStorage mapStorage;
      public VillageCollection villageCollectionObj;
-@@ -112,15 +176,82 @@
+@@ -112,15 +175,82 @@
      public final Profiler theProfiler;
      private final Vec3Pool vecPool = new Vec3Pool(300, 2000);
      private final Calendar theCalendar = Calendar.getInstance();
@@ -129,14 +135,14 @@
 +    public boolean populating;
 +    private int tickPosition;
 +    // CraftBukkit end
-+    public Set activeChunkSet = new HashSet(); // MCPC+ - protected -> public
++    public Set activeChunkSet = new HashSet(); // Cauldron - protected -> public
      private int ambientTickCountdown;
 -    protected boolean spawnHostileMobs;
 -    protected boolean spawnPeacefulMobs;
      private ArrayList collidingBoundingBoxes;
      private boolean field_147481_N;
      int[] lightUpdateBlockList;
-+    // MCPC+ start
++    // Cauldron start
 +    public boolean restoringBlockStates = false;
 +    public boolean captureBlockStates = false;
 +    public boolean captureTreeGeneration = false;
@@ -144,7 +150,7 @@
 +    public ArrayList<EntityItem> capturedItems = new ArrayList<EntityItem>();
 +    public int entitiesTicked;
 +    public int tilesTicked;
-+    public za.co.mcportcentral.MCPCWorldConfig mcpcConfig;
++    public net.minecraftforge.cauldron.CauldronWorldConfig cauldronConfig;
 +    // preload world crash report classes to fix NCDFE masking StackOverflow/memory error, see #721
 +    private static boolean preloadedCrashClasses = false;
 +    {
@@ -168,7 +174,7 @@
 +            preloadedCrashClasses = true;
 +        }
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +    // Spigot start
 +    private boolean guardEntityList = false;
 +
@@ -199,14 +205,14 @@
      private static final String __OBFID = "CL_00000140";
  
      public BiomeGenBase getBiomeGenForCoords(final int par1, final int par2)
-@@ -164,6 +295,29 @@
+@@ -164,6 +294,29 @@
          return this.provider.worldChunkMgr;
      }
  
 +    // CraftBukkit start
 +    private final CraftWorld world;
 +    public boolean pvpMode;
-+    public boolean keepSpawnInMemory = false; // MCPC+ - default to false to give forge's keepLoaded higher priority
++    public boolean keepSpawnInMemory = false; // Cauldron - default to false to give forge's keepLoaded higher priority
 +    public ChunkGenerator generator;
 +    Chunk lastChunkAccessed;
 +    int lastXAccessed = Integer.MIN_VALUE;
@@ -229,21 +235,21 @@
      @SideOnly(Side.CLIENT)
      public World(ISaveHandler p_i45368_1_, String p_i45368_2_, WorldProvider p_i45368_3_, WorldSettings p_i45368_4_, Profiler p_i45368_5_)
      {
-@@ -177,6 +331,13 @@
+@@ -177,6 +330,13 @@
          this.worldInfo = new WorldInfo(p_i45368_4_, p_i45368_2_);
          this.provider = p_i45368_3_;
          perWorldStorage = new MapStorage((ISaveHandler)null);
-+        // MCPC+ start
++        // Cauldron start
 +        this.world = null;
 +        this.timings = null;
 +        this.spigotConfig = null;
 +        this.activeChunkSet_CB = null;
 +        this.chunkTickRadius = 0;
-+        // MCPC+ end
++        // Cauldron end
      }
  
      // Broken up so that the WorldClient gets the chance to set the mapstorage object before the dimension initializes
-@@ -205,8 +366,158 @@
+@@ -205,8 +365,158 @@
          this.calculateInitialWeather();
      }
  
@@ -251,7 +257,7 @@
 +    public World(ISaveHandler p_i45369_1_, String p_i45369_2_, WorldSettings p_i45369_3_, WorldProvider p_i45369_4_, Profiler p_i45369_5_, ChunkGenerator gen, org.bukkit.World.Environment env)
 +    {
 +        this.spigotConfig = new org.spigotmc.SpigotWorldConfig(p_i45369_2_); // Spigot
-+        this.mcpcConfig = new za.co.mcportcentral.MCPCWorldConfig( p_i45369_2_ ); // MCPC+;
++        this.cauldronConfig = new net.minecraftforge.cauldron.CauldronWorldConfig( p_i45369_2_ ); // Cauldron;
 +        this.worldInfo = p_i45369_1_.loadWorldInfo(); // Spigot
 +        this.generator = gen;
 +        this.world = new CraftWorld((WorldServer) this, gen, env);
@@ -270,7 +276,7 @@
 +        this.lightUpdateBlockList = new int[32768];
 +        this.saveHandler = p_i45369_1_;
 +        this.theProfiler = p_i45369_5_;
-+        // MCPC+ start
++        // Cauldron start
 +        // Provides a solution for different worlds getting different copies of the same data, potentially rewriting the data or causing race conditions/stale data
 +        // Buildcraft has suffered from the issue this fixes.  If you load the same data from two different worlds they can get two different copies of the same object, thus the last saved gets final say.
 +        if (DimensionManager.getWorld(0) != null) // if overworld has loaded, use its mapstorage
@@ -281,16 +287,16 @@
 +        {
 +            this.mapStorage = new MapStorage(p_i45369_1_);
 +        }
-+        // MCPC+ end
++        // Cauldron end
 +        // this.worldInfo = p_i45369_1_.loadWorldInfo(); // Spigot - Moved up
 +
 +        if (p_i45369_4_ != null)
 +        {
 +            this.provider = p_i45369_4_;
 +        }
-+        else if (this.worldInfo != null && this.worldInfo.getDimension() != 0) // MCPC+
++        else if (this.worldInfo != null && this.worldInfo.getDimension() != 0) // Cauldron
 +        {
-+            this.provider = WorldProvider.getProviderForDimension(this.worldInfo.getDimension()); // MCPC+
++            this.provider = WorldProvider.getProviderForDimension(this.worldInfo.getDimension()); // Cauldron
 +        }
 +        else
 +        {
@@ -300,22 +306,22 @@
 +        if (this.worldInfo == null)
 +        {
 +            this.worldInfo = new WorldInfo(p_i45369_3_, p_i45369_2_);
-+            this.worldInfo.setDimension(this.provider.dimensionId); // MCPC+ - Save dimension to level.dat
++            this.worldInfo.setDimension(this.provider.dimensionId); // Cauldron - Save dimension to level.dat
 +        }
 +        else
 +        {
 +            this.worldInfo.setWorldName(p_i45369_2_);
-+            // MCPC+ start - Use saved dimension from level.dat. Fixes issues with MultiVerse
++            // Cauldron start - Use saved dimension from level.dat. Fixes issues with MultiVerse
 +            if (this.worldInfo.getDimension() != 0)
 +                this.provider.dimensionId = this.worldInfo.getDimension();
 +            else
 +            {
 +                this.worldInfo.setDimension(this.provider.dimensionId);
 +            }
-+            // MCPC+ end
++            // Cauldron end
 +        }
 +
-+        // MCPC+ start - Guarantee provider dimension is not reset. This is required for mods that rely on the provider ID to match the client dimension. Without this, IC2 will send the wrong ID to clients.
++        // Cauldron start - Guarantee provider dimension is not reset. This is required for mods that rely on the provider ID to match the client dimension. Without this, IC2 will send the wrong ID to clients.
 +        int providerId = this.provider.dimensionId;
 +        this.provider.registerWorld(this);
 +        this.provider.dimensionId = providerId;
@@ -376,11 +382,11 @@
 +
      public World(ISaveHandler p_i45369_1_, String p_i45369_2_, WorldSettings p_i45369_3_, WorldProvider p_i45369_4_, Profiler p_i45369_5_)
      {
-+        // MCPC+ start - handle dummy worlds
++        // Cauldron start - handle dummy worlds
 +        if (DimensionManager.getWorld(0) != null)
 +        {
 +            this.spigotConfig = new org.spigotmc.SpigotWorldConfig(p_i45369_2_); // Spigot
-+            this.mcpcConfig = new za.co.mcportcentral.MCPCWorldConfig( p_i45369_2_ );
++            this.cauldronConfig = new net.minecraftforge.cauldron.CauldronWorldConfig( p_i45369_2_ );
 +            this.world = DimensionManager.getWorld(0).getWorld();
 +            this.timings = DimensionManager.getWorld(0).timings;
 +            this.chunkTickRadius = (byte)((this.getServer().getViewDistance() < 7) ? this.getServer().getViewDistance() : 7);
@@ -391,18 +397,18 @@
 +        else
 +        {
 +            this.spigotConfig = null;
-+            this.mcpcConfig = null;
++            this.cauldronConfig = null;
 +            this.world = null;
 +            this.timings = null;
 +            this.chunkTickRadius = 0;
 +            this.activeChunkSet_CB = null;
 +            this.mapStorage = null;
 +        }
-+        // MCPC+ end
++        // Cauldron end
          this.ambientTickCountdown = this.rand.nextInt(12000);
          this.spawnHostileMobs = true;
          this.spawnPeacefulMobs = true;
-@@ -214,7 +525,6 @@
+@@ -214,7 +524,6 @@
          this.lightUpdateBlockList = new int[32768];
          this.saveHandler = p_i45369_1_;
          this.theProfiler = p_i45369_5_;
@@ -410,46 +416,46 @@
          this.worldInfo = p_i45369_1_.loadWorldInfo();
  
          if (p_i45369_4_ != null)
-@@ -233,13 +543,26 @@
+@@ -233,13 +542,26 @@
          if (this.worldInfo == null)
          {
              this.worldInfo = new WorldInfo(p_i45369_3_, p_i45369_2_);
-+            this.worldInfo.setDimension(this.provider.dimensionId); // MCPC+ - Save dimension to level.dat
++            this.worldInfo.setDimension(this.provider.dimensionId); // Cauldron - Save dimension to level.dat
          }
          else
          {
              this.worldInfo.setWorldName(p_i45369_2_);
-+            // MCPC+ start - Use saved dimension from level.dat. Fixes issues with MultiVerse
++            // Cauldron start - Use saved dimension from level.dat. Fixes issues with MultiVerse
 +            if (this.worldInfo.getDimension() != 0)
 +                this.provider.dimensionId = this.worldInfo.getDimension();
 +            else
 +            {
 +                this.worldInfo.setDimension(this.provider.dimensionId);
 +            }
-+            // MCPC+ end
++            // Cauldron end
          }
  
-+        // MCPC+ start - Guarantee provider dimension is not reset. This is required for mods that rely on the provider ID to match the client dimension. Without this, IC2 will send the wrong ID to clients.
++        // Cauldron start - Guarantee provider dimension is not reset. This is required for mods that rely on the provider ID to match the client dimension. Without this, IC2 will send the wrong ID to clients.
 +        int providerId = this.provider.dimensionId;
          this.provider.registerWorld(this);
 +        this.provider.dimensionId = providerId;
-+        // MCPC+ end
++        // Cauldron end
          this.chunkProvider = this.createChunkProvider();
  
          if (this instanceof WorldServer)
-@@ -292,6 +615,7 @@
+@@ -292,6 +614,7 @@
          this.calculateInitialSkylight();
          this.calculateInitialWeather();
      }
-+    // MCPC+ end    
++    // Cauldron end    
  
      private static MapStorage s_mapStorage;
      private static ISaveHandler s_savehandler;
-@@ -334,6 +658,21 @@
+@@ -334,6 +657,21 @@
  
      public Block getBlock(int p_147439_1_, int p_147439_2_, int p_147439_3_)
      {
-+        // MCPC+ start - tree generation
++        // Cauldron start - tree generation
 +        if (captureTreeGeneration) 
 +        {
 +            List<BlockState> blocks = (List<BlockState>) capturedBlockStates.clone(); // Avoid CME's
@@ -463,25 +469,25 @@
 +                }
 +            }
 +        }
-+        // MCPC+ end
++        // Cauldron end
          if (p_147439_1_ >= -30000000 && p_147439_3_ >= -30000000 && p_147439_1_ < 30000000 && p_147439_3_ < 30000000 && p_147439_2_ >= 0 && p_147439_2_ < 256)
          {
              Chunk chunk = null;
-@@ -364,6 +703,13 @@
+@@ -364,6 +702,13 @@
          return block.isAir(this, p_147437_1_, p_147437_2_, p_147437_3_);
      }
  
-+    // MCPC+ start - add CB method for block change delegate
++    // Cauldron start - add CB method for block change delegate
 +    public boolean isEmpty(int arg0, int arg1, int arg2)
 +    {
 +        return isAirBlock(arg0, arg1, arg2);
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
      public boolean blockExists(int par1, int par2, int par3)
      {
          return par2 >= 0 && par2 < 256 ? this.chunkExists(par1 >> 4, par3 >> 4) : false;
-@@ -387,7 +733,8 @@
+@@ -387,7 +732,8 @@
              {
                  for (int l1 = par3; l1 <= par6; ++l1)
                  {
@@ -491,16 +497,16 @@
                      {
                          return false;
                      }
-@@ -402,7 +749,7 @@
+@@ -402,7 +748,7 @@
          }
      }
  
 -    protected boolean chunkExists(int par1, int par2)
-+    public boolean chunkExists(int par1, int par2) // MCPC+ - protected -> public for repackaging
++    public boolean chunkExists(int par1, int par2) // Cauldron - protected -> public for repackaging
      {
          return this.chunkProvider.chunkExists(par1, par2);
      }
-@@ -412,13 +759,51 @@
+@@ -412,13 +758,51 @@
          return this.getChunkFromChunkCoords(par1 >> 4, par2 >> 4);
      }
  
@@ -524,7 +530,7 @@
  
      public boolean setBlock(int p_147465_1_, int p_147465_2_, int p_147465_3_, Block p_147465_4_, int p_147465_5_, int p_147465_6_)
      {
-+        // MCPC+ start - tree generation
++        // Cauldron start - tree generation
 +        if (this.captureTreeGeneration) 
 +        {
 +            BlockState blockstate = null;
@@ -549,15 +555,15 @@
 +            this.capturedBlockStates.add(blockstate);
 +            return true;
 +        }
-+        // MCPC+ end
++        // Cauldron end
          if (p_147465_1_ >= -30000000 && p_147465_3_ >= -30000000 && p_147465_1_ < 30000000 && p_147465_3_ < 30000000)
          {
              if (p_147465_2_ < 0)
-@@ -438,29 +823,31 @@
+@@ -438,29 +822,31 @@
                  {
                      block1 = chunk.getBlock(p_147465_1_ & 15, p_147465_2_, p_147465_3_ & 15);
                  }
-+                // MCPC+ start - capture blockstates
++                // Cauldron start - capture blockstates
 +                org.bukkit.block.BlockState blockstate = null;
 +                if (this.captureBlockStates) {
 +                    blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, p_147465_1_, p_147465_2_, p_147465_3_, p_147465_6_);
@@ -569,14 +575,14 @@
 +                if (!flag && this.captureBlockStates) {
 +                    this.capturedBlockStates.remove(blockstate);
 +                }
-+                // MCPC+ end
++                // Cauldron end
 +
                  this.theProfiler.startSection("checkLight");
                  this.func_147451_t(p_147465_1_, p_147465_2_, p_147465_3_);
                  this.theProfiler.endSection();
  
 -                if (flag)
-+                // MCPC+ start
++                // Cauldron start
 +                if (flag && !this.captureBlockStates) // Don't notify clients or update physics while capturing blockstates
                  {
 -                    if ((p_147465_6_ & 2) != 0 && (!this.isRemote || (p_147465_6_ & 4) == 0) && chunk.func_150802_k())
@@ -596,15 +602,15 @@
 +                    // Modularize client and physic updates
 +                    this.markAndNotifyBlock(p_147465_1_, p_147465_2_, p_147465_3_, chunk, block1, p_147465_4_, p_147465_6_);
                  }
-+                // MCPC+ end
++                // Cauldron end
  
                  return flag;
              }
-@@ -471,8 +858,42 @@
+@@ -471,8 +857,42 @@
          }
      }
  
-+    // MCPC+ start - Split off from original setBlock(int par1, int par2, int par3, int par4, int par5, int par6) method in order to directly send client and physic updates
++    // Cauldron start - Split off from original setBlock(int par1, int par2, int par3, int par4, int par5, int par6) method in order to directly send client and physic updates
 +    public void markAndNotifyBlock(int x, int y, int z, Chunk chunk, Block oldBlock, Block newBlock, int flag)
 +    {
 +        if ((flag & 2) != 0 && (chunk == null || chunk.func_150802_k()))
@@ -622,11 +628,11 @@
 +            }
 +        }
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
      public int getBlockMetadata(int par1, int par2, int par3)
      {
-+        // MCPC+ start - tree generation
++        // Cauldron start - tree generation
 +        if (captureTreeGeneration) 
 +        {
 +            Iterator<BlockState> it = capturedBlockStates.iterator();
@@ -639,11 +645,11 @@
 +                }
 +            }
 +        }
-+        // MCPC+ end
++        // Cauldron end
          if (par1 >= -30000000 && par3 >= -30000000 && par1 < 30000000 && par3 < 30000000)
          {
              if (par2 < 0)
-@@ -587,6 +1008,13 @@
+@@ -587,6 +1007,13 @@
  
      public void notifyBlockChange(int p_147444_1_, int p_147444_2_, int p_147444_3_, Block p_147444_4_)
      {
@@ -657,7 +663,7 @@
          this.notifyBlocksOfNeighborChange(p_147444_1_, p_147444_2_, p_147444_3_, p_147444_4_);
      }
  
-@@ -671,6 +1099,21 @@
+@@ -671,6 +1098,21 @@
  
              try
              {
@@ -679,7 +685,7 @@
                  block.onNeighborBlockChange(this, p_147460_1_, p_147460_2_, p_147460_3_, p_147460_4_);
              }
              catch (Throwable throwable1)
-@@ -1199,6 +1642,7 @@
+@@ -1199,6 +1641,7 @@
  
                              if (movingobjectposition1 != null)
                              {
@@ -687,7 +693,7 @@
                                  return movingobjectposition1;
                              }
                          }
-@@ -1207,6 +1651,8 @@
+@@ -1207,6 +1650,8 @@
                              movingobjectposition2 = new MovingObjectPosition(l, i1, j1, b0, p_147447_1_, false);
                          }
                      }
@@ -696,7 +702,7 @@
                  }
  
                  return p_147447_5_ ? movingobjectposition2 : null;
-@@ -1284,32 +1730,110 @@
+@@ -1284,32 +1729,110 @@
  
      public boolean spawnEntityInWorld(Entity par1Entity)
      {
@@ -710,12 +716,12 @@
 -        if (par1Entity instanceof EntityPlayer)
 +    public boolean addEntity(Entity entity, SpawnReason spawnReason)   // Changed signature, added SpawnReason
 +    {
-+        // MCPC+ start - do not drop any items while restoring blockstates. Fixes dupes in mods such as Flans
++        // Cauldron start - do not drop any items while restoring blockstates. Fixes dupes in mods such as Flans
 +        if (entity == null || (entity instanceof EntityItem && this.restoringBlockStates))
          {
 +            return false;
 +        }
-+        // MCPC+ end
++        // Cauldron end
 +
 +        // CraftBukkit end
 +        int i = MathHelper.floor_double(entity.posX / 16.0D);
@@ -813,11 +819,11 @@
 +            this.getChunkFromChunkCoords(i, j).addEntity(entity);
 +            this.loadedEntityList.add(entity);
 +            this.onEntityAdded(entity);
-+            za.co.mcportcentral.MCPCHooks.logEntitySpawn(this, entity, spawnReason);
++            net.minecraftforge.cauldron.CauldronHooks.logEntitySpawn(this, entity, spawnReason);
              return true;
          }
      }
-@@ -1320,6 +1844,8 @@
+@@ -1320,6 +1843,8 @@
          {
              ((IWorldAccess)this.worldAccesses.get(i)).onEntityCreate(par1Entity);
          }
@@ -826,7 +832,7 @@
      }
  
      public void onEntityRemoved(Entity par1Entity)
-@@ -1328,6 +1854,8 @@
+@@ -1328,6 +1853,8 @@
          {
              ((IWorldAccess)this.worldAccesses.get(i)).onEntityDestroy(par1Entity);
          }
@@ -835,7 +841,7 @@
      }
  
      public void removeEntity(Entity par1Entity)
-@@ -1369,7 +1897,20 @@
+@@ -1369,7 +1896,20 @@
              this.getChunkFromChunkCoords(i, j).removeEntity(par1Entity);
          }
  
@@ -857,7 +863,7 @@
          this.onEntityRemoved(par1Entity);
      }
  
-@@ -1387,32 +1928,48 @@
+@@ -1387,32 +1927,48 @@
          int l = MathHelper.floor_double(par2AxisAlignedBB.maxY + 1.0D);
          int i1 = MathHelper.floor_double(par2AxisAlignedBB.minZ);
          int j1 = MathHelper.floor_double(par2AxisAlignedBB.maxZ + 1.0D);
@@ -920,14 +926,14 @@
          double d0 = 0.25D;
          List list = this.getEntitiesWithinAABBExcludingEntity(par1Entity, par2AxisAlignedBB.expand(d0, d0, d0));
  
-@@ -1746,11 +2303,37 @@
+@@ -1746,11 +2302,37 @@
          Entity entity;
          CrashReport crashreport;
          CrashReportCategory crashreportcategory;
-+        // MCPC+ start
++        // Cauldron start
 +        entitiesTicked = 0;
 +        tilesTicked = 0;
-+        // MCPC+ end
++        // Cauldron end
 +        long lastChunk = Long.MIN_VALUE; // Spigot - cache chunk x, z cords for unload queue
  
          for (i = 0; i < this.weatherEffects.size(); ++i)
@@ -959,7 +965,7 @@
              try
              {
                  ++entity.ticksExisted;
-@@ -1787,6 +2370,7 @@
+@@ -1787,6 +2369,7 @@
              }
          }
  
@@ -967,7 +973,7 @@
          this.theProfiler.endStartSection("remove");
          this.loadedEntityList.removeAll(this.unloadedEntityList);
          int j;
-@@ -1811,11 +2395,30 @@
+@@ -1811,11 +2394,30 @@
  
          this.unloadedEntityList.clear();
          this.theProfiler.endStartSection("regular");
@@ -1000,7 +1006,7 @@
              if (entity.ridingEntity != null)
              {
                  if (!entity.ridingEntity.isDead && entity.ridingEntity.riddenByEntity == entity)
-@@ -1833,7 +2436,9 @@
+@@ -1833,7 +2435,9 @@
              {
                  try
                  {
@@ -1010,7 +1016,7 @@
                  }
                  catch (Throwable throwable1)
                  {
-@@ -1866,29 +2471,62 @@
+@@ -1866,29 +2470,62 @@
                      this.getChunkFromChunkCoords(j, l).removeEntity(entity);
                  }
  
@@ -1047,7 +1053,7 @@
 +            // Spigot end
 +            // CraftBukkit start - Don't tick entities in chunks queued for unload
 +            ChunkProviderServer chunkProviderServer = ((WorldServer) this).theChunkProviderServer;
-+            if (!isActiveBlockCoord(tileentity.xCoord, tileentity.zCoord)) continue; // MCPC+ don't tick inactive chunks
++            if (!isActiveBlockCoord(tileentity.xCoord, tileentity.zCoord)) continue; // Cauldron don't tick inactive chunks
 +            if (chunkProviderServer.chunksToUnload.contains(tileentity.xCoord >> 4, tileentity.zCoord >> 4))
 +            {
 +                continue;
@@ -1061,13 +1067,13 @@
                  {
 -                    tileentity.updateEntity();
 +                    tileentity.tickTimer.startTiming(); // Spigot
-+                    // MCPC+ start - selectively tick entities
-+                    if (!MCPCHooks.overrideTileTicks || MinecraftServer.getServer().getTickCounter() % MCPCHooks.getTileTickInterval(tileentity) == 0)
++                    // Cauldron start - selectively tick entities
++                    if (!CauldronHooks.overrideTileTicks || MinecraftServer.getServer().getTickCounter() % CauldronHooks.getTileTickInterval(tileentity) == 0)
 +                    {
 +                        tilesTicked++;
 +                        tileentity.updateEntity();
 +                    }
-+                    // MCPC+ stop
++                    // Cauldron stop
 +                    tileentity.tickTimer.stopTiming(); // Spigot
                  }
                  catch (Throwable throwable)
@@ -1076,7 +1082,7 @@
                      crashreport = CrashReport.makeCrashReport(throwable, "Ticking block entity");
                      crashreportcategory = crashreport.makeCategory("Block entity being ticked");
                      tileentity.func_145828_a(crashreportcategory);
-@@ -1921,6 +2559,10 @@
+@@ -1921,6 +2558,10 @@
              }
          }
  
@@ -1087,7 +1093,7 @@
          if (!this.field_147483_b.isEmpty())
          {
              for (Object tile : field_147483_b)
-@@ -1965,16 +2607,20 @@
+@@ -1965,16 +2606,20 @@
              this.addedTileEntityList.clear();
          }
  
@@ -1100,33 +1106,33 @@
      {
 -        List dest = field_147481_N ? addedTileEntityList : loadedTileEntityList;
 -        for(TileEntity entity : (Collection<TileEntity>)p_147448_1_)
-+        Collection dest = field_147481_N ? addedTileEntityList : loadedTileEntityList; // MCPC+ - List -> Collection for CB loadedTileEntityList type change
++        Collection dest = field_147481_N ? addedTileEntityList : loadedTileEntityList; // Cauldron - List -> Collection for CB loadedTileEntityList type change
 +        for(Object entity : p_147448_1_)
          {
 -            if(entity.canUpdate()) dest.add(entity);
-+            if(MCPCHooks.canUpdate((TileEntity)entity))
++            if(CauldronHooks.canUpdate((TileEntity)entity))
 +            {
 +                dest.add(entity);
 +            }
          }
      }
  
-@@ -1990,16 +2636,26 @@
+@@ -1990,16 +2635,26 @@
          boolean isForced = getPersistentChunks().containsKey(new ChunkCoordIntPair(i >> 4, j >> 4));
          byte b0 = isForced ? (byte)0 : 32;
          boolean canUpdate = !par2 || this.checkChunksExist(i - b0, 0, j - b0, i + b0, 0, j + b0);
 -
-+        boolean forceUpdate = false; // MCPC+
++        boolean forceUpdate = false; // Cauldron
          if (!canUpdate)
          {
              EntityEvent.CanUpdate event = new EntityEvent.CanUpdate(par1Entity);
              MinecraftForge.EVENT_BUS.post(event);
              canUpdate = event.canUpdate;
-+            forceUpdate = canUpdate; // MCPC+
++            forceUpdate = canUpdate; // Cauldron
          }
 -
 +        // Spigot start
-+        if (!isForced && !forceUpdate && !org.spigotmc.ActivationRange.checkIfActive(par1Entity)) // MCPC+ - ignore if forge event forced update or entity is in forced chunk
++        if (!isForced && !forceUpdate && !org.spigotmc.ActivationRange.checkIfActive(par1Entity)) // Cauldron - ignore if forge event forced update or entity is in forced chunk
 +        {
 +            par1Entity.ticksExisted++;
 +            par1Entity.inactiveTick();
@@ -1140,7 +1146,7 @@
              par1Entity.lastTickPosX = par1Entity.posX;
              par1Entity.lastTickPosY = par1Entity.posY;
              par1Entity.lastTickPosZ = par1Entity.posZ;
-@@ -2083,6 +2739,8 @@
+@@ -2083,6 +2738,8 @@
                      par1Entity.riddenByEntity = null;
                  }
              }
@@ -1149,7 +1155,7 @@
          }
      }
  
-@@ -2278,6 +2936,7 @@
+@@ -2278,6 +2935,7 @@
                  par3Entity.motionZ += vec3.zCoord * d1;
              }
  
@@ -1157,7 +1163,7 @@
              return flag;
          }
      }
-@@ -2369,6 +3028,7 @@
+@@ -2369,6 +3027,7 @@
          double d2 = 1.0D / ((par2AxisAlignedBB.maxZ - par2AxisAlignedBB.minZ) * 2.0D + 1.0D);
          int i = 0;
          int j = 0;
@@ -1165,7 +1171,7 @@
  
          for (float f = 0.0F; f <= 1.0F; f = (float)((double)f + d0))
          {
-@@ -2390,7 +3050,8 @@
+@@ -2390,7 +3049,8 @@
              }
          }
  
@@ -1175,16 +1181,16 @@
      }
  
      public boolean extinguishFire(EntityPlayer par1EntityPlayer, int par2, int par3, int par4, int par5)
-@@ -2510,7 +3171,7 @@
+@@ -2510,7 +3170,7 @@
              return;
          }
  
 -        if (p_147455_4_.canUpdate())
-+        if (MCPCHooks.canUpdate(p_147455_4_))
++        if (CauldronHooks.canUpdate(p_147455_4_))
          {
              if (this.field_147481_N)
              {
-@@ -2658,7 +3319,16 @@
+@@ -2658,7 +3318,16 @@
  
                      if (i <= 0)
                      {
@@ -1202,7 +1208,7 @@
                      }
                  }
  
-@@ -2694,7 +3364,16 @@
+@@ -2694,7 +3363,16 @@
  
                      if (j <= 0)
                      {
@@ -1220,12 +1226,12 @@
                      }
                  }
  
-@@ -2716,28 +3395,72 @@
+@@ -2716,28 +3394,72 @@
  
      protected void setActivePlayerChunksAndCheckLight()
      {
 -        this.activeChunkSet.clear();
-+        // MCPC+ start - add persistent chunks to be ticked for growth
++        // Cauldron start - add persistent chunks to be ticked for growth
 +        activeChunkSet.clear();
 +        activeChunkSet_CB.clear();
 +        for(ChunkCoordIntPair chunk : getPersistentChunks().keySet()) {
@@ -1236,7 +1242,7 @@
 +                ((WorldServer)this).theChunkProviderServer.loadChunk(chunk.chunkXPos, chunk.chunkZPos);
 +            }
 +        }
-+        // MCPC+ end
++        // Cauldron end
          this.theProfiler.startSection("buildList");
 -        this.activeChunkSet.addAll(getPersistentChunks().keySet());
          int i;
@@ -1247,7 +1253,7 @@
 +        int optimalChunks = spigotConfig.chunksPerTick;
  
 +        // Quick conditions to allow us to exist early
-+        if (optimalChunks <= 0) // MCPC+ tick chunks even if no players are logged in
++        if (optimalChunks <= 0) // Cauldron tick chunks even if no players are logged in
 +        {
 +            return;
 +        }
@@ -1257,12 +1263,12 @@
 +        int randRange = 3 + chunksPerPlayer / 30;
 +        // Limit to normal tick radius - including view distance
 +        randRange = ( randRange > chunkTickRadius ) ? chunkTickRadius : randRange;
-+        // MCPC+ start - validate view radius
++        // Cauldron start - validate view radius
 +        if (randRange < 1)
 +        {
 +            throw new IllegalArgumentException("Too small view radius! edit server.properties and change view-distance to a value > 0.");
 +        }
-+        // MCPC+ end
++        // Cauldron end
 +        // odds of growth happening vs growth happening in vanilla
 +        this.growthOdds = this.modifiedOdds = Math.max( 35, Math.min( 100, ( ( chunksPerPlayer + 1 ) * 100F ) / 15F ) );
 +        // Spigot end
@@ -1278,7 +1284,7 @@
 +            long key = chunkToKey(chunkX, chunkZ);
 +            int existingPlayers = Math.max(0, activeChunkSet_CB.get(key)); //filter out -1's
 +            activeChunkSet_CB.put(key, (short)(existingPlayers + 1));
-+            activeChunkSet.add(new ChunkCoordIntPair(chunkX, chunkZ)); // MCPC+ - vanilla compatibility
++            activeChunkSet.add(new ChunkCoordIntPair(chunkX, chunkZ)); // Cauldron - vanilla compatibility
  
 -            for (int l = -b0; l <= b0; ++l)
 +            // Check and see if we update the chunks surrounding the player this tick
@@ -1293,7 +1299,7 @@
                  {
 -                    this.activeChunkSet.add(new ChunkCoordIntPair(l + j, i1 + k));
 +                    activeChunkSet_CB.put(hash, (short) - 1); //no players
-+                    activeChunkSet.add(new ChunkCoordIntPair(dx + chunkX, dz + chunkZ)); // MCPC+ - vanilla compatibility
++                    activeChunkSet.add(new ChunkCoordIntPair(dx + chunkX, dz + chunkZ)); // Cauldron - vanilla compatibility
                  }
              }
 +
@@ -1301,7 +1307,7 @@
          }
  
          this.theProfiler.endSection();
-@@ -2749,7 +3472,7 @@
+@@ -2749,7 +3471,7 @@
  
          this.theProfiler.startSection("playerCheckLight");
  
@@ -1310,7 +1316,7 @@
          {
              i = this.rand.nextInt(this.playerEntities.size());
              entityplayer = (EntityPlayer)this.playerEntities.get(i);
-@@ -3221,8 +3944,21 @@
+@@ -3221,8 +3943,21 @@
          {
              Entity entity = (Entity)this.loadedEntityList.get(j);
  
@@ -1333,11 +1339,11 @@
                  ++i;
              }
          }
-@@ -3251,8 +3987,14 @@
+@@ -3251,8 +3986,14 @@
      public boolean canPlaceEntityOnSide(Block p_147472_1_, int p_147472_2_, int p_147472_3_, int p_147472_4_, boolean p_147472_5_, int p_147472_6_, Entity p_147472_7_, ItemStack p_147472_8_)
      {
          Block block1 = this.getBlock(p_147472_2_, p_147472_3_, p_147472_4_);
-+        if (block1 == null) return false; // MCPC+
++        if (block1 == null) return false; // Cauldron
          AxisAlignedBB axisalignedbb = p_147472_5_ ? null : p_147472_1_.getCollisionBoundingBoxFromPool(this, p_147472_2_, p_147472_3_, p_147472_4_);
 -        return axisalignedbb != null && !this.checkNoEntityCollision(axisalignedbb, p_147472_7_) ? false : (block1.getMaterial() == Material.circuits && p_147472_1_ == Blocks.anvil ? true : block1.isReplaceable(this, p_147472_2_, p_147472_3_, p_147472_4_) && p_147472_1_.canReplace(this, p_147472_2_, p_147472_3_, p_147472_4_, p_147472_6_, p_147472_8_));
 +        // CraftBukkit start - store default return
@@ -1349,7 +1355,7 @@
      }
  
      public PathEntity getPathEntityToEntity(Entity par1Entity, Entity par2Entity, float par3, boolean par4, boolean par5, boolean par6, boolean par7)
-@@ -3400,7 +4142,15 @@
+@@ -3400,7 +4141,15 @@
  
          for (int i = 0; i < this.playerEntities.size(); ++i)
          {
@@ -1366,7 +1372,7 @@
              double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
  
              if ((par7 < 0.0D || d5 < par7 * par7) && (d4 == -1.0D || d5 < d4))
-@@ -3425,8 +4175,16 @@
+@@ -3425,8 +4174,16 @@
  
          for (int i = 0; i < this.playerEntities.size(); ++i)
          {
@@ -1384,7 +1390,7 @@
              if (!entityplayer1.capabilities.disableDamage && entityplayer1.isEntityAlive())
              {
                  double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
-@@ -3580,6 +4338,18 @@
+@@ -3580,6 +4337,18 @@
  
      public void updateAllPlayersSleepingFlag() {}
  
@@ -1403,23 +1409,23 @@
      public float getWeightedThunderStrength(float par1)
      {
          return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * par1) * this.getRainStrength(par1);
-@@ -3857,8 +4627,8 @@
+@@ -3857,8 +4626,8 @@
       */
      public void addTileEntity(TileEntity entity)
      {
 -        List dest = field_147481_N ? addedTileEntityList : loadedTileEntityList;
 -        if(entity.canUpdate())
-+        Collection dest = field_147481_N ? addedTileEntityList : loadedTileEntityList; // MCPC+ - List -> Collection for CB loadedTileEntityList type change
-+        if(MCPCHooks.canUpdate(entity))
++        Collection dest = field_147481_N ? addedTileEntityList : loadedTileEntityList; // Cauldron - List -> Collection for CB loadedTileEntityList type change
++        if(CauldronHooks.canUpdate(entity))
          {
              dest.add(entity);
          }
-@@ -3954,4 +4724,43 @@
+@@ -3954,4 +4723,43 @@
          }
          return count;
      }
 +    
-+    // MCPC+ start
++    // Cauldron start
 +    public boolean isActiveChunk(int x, int z)
 +    {
 +        return getPersistentChunks().containsKey(new ChunkCoordIntPair(x, z)) || activeChunkSet_CB.containsKey(chunkToKey(x, z));
@@ -1456,5 +1462,5 @@
 +
 +        return true;
 +    }
-+    // MCPC+ end
++    // Cauldron end
  }

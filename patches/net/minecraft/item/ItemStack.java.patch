@@ -14,7 +14,7 @@
  
 +import org.bukkit.craftbukkit.util.CraftMagicNumbers; // CraftBukkit
 +import net.minecraft.entity.player.EntityPlayerMP; // Spigot
-+// MCPC+ start
++// Cauldron start
 +import net.minecraft.block.BlockSapling;
 +import net.minecraft.block.BlockMushroom;
 +
@@ -24,7 +24,7 @@
 +import org.bukkit.craftbukkit.block.CraftBlockState;
 +import org.bukkit.entity.Player;
 +import org.bukkit.event.world.StructureGrowEvent;
-+// MCPC+ end
++// Cauldron end
 +
  public final class ItemStack
  {
@@ -35,12 +35,12 @@
      int itemDamage;
 -    private EntityItemFrame itemFrame;
 +
-+    // MCPC+ - due to a bug in Gson(https://code.google.com/p/google-gson/issues/detail?id=440), a stackoverflow 
++    // Cauldron - due to a bug in Gson(https://code.google.com/p/google-gson/issues/detail?id=440), a stackoverflow 
 +    //         can occur when gson attempts to resolve a field of a class that points to itself.
 +    //         As a temporary workaround, we will prevent serialization for this object until the bug is fixed.
 +    //         This fixes EE3's serialization of ItemStack.
 +    private transient EntityItemFrame itemFrame;
-+    public static EntityPlayer currentPlayer; // MCPC+ - reference to current player calling onItemUse
++    public static EntityPlayer currentPlayer; // Cauldron - reference to current player calling onItemUse
      private static final String __OBFID = "CL_00000043";
  
      public ItemStack(Block par1Block)
@@ -48,7 +48,7 @@
  
      public boolean tryPlaceItemIntoWorld(EntityPlayer par1EntityPlayer, World par2World, int par3, int par4, int par5, int par6, float par7, float par8, float par9)
      {
-+        // MCPC+ start - handle all placement events here
++        // Cauldron start - handle all placement events here
 +        int meta = this.getItemDamage();
 +        int size = this.stackSize;
 +        NBTTagCompound nbt = null;
@@ -158,7 +158,7 @@
          }
 +        par2World.capturedBlockStates.clear();
 +        par2World.capturedItems.clear();
-+        // MCPC+ end
++        // Cauldron end
  
          return flag;
      }
@@ -226,7 +226,7 @@
  
      public void setTagCompound(NBTTagCompound par1NBTTagCompound)
      {
-+        // MCPC+ - do not alter name of compound. Fixes Ars Magica 2 Spellbooks
++        // Cauldron - do not alter name of compound. Fixes Ars Magica 2 Spellbooks
          this.stackTagCompound = par1NBTTagCompound;
      }
  

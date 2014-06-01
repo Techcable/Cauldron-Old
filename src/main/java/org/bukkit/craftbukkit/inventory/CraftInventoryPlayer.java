@@ -19,7 +19,7 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
 
     @Override
     public int getSize() {
-        return getInventory().mainInventory.length; // MCPC+ - Galacticraft and Aether extend equipped item slots so we need to check the main inventory array directly
+        return getInventory().mainInventory.length; // Cauldron - Galacticraft and Aether extend equipped item slots so we need to check the main inventory array directly
     }
 
     public ItemStack getItemInHand() {

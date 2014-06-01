@@ -14,7 +14,7 @@ public class CraftTravelAgent extends net.minecraft.world.Teleporter implements 
 
     public CraftTravelAgent(net.minecraft.world.WorldServer worldserver) {
         super(worldserver);
-        if (DEFAULT == null && worldserver.provider.dimensionId == 0) { // MCPC+
+        if (DEFAULT == null && worldserver.provider.dimensionId == 0) { // Cauldron
             DEFAULT = this;
         }
     }

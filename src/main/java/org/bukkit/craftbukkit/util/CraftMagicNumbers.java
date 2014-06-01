@@ -70,7 +70,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
     }
 
     public static net.minecraft.block.Block getBlock(Material material) {
-        material = material == null ? Material.AIR : material; // MCPC+ - this should not happen but just in case it does
+        material = material == null ? Material.AIR : material; // Cauldron - this should not happen but just in case it does
         // TODO: Don't use ID
         net.minecraft.block.Block block = net.minecraft.block.Block.getBlockById(material.getId());
 

@@ -2,9 +2,10 @@ package org.bukkit.craftbukkit.inventory;
 
 import java.util.Iterator;
 
+import net.minecraftforge.cauldron.potion.CustomModRecipe;
+
 import org.bukkit.inventory.Recipe;
 
-import za.co.mcportcentral.potion.CustomModRecipe; // MCPC+
 
 public class RecipeIterator implements Iterator<Recipe> {
     private final Iterator<net.minecraft.item.crafting.IRecipe> recipes;
@@ -25,7 +26,7 @@ public class RecipeIterator implements Iterator<Recipe> {
     public Recipe next() {
         if (recipes.hasNext()) {
             removeFrom = recipes;
-            // MCPC+ start - handle custom recipe classes without Bukkit API equivalents
+            // Cauldron start - handle custom recipe classes without Bukkit API equivalents
             net.minecraft.item.crafting.IRecipe iRecipe = recipes.next();
             try {
                 return iRecipe.toBukkitRecipe();
@@ -33,7 +34,7 @@ public class RecipeIterator implements Iterator<Recipe> {
                 // No Bukkit wrapper provided
                 return new CustomModRecipe(iRecipe);
             }
-            // MCPC+ end
+            // Cauldron end
         } else {
             net.minecraft.item.ItemStack item;
             if (smeltingCustom.hasNext()) {

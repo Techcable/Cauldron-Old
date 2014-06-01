@@ -9,12 +9,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import org.bukkit.configuration.file.YamlConfiguration; // MCPC+
+import org.bukkit.configuration.file.YamlConfiguration; // Cauldron
 
 public class Main {
     public static boolean useJline = true;
     public static boolean useConsole = true;
-    // MCPC start
+    // Cauldron start
     public static YamlConfiguration configuration;
     public static File configFile;
     public static void main(String[] args) {
@@ -23,7 +23,7 @@ public class Main {
     }
 
     public static OptionSet loadOptions(String[] args) {
-    // MCPC end
+    // Cauldron end
         OptionParser parser = new OptionParser() {
             {
                 acceptsAll(asList("?", "help"), "Show the help");
@@ -171,7 +171,7 @@ public class Main {
                     System.out.println( "Warning, your max perm gen size is not set or less than 128mb. It is recommended you restart Java with the following argument: -XX:MaxPermSize=128M" );
                 }
                 // Spigot End
-                // MCPC+ start - initialize config
+                // Cauldron start - initialize config
                 configFile = (File) options.valueOf("bukkit-settings");
                 configuration = YamlConfiguration.loadConfiguration(configFile);
                 configuration.options().copyDefaults(true);
@@ -182,12 +182,12 @@ public class Main {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, "Could not save " + configFile, ex);
                 }
                 return options;
-                // MCPC+ end
+                // Cauldron end
             } catch (Throwable t) {
                 t.printStackTrace();
             }
         }
-        return null; // MCPC
+        return null; // Cauldron
     }
 
     private static List<String> asList(String... params) {

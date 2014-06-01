@@ -1,4 +1,4 @@
-package za.co.mcportcentral;
+package net.minecraftforge.cauldron;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.cauldron.CauldronConfig.Setting;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -16,22 +17,21 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.util.StringUtil;
 
-import za.co.mcportcentral.MCPCConfig.Setting;
 
 import com.google.common.collect.ImmutableList;
 
-public class MCPCCommand extends Command
+public class CauldronCommand extends Command
 {
     private static final List<String> COMMANDS = ImmutableList.of("get", "set", "tick-interval", "save", "reload", "chunks", "heap");
     private static final List<String> CHUNK_COMMANDS = ImmutableList.of("print", "dump");
 
-    public MCPCCommand()
+    public CauldronCommand()
     {
-        super("mcpc");
-        this.description = "Toggle certain MCPC options";
+        super("cauldron");
+        this.description = "Toggle certain Cauldron options";
 
-        this.usageMessage = "/mcpc [" + StringUtils.join(COMMANDS, '|') + "] <option> [value]";
-        this.setPermission("mcpc.command.mcpc");
+        this.usageMessage = "/cauldron [" + StringUtils.join(COMMANDS, '|') + "] <option> [value]";
+        this.setPermission("cauldron.command.cauldron");
     }
 
     @Override
@@ -53,13 +53,13 @@ public class MCPCCommand extends Command
         }
         if ((args.length == 1) && "save".equalsIgnoreCase(args[0]))
         {
-            MCPCConfig.save();
+            CauldronConfig.save();
             sender.sendMessage(ChatColor.GREEN + "Config file saved");
             return true;
         }
         if ((args.length == 1) && "reload".equalsIgnoreCase(args[0]))
         {
-            MCPCConfig.load();
+            CauldronConfig.load();
             sender.sendMessage(ChatColor.GREEN + "Config file reloaded");
             return true;
         }
@@ -93,7 +93,7 @@ public class MCPCCommand extends Command
     {
         File file = new File(new File(new File("."), "dumps"), "heap-dump-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.bin");
         sender.sendMessage("Writing chunk info to: " + file);
-        MCPCHooks.dumpHeap(file, true);
+        CauldronHooks.dumpHeap(file, true);
         sender.sendMessage("Chunk info complete");
     }
 
@@ -123,7 +123,7 @@ public class MCPCCommand extends Command
 
         File file = new File(new File(new File("."), "chunk-dumps"), "chunk-info-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.txt");
         sender.sendMessage("Writing chunk info to: " + file);
-        MCPCHooks.writeChunks(file, dumpAll);
+        CauldronHooks.writeChunks(file, dumpAll);
         sender.sendMessage("Chunk info complete");
     }
 
@@ -131,7 +131,7 @@ public class MCPCCommand extends Command
     {
         try
         {
-            MCPCConfig.Setting toggle = MCPCConfig.settings.get(args[1]);
+            CauldronConfig.Setting toggle = CauldronConfig.settings.get(args[1]);
             if (toggle == null)
             {
                 sender.sendMessage(ChatColor.RED + "Could not find option: " + args[1]);
@@ -154,7 +154,7 @@ public class MCPCCommand extends Command
         try
         {
             int setting = NumberUtils.toInt(args[2], 1);
-            MCPCConfig.set(args[1], setting);
+            CauldronConfig.set(args[1], setting);
         }
         catch (Exception ex)
         {
@@ -168,7 +168,7 @@ public class MCPCCommand extends Command
     {
         try
         {
-            MCPCConfig.Setting toggle = MCPCConfig.settings.get(args[1]);
+            CauldronConfig.Setting toggle = CauldronConfig.settings.get(args[1]);
             if (toggle == null)
             {
                 sender.sendMessage(ChatColor.RED + "Could not find option: " + args[1]);
@@ -184,16 +184,16 @@ public class MCPCCommand extends Command
             String option = (Boolean.TRUE.equals(value) ? ChatColor.GREEN : ChatColor.RED) + " " + value;
             sender.sendMessage(ChatColor.GOLD + args[1] + " " + option);
             // Special case for load-on-request
-            if (toggle == MCPCConfig.Setting.loadChunkOnRequest)
+            if (toggle == CauldronConfig.Setting.loadChunkOnRequest)
             {
                 for (net.minecraft.world.WorldServer world : MinecraftServer.getServer().worlds)
                 {
-                    world.theChunkProviderServer.loadChunkOnProvideRequest = za.co.mcportcentral.MCPCConfig.Setting.loadChunkOnRequest.getValue();
+                    world.theChunkProviderServer.loadChunkOnProvideRequest = net.minecraftforge.cauldron.CauldronConfig.Setting.loadChunkOnRequest.getValue();
                 }
             }
-            if (toggle == MCPCConfig.Setting.overrideTileTicks)
+            if (toggle == CauldronConfig.Setting.overrideTileTicks)
             {
-                MCPCHooks.overrideTileTicks = MCPCConfig.Setting.overrideTileTicks.getValue();
+                CauldronHooks.overrideTileTicks = CauldronConfig.Setting.overrideTileTicks.getValue();
             }
         }
         catch (Exception ex)
@@ -217,7 +217,7 @@ public class MCPCCommand extends Command
         }
         if (((args.length == 2) && "get".equalsIgnoreCase(args[0])) || "set".equalsIgnoreCase(args[0]))
         {
-            return StringUtil.copyPartialMatches(args[1], MCPCConfig.settings.keySet(), new ArrayList<String>(MCPCConfig.settings.size()));
+            return StringUtil.copyPartialMatches(args[1], CauldronConfig.settings.keySet(), new ArrayList<String>(CauldronConfig.settings.size()));
         }
         else if ((args.length == 2) && "chunks".equalsIgnoreCase(args[0]))
         {

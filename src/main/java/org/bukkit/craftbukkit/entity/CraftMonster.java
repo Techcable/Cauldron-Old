@@ -17,6 +17,6 @@ public class CraftMonster extends CraftCreature implements Monster {
 
     @Override
     public String toString() {
-        return this.entityName; // MCPC+
+        return this.entityName; // Cauldron
     }
 }

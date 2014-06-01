@@ -5,11 +5,11 @@
  {
      private static final String __OBFID = "CL_00000365";
 +
-+    // MCPC+ start
++    // Cauldron start
 +    @Override
 +    public boolean canUpdate()
 +    {
 +        return false;
 +    }
-+    // MCPC+ end
++    // Cauldron end
  }

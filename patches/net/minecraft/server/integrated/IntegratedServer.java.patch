@@ -17,7 +17,7 @@
      }
  
 -    protected boolean startServer() throws IOException
-+    protected boolean startServer() throws java.net.UnknownHostException // MCPC+
++    protected boolean startServer() throws java.net.UnknownHostException // Cauldron
      {
          logger.info("Starting integrated minecraft server version 1.7.2");
          this.setOnlineMode(false);

@@ -89,7 +89,7 @@
 +                    }
 +                    else
 +                    {
-+                        // MCPC+ start - support mod inventories, with no owners
++                        // Cauldron start - support mod inventories, with no owners
 +                        try {
 +                            if (iinventory.getOwner() != null) {
 +                                destinationInventory = iinventory.getOwner().getInventory();
@@ -99,7 +99,7 @@
 +                            }
 +                         } catch (AbstractMethodError e) { // fixes openblocks AbstractMethodError
 +                            if (iinventory instanceof net.minecraft.tileentity.TileEntity) {
-+                                org.bukkit.inventory.InventoryHolder holder = za.co.mcportcentral.MCPCUtils.getOwner((net.minecraft.tileentity.TileEntity)iinventory);
++                                org.bukkit.inventory.InventoryHolder holder = net.minecraftforge.cauldron.CauldronUtils.getOwner((net.minecraft.tileentity.TileEntity)iinventory);
 +                                if (holder != null) {
 +                                    destinationInventory = holder.getInventory();
 +                                } else {
@@ -109,7 +109,7 @@
 +                                destinationInventory = null;
 +                            }
 +                        }
-+                        // MCPC+ end
++                        // Cauldron end
 +                    }
 +
 +                    InventoryMoveItemEvent event = new InventoryMoveItemEvent(this.getOwner().getInventory(), oitemstack.clone(), destinationInventory, true);
@@ -156,7 +156,7 @@
 +            }
 +            else
 +            {
-+                // MCPC+ start - support mod inventories, with no owners
++                // Cauldron start - support mod inventories, with no owners
 +                try
 +                {
 +                    if (p_145892_1_.getOwner() != null)
@@ -173,7 +173,7 @@
 +                {
 +                    sourceInventory = null;
 +                }
-+                // MCPC+ end
++                // Cauldron end
 +            }
 +
 +            InventoryMoveItemEvent event = new InventoryMoveItemEvent(sourceInventory, oitemstack.clone(), p_145892_0_.getOwner().getInventory(), false);
@@ -218,7 +218,7 @@
          else
          {
 +            // CraftBukkit start
-+            // MCPC+ start - vanilla compatibility
++            // Cauldron start - vanilla compatibility
 +            if (p_145898_0_.getOwner() != null && p_145898_1_.getBukkitEntity() != null)
 +            {
 +                InventoryPickupItemEvent event = new InventoryPickupItemEvent(p_145898_0_.getOwner().getInventory(), (org.bukkit.entity.Item) p_145898_1_.getBukkitEntity());
@@ -229,7 +229,7 @@
 +                    return false;
 +                }
 +            }
-+            // MCPC+ end
++            // Cauldron end
 +            // CraftBukkit end
              ItemStack itemstack = p_145898_1_.getEntityItem().copy();
              ItemStack itemstack1 = func_145889_a(p_145898_0_, itemstack, -1);

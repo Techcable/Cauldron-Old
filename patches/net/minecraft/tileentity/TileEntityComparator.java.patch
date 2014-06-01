@@ -5,11 +5,11 @@
          this.field_145997_a = p_145995_1_;
      }
 +
-+    // MCPC+ start
++    // Cauldron start
 +    @Override
 +    public boolean canUpdate()
 +    {
 +        return false;
 +    }
-+    // MCPC+ end
++    // Cauldron end
  }

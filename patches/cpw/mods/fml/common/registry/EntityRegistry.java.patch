@@ -4,11 +4,11 @@
  import cpw.mods.fml.common.ModContainer;
  import cpw.mods.fml.common.network.internal.FMLMessage.EntitySpawnMessage;
  
-+// MCPC+ start
++// Cauldron start
 +import net.minecraftforge.common.util.EnumHelper;
 +import org.bukkit.craftbukkit.entity.CraftEntity;
 +import org.bukkit.entity.EntityType;
-+// MCPC+ end
++// Cauldron end
 +
  public class EntityRegistry
  {
@@ -17,8 +17,8 @@
      private ListMultimap<ModContainer, EntityRegistration> entityRegistrations = ArrayListMultimap.create();
      private Map<String,ModContainer> entityNames = Maps.newHashMap();
      private BiMap<Class<? extends Entity>, EntityRegistration> entityClassRegistrations = HashBiMap.create();
-+    public static Map<Class <? extends Entity>, String> entityTypeMap = Maps.newHashMap(); // MCPC+ - used by CraftCustomEntity
-+    public static Map<String, Class <? extends Entity>> entityClassMap = Maps.newHashMap(); // MCPC+ - used by CraftWorld
++    public static Map<Class <? extends Entity>, String> entityTypeMap = Maps.newHashMap(); // Cauldron - used by CraftCustomEntity
++    public static Map<String, Class <? extends Entity>> entityClassMap = Maps.newHashMap(); // Cauldron - used by CraftWorld
      public static EntityRegistry instance()
      {
          return INSTANCE;
@@ -26,7 +26,7 @@
      public static void registerModEntity(Class<? extends Entity> entityClass, String entityName, int id, Object mod, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates)
      {
          instance().doModEntityRegistration(entityClass, entityName, id, mod, trackingRange, updateFrequency, sendsVelocityUpdates);
-+        registerBukkitType(entityClass, entityName); // MCPC+ - register EntityType for Bukkit
++        registerBukkitType(entityClass, entityName); // Cauldron - register EntityType for Bukkit
      }
  
      @SuppressWarnings("unchecked")
@@ -34,7 +34,7 @@
          }
          id = instance().validateAndClaimId(id);
          EntityList.addMapping(entityClass, entityName, id);
-+        registerBukkitType(entityClass, entityName); // MCPC+ - register EntityType for Bukkit
++        registerBukkitType(entityClass, entityName); // Cauldron - register EntityType for Bukkit
      }
  
      private int validateAndClaimId(int id)
@@ -42,10 +42,10 @@
          }
          instance().validateAndClaimId(id);
          EntityList.addMapping(entityClass, entityName, id, backgroundEggColour, foregroundEggColour);
-+        registerBukkitType(entityClass, entityName); // MCPC+ - register EntityType for Bukkit
++        registerBukkitType(entityClass, entityName); // Cauldron - register EntityType for Bukkit
      }
  
-+    // MCPC+ start
++    // Cauldron start
 +    private static void registerBukkitType(Class <? extends Entity > entityClass, String entityName)
 +    {
 +        ModContainer activeModContainer = Loader.instance().activeModContainer();
@@ -72,7 +72,7 @@
 +    {
 +        return entityTypeMap.get(entityClass);
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
      public static void addSpawn(Class <? extends EntityLiving > entityClass, int weightedProb, int min, int max, EnumCreatureType typeOfCreature, BiomeGenBase... biomes)
      {

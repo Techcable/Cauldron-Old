@@ -5,7 +5,7 @@
          else
          {
 -            FMLLog.info("Unexpected packet during modded negotiation - assuming vanilla or keepalives : %s", msg.getClass().getName());
-+            //FMLLog.info("Unexpected packet during modded negotiation - assuming vanilla or keepalives : %s", msg.getClass().getName()); // MCPC+ - unneeded spam
++            //FMLLog.info("Unexpected packet during modded negotiation - assuming vanilla or keepalives : %s", msg.getClass().getName()); // Cauldron - unneeded spam
          }
          return false;
      }
@@ -14,7 +14,7 @@
          if (!(cause instanceof ClosedChannelException))
          {
 -            FMLLog.log(Level.ERROR, cause, "NetworkDispatcher exception");
-+            //FMLLog.log(Level.ERROR, cause, "NetworkDispatcher exception"); // MCPC+ - disable unneeded spam
++            //FMLLog.log(Level.ERROR, cause, "NetworkDispatcher exception"); // Cauldron - disable unneeded spam
          }
          super.exceptionCaught(ctx, cause);
      }

@@ -5,13 +5,13 @@
              }
          }
 -        if (!goodFML)
-+        // MCPC+ start - disable message
++        // Cauldron start - disable message
 +        /*if (!goodFML)
          {
              FMLRelaunchLog.severe("FML appears to be missing any signature data. This is not a good thing");
 -        }
 +        }*/
-+        // MCPC+ end
++        // Cauldron end
          return null;
      }
  

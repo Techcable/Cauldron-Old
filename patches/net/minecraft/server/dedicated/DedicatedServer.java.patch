@@ -144,7 +144,7 @@
 +        org.spigotmc.SpigotConfig.init();
 +        org.spigotmc.SpigotConfig.registerCommands();
 +        // Spigot end
-+        za.co.mcportcentral.MCPCConfig.registerCommands(); // MCPC+
++        net.minecraftforge.cauldron.CauldronConfig.registerCommands(); // Cauldron
          field_155771_h.info("Generating keypair");
          this.setKeyPair(CryptManager.createNewKeyPair());
          field_155771_h.info("Starting Minecraft server on " + (this.getServerHostname().length() == 0 ? "*" : this.getServerHostname()) + ":" + this.getServerPort());
@@ -175,10 +175,10 @@
  
 +        // Spigot Start - Move DedicatedPlayerList up and bring plugin loading from CraftServer to here
 +        // this.setConfigurationManager((ServerConfigurationManager)(new DedicatedPlayerList(this)));  // CraftBukkit
-+        // MCPC+ start - moved to FMLServerAboutToStart
++        // Cauldron start - moved to FMLServerAboutToStart
 +        // server.loadPlugins();
 +        // server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.STARTUP);
-+        // MCPC+ End
++        // Cauldron End
 +        // Spigot End
 +
          if (!this.isServerInOnlineMode())

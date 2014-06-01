@@ -17,7 +17,12 @@
  import net.minecraft.server.gui.IUpdatePlayerListBox;
  import net.minecraft.server.management.ServerConfigurationManager;
  import net.minecraft.util.AxisAlignedBB;
-@@ -79,17 +82,46 @@
+@@ -75,21 +78,49 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++import net.minecraftforge.cauldron.CauldronUtils;
+ import net.minecraftforge.common.DimensionManager;
  import net.minecraftforge.common.MinecraftForge;
  import net.minecraftforge.event.world.WorldEvent;
  
@@ -33,7 +38,7 @@
 +import org.bukkit.event.server.RemoteServerCommandEvent;
 +import org.bukkit.event.world.WorldSaveEvent;
 +// CraftBukkit end
-+// MCPC+ start
++// Cauldron start
 +import java.util.Map;
 +import java.lang.reflect.Constructor;
 +import joptsimple.OptionParser;
@@ -47,8 +52,6 @@
 +import org.bukkit.configuration.file.YamlConfiguration;
 +import org.bukkit.craftbukkit.CraftServer;
 +import org.bukkit.craftbukkit.block.CraftBlock;
-+import za.co.mcportcentral.MCPCUtils;
-+// MCPC+ end
 +
  public abstract class MinecraftServer implements ICommandSender, Runnable, IPlayerUsage
  {
@@ -67,7 +70,7 @@
      private final ServerStatusResponse field_147147_p = new ServerStatusResponse();
      private final Random field_147146_q = new Random();
      @SideOnly(Side.SERVER)
-@@ -130,8 +162,38 @@
+@@ -130,8 +161,38 @@
      private boolean isGamemodeForced;
      private final MinecraftSessionService field_147143_S;
      private long field_147142_T = 0L;
@@ -75,7 +78,7 @@
 +    // CraftBukkit start
 +    public List<WorldServer> worlds = new ArrayList<WorldServer>();
 +    public org.bukkit.craftbukkit.CraftServer server;
-+    public static OptionSet options; // MCPC+
++    public static OptionSet options; // Cauldron
 +    public org.bukkit.command.ConsoleCommandSender console;
 +    public org.bukkit.command.RemoteConsoleCommandSender remoteConsole;
 +    public ConsoleReader reader;
@@ -89,7 +92,7 @@
 +    private static final int TICK_TIME = 1000000000 / TPS;
 +    public final double[] recentTps = new double[ 3 ];
 +    // Spigot end
-+    // MCPC+ start
++    // Cauldron start
 +    public static YamlConfiguration configuration;
 +    public static YamlConfiguration commandsConfiguration;
 +    public static File configFile;
@@ -99,20 +102,20 @@
 +    public static boolean useConsole = true;
 +    public static boolean callingForgeTick = false;
 +    public static List<Class<? extends TileEntity>> bannedTileEntityUpdates = new ArrayList<Class<? extends TileEntity>>();
-+    // MCPC+ end
++    // Cauldron end
      private static final String __OBFID = "CL_00001462";
  
-+    // MCPC+ start - IntegratedServer requires this
++    // Cauldron start - IntegratedServer requires this
      public MinecraftServer(File p_i45281_1_, Proxy p_i45281_2_)
      {
          mcServer = this;
-@@ -141,10 +203,60 @@
+@@ -141,10 +202,60 @@
          this.commandManager = new ServerCommandManager();
          this.anvilConverterForAnvilFile = new AnvilSaveConverter(p_i45281_1_);
          this.field_147143_S = (new YggdrasilAuthenticationService(p_i45281_2_, UUID.randomUUID().toString())).createMinecraftSessionService();
 +        primaryThread = new Thread(this, "Server thread");
      }
-+    // MCPC+ end
++    // Cauldron end
 +    
 +    public MinecraftServer(OptionSet options, Proxy proxy)   // CraftBukkit - signature file -> OptionSet
 +    {
@@ -154,7 +157,7 @@
 +                logger.warn((String) null, ex);
 +            }
 +        }
-+        za.co.mcportcentral.MCPCHooks.enableThreadContentionMonitoring();
++        net.minecraftforge.cauldron.CauldronHooks.enableThreadContentionMonitoring();
 +        Runtime.getRuntime().addShutdownHook(new org.bukkit.craftbukkit.util.ServerShutdownThread(this));
 +        primaryThread = new Thread(this, "Server thread"); // Moved from main
 +    }
@@ -169,7 +172,7 @@
      protected void convertMapIfNeeded(String par1Str)
      {
          if (this.getActiveAnvilConverter().isOldMapFormat(par1Str))
-@@ -164,6 +276,7 @@
+@@ -164,6 +275,7 @@
                          MinecraftServer.logger.info("Converting... " + par1 + "%");
                      }
                  }
@@ -177,14 +180,14 @@
                  @SideOnly(Side.CLIENT)
                  public void resetProgressAndMessage(String par1Str) {}
                  @SideOnly(Side.CLIENT)
-@@ -187,31 +300,92 @@
+@@ -187,31 +299,92 @@
  
      protected void loadAllWorlds(String par1Str, String par2Str, long par3, WorldType par5WorldType, String par6Str)
      {
-+        // MCPC+ start - register vanilla server commands
++        // Cauldron start - register vanilla server commands
 +        ServerCommandManager vanillaCommandManager = (ServerCommandManager)this.getCommandManager();
 +        vanillaCommandManager.registerVanillaCommands();
-+        // MCPC+ end
++        // Cauldron end
          this.convertMapIfNeeded(par1Str);
          this.setUserMessage("menu.loadingLevel");
 +        // CraftBukkit - Removed ticktime arrays
@@ -220,7 +223,7 @@
 +            String name = "";
 +            String oldName = "";
 +            org.bukkit.generator.ChunkGenerator gen = null;
-+            // MCPC+ start
++            // Cauldron start
 +            Environment env = Environment.getEnvironment(dimension);
 +            if (dimension != 0)
 +            {
@@ -268,13 +271,13 @@
 +                worldsettings = new WorldSettings(par3, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), par5WorldType);
 +                worldsettings.func_82750_a(par6Str);
 +
-+                MCPCUtils.migrateWorlds(worldType, oldName, par1Str, name);
++                CauldronUtils.migrateWorlds(worldType, oldName, par1Str, name);
 +
 +                this.setUserMessage(name);
 +            }
 +
 +            world = (dimension == 0 ? overWorld : new WorldServerMulti(this, new AnvilSaveHandler(server.getWorldContainer(), name, true), name, dimension, worldsettings, overWorld, this.theProfiler, env, gen));
-+            // MCPC+ end
++            // Cauldron end
 +            if (gen != null)
 +            {
 +                world.getWorld().getPopulators().addAll(gen.getDefaultPopulators(world.getWorld()));
@@ -285,7 +288,7 @@
              world.addWorldAccess(new WorldManager(this, world));
  
              if (!this.isSinglePlayer())
-@@ -219,12 +393,31 @@
+@@ -219,12 +392,31 @@
                  world.getWorldInfo().setGameType(this.getGameType());
              }
  
@@ -298,8 +301,8 @@
 -        this.serverConfigManager.setPlayerManager(new WorldServer[]{ overWorld });
          this.func_147139_a(this.func_147135_j());
          this.initialWorldChunkLoad();
-+        CraftBlock.dumpMaterials(); // MCPC+
-+        // MCPC+ start
++        CraftBlock.dumpMaterials(); // Cauldron
++        // Cauldron start
 +        SideTransformer.allowInvalidSide = true;
 +        for (Object obj : TileEntity.classToNameMap.entrySet())
 +        {
@@ -307,24 +310,24 @@
 +            if (tileEntry.getKey() == null)
 +                continue;
 +            // verify if TE's should tick
-+            if (!MCPCUtils.isOverridingUpdateEntity(tileEntry.getKey()) && MCPCUtils.canTileEntityUpdate(tileEntry.getKey()))
++            if (!CauldronUtils.isOverridingUpdateEntity(tileEntry.getKey()) && CauldronUtils.canTileEntityUpdate(tileEntry.getKey()))
 +            {
 +                bannedTileEntityUpdates.add(tileEntry.getKey());
 +            }
 +            //  register TE's for inventory events
 +            EnumHelper.addInventoryType(tileEntry.getKey(), tileEntry.getValue());
 +        }
-+        MCPCUtils.dumpAndSortClassList(bannedTileEntityUpdates);
++        CauldronUtils.dumpAndSortClassList(bannedTileEntityUpdates);
 +        SideTransformer.allowInvalidSide = false;
-+        // MCPC+ end
++        // Cauldron end
      }
  
      protected void initialWorldChunkLoad()
-@@ -236,9 +429,12 @@
+@@ -236,9 +428,12 @@
          int i = 0;
          this.setUserMessage("menu.generatingTerrain");
          byte b0 = 0;
-+        // MCPC+ start - we now handle CraftBukkit's keepSpawnInMemory logic in DimensionManager. Prevents crashes with mods such as DivineRPG and speeds up server startup time by a ton.
++        // Cauldron start - we now handle CraftBukkit's keepSpawnInMemory logic in DimensionManager. Prevents crashes with mods such as DivineRPG and speeds up server startup time by a ton.
          logger.info("Preparing start region for level " + b0);
          WorldServer worldserver = this.worldServers[b0];
          ChunkCoordinates chunkcoordinates = worldserver.getSpawnPoint();
@@ -333,17 +336,17 @@
          long j = getSystemTimeMillis();
  
          for (int k = -192; k <= 192 && this.isServerRunning(); k += 16)
-@@ -257,7 +453,8 @@
+@@ -257,7 +452,8 @@
                  worldserver.theChunkProviderServer.loadChunk(chunkcoordinates.posX + k >> 4, chunkcoordinates.posZ + l >> 4);
              }
          }
 -
 +        worldserver.theChunkProviderServer.loadChunkOnProvideRequest = before;
-+        // MCPC+ end
++        // Cauldron end
          this.clearCurrentTask();
      }
  
-@@ -282,19 +479,17 @@
+@@ -282,19 +478,17 @@
      {
          this.currentTask = null;
          this.percentDone = 0;
@@ -368,7 +371,7 @@
  
                  if (worldserver != null)
                  {
-@@ -303,14 +498,11 @@
+@@ -303,14 +497,11 @@
                          logger.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/" + worldserver.provider.getDimensionName());
                      }
  
@@ -388,7 +391,7 @@
                  }
              }
          }
-@@ -322,6 +514,14 @@
+@@ -322,6 +513,14 @@
          {
              logger.info("Stopping server");
  
@@ -403,7 +406,7 @@
              if (this.func_147137_ag() != null)
              {
                  this.func_147137_ag().terminateEndpoints();
-@@ -335,19 +535,21 @@
+@@ -335,19 +534,21 @@
              }
  
              logger.info("Saving worlds");
@@ -434,7 +437,7 @@
              }
  
              if (this.usageSnooper.isSnooperRunning())
-@@ -367,6 +569,13 @@
+@@ -367,6 +568,13 @@
          this.serverRunning = false;
      }
  
@@ -448,7 +451,7 @@
      public void run()
      {
          try
-@@ -375,49 +584,47 @@
+@@ -375,49 +583,47 @@
              {
                  FMLCommonHandler.instance().handleServerStarted();
                  long i = getSystemTimeMillis();
@@ -457,7 +460,7 @@
                  this.field_147147_p.func_151315_a(new ChatComponentText(this.motd));
                  this.field_147147_p.func_151321_a(new ServerStatusResponse.MinecraftProtocolVersionIdentifier("1.7.2", 4));
                  this.func_147138_a(this.field_147147_p);
-+                DedicatedServer.allowPlayerLogins = true; // MCPC+ - server is ready, allow player logins
++                DedicatedServer.allowPlayerLogins = true; // Cauldron - server is ready, allow player logins
 +                // Spigot start
 +                Arrays.fill(recentTps, 20);
 +                long lastTick = 0, catchupTime = 0, curTime, wait;
@@ -522,7 +525,7 @@
                  FMLCommonHandler.instance().handleServerStopping();
                  FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
              }
-@@ -435,6 +642,14 @@
+@@ -435,6 +641,14 @@
          catch (Throwable throwable1)
          {
              logger.error("Encountered an unexpected exception", throwable1);
@@ -537,7 +540,7 @@
              CrashReport crashreport = null;
  
              if (throwable1 instanceof ReportedException)
-@@ -464,6 +679,7 @@
+@@ -464,6 +678,7 @@
          {
              try
              {
@@ -545,7 +548,7 @@
                  this.stopServer();
                  this.serverStopped = true;
              }
-@@ -473,6 +689,16 @@
+@@ -473,6 +688,16 @@
              }
              finally
              {
@@ -562,17 +565,17 @@
                  FMLCommonHandler.instance().handleServerStopped();
                  this.serverStopped = true;
                  this.systemExitNow();
-@@ -517,7 +743,9 @@
+@@ -517,7 +742,9 @@
      {
          long i = System.nanoTime();
          AxisAlignedBB.getAABBPool().cleanPool();
-+        callingForgeTick = true; // MCPC+ start - handle loadOnProviderRequests during forge tick event
++        callingForgeTick = true; // Cauldron start - handle loadOnProviderRequests during forge tick event
          FMLCommonHandler.instance().onPreServerTick();
-+        callingForgeTick = false; // MCPC+ end
++        callingForgeTick = false; // Cauldron end
          ++this.tickCounter;
  
          if (this.startProfiling)
-@@ -546,11 +774,18 @@
+@@ -546,11 +773,18 @@
              this.field_147147_p.func_151318_b().func_151330_a(agameprofile);
          }
  
@@ -593,7 +596,7 @@
              this.theProfiler.endSection();
          }
  
-@@ -559,24 +794,51 @@
+@@ -559,24 +793,51 @@
          this.theProfiler.endSection();
          this.theProfiler.startSection("snooper");
  
@@ -611,9 +614,9 @@
  
          this.theProfiler.endSection();
          this.theProfiler.endSection();
-+        callingForgeTick = true; // MCPC+ start - handle loadOnProviderRequests during forge tick event
++        callingForgeTick = true; // Cauldron start - handle loadOnProviderRequests during forge tick event
          FMLCommonHandler.instance().onPostServerTick();
-+        callingForgeTick = false; // MCPC+ end
++        callingForgeTick = false; // Cauldron end
      }
  
      public void updateTimeLightAndEntities()
@@ -647,7 +650,7 @@
          int i;
  
          Integer[] ids = DimensionManager.getIDs(this.tickCounter % 200 == 0);
-@@ -585,20 +847,21 @@
+@@ -585,20 +846,21 @@
              int id = ids[x];
              long j = System.nanoTime();
  
@@ -672,7 +675,7 @@
  
                  this.theProfiler.startSection("tick");
                  FMLCommonHandler.instance().onPreWorldTick(worldserver);
-@@ -610,7 +873,17 @@
+@@ -610,7 +872,17 @@
                  }
                  catch (Throwable throwable1)
                  {
@@ -691,7 +694,7 @@
                      worldserver.addWorldInfoToCrashReport(crashreport);
                      throw new ReportedException(crashreport);
                  }
-@@ -621,7 +894,17 @@
+@@ -621,7 +893,17 @@
                  }
                  catch (Throwable throwable)
                  {
@@ -710,7 +713,7 @@
                      worldserver.addWorldInfoToCrashReport(crashreport);
                      throw new ReportedException(crashreport);
                  }
-@@ -629,10 +912,12 @@
+@@ -629,10 +911,12 @@
                  FMLCommonHandler.instance().onPostWorldTick(worldserver);
                  this.theProfiler.endSection();
                  this.theProfiler.startSection("tracker");
@@ -724,7 +727,7 @@
  
              worldTickTimes.get(id)[this.tickCounter % 100] = System.nanoTime() - j;
          }
-@@ -640,16 +925,22 @@
+@@ -640,16 +924,22 @@
          this.theProfiler.endStartSection("dim_unloading");
          DimensionManager.unloadWorlds(worldTickTimes);
          this.theProfiler.endStartSection("connection");
@@ -747,30 +750,30 @@
          this.theProfiler.endSection();
      }
  
-@@ -683,6 +974,13 @@
+@@ -683,6 +973,13 @@
  
      public WorldServer worldServerForDimension(int par1)
      {
-+        // MCPC+ start - this is required for MystCraft agebooks to teleport correctly
++        // Cauldron start - this is required for MystCraft agebooks to teleport correctly
 +        // verify the nether or the end is allowed, and if not return overworld
 +        if ((par1 == -1 && !this.getAllowNether()) || (par1 == 1 && !this.server.getAllowEnd()))
 +        {
 +            return DimensionManager.getWorld(0);
 +        }
-+        // MCPC+ end
++        // Cauldron end
          WorldServer ret = DimensionManager.getWorld(par1);
          if (ret == null)
          {
-@@ -763,7 +1061,7 @@
+@@ -763,7 +1060,7 @@
  
      public List getPossibleCompletions(ICommandSender par1ICommandSender, String par2Str)
      {
 -        ArrayList arraylist = new ArrayList();
-+        java.util.HashSet arraylist = new java.util.HashSet(); // MCPC+ - use a set here to avoid duplicates
++        java.util.HashSet arraylist = new java.util.HashSet(); // Cauldron - use a set here to avoid duplicates
  
          if (par2Str.startsWith("/"))
          {
-@@ -789,8 +1087,6 @@
+@@ -789,8 +1086,6 @@
                      }
                  }
              }
@@ -779,7 +782,7 @@
          }
          else
          {
-@@ -808,9 +1104,10 @@
+@@ -808,9 +1103,10 @@
                      arraylist.add(s2);
                  }
              }
@@ -787,12 +790,12 @@
 -            return arraylist;
          }
 +
-+        arraylist.addAll(this.server.tabComplete(par1ICommandSender, par2Str)); // MCPC+ - Add craftbukkit commands
++        arraylist.addAll(this.server.tabComplete(par1ICommandSender, par2Str)); // Cauldron - Add craftbukkit commands
 +        return new ArrayList(arraylist);
      }
  
      public static MinecraftServer getServer()
-@@ -1013,7 +1310,7 @@
+@@ -1013,7 +1309,7 @@
  
      public boolean isServerInOnlineMode()
      {
@@ -801,7 +804,7 @@
      }
  
      public void setOnlineMode(boolean par1)
-@@ -1103,7 +1400,7 @@
+@@ -1103,7 +1399,7 @@
  
      public NetworkSystem func_147137_ag()
      {
@@ -810,7 +813,7 @@
      }
  
      @SideOnly(Side.CLIENT)
-@@ -1228,8 +1525,11 @@
+@@ -1228,8 +1524,11 @@
      {
          Bootstrap.func_151354_b();
  
@@ -822,7 +825,7 @@
              boolean flag = !GraphicsEnvironment.isHeadless();
              String s = null;
              String s1 = ".";
-@@ -1325,16 +1625,32 @@
+@@ -1325,16 +1624,32 @@
              {
                  dedicatedserver.setGuiEnabled();
              }
@@ -861,7 +864,7 @@
          }
          catch (Exception exception)
          {
-@@ -1342,6 +1658,203 @@
+@@ -1342,6 +1657,203 @@
          }
      }
  
@@ -1001,7 +1004,7 @@
 +                if (options.has("noconsole")) {
 +                    useConsole = false;
 +                }
-+                // MCPC+ start - initialize config
++                // Cauldron start - initialize config
 +                configFile = (File) options.valueOf("bukkit-settings");
 +                commandFile = (File)options.valueOf("commands-settings");
 +                configuration = YamlConfiguration.loadConfiguration(configFile);
@@ -1054,18 +1057,18 @@
 +                }
 +
 +                return options;
-+                // MCPC+ end
++                // Cauldron end
 +            } catch (Throwable t) {
 +                t.printStackTrace();
 +            }
 +        }
-+        return null; // MCPC
++        return null; // Cauldron
 +    }
 +
      @SideOnly(Side.SERVER)
      public void logInfo(String par1Str)
      {
-@@ -1369,15 +1882,70 @@
+@@ -1369,15 +1881,70 @@
      @SideOnly(Side.SERVER)
      public String getPlugins()
      {
@@ -1141,7 +1144,7 @@
      }
  
      @SideOnly(Side.SERVER)
-@@ -1429,4 +1997,11 @@
+@@ -1429,4 +1996,11 @@
      {
          this.isGamemodeForced = par1;
      }

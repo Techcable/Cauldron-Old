@@ -22,23 +22,23 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BlockVector;
-// MCPC+ start
+// Cauldron start
 import cpw.mods.fml.common.FMLLog;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.inventory.IInventory;
+import net.minecraftforge.cauldron.block.CraftCustomContainer;
+
 import org.bukkit.craftbukkit.CraftWorld;
-import za.co.mcportcentral.block.CraftCustomContainer;
-// MCPC+ end
 
 public class CraftBlock implements Block {
     private final CraftChunk chunk;
     private final int x;
     private final int y;
     private final int z;
-    // MCPC+ start - add support for custom biomes
+    // Cauldron start - add support for custom biomes
     private static final Biome[] BIOME_MAPPING = new Biome[net.minecraft.world.biome.BiomeGenBase.getBiomeGenArray().length];
     private static final net.minecraft.world.biome.BiomeGenBase[] BIOMEBASE_MAPPING = new net.minecraft.world.biome.BiomeGenBase[net.minecraft.world.biome.BiomeGenBase.getBiomeGenArray().length];
-    // MCPC+ end
+    // Cauldron end
     
     public CraftBlock(CraftChunk chunk, int x, int y, int z) {
         this.x = x;
@@ -245,7 +245,7 @@ public class CraftBlock implements Block {
 
     public BlockState getState() {
         Material material = getType();
-        // MCPC+ start - if null, check for TE that implements IInventory
+        // Cauldron start - if null, check for TE that implements IInventory
         if (material == null)
         {
             TileEntity te = ((CraftWorld)this.getWorld()).getHandle().getTileEntity(this.getX(), this.getY(), this.getZ());
@@ -258,7 +258,7 @@ public class CraftBlock implements Block {
             // pass default state
             return new CraftBlockState(this);
         }
-        // MCPC+ end
+        // Cauldron end
         switch (material) {
         case SIGN:
         case SIGN_POST:
@@ -291,7 +291,7 @@ public class CraftBlock implements Block {
         case BEACON:
             return new CraftBeacon(this);
         default:
-            // MCPC+ start
+            // Cauldron start
             TileEntity te = ((CraftWorld)this.getWorld()).getHandle().getTileEntity(this.getX(), this.getY(), this.getZ());
             if (te != null && te instanceof IInventory)
             {
@@ -300,7 +300,7 @@ public class CraftBlock implements Block {
                 return new CraftCustomContainer(this);
             }
             // pass default state
-            // MCPC+ end
+            // Cauldron end
             return new CraftBlockState(this);
         }
     }
@@ -391,12 +391,12 @@ public class CraftBlock implements Block {
     }
 
     public boolean isEmpty() {
-        // MCPC+ start - support custom air blocks (Railcraft player aura tracking block)
+        // Cauldron start - support custom air blocks (Railcraft player aura tracking block)
         //return getType() == Material.AIR;
         if (getType() == Material.AIR) return true;
         if (!(getWorld() instanceof CraftWorld)) return false;
         return ((CraftWorld) getWorld()).getHandle().isAirBlock(getX(), getY(), getZ());
-        // MCPC+ end
+        // Cauldron end
     }
 
     public boolean isLiquid() {
@@ -482,9 +482,9 @@ public class CraftBlock implements Block {
     }
 
     /* Build biome index based lookup table for BiomeBase to Biome mapping */
-    public static void initMappings() { // MCPC+ - initializer to initMappings() method; called in CraftServer
-        //BIOME_MAPPING = new Biome[net.minecraft.world.biome.BiomeGenBase.biomeList.length]; // MCPC+ - move up
-        //BIOMEBASE_MAPPING = new net.minecraft.world.biome.BiomeGenBase[Biome.values().length]; // MCPC+ - move up
+    public static void initMappings() { // Cauldron - initializer to initMappings() method; called in CraftServer
+        //BIOME_MAPPING = new Biome[net.minecraft.world.biome.BiomeGenBase.biomeList.length]; // Cauldron - move up
+        //BIOMEBASE_MAPPING = new net.minecraft.world.biome.BiomeGenBase[Biome.values().length]; // Cauldron - move up
         BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.swampland.biomeID] = Biome.SWAMPLAND;
         BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.forest.biomeID] = Biome.FOREST;
         BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.taiga.biomeID] = Biome.TAIGA;
@@ -553,7 +553,7 @@ public class CraftBlock implements Block {
         /* Helps avoid missed biomes when we upgrade bukkit to new code with new biomes */
         for (int i = 0; i < BIOME_MAPPING.length; i++) {
             if ((net.minecraft.world.biome.BiomeGenBase.getBiome(i) != null) && (BIOME_MAPPING[i] == null)) {
-                // MCPC+ start - add support for mod biomes
+                // Cauldron start - add support for mod biomes
                 //throw new IllegalArgumentException("Missing Biome mapping for BiomeBase[" + i + "]");
                 String name = net.minecraft.world.biome.BiomeGenBase.getBiome(i).biomeName;
                 int id = net.minecraft.world.biome.BiomeGenBase.getBiome(i).biomeID;
@@ -561,7 +561,7 @@ public class CraftBlock implements Block {
                 System.out.println("Adding biome mapping " + net.minecraft.world.biome.BiomeGenBase.getBiome(i).biomeID + " " + name + " at BiomeBase[" + i + "]");
                 net.minecraftforge.common.util.EnumHelper.addBukkitBiome(name); // Forge
                 BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.getBiome(i).biomeID] = ((Biome) Enum.valueOf(Biome.class, name));
-                // MCPC+ end           
+                // Cauldron end           
             }
             if (BIOME_MAPPING[i] != null) {  /* Build reverse mapping for setBiome */
                 BIOMEBASE_MAPPING[BIOME_MAPPING[i].ordinal()] = net.minecraft.world.biome.BiomeGenBase.getBiome(i);
@@ -569,11 +569,11 @@ public class CraftBlock implements Block {
         }
     }
 
-    // MCPC+ start - if mcpc.dump-materials is true, dump all materials with their corresponding id's
+    // Cauldron start - if cauldron.dump-materials is true, dump all materials with their corresponding id's
     public static void dumpMaterials() {
-        if (za.co.mcportcentral.MCPCConfig.Setting.dumpMaterials.getValue())
+        if (net.minecraftforge.cauldron.CauldronConfig.Setting.dumpMaterials.getValue())
         {
-            FMLLog.info("MCPC Dump Materials is ENABLED. Starting dump...");
+            FMLLog.info("Cauldron Dump Materials is ENABLED. Starting dump...");
             for (int i = 0; i < 32000; i++)
             {
                 Material material = Material.getMaterial(i);
@@ -582,11 +582,11 @@ public class CraftBlock implements Block {
                     FMLLog.info("Found material " + material + " with ID " + i);
                 }
             }
-            FMLLog.info("MCPC Dump Materials complete.");
-            FMLLog.info("To disable these dumps, set mcpc.dump-materials to false in bukkit.yml.");
+            FMLLog.info("Cauldron Dump Materials complete.");
+            FMLLog.info("To disable these dumps, set cauldron.dump-materials to false in bukkit.yml.");
         }
     }
-    // MCPC+ end
+    // Cauldron end
 
     public void setMetadata(String metadataKey, MetadataValue newMetadataValue) {
         chunk.getCraftWorld().getBlockMetadata().setMetadata(this, metadataKey, newMetadataValue);

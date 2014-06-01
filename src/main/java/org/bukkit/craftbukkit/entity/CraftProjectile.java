@@ -7,7 +7,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.projectiles.ProjectileSource;
 
-public class CraftProjectile extends AbstractProjectile implements Projectile { // MCPC - concrete
+public class CraftProjectile extends AbstractProjectile implements Projectile { // Cauldron - concrete
     public CraftProjectile(CraftServer server, net.minecraft.entity.Entity entity) {
         super(server, entity);
     }
@@ -39,12 +39,12 @@ public class CraftProjectile extends AbstractProjectile implements Projectile { 
         return "CraftProjectile";
     }
 
-    // MCPC start
+    // Cauldron start
     @Override
     public EntityType getType() {
         return EntityType.UNKNOWN;
     }
-    // MCPC end
+    // Cauldron end
 
     @Deprecated
     public LivingEntity _INVALID_getShooter() {

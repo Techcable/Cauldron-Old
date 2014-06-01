@@ -35,11 +35,11 @@
 +import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 +import org.bukkit.util.Vector;
 +// CraftBukkit end
-+// MCPC+ start
++// Cauldron start
 +import net.minecraftforge.common.DimensionManager;
 +import net.minecraftforge.common.network.ForgeMessage;
 +import net.minecraftforge.common.network.ForgeNetworkHandler;
-+// MCPC+ end
++// Cauldron end
 +
  public abstract class ServerConfigurationManager
  {
@@ -95,7 +95,7 @@
 +            maxPlayers = 60;
 +        }
 +
-+        // MCPC+ start - send DimensionRegisterMessage to client before attempting to login to a Bukkit dimension
++        // Cauldron start - send DimensionRegisterMessage to client before attempting to login to a Bukkit dimension
 +        if (DimensionManager.isBukkitDimension(par2EntityPlayerMP.dimension))
 +        {
 +            FMLEmbeddedChannel serverChannel = ForgeNetworkHandler.getServerChannel();
@@ -103,7 +103,7 @@
 +            serverChannel.attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(par2EntityPlayerMP);
 +            serverChannel.writeOutbound(new ForgeMessage.DimensionRegisterMessage(par2EntityPlayerMP.dimension, worldserver.getWorld().getEnvironment().getId()));
 +        }
-+        // MCPC+ end
++        // Cauldron end
 +
          nethandlerplayserver.sendPacket(new S01PacketJoinGame(par2EntityPlayerMP.getEntityId(), par2EntityPlayerMP.theItemInWorldManager.getGameType(), worldserver.getWorldInfo().isHardcoreModeEnabled(), worldserver.provider.dimensionId, worldserver.difficultySetting, this.getMaxPlayers(), worldserver.getWorldInfo().getTerrainType()));
 +        par2EntityPlayerMP.getBukkitEntity().sendSupportedChannels();
@@ -228,7 +228,7 @@
      }
  
 -    public void playerLoggedOut(EntityPlayerMP par1EntityPlayerMP)
-+    // MCPC+ start - vanilla compatibility
++    // Cauldron start - vanilla compatibility
 +    public void playerLoggedOut(EntityPlayerMP entityPlayerMP)
      {
 -        FMLCommonHandler.instance().firePlayerLoggedOut(par1EntityPlayerMP);
@@ -237,13 +237,13 @@
 -        WorldServer worldserver = par1EntityPlayerMP.getServerForPlayer();
 +        disconnect(entityPlayerMP);
 +    }
-+    // MCPC+ end
++    // Cauldron end
  
 -        if (par1EntityPlayerMP.ridingEntity != null)
 +    public String disconnect(EntityPlayerMP entityplayermp)   // CraftBukkit - return string
 +    {
 +        entityplayermp.triggerAchievement(StatList.leaveGameStat);
-+        // MCPC+ start - don't show quit messages for players that haven't actually connected
++        // Cauldron start - don't show quit messages for players that haven't actually connected
 +        PlayerQuitEvent playerQuitEvent = null;
 +        if (entityplayermp.playerNetServerHandler != null)
          {
@@ -255,7 +255,7 @@
 +            entityplayermp.getBukkitEntity().disconnect(playerQuitEvent.getQuitMessage());
 +            // CraftBukkit end
 +        }
-+        // MCPC+ end
++        // Cauldron end
 +        FMLCommonHandler.instance().firePlayerLoggedOut(entityplayermp);
 +        this.writePlayerData(entityplayermp);
 +        WorldServer worldserver = entityplayermp.getServerForPlayer();
@@ -292,7 +292,7 @@
 +
 +        // This removes the scoreboard (and player reference) for the specific player in the manager
 +        this.cserver.getScoreboardManager().removePlayer(entityplayermp.getBukkitEntity());
-+        // MCPC+ start
++        // Cauldron start
 +        if (playerQuitEvent != null)
 +        {
 +            return playerQuitEvent.getQuitMessage();
@@ -301,7 +301,7 @@
 +        {
 +            return null;
 +        }
-+        // MCPC+ end
++        // Cauldron end
 +        // CraftBukkit end
      }
  
@@ -380,7 +380,7 @@
 +        // CraftBukkit end
 +    }
 +
-+    // MCPC+ start - vanilla compatibility
++    // Cauldron start - vanilla compatibility
 +    public EntityPlayerMP processLogin(GameProfile p_148545_1_)
 +    {
 +        ArrayList arraylist = new ArrayList();
@@ -417,7 +417,7 @@
 +
 +        return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
 +    public EntityPlayerMP processLogin(GameProfile gameprofile, EntityPlayerMP player)   // CraftBukkit - added EntityPlayer
 +    {
@@ -467,7 +467,7 @@
 +
 +    public EntityPlayerMP moveToWorld(EntityPlayerMP par1EntityPlayerMP, int par2, boolean flag, Location location, boolean avoidSuffocation)
 +    {
-+        // MCPC+ start - handle canRespawnHere for mods
++        // Cauldron start - handle canRespawnHere for mods
          World world = mcServer.worldServerForDimension(par2);
 +
 +        boolean canRespawnHere = true;
@@ -482,7 +482,7 @@
              par2 = world.provider.getRespawnDimension(par1EntityPlayerMP);
          }
 -
-+        // MCPC+ end
++        // Cauldron end
 +        // CraftBukkit end
          par1EntityPlayerMP.getServerForPlayer().getEntityTracker().removePlayerFromTrackers(par1EntityPlayerMP);
 -        par1EntityPlayerMP.getServerForPlayer().getEntityTracker().removeEntityFromAllTrackingPlayers(par1EntityPlayerMP);
@@ -493,10 +493,10 @@
 -        ChunkCoordinates chunkcoordinates = par1EntityPlayerMP.getBedLocation(par2);
 +        ChunkCoordinates chunkcoordinates = par1EntityPlayerMP.getBedLocation();
          boolean flag1 = par1EntityPlayerMP.isSpawnForced(par2);
-+        // MCPC+ start
++        // Cauldron start
 +        if (!canRespawnHere)
 +            par1EntityPlayerMP.dimension = par2;
-+        // MCPC+ end
++        // Cauldron end
 +        /* CraftBukkit start
          par1EntityPlayerMP.dimension = par2;
          Object object;
@@ -528,7 +528,7 @@
 -            chunkcoordinates1 = EntityPlayer.verifyRespawnCoordinates(this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension), chunkcoordinates, flag1);
 +            boolean isBedSpawn = false;
 +            CraftWorld cworld = (CraftWorld) this.mcServer.server.getWorld(par1EntityPlayerMP.spawnWorld);
-+            // MCPC+ start - handle canRespawnHere for mods
++            // Cauldron start - handle canRespawnHere for mods
 +            if (world != null && !canRespawnHere)
 +            {
 +                cworld = (CraftWorld) mcServer.worldServerForDimension(par2).getWorld(); // make sure to hotload the dimension if it got unloaded
@@ -537,7 +537,7 @@
 +                    location = new Location(cworld, cworld.getSpawnLocation().getX() + 0.5, cworld.getSpawnLocation().getY(), cworld.getSpawnLocation().getZ() + 0.5); // use the spawnpoint as location
 +                }
 +            }
-+            // MCPC+ end
++            // Cauldron end
  
 -            if (chunkcoordinates1 != null)
 +            if (cworld != null && chunkcoordinates != null)
@@ -577,7 +577,7 @@
 +            }
 +
 +            // Spigot End
-+            if (canRespawnHere) // MCPC+ - avoid plugins changing our respawn location if a forge mod wants a change. Breaks DimensionalDoors respawning in Limbo
++            if (canRespawnHere) // Cauldron - avoid plugins changing our respawn location if a forge mod wants a change. Breaks DimensionalDoors respawning in Limbo
 +            {
 +                location = respawnEvent.getRespawnLocation();
 +            }
@@ -602,7 +602,7 @@
  
 -        entityplayermp1.playerNetServerHandler.sendPacket(new S07PacketRespawn(entityplayermp1.dimension, entityplayermp1.worldObj.difficultySetting, entityplayermp1.worldObj.getWorldInfo().getTerrainType(), entityplayermp1.theItemInWorldManager.getGameType()));
 +        int actualDimension = worldserver.provider.dimensionId;
-+        // MCPC+ - change dim for bukkit added dimensions
++        // Cauldron - change dim for bukkit added dimensions
 +        if (DimensionManager.isBukkitDimension(actualDimension))
 +        {
 +            FMLEmbeddedChannel serverChannel = ForgeNetworkHandler.getServerChannel();
@@ -610,7 +610,7 @@
 +            serverChannel.attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(entityplayermp1);
 +            serverChannel.writeOutbound(new ForgeMessage.DimensionRegisterMessage(actualDimension, worldserver.getWorld().getEnvironment().getId()));
 +        }
-+        // MCPC+ end
++        // Cauldron end
 +        // CraftBukkit start
 +        entityplayermp1.playerNetServerHandler.sendPacket(new S07PacketRespawn(actualDimension, worldserver.difficultySetting, worldserver.getWorldInfo().getTerrainType(), entityplayermp1.theItemInWorldManager.getGameType()));
 +        entityplayermp1.setWorld(worldserver);
@@ -659,7 +659,7 @@
 +    // CraftBukkit start - Replaced the standard handling of portals with a more customised method.
 +    public void changeDimension(EntityPlayerMP entityplayermp, int i, TeleportCause cause)
 +    {
-+        // MCPC+ start - Allow Forge hotloading on teleport
++        // Cauldron start - Allow Forge hotloading on teleport
 +        WorldServer exitWorld = this.mcServer.worldServerForDimension(i);
 +
 +        Location enter = entityplayermp.getBukkitEntity().getLocation();
@@ -686,7 +686,7 @@
 +            }
 +        }
 +
-+        // MCPC+ start - allow for forge mods to be the teleporter
++        // Cauldron start - allow for forge mods to be the teleporter
 +        TravelAgent agent = null;
 +        if (exit != null) {
 +            net.minecraft.world.Teleporter teleporter = ((CraftWorld)exit.getWorld()).getHandle().getDefaultTeleporter();
@@ -697,7 +697,7 @@
 +        if (agent == null) {
 +            agent = org.bukkit.craftbukkit.CraftTravelAgent.DEFAULT; // return arbitrary TA to compensate for implementation dependent plugins
 +        }
-+        // MCPC+ end
++        // Cauldron end
 +        PlayerPortalEvent event = new PlayerPortalEvent(entityplayermp.getBukkitEntity(), enter, exit, agent, cause);
 +        event.useTravelAgent(useTravelAgent);
 +        Bukkit.getServer().getPluginManager().callEvent(event);
@@ -738,14 +738,14 @@
              par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S1DPacketEntityEffect(par1EntityPlayerMP.getEntityId(), potioneffect));
          }
 +
-+        // MCPC+ start - fire PlayerChangedWorldEvent for mods that call this method
++        // Cauldron start - fire PlayerChangedWorldEvent for mods that call this method
 +        if (worldserver != worldserver1)
 +        {
 +            PlayerChangedWorldEvent event = new PlayerChangedWorldEvent((Player) par1EntityPlayerMP.getBukkitEntity(), worldserver.getWorld());
 +            Bukkit.getServer().getPluginManager().callEvent(event);
 +        }
 +
-+        // MCPC+ end
++        // Cauldron end
          FMLCommonHandler.instance().firePlayerChangedDimensionEvent(par1EntityPlayerMP, j, par2);
      }
  
@@ -1000,7 +1000,7 @@
  
      public boolean isPlayerOpped(String par1Str)
      {
-+        if (par1Str == null) return false; // MCPC+ - fixes Aether ServerPlayerAPI initialization which passes a null username
++        if (par1Str == null) return false; // Cauldron - fixes Aether ServerPlayerAPI initialization which passes a null username
          return this.ops.contains(par1Str.trim().toLowerCase()) || this.mcServer.isSinglePlayer() && this.mcServer.worldServers[0].getWorldInfo().areCommandsAllowed() && this.mcServer.getServerOwner().equalsIgnoreCase(par1Str) || this.commandsAllowedForAll;
      }
  
@@ -1025,12 +1025,12 @@
                  double d5 = p_148543_4_ - entityplayermp.posY;
                  double d6 = p_148543_6_ - entityplayermp.posZ;
  
-+                // MCPC+ start - send packets only to players within configured player tracking range)
++                // Cauldron start - send packets only to players within configured player tracking range)
 +                if (p_148543_8_ > org.spigotmc.TrackingRange.getEntityTrackingRange(entityplayermp, 512))
 +                {
 +                    p_148543_8_ = org.spigotmc.TrackingRange.getEntityTrackingRange(entityplayermp, 512);
 +                }
-+                // MCPC+ end
++                // Cauldron end
 +
                  if (d4 * d4 + d5 * d5 + d6 * d6 < p_148543_8_ * p_148543_8_)
                  {
@@ -1064,10 +1064,10 @@
      public String[] getAvailablePlayerDat()
      {
 -        return this.mcServer.worldServers[0].getSaveHandler().getSaveHandler().getAvailablePlayerDat();
-+        // MCPC+ start - don't crash if the overworld isn't loaded
++        // Cauldron start - don't crash if the overworld isn't loaded
 +        List<WorldServer> worldServers = this.mcServer.worlds;
 +        return worldServers.isEmpty() ? new String[0] : worldServers.get(0).getSaveHandler().getSaveHandler().getAvailablePlayerDat(); // CraftBukkit
-+        // MCPC+ end
++        // Cauldron end
      }
  
      public void setWhiteListEnabled(boolean par1)

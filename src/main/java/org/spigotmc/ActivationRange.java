@@ -30,10 +30,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 
 import org.bukkit.craftbukkit.SpigotTimings;
- // MCPC+ start
+ // Cauldron start
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraftforge.common.util.FakePlayer;
-// MCPC+ end
+// Cauldron end
 
 public class ActivationRange
 {
@@ -53,15 +53,15 @@ public class ActivationRange
     public static byte initializeEntityActivationType(Entity entity)
     {
         Chunk chunk = null;
-        // MCPC+ start - account for entities that dont extend EntityMob, EntityAmbientCreature, EntityCreature
-        if ( entity instanceof EntityMob || entity instanceof EntitySlime || entity.isCreatureType(EnumCreatureType.monster, false)) // MCPC+ - account for entities that dont extend EntityMob
+        // Cauldron start - account for entities that dont extend EntityMob, EntityAmbientCreature, EntityCreature
+        if ( entity instanceof EntityMob || entity instanceof EntitySlime || entity.isCreatureType(EnumCreatureType.monster, false)) // Cauldron - account for entities that dont extend EntityMob
         {
             return 1; // Monster
         } else if ( entity instanceof EntityCreature || entity instanceof EntityAmbientCreature || entity.isCreatureType(EnumCreatureType.creature, false) 
                  || entity.isCreatureType(EnumCreatureType.waterCreature, false) || entity.isCreatureType(EnumCreatureType.ambient, false))
         {
             return 2; // Animal
-        // MCPC+ end
+        // Cauldron end
         } else
         {
             return 3; // Misc
@@ -80,7 +80,7 @@ public class ActivationRange
         if ( ( entity.activationType == 3 && config.miscActivationRange == 0 )
                 || ( entity.activationType == 2 && config.animalActivationRange == 0 )
                 || ( entity.activationType == 1 && config.monsterActivationRange == 0 )
-                || (entity instanceof EntityPlayer && !(entity instanceof FakePlayer)) // MCPC+
+                || (entity instanceof EntityPlayer && !(entity instanceof FakePlayer)) // Cauldron
                 || entity instanceof EntityThrowable
                 || entity instanceof EntityDragon
                 || entity instanceof EntityDragonPart
@@ -91,7 +91,7 @@ public class ActivationRange
                 || entity instanceof EntityEnderCrystal
                 || entity instanceof EntityFireworkRocket
                 || entity instanceof EntityVillager
-                // MCPC+ start - force ticks for entities with superclass of Entity and not a creature/monster
+                // Cauldron start - force ticks for entities with superclass of Entity and not a creature/monster
                 || (entity.getClass().getSuperclass() == Entity.class && !entity.isCreatureType(EnumCreatureType.creature, false)
                 && !entity.isCreatureType(EnumCreatureType.ambient, false) && !entity.isCreatureType(EnumCreatureType.monster, false)
                 && !entity.isCreatureType(EnumCreatureType.waterCreature, false)))

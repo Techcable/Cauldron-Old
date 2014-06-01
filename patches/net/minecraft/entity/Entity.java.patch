@@ -30,7 +30,7 @@
 +import org.bukkit.event.entity.EntityPortalEvent;
 +import org.bukkit.plugin.PluginManager;
 +// CraftBukkit end
-+import net.minecraft.world.Teleporter; // MCPC+
++import net.minecraft.world.Teleporter; // Cauldron
 +
  public abstract class Entity
  {
@@ -330,7 +330,7 @@
          return null;
      }
  
-+    // MCPC+ start - vanilla compatibility
++    // Cauldron start - vanilla compatibility
      protected void dealFireDamage(int par1)
      {
          if (!this.isImmuneToFire)
@@ -338,7 +338,7 @@
              this.attackEntityFrom(DamageSource.inFire, (float)par1);
          }
      }
-+    // MCPC+ end
++    // Cauldron end
  
 +    protected void dealFireDamage(float par1) // CraftBukkit signature change
 +    {
@@ -475,13 +475,13 @@
 +                if (bworld == null)
 +                {
 +                    EntityPlayerMP entityPlayer = (EntityPlayerMP) this;
-+                    // MCPC+ start - use CraftBukkit's fallback world code if no valid world is found.
++                    // Cauldron start - use CraftBukkit's fallback world code if no valid world is found.
 +                    entityPlayer.setWorld(MinecraftServer.getServer().worldServerForDimension(entityPlayer.dimension));
 +                }
 +                else
 +                {
 +                    this.setWorld(((CraftWorld) bworld).getHandle());
-+                    // MCPC+ end
++                    // Cauldron end
 +                }
 +            }
 +
@@ -616,10 +616,10 @@
 -        this.dealFireDamage(5);
 +        // CraftBukkit start
 +        final org.bukkit.entity.Entity thisBukkitEntity = this.getBukkitEntity();
-+        if (thisBukkitEntity == null) return; // MCPC+ - skip mod entities with no wrapper (TODO: create a wrapper)
-+        if (par1EntityLightningBolt == null) return; // MCPC+ - skip null entities, see #392
++        if (thisBukkitEntity == null) return; // Cauldron - skip mod entities with no wrapper (TODO: create a wrapper)
++        if (par1EntityLightningBolt == null) return; // Cauldron - skip null entities, see #392
 +        final org.bukkit.entity.Entity stormBukkitEntity = par1EntityLightningBolt.getBukkitEntity();
-+        if (stormBukkitEntity == null) return; // MCPC+ - skip mod entities with no wrapper (TODO: create a wrapper)
++        if (stormBukkitEntity == null) return; // Cauldron - skip mod entities with no wrapper (TODO: create a wrapper)
 +        final PluginManager pluginManager = Bukkit.getPluginManager();
 +
 +        if (thisBukkitEntity instanceof Painting)
@@ -670,17 +670,17 @@
 -            this.dimension = par1;
 +            // CraftBukkit start - Move logic into new function "teleportToLocation"
 +            // int j = this.dimension;
-+            // MCPC+ start - Allow Forge hotloading on teleport
++            // Cauldron start - Allow Forge hotloading on teleport
 +            WorldServer exitWorld = minecraftserver.worldServerForDimension(par1);
  
 -            if (j == 1 && par1 == 1)
 +            Location enter = this.getBukkitEntity().getLocation();
 +            Location exit = exitWorld != null ? minecraftserver.getConfigurationManager().calculateTarget(enter, minecraftserver.worldServerForDimension(par1)) : null;
 +            boolean useTravelAgent = exitWorld != null && !(this.dimension == 1 && exitWorld.dimension == 1); // don't use agent for custom worlds or return from THE_END
-+            // MCPC+ start - check if teleporter is instance of TravelAgent before attempting to cast to it
++            // Cauldron start - check if teleporter is instance of TravelAgent before attempting to cast to it
 +            Teleporter teleporter = exit != null ? ((CraftWorld) exit.getWorld()).getHandle().getDefaultTeleporter() : null;
 +            TravelAgent agent = (teleporter != null && teleporter instanceof TravelAgent) ? (TravelAgent)teleporter : org.bukkit.craftbukkit.CraftTravelAgent.DEFAULT;  // return arbitrary TA to compensate for implementation dependent plugins
-+            // MCPC+ end
++            // Cauldron end
 +            EntityPortalEvent event = new EntityPortalEvent(this.getBukkitEntity(), enter, exit, agent);
 +            event.useTravelAgent(useTravelAgent);
 +            event.getEntity().getServer().getPluginManager().callEvent(event);
@@ -712,10 +712,10 @@
 -            minecraftserver.getConfigurationManager().transferEntityToWorld(this, j, worldserver, worldserver1);
 +            // CraftBukkit start - Ensure chunks are loaded in case TravelAgent is not used which would initially cause chunks to load during find/create
 +            // minecraftserver.getPlayerList().a(this, j, worldserver, worldserver1);
-+            boolean before = worldserver1.theChunkProviderServer.loadChunkOnProvideRequest;  // MCPC+ start - load chunks on provide request
++            boolean before = worldserver1.theChunkProviderServer.loadChunkOnProvideRequest;  // Cauldron start - load chunks on provide request
 +            worldserver1.theChunkProviderServer.loadChunkOnProvideRequest = true;
 +            worldserver1.func_73046_m().getConfigurationManager().repositionEntity(this, exit, portal);
-+            worldserver1.theChunkProviderServer.loadChunkOnProvideRequest = before; // MCPC+ end
++            worldserver1.theChunkProviderServer.loadChunkOnProvideRequest = before; // Cauldron end
 +            // CraftBukkit end
              this.worldObj.theProfiler.endStartSection("reloading");
              Entity entity = EntityList.createEntityByName(EntityList.getEntityString(this), worldserver1);

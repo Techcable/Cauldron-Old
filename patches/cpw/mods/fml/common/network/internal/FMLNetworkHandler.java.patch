@@ -4,7 +4,7 @@
  import cpw.mods.fml.common.registry.EntityRegistry.EntityRegistration;
  import cpw.mods.fml.relauncher.Side;
  import cpw.mods.fml.relauncher.SideOnly;
-+//MCPC+ start
++//Cauldron start
 +import net.minecraft.inventory.IInventory;
 +import net.minecraft.server.MinecraftServer;
 +import net.minecraft.tileentity.TileEntity;
@@ -13,7 +13,7 @@
 +import org.bukkit.craftbukkit.inventory.CraftInventory;
 +import org.bukkit.craftbukkit.inventory.CraftInventoryView;
 +import org.bukkit.event.inventory.InventoryType;
-+// MCPC+ end
++// Cauldron end
  
  public class FMLNetworkHandler
  {
@@ -21,7 +21,7 @@
              Container remoteGuiContainer = NetworkRegistry.INSTANCE.getRemoteGuiContainer(mc, entityPlayerMP, modGuiId, world, x, y, z);
              if (remoteGuiContainer != null)
              {
-+                // MCPC+ start - create bukkitView for passed container then fire open event.
++                // Cauldron start - create bukkitView for passed container then fire open event.
 +                if (entityPlayer != null)
 +                {
 +                    if (remoteGuiContainer.getBukkitView() == null)
@@ -45,7 +45,7 @@
 +                        }
 +                    }
 +                }
-+                // MCPC+ end
++                // Cauldron end
                  entityPlayerMP.getNextWindowId();
                  entityPlayerMP.closeContainer();
                  int windowId = entityPlayerMP.currentWindowId;

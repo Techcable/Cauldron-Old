@@ -1,38 +1,37 @@
 --- ../src-base/minecraft/net/minecraftforge/common/DimensionManager.java
 +++ ../src-work/minecraft/net/minecraftforge/common/DimensionManager.java
-@@ -34,6 +34,15 @@
+@@ -34,6 +34,14 @@
  import net.minecraft.world.storage.ISaveHandler;
  import net.minecraft.world.storage.SaveHandler;
  import net.minecraftforge.event.world.WorldEvent;
-+// MCPC+ start
++// Cauldron start
 +import net.minecraft.server.dedicated.DedicatedServer;
 +import net.minecraft.world.chunk.storage.AnvilSaveHandler;
++import net.minecraftforge.cauldron.CauldronUtils;
 +import net.minecraftforge.common.util.EnumHelper;
 +import org.bukkit.World.Environment;
 +import org.bukkit.WorldCreator;
 +import org.bukkit.generator.ChunkGenerator;
-+import za.co.mcportcentral.MCPCUtils;
-+// MCPC+ end
  
  public class DimensionManager
  {
-@@ -46,6 +55,11 @@
+@@ -46,6 +54,11 @@
      private static BitSet dimensionMap = new BitSet(Long.SIZE << 4);
      private static ConcurrentMap<World, World> weakWorldMap = new MapMaker().weakKeys().weakValues().<World,World>makeMap();
      private static Multiset<Integer> leakedWorlds = HashMultiset.create();
-+    // MCPC+ start
++    // Cauldron start
 +    private static Hashtable<Class<? extends WorldProvider>, Integer> classToProviders = new Hashtable<Class<? extends WorldProvider>, Integer>();
 +    private static ArrayList<Integer> bukkitDims = new ArrayList<Integer>(); // used to keep track of Bukkit dimensions
 +    private static final String FILE_SEPARATOR = System.getProperty("file.separator");
-+    // MCPC+ end
++    // Cauldron end
  
      public static boolean registerProviderType(int id, Class<? extends WorldProvider> provider, boolean keepLoaded)
      {
-@@ -53,7 +67,25 @@
+@@ -53,7 +66,25 @@
          {
              return false;
          }
-+        // MCPC+ start - register provider with bukkit and add appropriate config option
++        // Cauldron start - register provider with bukkit and add appropriate config option
 +        String worldType = "unknown";
 +        if (id != -1 && id != 0 && id != 1) // ignore vanilla
 +        {
@@ -45,22 +44,22 @@
 +        {
 +            worldType = Environment.getEnvironment(id).name().toLowerCase();
 +        }
-+        za.co.mcportcentral.MCPCConfig.init();
-+        keepLoaded = za.co.mcportcentral.MCPCConfig.getBoolean("world-environment-settings." + worldType + ".keep-world-loaded", keepLoaded);
-+        za.co.mcportcentral.MCPCConfig.save();
-+        // MCPC+ end
++        net.minecraftforge.cauldron.CauldronConfig.init();
++        keepLoaded = net.minecraftforge.cauldron.CauldronConfig.getBoolean("world-environment-settings." + worldType + ".keep-world-loaded", keepLoaded);
++        net.minecraftforge.cauldron.CauldronConfig.save();
++        // Cauldron end
          providers.put(id, provider);
 +        classToProviders.put(provider, id);
          spawnSettings.put(id, keepLoaded);
          return true;
      }
-@@ -157,28 +189,33 @@
+@@ -157,28 +188,33 @@
  
      public static Integer[] getIDs(boolean check)
      {
 -        if (check)
-+        // MCPC+ start - check config option and only log world leak messages if enabled
-+        if (za.co.mcportcentral.MCPCConfig.Setting.worldLeakDebug.getValue())
++        // Cauldron start - check config option and only log world leak messages if enabled
++        if (net.minecraftforge.cauldron.CauldronConfig.Setting.worldLeakDebug.getValue())
          {
 -            List<World> allWorlds = Lists.newArrayList(weakWorldMap.keySet());
 -            allWorlds.removeAll(worlds.values());
@@ -89,26 +88,26 @@
 +                    int leakCount = leakedWorlds.count(System.identityHashCode(w));
 +                    if (leakCount == 5)
 +                    {
-+                        FMLLog.fine("The world %x (%s) may have leaked: first encounter (5 occurences). Note: This may be a caused by a mod, plugin, or just a false-positive(No memory leak). If server crashes due to OOM, report to MCPC.\n", System.identityHashCode(w), w.getWorldInfo().getWorldName());
++                        FMLLog.fine("The world %x (%s) may have leaked: first encounter (5 occurences). Note: This may be a caused by a mod, plugin, or just a false-positive(No memory leak). If server crashes due to OOM, report to Cauldron.\n", System.identityHashCode(w), w.getWorldInfo().getWorldName());
 +                    }
 +                    else if (leakCount % 5 == 0)
 +                    {
-+                        FMLLog.fine("The world %x (%s) may have leaked: seen %d times. Note: This may be a caused by a mod, plugin, or just a false-positive(No memory leak). If server crashes due to OOM, report to MCPC.\n", System.identityHashCode(w), w.getWorldInfo().getWorldName(), leakCount);
++                        FMLLog.fine("The world %x (%s) may have leaked: seen %d times. Note: This may be a caused by a mod, plugin, or just a false-positive(No memory leak). If server crashes due to OOM, report to Cauldron.\n", System.identityHashCode(w), w.getWorldInfo().getWorldName(), leakCount);
 +                    }
                  }
              }
          }
-+        // MCPC+ end
++        // Cauldron end
          return getIDs();
      }
      public static Integer[] getIDs()
-@@ -191,12 +228,23 @@
+@@ -191,12 +227,23 @@
          if (world != null)
          {
              worlds.put(id, world);
 -            weakWorldMap.put(world, world);
-+            // MCPC+ start - check config option and only log world leak messages if enabled
-+            if (za.co.mcportcentral.MCPCConfig.Setting.worldLeakDebug.getValue())
++            // Cauldron start - check config option and only log world leak messages if enabled
++            if (net.minecraftforge.cauldron.CauldronConfig.Setting.worldLeakDebug.getValue())
 +            {
 +                weakWorldMap.put(world, world);
 +            }
@@ -117,43 +116,43 @@
 +            {
 +                MinecraftServer.getServer().worlds.add(world);
 +            }
-+            // MCPC+ end
++            // Cauldron end
              MinecraftServer.getServer().worldTickTimes.put(id, new long[100]);
              FMLLog.info("Loading dimension %d (%s) (%s)", id, world.getWorldInfo().getWorldName(), world.func_73046_m());
          }
          else
          {
-+            MinecraftServer.getServer().worlds.remove(getWorld(id)); // MCPC+ - remove world from our new world arraylist
++            MinecraftServer.getServer().worlds.remove(getWorld(id)); // Cauldron - remove world from our new world arraylist
              worlds.remove(id);
              MinecraftServer.getServer().worldTickTimes.remove(id);
              FMLLog.info("Unloading dimension %d", id);
-@@ -224,6 +272,7 @@
+@@ -224,6 +271,7 @@
      }
  
      public static void initDimension(int dim) {
-+        if (dim == 0) return; // MCPC+ - overworld
++        if (dim == 0) return; // Cauldron - overworld
          WorldServer overworld = getWorld(0);
          if (overworld == null)
          {
-@@ -231,6 +280,12 @@
+@@ -231,6 +279,12 @@
          }
          try
          {
-+            // MCPC+ start - Fixes MultiVerse issue when mods such as Twilight Forest try to hotload their dimension when using its WorldProvider
-+            if(za.co.mcportcentral.MCPCHooks.craftWorldLoading)
++            // Cauldron start - Fixes MultiVerse issue when mods such as Twilight Forest try to hotload their dimension when using its WorldProvider
++            if(net.minecraftforge.cauldron.CauldronHooks.craftWorldLoading)
 +            {
 +                return;
 +            }
-+            // MCPC+ end
++            // Cauldron end
              DimensionManager.getProviderType(dim);
          }
          catch (Exception e)
-@@ -242,9 +297,55 @@
+@@ -242,9 +296,55 @@
          ISaveHandler savehandler = overworld.getSaveHandler();
          WorldSettings worldSettings = new WorldSettings(overworld.getWorldInfo());
  
 -        WorldServer world = (dim == 0 ? overworld : new WorldServerMulti(mcServer, savehandler, overworld.getWorldInfo().getWorldName(), dim, worldSettings, overworld, mcServer.theProfiler));
-+        // MCPC+ start - handles hotloading dimensions
++        // Cauldron start - handles hotloading dimensions
 +        String worldType;
 +        String name;
 +        String oldName = "";
@@ -179,14 +178,14 @@
 +            name = provider.getSaveFolder();
 +            if (name == null) name = "DIM0";
 +        }
-+        // MCPC+ start - add ability to disable dimensions
-+        boolean enabled = za.co.mcportcentral.MCPCConfig.getBoolean("world-environment-settings." + worldType + ".enabled", true);
-+        za.co.mcportcentral.MCPCConfig.save();
++        // Cauldron start - add ability to disable dimensions
++        boolean enabled = net.minecraftforge.cauldron.CauldronConfig.getBoolean("world-environment-settings." + worldType + ".enabled", true);
++        net.minecraftforge.cauldron.CauldronConfig.save();
 +        if (!enabled)
 +            return;
-+        // MCPC+ end
++        // Cauldron end
 +
-+        MCPCUtils.migrateWorlds(worldType, oldName, overworld.getWorldInfo().getWorldName(), name); // MCPC+
++        CauldronUtils.migrateWorlds(worldType, oldName, overworld.getWorldInfo().getWorldName(), name); // Cauldron
 +        ChunkGenerator gen = mcServer.server.getGenerator(name);
 +        if (mcServer instanceof DedicatedServer) {
 +            worldSettings.func_82750_a(((DedicatedServer) mcServer).getStringProperty("generator-settings", ""));
@@ -201,15 +200,15 @@
          world.addWorldAccess(new WorldManager(mcServer, world));
          MinecraftForge.EVENT_BUS.post(new WorldEvent.Load(world));
 +        mcServer.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldLoadEvent(world.getWorld()));
-+        // MCPC+ end
++        // Cauldron end
          if (!mcServer.isSinglePlayer())
          {
              world.getWorldInfo().setGameType(mcServer.getGameType());
-@@ -253,6 +354,76 @@
+@@ -253,6 +353,76 @@
          mcServer.func_147139_a(mcServer.func_147135_j());
      }
  
-+    // MCPC+ start - new method for handling creation of Bukkit dimensions. Currently supports MultiVerse
++    // Cauldron start - new method for handling creation of Bukkit dimensions. Currently supports MultiVerse
 +    public static WorldServer initDimension(WorldCreator creator, WorldSettings worldSettings) {
 +        WorldServer overworld = getWorld(0);
 +        if (overworld == null) {
@@ -264,7 +263,7 @@
 +        {
 +            world.getWorld().getPopulators().addAll(gen.getDefaultPopulators(world.getWorld()));
 +        }
-+        world.provider.dimensionId = dim; // MCPC+ - Fix for TerrainControl injecting their own WorldProvider
++        world.provider.dimensionId = dim; // Cauldron - Fix for TerrainControl injecting their own WorldProvider
 +        mcServer.getConfigurationManager().setPlayerManager(mcServer.worlds.toArray(new WorldServer[mcServer.worlds.size()]));
 +
 +        world.addWorldAccess(new WorldManager(mcServer, world));
@@ -277,31 +276,31 @@
 +
 +        return world;
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
      public static WorldServer getWorld(int id)
      {
          return worlds.get(id);
-@@ -266,7 +437,7 @@
+@@ -266,7 +436,7 @@
      public static boolean shouldLoadSpawn(int dim)
      {
          int id = getProviderType(dim);
 -        return spawnSettings.containsKey(id) && spawnSettings.get(id);
-+        return ((spawnSettings.containsKey(id) && spawnSettings.get(id)) || (getWorld(dim) != null && getWorld(dim).keepSpawnInMemory)); // MCPC+ added bukkit check
++        return ((spawnSettings.containsKey(id) && spawnSettings.get(id)) || (getWorld(dim) != null && getWorld(dim).keepSpawnInMemory)); // Cauldron added bukkit check
      }
  
      static
-@@ -306,7 +477,8 @@
+@@ -306,7 +476,8 @@
      }
  
      public static void unloadWorld(int id) {
 -        unloadQueue.add(id);
-+        if (!shouldLoadSpawn(id)) // MCPC+ - prevent mods from force unloading if we have it disabled
++        if (!shouldLoadSpawn(id)) // Cauldron - prevent mods from force unloading if we have it disabled
 +            unloadQueue.add(id);
      }
  
      /*
-@@ -315,26 +487,9 @@
+@@ -315,26 +486,9 @@
      public static void unloadWorlds(Hashtable<Integer, long[]> worldTickTimes) {
          for (int id : unloadQueue) {
              WorldServer w = worlds.get(id);
@@ -326,20 +325,20 @@
 -                    w.flush();
 -                    setWorld(id, null);
 -                }
-+                MinecraftServer.getServer().server.unloadWorld(w.getWorld(), true); // MCPC+ - unload through our new method for simplicity
++                MinecraftServer.getServer().server.unloadWorld(w.getWorld(), true); // Cauldron - unload through our new method for simplicity
              }
          }
          unloadQueue.clear();
-@@ -425,4 +580,45 @@
+@@ -425,4 +579,45 @@
              return null;
          }
      }
 +
-+    // MCPC+ start - add registration for Bukkit Environments
++    // Cauldron start - add registration for Bukkit Environments
 +    public static Environment registerBukkitEnvironment(int dim, String providerName)
 +    {
 +        Environment env = Environment.getEnvironment(dim);
-+        if (env == null) // MCPC+  if environment not found, register one
++        if (env == null) // Cauldron  if environment not found, register one
 +        {
 +            providerName = providerName.replace("WorldProvider", "");
 +            env = EnumHelper.addBukkitEnvironment(dim, providerName.toUpperCase());
@@ -374,5 +373,5 @@
 +    {
 +        return bukkitDims.contains(dim);
 +    }
-+    // MCPC+ end
++    // Cauldron end
  }

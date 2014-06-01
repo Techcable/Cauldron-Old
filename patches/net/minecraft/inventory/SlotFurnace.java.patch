@@ -17,7 +17,7 @@
                  i = j;
              }
  
-+            // MCPC+ start - validate inventory before attempting to cast it
++            // Cauldron start - validate inventory before attempting to cast it
 +            if (this.inventory instanceof TileEntityFurnace) 
 +            {
 +                // CraftBukkit start
@@ -29,7 +29,7 @@
 +                i = event.getExpToDrop();
 +                // CraftBukkit end
 +            }
-+            // MCPC+ end
++            // Cauldron end
 +
              while (i > 0)
              {

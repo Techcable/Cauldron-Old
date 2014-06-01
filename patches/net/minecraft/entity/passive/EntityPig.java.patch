@@ -51,7 +51,7 @@
          {
              EntityPigZombie entitypigzombie = new EntityPigZombie(this.worldObj);
 +
-+            // MCPC+ start
++            // Cauldron start
 +            if (par1EntityLightningBolt != null)
 +            {
 +                // CraftBukkit start
@@ -62,7 +62,7 @@
 +
 +                // CraftBukkit end
 +            }
-+            // MCPC+ end
++            // Cauldron end
              entitypigzombie.setCurrentItemOrArmor(0, new ItemStack(Items.golden_sword));
              entitypigzombie.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
 -            this.worldObj.spawnEntityInWorld(entitypigzombie);

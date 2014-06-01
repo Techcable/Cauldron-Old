@@ -172,7 +172,7 @@ public class SpigotConfig
         outdatedServerMessage = transform( getString( "messages.outdated-server", outdatedServerMessage ) );
     }
 
-    public static int timeoutTime = 90; // MCPC+ - raise to 90
+    public static int timeoutTime = 90; // Cauldron - raise to 90
     public static boolean restartOnCrash = true;
     public static String restartScript = "./start.sh";
     public static String restartMessage;
@@ -203,7 +203,7 @@ public class SpigotConfig
         Bukkit.getLogger().log( Level.INFO, "Using {0} threads for Netty based IO", count );
     }
 
-    /* MCPC+ - temp disable
+    /* Cauldron - temp disable
     private static void replaceCommands()
     {
         if ( config.contains( "replace-commands" ) ) {

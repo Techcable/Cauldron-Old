@@ -16,15 +16,15 @@ public class CraftAmbient extends CraftLivingEntity implements Ambient {
 
     @Override
     public String toString() {
-        return this.entityName; // MCPC+
+        return this.entityName; // Cauldron
     }
 
     public EntityType getType() {
-        // MCPC+ start
+        // Cauldron start
         EntityType type = EntityType.fromName(this.entityName);
         if (type != null)
             return type;
         else return EntityType.UNKNOWN;
-        // MCPC+ end
+        // Cauldron end
     }
 }

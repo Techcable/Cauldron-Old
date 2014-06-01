@@ -51,7 +51,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.meta.BookMeta;
-// MCPC+ start
+// Cauldron start
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -59,7 +59,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemSword;
 import net.minecraftforge.common.util.FakePlayer;
 import org.bukkit.block.CreatureSpawner;
-// MCPC+ end
+// Cauldron end
 
 
 public class CraftEventFactory {
@@ -90,7 +90,7 @@ public class CraftEventFactory {
     /**
      * Block place methods
      */
-    // MCPC+ start
+    // Cauldron start
     public static BlockMultiPlaceEvent callBlockMultiPlaceEvent(net.minecraft.world.World world, net.minecraft.entity.player.EntityPlayer who, List<BlockState> blockStates, int clickedX, int clickedY, int clickedZ) {
         CraftWorld craftWorld = world.getWorld();
         CraftServer craftServer = world.getServer();
@@ -112,7 +112,7 @@ public class CraftEventFactory {
 
         return event;
     }
-    // MCPC+ end
+    // Cauldron end
 
     public static BlockPlaceEvent callBlockPlaceEvent(net.minecraft.world.World world, net.minecraft.entity.player.EntityPlayer who, BlockState replacedBlockState, int clickedX, int clickedY, int clickedZ) {
         CraftWorld craftWorld = world.getWorld();
@@ -360,7 +360,7 @@ public class CraftEventFactory {
         Bukkit.getServer().getPluginManager().callEvent(event);
 
         victim.expToDrop = event.getDroppedExp();
-        // MCPC+ start - handle any drop changes from plugins
+        // Cauldron start - handle any drop changes from plugins
         victim.capturedDrops.clear();
         for (org.bukkit.inventory.ItemStack stack : event.getDrops())
         {
@@ -370,7 +370,7 @@ public class CraftEventFactory {
                 victim.capturedDrops.add((EntityItem)entityitem);
             }
         }
-        // MCPC+ end
+        // Cauldron end
 
         return event;
     }
@@ -390,7 +390,7 @@ public class CraftEventFactory {
         for (org.bukkit.inventory.ItemStack stack : event.getDrops()) {
             if (stack == null || stack.getType() == Material.AIR) continue;
 
-            // MCPC+ start - add support for Forge's PlayerDropsEvent
+            // Cauldron start - add support for Forge's PlayerDropsEvent
             //world.dropItemNaturally(entity.getLocation(), stack); // handle world drop in EntityPlayerMP
             if (victim.captureDrops)
             {
@@ -400,7 +400,7 @@ public class CraftEventFactory {
                     victim.capturedDrops.add((EntityItem)entityitem);
                 }
             }
-            // MCPC+ end
+            // Cauldron end
         }
 
         return event;
@@ -445,7 +445,7 @@ public class CraftEventFactory {
 
             if (source instanceof net.minecraft.util.EntityDamageSourceIndirect) {
                 damager = ((net.minecraft.util.EntityDamageSourceIndirect) source).getProximateDamageSource();
-                // MCPC+ start - vanilla compatibility
+                // Cauldron start - vanilla compatibility
                 if (damager != null) {
                     if (damager.getBukkitEntity() instanceof ThrownPotion) {
                         cause = DamageCause.MAGIC;
@@ -453,7 +453,7 @@ public class CraftEventFactory {
                         cause = DamageCause.PROJECTILE;
                     }
                 }
-                // MCPC+ end
+                // Cauldron end
             } else if ("thorns".equals(source.damageType)) {
                 cause = DamageCause.THORNS;
             }
@@ -612,39 +612,39 @@ public class CraftEventFactory {
         return event;
     }
 
-    // MCPC+ start - allow inventory force close to be toggled
+    // Cauldron start - allow inventory force close to be toggled
     public static net.minecraft.inventory.Container callInventoryOpenEvent(net.minecraft.entity.player.EntityPlayerMP player, net.minecraft.inventory.Container container) {
         return callInventoryOpenEvent(player, container, true);
     }
 
     public static net.minecraft.inventory.Container callInventoryOpenEvent(net.minecraft.entity.player.EntityPlayerMP player, net.minecraft.inventory.Container container, boolean closeInv) {
         if (player.openContainer != player.inventoryContainer && closeInv) { // fire INVENTORY_CLOSE if one already open
-    // MCPC+ end
+    // Cauldron end
             player.playerNetServerHandler.processCloseWindow(new net.minecraft.network.play.client.C0DPacketCloseWindow(player.openContainer.windowId));
         }
 
         CraftServer server = player.worldObj.getServer();
         CraftPlayer craftPlayer = player.getBukkitEntity();
-        // MCPC+ start - vanilla compatibility
+        // Cauldron start - vanilla compatibility
         try {
             player.openContainer.transferTo(container, craftPlayer);
         }
         catch (AbstractMethodError e) {
             // do nothing
         }
-        // MCPC+ end
+        // Cauldron end
         InventoryOpenEvent event = new InventoryOpenEvent(container.getBukkitView());
-        if (container.getBukkitView() != null) server.getPluginManager().callEvent(event); // MCPC+ - allow vanilla mods to bypass
+        if (container.getBukkitView() != null) server.getPluginManager().callEvent(event); // Cauldron - allow vanilla mods to bypass
 
         if (event.isCancelled()) {
             container.transferTo(player.openContainer, craftPlayer);
-            // MCPC+ start - handle close for modded containers
+            // Cauldron start - handle close for modded containers
             if (!closeInv) { // fire INVENTORY_CLOSE if one already open
                 player.openContainer = container; // make sure the right container is processed
                 player.closeScreen();
                 player.openContainer = player.inventoryContainer;
             }
-            // MCPC+ end
+            // Cauldron end
             return null;
         }
 
@@ -764,7 +764,7 @@ public class CraftEventFactory {
 
     public static void handleInventoryCloseEvent(net.minecraft.entity.player.EntityPlayer human) {
         InventoryCloseEvent event = new InventoryCloseEvent(human.openContainer.getBukkitView());
-        if (human.openContainer.getBukkitView() != null) human.worldObj.getServer().getPluginManager().callEvent(event); // MCPC+ - allow vanilla mods to bypass
+        if (human.openContainer.getBukkitView() != null) human.worldObj.getServer().getPluginManager().callEvent(event); // Cauldron - allow vanilla mods to bypass
         human.openContainer.transferTo(human.inventoryContainer, human.getBukkitEntity());
     }
 
@@ -842,7 +842,7 @@ public class CraftEventFactory {
         return (Cancellable) event;
     }
 
-    // MCPC+ start
+    // Cauldron start
     public static BlockBreakEvent callBlockBreakEvent(net.minecraft.world.World world, int x, int y, int z, net.minecraft.block.Block block, int blockMetadata, net.minecraft.entity.player.EntityPlayerMP player)
     {
         org.bukkit.block.Block bukkitBlock = world.getWorld().getBlockAt(x, y, z);
@@ -868,5 +868,5 @@ public class CraftEventFactory {
         world.getServer().getPluginManager().callEvent(blockBreakEvent);
         return blockBreakEvent;
     }
-    // MCPC+ end
+    // Cauldron end
 }

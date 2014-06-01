@@ -53,7 +53,7 @@ public final class CraftMapView implements MapView {
     }
 
     public World getWorld() {
-        int dimension = worldMap.dimension; // MCPC+ - byte -> int for Forge
+        int dimension = worldMap.dimension; // Cauldron - byte -> int for Forge
         for (World world : Bukkit.getServer().getWorlds()) {
             if (((CraftWorld) world).getHandle().provider.dimensionId == dimension) {
                 return world;

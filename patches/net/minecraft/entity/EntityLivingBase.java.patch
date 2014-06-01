@@ -11,7 +11,7 @@
 +import org.bukkit.event.entity.EntityDamageEvent;
 +import org.bukkit.event.entity.EntityRegainHealthEvent;
 +// CraftBukkit end
-+import org.bukkit.craftbukkit.inventory.CraftItemStack; // MCPC+
++import org.bukkit.craftbukkit.inventory.CraftItemStack; // Cauldron
 +
  public abstract class EntityLivingBase extends Entity
  {
@@ -301,7 +301,7 @@
  
              if (!ForgeHooks.onLivingDrops(this, par1DamageSource, capturedDrops, i, recentlyHit > 0, j))
              {
-+                // MCPC+ start - capture drops for plugins then fire event
++                // Cauldron start - capture drops for plugins then fire event
 +                if (this.capturedDrops.size() > 0)
 +                {
 +                    java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
@@ -315,7 +315,7 @@
 +                {
 +                    CraftEventFactory.callEntityDeathEvent(this);
 +                }
-+                // MCPC+ end
++                // Cauldron end
                  for (EntityItem item : capturedDrops)
                  {
                      worldObj.spawnEntityInWorld(item);

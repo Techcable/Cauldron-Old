@@ -152,7 +152,7 @@
  
          if (!this.onGround)
          {
-+            // CraftBukkit start // MCPC+ - CB changed to flyingX but Forge changed to getDragAir() - prefer Forge in this case
++            // CraftBukkit start // Cauldron - CB changed to flyingX but Forge changed to getDragAir() - prefer Forge in this case
              this.motionX *= getDragAir();
              this.motionY *= getDragAir();
              this.motionZ *= getDragAir();

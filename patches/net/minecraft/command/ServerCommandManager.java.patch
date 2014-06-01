@@ -4,7 +4,7 @@
  {
      private static final String __OBFID = "CL_00000922";
  
-+    // MCPC+ start - moved commands to it's own method to be executed further in server startup + changed to registerVanillaCommand
++    // Cauldron start - moved commands to it's own method to be executed further in server startup + changed to registerVanillaCommand
      public ServerCommandManager()
      {
 +        CommandBase.setAdminCommander(this);
@@ -12,7 +12,7 @@
 +
 +    public void registerVanillaCommands()
 +    {
-+        // MCPC+ - do not register vanilla commands replaced by Bukkit
++        // Cauldron - do not register vanilla commands replaced by Bukkit
 +        /*    
          this.registerCommand(new CommandTime());
          this.registerCommand(new CommandGameMode());
@@ -38,7 +38,7 @@
 -        this.registerCommand(new CommandTestForBlock());
 -        this.registerCommand(new CommandMessageRaw());
 +        */
-+        // MCPC+ start - add permission nodes for rest of vanilla commands
++        // Cauldron start - add permission nodes for rest of vanilla commands
 +        this.registerCommand("vanilla.command", new CommandDebug());
 +        this.registerCommand("vanilla.command", new CommandSpreadPlayers());
 +        this.registerCommand("vanilla.command", new CommandPlaySound());
@@ -48,7 +48,7 @@
 +        this.registerCommand("vanilla.command", new CommandSetBlock());
 +        this.registerCommand("vanilla.command", new CommandTestForBlock());
 +        this.registerCommand("vanilla.command", new CommandMessageRaw());
-+        // MCPC+ end
++        // Cauldron end
  
          if (MinecraftServer.getServer().isDedicatedServer())
          {
@@ -68,7 +68,7 @@
          }
 -
 -        CommandBase.setAdminCommander(this);
-+        // MCPC+ end
++        // Cauldron end
      }
  
      public void notifyAdmins(ICommandSender par1ICommandSender, int par2, String par3Str, Object ... par4ArrayOfObj)

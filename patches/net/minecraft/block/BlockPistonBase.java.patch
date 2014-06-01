@@ -69,11 +69,11 @@
      }
  
 -    private static boolean canExtend(World p_150077_0_, int p_150077_1_, int p_150077_2_, int p_150077_3_, int p_150077_4_)
-+    // MCPC+ start - vanilla compatibility
++    // Cauldron start - vanilla compatibility
 +    private static boolean canExtend(World world, int i, int j, int k, int l) {
 +        return canExtend_IntCB(world, i, j, k, l) >= 0;
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
 +    private static int canExtend_IntCB(World p_150077_0_, int p_150077_1_, int p_150077_2_, int p_150077_3_, int p_150077_4_) // CraftBukkit int -> boolean
      {

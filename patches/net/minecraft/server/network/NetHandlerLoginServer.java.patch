@@ -168,7 +168,7 @@
          }
      }
  
-+    // MCPC+ start - access methods for ThreadPlayerLookupUUID
++    // Cauldron start - access methods for ThreadPlayerLookupUUID
 +    static String getLoginServerId(NetHandlerLoginServer loginServer) {
 +        return loginServer.field_147334_j;
 +    }
@@ -197,7 +197,7 @@
 +    {
 +        loginServer.field_147328_g = state;
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
      static enum LoginState
      {

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import net.minecraft.world.chunk.IChunkProvider; // MCPC+
+import net.minecraft.world.chunk.IChunkProvider; // Cauldron
 
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.generator.BlockPopulator;
@@ -109,10 +109,10 @@ public class NormalChunkGenerator extends InternalChunkGenerator {
      */
     public void saveExtraData() {}
     
-    // MCPC+ start - return vanilla compatible IChunkProvider for forge
+    // Cauldron start - return vanilla compatible IChunkProvider for forge
     public IChunkProvider getForgeChunkProvider()
     {
         return this.provider;
     }
-    // MCPC+ end
+    // Cauldron end
 }

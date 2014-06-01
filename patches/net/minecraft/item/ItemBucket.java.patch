@@ -20,7 +20,7 @@
          {
 -            FillBucketEvent event = new FillBucketEvent(par3EntityPlayer, par1ItemStack, par2World, movingobjectposition);
 -            if (MinecraftForge.EVENT_BUS.post(event))
-+            // MCPC+ start - rename to forgeEvent fixing naming clash
++            // Cauldron start - rename to forgeEvent fixing naming clash
 +            FillBucketEvent forgeEvent = new FillBucketEvent(par3EntityPlayer, par1ItemStack, par2World, movingobjectposition);
 +            if (MinecraftForge.EVENT_BUS.post(forgeEvent))
              {
@@ -47,7 +47,7 @@
 +                    par3EntityPlayer.dropPlayerItemWithRandomChoice(forgeEvent.result, false);
                  }
 -
-+             // MCPC+ end
++             // Cauldron end
                  return par1ItemStack;
              }
              if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
@@ -132,13 +132,13 @@
          }
      }
  
-+    // MCPC+ start - vanilla compatibility
++    // Cauldron start - vanilla compatibility
      private ItemStack func_150910_a(ItemStack p_150910_1_, EntityPlayer p_150910_2_, Item p_150910_3_)
      {
 -        if (p_150910_2_.capabilities.isCreativeMode)
 +        return this.func_150910_a(p_150910_1_, p_150910_2_, p_150910_3_, null);
 +    }
-+    // MCPC+ end
++    // Cauldron end
 +
 +    // CraftBukkit - added ob.ItemStack result - TODO: Is this... the right way to handle this?
 +    private ItemStack func_150910_a(ItemStack itemstack, EntityPlayer entityplayer, Item item, org.bukkit.inventory.ItemStack result)

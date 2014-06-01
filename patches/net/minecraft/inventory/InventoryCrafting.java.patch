@@ -51,7 +51,7 @@
 +
 +    public org.bukkit.inventory.InventoryHolder getOwner()
 +    {
-+        if (owner == null) return null; // MCPC+
++        if (owner == null) return null; // Cauldron
 +        return owner.getBukkitEntity();
 +    }
 +

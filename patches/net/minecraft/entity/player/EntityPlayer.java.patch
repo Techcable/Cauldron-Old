@@ -370,7 +370,7 @@
          {
 +            // CraftBukkit start
 +            InventoryCloseEvent event = new InventoryCloseEvent(this.openContainer.getBukkitView());
-+            if (this.openContainer.getBukkitView() != null) Bukkit.getServer().getPluginManager().callEvent(event); // MCPC+ - allow vanilla mods to bypass
++            if (this.openContainer.getBukkitView() != null) Bukkit.getServer().getPluginManager().callEvent(event); // Cauldron - allow vanilla mods to bypass
 +            // CraftBukkit end
              this.openContainer.onContainerClosed(this);
          }

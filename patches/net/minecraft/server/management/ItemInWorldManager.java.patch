@@ -29,13 +29,13 @@
 +import org.bukkit.event.block.Action;
 +import org.bukkit.event.player.PlayerInteractEvent;
 +// CraftBukkit end
-+// MCPC+ start
++// Cauldron start
 +import net.minecraft.inventory.ContainerPlayer;
 +import net.minecraft.inventory.IInventory;
 +import net.minecraft.server.MinecraftServer;
 +import org.bukkit.craftbukkit.inventory.CraftInventoryView;
 +import org.bukkit.event.inventory.InventoryType;
-+// MCPC+ end
++// Cauldron end
 +
  public class ItemInWorldManager
  {
@@ -88,7 +88,7 @@
 -                
 -                if (!block.isAir(theWorld, par1, par2, par3))
 +                // CraftBukkit start - Swings at air do *NOT* exist.
-+                if (cbEvent.useInteractedBlock() == org.bukkit.event.Event.Result.DENY || event.useBlock == cpw.mods.fml.common.eventhandler.Event.Result.DENY)   // MCPC
++                if (cbEvent.useInteractedBlock() == org.bukkit.event.Event.Result.DENY || event.useBlock == cpw.mods.fml.common.eventhandler.Event.Result.DENY)   // Cauldron
                  {
 -                    if (event.useBlock != Event.Result.DENY)
 +                    // If we denied a door from opening, we need to send a correcting update to the client, as it already opened the door.
@@ -187,7 +187,7 @@
 -        boolean isAir = block.isAir(par2World, par4, par5, par6);
 -        boolean useBlock = !par1EntityPlayer.isSneaking() || par1EntityPlayer.getHeldItem() == null;
 -        if (!useBlock) useBlock = par1EntityPlayer.getHeldItem().getItem().doesSneakBypassUse(par2World, par4, par5, par6, par1EntityPlayer);
-+        boolean isAir = block.isAir(par2World, par4, par5, par6); // MCPC+
++        boolean isAir = block.isAir(par2World, par4, par5, par6); // Cauldron
          boolean result = false;
  
 -        if (useBlock)
@@ -196,7 +196,7 @@
 -            if (event.useBlock != Event.Result.DENY)
 +            org.bukkit.event.player.PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(par1EntityPlayer, org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK, par4, par5, par6, par7, par3ItemStack);
 +            net.minecraftforge.event.entity.player.PlayerInteractEvent forgeEvent = ForgeEventFactory.onPlayerInteract(par1EntityPlayer, net.minecraftforge.event.entity.player.PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK, par4, par5, par6, par7);
-+            // MCPC+ start
++            // Cauldron start
 +            // if forge event is explicitly cancelled, return
 +            if (forgeEvent.isCanceled())
              {
@@ -214,7 +214,7 @@
 +                        return true;
 +                }
 +            }
-+            // MCPC+ end
++            // Cauldron end
 +            if (event.useInteractedBlock() == org.bukkit.event.Event.Result.DENY || forgeEvent.useBlock == cpw.mods.fml.common.eventhandler.Event.Result.DENY)
 +            {
 +                // If we denied a door from opening, we need to send a correcting update to the client, as it already opened the door.
@@ -229,7 +229,7 @@
 +            else if (!par1EntityPlayer.isSneaking() || par3ItemStack == null || par1EntityPlayer.getHeldItem().getItem().doesSneakBypassUse(par2World, par4, par5, par6, par1EntityPlayer))
 +            {
                  result = block.onBlockActivated(par2World, par4, par5, par6, par1EntityPlayer, par7, par8, par9, par10);
-+                // MCPC+ start - if bukkitView is null, create one. Required for Ender Chests since they do not use NetworkRegistry.openRemoteGUI
++                // Cauldron start - if bukkitView is null, create one. Required for Ender Chests since they do not use NetworkRegistry.openRemoteGUI
 +                if (thisPlayerMP != null && !(thisPlayerMP.openContainer instanceof ContainerPlayer))
 +                {
 +                    if (thisPlayerMP.openContainer.getBukkitView() == null)
@@ -254,7 +254,7 @@
 +                        }
 +                    }
 +                }
-+                // MCPC+ end
++                // Cauldron end
              }
 -            else
 +
@@ -287,7 +287,7 @@
 -            result = par3ItemStack.tryPlaceItemIntoWorld(par1EntityPlayer, par2World, par4, par5, par6, par7, par8, par9, par10);
 -            if (isCreative())
 +            // If we have 'true' and no explicit deny *or* an explicit allow -- run the item part of the hook
-+            if (/*!noTryItem(par2World, par4, par5, par6) && */// MCPC+
++            if (/*!noTryItem(par2World, par4, par5, par6) && */// Cauldron
 +                    par3ItemStack != null && ((!result && event.useItemInHand() != org.bukkit.event.Event.Result.DENY) || event.useItemInHand() == org.bukkit.event.Event.Result.ALLOW))
              {
 -                par3ItemStack.setItemDamage(meta);

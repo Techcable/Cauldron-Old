@@ -13,7 +13,7 @@
      private static Map nameToClassMap = new HashMap();
 -    private static Map classToNameMap = new HashMap();
 -    protected World worldObj;
-+    public static Map classToNameMap = new HashMap(); // MCPC+ - private -> public
++    public static Map classToNameMap = new HashMap(); // Cauldron - private -> public
 +    public World worldObj; // CraftBukkit - protected -> public
      public int xCoord;
      public int yCoord;

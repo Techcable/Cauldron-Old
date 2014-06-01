@@ -17,6 +17,6 @@ public class CraftWaterMob extends CraftCreature implements WaterMob {
 
     @Override
     public String toString() {
-        return this.entityName; // MCPC+
+        return this.entityName; // Cauldron
     }
 }

@@ -26,7 +26,7 @@
 -            if (p_149674_1_.getBlockLightValue(p_149674_2_, p_149674_3_ + 1, p_149674_4_) >= 9 && p_149674_5_.nextInt(7) == 0)
 +            if (p_149674_1_.getBlockLightValue(p_149674_2_, p_149674_3_ + 1, p_149674_4_) >= 9 && (p_149674_5_.nextInt(Math.max(2, (int)((p_149674_1_.growthOdds / p_149674_1_.spigotConfig.saplingModifier * 7) + 0.5F))) == 0))    // Spigot
              {
-+                // MCPC+ start
++                // Cauldron start
 +                p_149674_1_.captureTreeGeneration = true;
                  this.func_149879_c(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, p_149674_5_);
 +                p_149674_1_.captureTreeGeneration = false;
@@ -48,7 +48,7 @@
 +                        }
 +                    }
 +                }
-+                //MCPC+ end
++                //Cauldron end
              }
          }
      }

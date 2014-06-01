@@ -7,10 +7,10 @@ import org.bukkit.craftbukkit.util.LongHash;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-// MCPC+ start - Don't call ChunkDataEvent.Load async
+// Cauldron start - Don't call ChunkDataEvent.Load async
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkDataEvent;
-// MCPC+ end
+// Cauldron end
 
 class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChunk, net.minecraft.world.chunk.Chunk, Runnable, RuntimeException> {
     private final AtomicInteger threadNumber = new AtomicInteger(1);
@@ -18,7 +18,7 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
     // async stuff
     public net.minecraft.world.chunk.Chunk callStage1(QueuedChunk queuedChunk) throws RuntimeException {
         net.minecraft.world.chunk.storage.AnvilChunkLoader loader = queuedChunk.loader;
-        Object[] data = loader.loadChunk__Async_CB(queuedChunk.world, queuedChunk.x, queuedChunk.z); // MCPC+
+        Object[] data = loader.loadChunk__Async_CB(queuedChunk.world, queuedChunk.x, queuedChunk.z); // Cauldron
 
         if (data != null) {
             queuedChunk.compound = (net.minecraft.nbt.NBTTagCompound) data[1];
@@ -37,10 +37,10 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
         }
 
         queuedChunk.loader.loadEntities(chunk, queuedChunk.compound.getCompoundTag("Level"), queuedChunk.world);
-        MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, queuedChunk.compound)); // MCPC+ - Don't call ChunkDataEvent.Load async
+        MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, queuedChunk.compound)); // Cauldron - Don't call ChunkDataEvent.Load async
         chunk.lastSaveTime = queuedChunk.provider.worldObj.getTotalWorldTime();
         queuedChunk.provider.loadedChunkHashMap.put(LongHash.toLong(queuedChunk.x, queuedChunk.z), chunk);
-        queuedChunk.provider.loadedChunks.add(chunk); // MCPC+  vanilla compatibility        
+        queuedChunk.provider.loadedChunks.add(chunk); // Cauldron  vanilla compatibility        
         chunk.onChunkLoad();
 
         if (queuedChunk.provider.currentChunkProvider != null) {

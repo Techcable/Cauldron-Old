@@ -33,6 +33,6 @@ public class CraftCreature extends CraftLivingEntity implements Creature {
 
     @Override
     public String toString() {
-        return this.entityName; // MCPC+
+        return this.entityName; // Cauldron
     }
 }

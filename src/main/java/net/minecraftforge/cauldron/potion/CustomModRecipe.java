@@ -1,4 +1,4 @@
-package za.co.mcportcentral.potion;
+package net.minecraftforge.cauldron.potion;
 
 import net.minecraft.item.crafting.IRecipe;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;

@@ -4,7 +4,7 @@
  import cpw.mods.fml.common.LoaderException;
  import cpw.mods.fml.common.LoaderState;
  import cpw.mods.fml.common.ObfuscationReflectionHelper;
-+import java.util.HashMap; // MCPC+
++import java.util.HashMap; // Cauldron
  
  public class GameRegistry
  {
@@ -12,10 +12,10 @@
      private static Map<IWorldGenerator, Integer> worldGeneratorIndex = Maps.newHashMap();
      private static List<IFuelHandler> fuelHandlers = Lists.newArrayList();
      private static List<IWorldGenerator> sortedGeneratorList;
-+    // MCPC+ start
++    // Cauldron start
 +    private static Map<String, Boolean> configWorldGenCache = new HashMap<String, Boolean>();
 +    private static Map<String, String> worldGenMap = new HashMap<String, String>();
-+    // MCPC+ end
++    // Cauldron end
  
      /**
       * Register a world generator - something that inserts new block types into the world
@@ -23,7 +23,7 @@
       */
      public static void registerWorldGenerator(IWorldGenerator generator, int modGenerationWeight)
      {
-+        // MCPC+ start - mod id's are not available during generateWorld so we must capture them here
++        // Cauldron start - mod id's are not available during generateWorld so we must capture them here
 +        String modId = Loader.instance().activeModContainer().getModId();
 +        modId = modId.replaceAll("[^A-Za-z0-9]", ""); // remove all non-digits/alphanumeric
 +        modId.replace(" ", "_");
@@ -34,7 +34,7 @@
              sortedGeneratorList = null;
          }
 +        worldGenMap.put(generator.getClass().getName(), modId);
-+        // MCPC+ end
++        // Cauldron end
      }
  
      /**
@@ -43,19 +43,19 @@
          long chunkSeed = (xSeed * chunkX + zSeed * chunkZ) ^ worldSeed;
  
 -        for (IWorldGenerator generator : sortedGeneratorList)
-+        boolean before = ((net.minecraft.world.WorldServer)world).theChunkProviderServer.loadChunkOnProvideRequest; // MCPC+ store value
-+        ((net.minecraft.world.WorldServer)world).theChunkProviderServer.loadChunkOnProvideRequest = true; // MCPC+ load chunks on provide requests
++        boolean before = ((net.minecraft.world.WorldServer)world).theChunkProviderServer.loadChunkOnProvideRequest; // Cauldron store value
++        ((net.minecraft.world.WorldServer)world).theChunkProviderServer.loadChunkOnProvideRequest = true; // Cauldron load chunks on provide requests
 +        for (IWorldGenerator generator : worldGenerators)
          {
 -            fmlRandom.setSeed(chunkSeed);
 -            generator.generate(fmlRandom, chunkX, chunkZ, world, chunkGenerator, chunkProvider);
-+        // MCPC+ start
++        // Cauldron start
 +            if (!configWorldGenCache.containsKey(generator.getClass().getName()))
 +            {
 +                String modId = worldGenMap.get(generator.getClass().getName());
 +                String generatorName = "";
 +                generatorName = modId + "-" + generator.getClass().getSimpleName();
-+                boolean generatorEnabled = world.mcpcConfig.getBoolean("worldgen-" + generatorName, true);
++                boolean generatorEnabled = world.cauldronConfig.getBoolean("worldgen-" + generatorName, true);
 +                configWorldGenCache.put(generator.getClass().getName(), generatorEnabled);
 +            }
 +            if (configWorldGenCache.get(generator.getClass().getName()))
@@ -64,9 +64,9 @@
 +                generator.generate(fmlRandom, chunkX, chunkZ, world, chunkGenerator, chunkProvider);
 +            }
          }
-+        world.mcpcConfig.save();
++        world.cauldronConfig.save();
 +        ((net.minecraft.world.WorldServer)world).theChunkProviderServer.loadChunkOnProvideRequest = before; // reset
-+        // MCPC+ end
++        // Cauldron end
      }
  
      private static void computeSortedGeneratorList()
