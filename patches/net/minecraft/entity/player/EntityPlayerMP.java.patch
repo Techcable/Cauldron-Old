@@ -16,7 +16,7 @@
  import net.minecraft.util.ChunkCoordinates;
  import net.minecraft.util.DamageSource;
  import net.minecraft.util.EntityDamageSource;
-@@ -105,10 +107,24 @@
+@@ -105,10 +107,25 @@
  import net.minecraftforge.event.entity.player.PlayerDropsEvent;
  import net.minecraftforge.event.world.ChunkWatchEvent;
  
@@ -30,6 +30,7 @@
 +import org.bukkit.craftbukkit.entity.CraftPlayer;
 +import org.bukkit.craftbukkit.event.CraftEventFactory;
 +import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.entity.Player;
 +import org.bukkit.event.inventory.InventoryType;
 +import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 +// CraftBukkit end
@@ -42,7 +43,7 @@
      public NetHandlerPlayServer playerNetServerHandler;
      public final MinecraftServer mcServer;
      public final ItemInWorldManager theItemInWorldManager;
-@@ -121,8 +137,8 @@
+@@ -121,8 +138,8 @@
      private float lastHealth = -1.0E8F;
      private int lastFoodLevel = -99999999;
      private boolean wasHungry = true;
@@ -53,7 +54,7 @@
      private int renderDistance;
      private EntityPlayer.EnumChatVisibility chatVisibility;
      private boolean chatColours = true;
-@@ -131,6 +147,39 @@
+@@ -131,6 +148,39 @@
      public boolean isChangingQuantityOnly;
      public int ping;
      public boolean playerConqueredTheEnd;
@@ -93,7 +94,7 @@
      private static final String __OBFID = "CL_00001440";
  
      public EntityPlayerMP(MinecraftServer p_i45285_1_, WorldServer p_i45285_2_, GameProfile p_i45285_3_, ItemInWorldManager p_i45285_4_)
-@@ -154,6 +203,13 @@
+@@ -154,6 +204,13 @@
          {
              this.setPosition(this.posX, this.posY + 1.0D, this.posZ);
          }
@@ -107,7 +108,7 @@
      }
  
      public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
-@@ -171,14 +227,57 @@
+@@ -171,14 +228,57 @@
                  this.theItemInWorldManager.setGameType(WorldSettings.GameType.getByID(par1NBTTagCompound.getInteger("playerGameType")));
              }
          }
@@ -165,7 +166,7 @@
      public void addExperienceLevel(int par1)
      {
          super.addExperienceLevel(par1);
-@@ -241,7 +340,7 @@
+@@ -241,7 +341,7 @@
              ArrayList arraylist1 = new ArrayList();
              Chunk chunk;
  
@@ -174,7 +175,7 @@
              {
                  ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair)iterator1.next();
  
-@@ -254,8 +353,7 @@
+@@ -254,8 +354,7 @@
                          if (chunk.func_150802_k())
                          {
                              arraylist.add(chunk);
@@ -184,7 +185,7 @@
                              iterator1.remove();
                          }
                      }
-@@ -315,9 +413,10 @@
+@@ -315,9 +414,10 @@
                  }
              }
  
@@ -196,7 +197,7 @@
                  this.lastHealth = this.getHealth();
                  this.lastFoodLevel = this.foodStats.getFoodLevel();
                  this.wasHungry = this.foodStats.getSaturationLevel() == 0.0F;
-@@ -326,16 +425,18 @@
+@@ -326,16 +426,18 @@
              if (this.getHealth() + this.getAbsorptionAmount() != this.field_130068_bO)
              {
                  this.field_130068_bO = this.getHealth() + this.getAbsorptionAmount();
@@ -222,7 +223,7 @@
              if (this.experienceTotal != this.lastExperience)
              {
                  this.lastExperience = this.experienceTotal;
-@@ -346,6 +447,20 @@
+@@ -346,6 +448,20 @@
              {
                  this.func_147098_j();
              }
@@ -243,7 +244,7 @@
          }
          catch (Throwable throwable)
          {
-@@ -408,34 +523,88 @@
+@@ -408,34 +524,88 @@
  
      public void onDeath(DamageSource par1DamageSource)
      {
@@ -341,7 +342,7 @@
              score.func_96648_a();
          }
  
-@@ -500,7 +669,8 @@
+@@ -500,7 +670,8 @@
  
      public boolean canAttackPlayer(EntityPlayer par1EntityPlayer)
      {
@@ -351,7 +352,7 @@
      }
  
      public void travelToDimension(int par1)
-@@ -517,6 +687,8 @@
+@@ -517,6 +688,8 @@
              if (this.dimension == 0 && par1 == 1)
              {
                  this.triggerAchievement(AchievementList.theEnd);
@@ -360,7 +361,7 @@
                  ChunkCoordinates chunkcoordinates = this.mcServer.worldServerForDimension(par1).getEntrancePortalLocation();
  
                  if (chunkcoordinates != null)
-@@ -525,13 +697,18 @@
+@@ -525,13 +698,18 @@
                  }
  
                  par1 = 1;
@@ -380,7 +381,7 @@
              this.lastExperience = -1;
              this.lastHealth = -1.0F;
              this.lastFoodLevel = -1;
-@@ -574,6 +751,11 @@
+@@ -574,6 +752,11 @@
  
      public void wakeUpPlayer(boolean par1, boolean par2, boolean par3)
      {
@@ -392,7 +393,7 @@
          if (this.isPlayerSleeping())
          {
              this.getServerForPlayer().getEntityTracker().func_151248_b(this, new S0BPacketAnimation(this, 2));
-@@ -589,11 +771,27 @@
+@@ -589,11 +772,27 @@
  
      public void mountEntity(Entity par1Entity)
      {
@@ -423,7 +424,7 @@
      protected void updateFallState(double par1, boolean par3) {}
  
      public void handleFalling(double par1, boolean par3)
-@@ -615,29 +813,64 @@
+@@ -615,29 +814,64 @@
          this.currentWindowId = this.currentWindowId % 100 + 1;
      }
  
@@ -494,7 +495,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -649,71 +882,150 @@
+@@ -649,71 +883,150 @@
              this.closeScreen();
          }
  
@@ -661,7 +662,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
          InventoryMerchant inventorymerchant = ((ContainerMerchant)this.openContainer).getMerchantInventory();
-@@ -729,7 +1041,7 @@
+@@ -729,7 +1042,7 @@
                  merchantrecipelist.func_151391_a(packetbuffer);
                  this.playerNetServerHandler.sendPacket(new S3FPacketCustomPayload("MC|TrList", packetbuffer));
              }
@@ -670,7 +671,7 @@
              {
                  logger.error("Couldn\'t send trade list", ioexception);
              }
-@@ -738,14 +1050,25 @@
+@@ -738,14 +1051,25 @@
  
      public void displayGUIHorse(EntityHorse par1EntityHorse, IInventory par2IInventory)
      {
@@ -698,7 +699,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -770,6 +1093,15 @@
+@@ -770,6 +1094,15 @@
      {
          this.playerNetServerHandler.sendPacket(new S30PacketWindowItems(par1Container.windowId, par2List));
          this.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, this.inventory.getItemStack()));
@@ -714,7 +715,7 @@
      }
  
      public void sendProgressBarUpdate(Container par1Container, int par2, int par3)
-@@ -779,6 +1111,7 @@
+@@ -779,6 +1112,7 @@
  
      public void closeScreen()
      {
@@ -722,7 +723,7 @@
          this.playerNetServerHandler.sendPacket(new S2EPacketCloseWindow(this.openContainer.windowId));
          this.closeContainer();
      }
-@@ -852,6 +1185,7 @@
+@@ -852,6 +1186,7 @@
      public void setPlayerHealthUpdated()
      {
          this.lastHealth = -1.0E8F;
@@ -730,28 +731,7 @@
      }
  
      public void addChatComponentMessage(IChatComponent p_146105_1_)
-@@ -936,6 +1270,20 @@
-         this.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(3, (float)par1EnumGameType.getID()));
-     }
- 
-+    // CraftBukkit start - Support multi-line messages
-+    public void sendMessage(IChatComponent[] ichatbasecomponent, String message) // MCPC+ - add untouched message
-+    {
-+        for (IChatComponent component : ichatbasecomponent)
-+        {
-+            // MCPC+ start - fix forge compatibility
-+            ChatComponentTranslation chatcomponenttranslation1 = new ChatComponentTranslation("chat.type.text", new Object[] {this.func_145748_c_(), message});
-+            if (component instanceof net.minecraft.util.ChatComponentText) chatcomponenttranslation1.setChatStyle(((net.minecraft.util.ChatComponentText)component).getChatStyle()); // make sure to use style passed with component
-+            this.addChatMessage(chatcomponenttranslation1);
-+            // MCPC+ end
-+        }
-+    }
-+    // CraftBukkit end
-+
-     public void addChatMessage(IChatComponent p_145747_1_)
-     {
-         this.playerNetServerHandler.sendPacket(new S02PacketChat(p_145747_1_));
-@@ -1000,6 +1348,114 @@
+@@ -1000,6 +1335,114 @@
          return this.field_147103_bO;
      }
  

@@ -1,0 +1,39 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemLilyPad.java
++++ ../src-work/minecraft/net/minecraft/item/ItemLilyPad.java
+@@ -33,6 +33,7 @@
+                 int i = movingobjectposition.blockX;
+                 int j = movingobjectposition.blockY;
+                 int k = movingobjectposition.blockZ;
++                final int clickedX = i, clickedY = j, clickedZ = k; // CraftBukkit
+ 
+                 if (!par2World.canMineBlock(par3EntityPlayer, i, j, k))
+                 {
+@@ -46,7 +47,15 @@
+ 
+                 if (par2World.getBlock(i, j, k).getMaterial() == Material.water && par2World.getBlockMetadata(i, j, k) == 0 && par2World.isAirBlock(i, j + 1, k))
+                 {
++                    // Cauldron start - special case for handling block placement with water lilies
++                    org.bukkit.block.BlockState blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(par2World, i, j + 1, k);
+                     par2World.setBlock(i, j + 1, k, Blocks.waterlily);
++                    org.bukkit.event.block.BlockPlaceEvent placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(par2World, par3EntityPlayer, blockstate, i, j, k);
++                    if (placeEvent != null && (placeEvent.isCancelled() || !placeEvent.canBuild())) {
++                        blockstate.update(true, false);
++                        return par1ItemStack;
++                    }
++                    // Cauldron end
+ 
+                     if (!par3EntityPlayer.capabilities.isCreativeMode)
+                     {
+@@ -59,6 +68,12 @@
+         }
+     }
+ 
++    public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
++    {
++        cpw.mods.fml.relauncher.FMLRelaunchLog.info("onItemUse par1ItemStack = " + par1ItemStack);
++        return super.onItemUse(par1ItemStack, par2EntityPlayer, par3World, par4, par5, par6, par7, par8, par9, par10);
++    }
++
+     @SideOnly(Side.CLIENT)
+     public int getColorFromItemStack(ItemStack par1ItemStack, int par2)
+     {
