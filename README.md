@@ -79,6 +79,4 @@ Credits
 
 Donating
 --------
-Click here to [Donate to BloodMC](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YNCKCALNQKFAS)
-
-Click here to [Donate to Onibait](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=B29U8Y8AF7A2Q)
+Click here to [Donate to bloodmc](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YNCKCALNQKFAS)
