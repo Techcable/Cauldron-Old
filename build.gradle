@@ -70,7 +70,7 @@ def getBuild() {
 }
 
 tasks.packageUniversal {
-    classifier = 'universal'
+    classifier = 'server'
 }
 
 tasks.packageUniversal.manifest { 
