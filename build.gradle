@@ -45,7 +45,11 @@ minecraft {
 }
 
 group = 'net.minecraftforge'
-version = "1.7.2-R0.4-forge1098"
+mcVersion = "1.7.2"
+cauldronVersion = "1"
+forgeVersion = "1098"
+bukkitVersion = "04"
+version = "${mcVersion}-${cauldronVersion}.${forgeVersion}.${bukkitVersion}.${getBuild()}"
 
 jenkins {
     job = 'Cauldron'
@@ -59,9 +63,9 @@ def getBuild() {
     // check for jenkins build and if not found, return default
     ext.env = System.getenv()
     if(env.BUILD_NUMBER) {
-        return "-$env.BUILD_NUMBER"
+        return "$env.BUILD_NUMBER"
     } else {
-        return "-B0"
+        return "0"
     }
 }
 
