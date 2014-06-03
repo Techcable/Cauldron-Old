@@ -52,7 +52,7 @@
      public Chunk(World p_i45446_1_, Block[] p_i45446_2_, int p_i45446_3_, int p_i45446_4_)
      {
          this(p_i45446_1_, p_i45446_3_, p_i45446_4_);
-@@ -587,10 +610,16 @@
+@@ -587,9 +610,11 @@
  
              if (!this.worldObj.isRemote)
              {
@@ -60,32 +60,11 @@
                  block1.onBlockPreDestroy(this.worldObj, l1, p_150807_2_, i2, k1);
              }
  
--            extendedblockstorage.func_150818_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_4_);
-+            // CraftBukkit start - Delay removing containers until after they're cleaned up
-+            if (!(block1 instanceof ITileEntityProvider))
-+            {
-+                extendedblockstorage.func_150818_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_4_);
-+            }
-+            // CraftBukkit end
++            // Cauldron - Removed CB patch that fixes BUKKIT-5238 to prevent stackoverflows. See issue #1165 and #1169
+             extendedblockstorage.func_150818_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_4_);
              extendedblockstorage.setExtBlockMetadata(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_5_); // Move this above to prevent other mods/tile entites from creating invalid ones for the wrong metadata
  
-             if (!this.worldObj.isRemote)
-@@ -606,6 +635,14 @@
-                 }
-             }
- 
-+            // CraftBukkit start - Remove containers now after cleanup
-+            if (block1 instanceof ITileEntityProvider)
-+            {
-+                extendedblockstorage.func_150818_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_4_);
-+            }
-+
-+            // CraftBukkit end
-+
-             if (extendedblockstorage.getBlockByExtId(p_150807_1_, p_150807_2_ & 15, p_150807_3_) != p_150807_4_)
-             {
-                 return false;
-@@ -768,8 +805,12 @@
+@@ -768,8 +793,12 @@
  
          if (i != this.xPosition || j != this.zPosition)
          {
@@ -100,7 +79,7 @@
          }
  
          int k = MathHelper.floor_double(par1Entity.posY / 16.0D);
-@@ -790,6 +831,28 @@
+@@ -790,6 +819,28 @@
          par1Entity.chunkCoordY = k;
          par1Entity.chunkCoordZ = this.zPosition;
          this.entityLists[k].add(par1Entity);
@@ -129,7 +108,7 @@
      }
  
      public void removeEntity(Entity par1Entity)
-@@ -810,6 +873,28 @@
+@@ -810,6 +861,28 @@
          }
  
          this.entityLists[par2].remove(par1Entity);
@@ -158,7 +137,7 @@
      }
  
      public boolean canBlockSeeTheSky(int par1, int par2, int par3)
-@@ -876,7 +961,16 @@
+@@ -876,7 +949,16 @@
  
              p_150812_4_.validate();
              this.chunkTileEntityMap.put(chunkposition, p_150812_4_);
@@ -175,7 +154,7 @@
      }
  
      public void removeTileEntity(int p_150805_1_, int p_150805_2_, int p_150805_3_)
-@@ -921,12 +1015,28 @@
+@@ -921,12 +1003,28 @@
  
          while (iterator.hasNext())
          {
@@ -205,7 +184,7 @@
              this.worldObj.unloadEntities(this.entityLists[i]);
          }
          MinecraftForge.EVENT_BUS.post(new ChunkEvent.Unload(this));
-@@ -1175,8 +1285,8 @@
+@@ -1175,8 +1273,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getMetadataArray();
@@ -216,7 +195,7 @@
              }
          }
  
-@@ -1185,8 +1295,8 @@
+@@ -1185,8 +1283,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getBlocklightArray();
@@ -227,7 +206,7 @@
              }
          }
  
-@@ -1197,8 +1307,8 @@
+@@ -1197,8 +1295,8 @@
                  if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
                  {
                      nibblearray = this.storageArrays[l].getSkylightArray();
@@ -238,7 +217,7 @@
                  }
              }
          }
-@@ -1220,8 +1330,8 @@
+@@ -1220,8 +1318,8 @@
                          nibblearray = this.storageArrays[l].createBlockMSBArray();
                      }
  
