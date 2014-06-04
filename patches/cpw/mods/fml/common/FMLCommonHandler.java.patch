@@ -1,6 +1,19 @@
 --- ../src-base/minecraft/cpw/mods/fml/common/FMLCommonHandler.java
 +++ ../src-work/minecraft/cpw/mods/fml/common/FMLCommonHandler.java
-@@ -495,7 +495,12 @@
+@@ -384,10 +384,11 @@
+         {
+             return;
+         }
+-        if (handlerSet.contains(handler))
++        if (handlerSet.contains(handler) || worldInfo.getDimension() != 0) // Cauldron - Only check FML data in main world
+         {
+             return;
+         }
++        // Cauldron - logic below should only be run for overworld as Forge/Vanilla only use 1 SaveHandler
+         handlerSet.add(handler);
+         handlerToCheck = new WeakReference<SaveHandler>(handler); // for confirmBackupLevelDatUse
+         Map<String,NBTBase> additionalProperties = Maps.newHashMap();
+@@ -495,7 +496,12 @@
  
      public String getModName()
      {
