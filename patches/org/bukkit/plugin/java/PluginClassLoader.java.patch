@@ -184,7 +184,7 @@
          try {
              Class<?> jarClass;
              try {
-@@ -62,30 +213,261 @@
+@@ -62,30 +213,259 @@
          return findClass(name, true);
      }
  
@@ -195,9 +195,7 @@
 +    public static String getNativeVersion() {
 +        // see https://github.com/mbax/VanishNoPacket/blob/master/src/main/java/org/kitteh/vanish/compat/NMSManager.java
 +        final String packageName = org.bukkit.craftbukkit.CraftServer.class.getPackage().getName();
-+        //if (CauldronUtils.deobfuscatedEnvironment())
-+            return "v1_7_R1";
-+        //else return packageName.substring(packageName.lastIndexOf('.')  + 1);
++        return packageName.substring(packageName.lastIndexOf('.')  + 1);
 +    }
 +
 +    /**
@@ -228,7 +226,7 @@
 +                    null, false);
 +        }
 +        // resolve naming conflict in FML/CB
-+        jarMapping.methods.put("net/minecraft/server/"+obfVersion+"/PlayerConnection/getPlayer ()Lorg/bukkit/craftbukkit/entity/CraftPlayer;", "getPlayerB");
++        jarMapping.methods.put("net/minecraft/server/"+obfVersion+"/PlayerConnection/getPlayer ()Lorg/bukkit/craftbukkit/"+getNativeVersion()+"/entity/CraftPlayer;", "getPlayerB");
 +
 +        // remap bouncycastle to Forge's included copy, not the vanilla obfuscated copy (not in Cauldron), see #133
 +        //jarMapping.packages.put("net/minecraft/"+obfVersion+"/org/bouncycastle", "org/bouncycastle"); No longer needed
@@ -281,23 +279,23 @@
 +            }
 +
 +            if ((flags & F_REMAP_OBC172) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R1", org_bukkit_craftbukkit);
++                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R1", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
 +
 +            if ((flags & F_REMAP_OBC164) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R3", org_bukkit_craftbukkit);
++                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R3", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
 +
 +            if ((flags & F_REMAP_OBC162) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R2", org_bukkit_craftbukkit);
++                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R2", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
 +
 +            if ((flags & F_REMAP_OBC161) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R1", org_bukkit_craftbukkit);
++                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R1", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
 +
 +            if ((flags & F_REMAP_OBC152) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_5_R3", org_bukkit_craftbukkit);
++                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_5_R3", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
 +
 +            if ((flags & F_REMAP_OBCPRE) != 0) {

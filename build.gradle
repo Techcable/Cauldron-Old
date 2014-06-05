@@ -42,6 +42,7 @@ minecraft {
             }
         }
     }
+    srgExtra "PK: org/bukkit/craftbukkit org/bukkit/craftbukkit/v1_7_R1"
 }
 
 group = 'net.minecraftforge'
