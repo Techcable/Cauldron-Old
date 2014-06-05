@@ -29,7 +29,7 @@ public class CauldronConfig
             + "join us at the IRC or drop by our forums and leave a post.\n"
             + "\n"
             + "IRC: #cauldron @ irc.esper.net ( http://webchat.esper.net/?channel=cauldron )\n"
-            + "Forums: http://http://cauldron.minecraftforge.net/\n";
+            + "Forums: http://cauldron.minecraftforge.net/\n";
     
     /* ======================================================================== */
     
