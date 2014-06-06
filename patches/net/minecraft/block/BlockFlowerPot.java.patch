@@ -1,14 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockFlowerPot.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockFlowerPot.java
-@@ -144,6 +144,7 @@
-         if (tileentityflowerpot != null && tileentityflowerpot.getFlowerPotItem() != null)
-         {
-             this.dropBlockAsItem(p_149690_1_, p_149690_2_, p_149690_3_, p_149690_4_, new ItemStack(tileentityflowerpot.getFlowerPotItem(), 1, tileentityflowerpot.getFlowerPotData()));
-+            tileentityflowerpot.func_145964_a(null, 0);   // Spigot
-         }
-     }
- 
-@@ -154,6 +155,7 @@
+@@ -149,6 +149,7 @@
          if (tileentityflowerpot != null && tileentityflowerpot.getFlowerPotItem() != null)
          {
              this.dropBlockAsItem(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, new ItemStack(tileentityflowerpot.getFlowerPotItem(), 1, tileentityflowerpot.getFlowerPotData()));

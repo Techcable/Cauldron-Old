@@ -24,9 +24,9 @@
 -        if (!p_149642_1_.isRemote && p_149642_1_.getGameRules().getGameRuleBooleanValue("doTileDrops"))
 +        if (!p_149642_1_.isRemote && p_149642_1_.getGameRules().getGameRuleBooleanValue("doTileDrops") && !p_149642_1_.restoringBlockStates) // Cauldron do not drop items while restoring blockstates, prevents item dupe)
          {
-             float f = 0.7F;
-             double d0 = (double)(p_149642_1_.rand.nextFloat() * f) + (double)(1.0F - f) * 0.5D;
-@@ -1124,6 +1125,23 @@
+             if (captureDrops.get())
+             {
+@@ -1129,6 +1130,23 @@
          return this;
      }
  

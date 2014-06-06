@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/common/util/EnumHelper.java
 +++ ../src-work/minecraft/net/minecraftforge/common/util/EnumHelper.java
-@@ -19,7 +19,23 @@
+@@ -21,7 +21,23 @@
  import net.minecraft.world.EnumSkyBlock;
  import net.minecraft.world.gen.structure.StructureStrongholdPieces.Stronghold.Door;
  import net.minecraftforge.classloading.FMLForgePlugin;
@@ -24,7 +24,7 @@
  public class EnumHelper
  {
      private static Object reflectionFactory      = null;
-@@ -28,6 +44,7 @@
+@@ -30,6 +46,7 @@
      private static Method newFieldAccessor       = null;
      private static Method fieldAccessorSet       = null;
      private static boolean isSetup               = false;
@@ -32,8 +32,8 @@
  
      //Some enums are decompiled with extra arguments, so lets check for that
      @SuppressWarnings("rawtypes")
-@@ -48,6 +65,67 @@
-         {ToolMaterial.class, int.class, int.class, float.class, float.class, int.class}
+@@ -51,6 +68,67 @@
+         {EnumRarity.class, EnumChatFormatting.class, String.class}
      }; 
  
 +    // Cauldron start
@@ -100,7 +100,7 @@
      public static EnumAction addAction(String name)
      {
          return addEnum(EnumAction.class, name);
-@@ -273,6 +351,86 @@
+@@ -280,6 +358,86 @@
          }
      }
  
