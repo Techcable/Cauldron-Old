@@ -8,7 +8,7 @@
  import net.minecraft.nbt.CompressedStreamTools;
  import net.minecraft.nbt.NBTTagCompound;
  import net.minecraft.server.MinecraftServer;
-@@ -19,6 +20,12 @@
+@@ -19,6 +20,13 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -17,11 +17,12 @@
 +
 +import org.bukkit.craftbukkit.entity.CraftPlayer;
 +// CraftBukkit end
++import cpw.mods.fml.common.registry.GameData; // Cauldron
 +
  public class SaveHandler implements ISaveHandler, IPlayerFileData
  {
      private static final Logger logger = LogManager.getLogger();
-@@ -27,6 +34,7 @@
+@@ -27,6 +35,7 @@
      private final File mapDataDir;
      private final long initializationTime = MinecraftServer.getSystemTimeMillis();
      private final String saveDirectoryName;
@@ -29,7 +30,7 @@
      private static final String __OBFID = "CL_00000585";
  
      public SaveHandler(File par1File, String par2Str, boolean par3)
-@@ -65,7 +73,7 @@
+@@ -65,7 +74,7 @@
          catch (IOException ioexception)
          {
              ioexception.printStackTrace();
@@ -38,7 +39,7 @@
          }
      }
  
-@@ -85,7 +93,7 @@
+@@ -85,7 +94,7 @@
              {
                  if (datainputstream.readLong() != this.initializationTime)
                  {
@@ -47,7 +48,7 @@
                  }
              }
              finally
-@@ -95,7 +103,10 @@
+@@ -95,7 +104,10 @@
          }
          catch (IOException ioexception)
          {
@@ -59,7 +60,25 @@
          }
      }
  
-@@ -267,6 +278,14 @@
+@@ -120,6 +132,17 @@
+                 nbttagcompound1 = nbttagcompound.getCompoundTag("Data");
+                 worldInfo = new WorldInfo(nbttagcompound1);
+                 FMLCommonHandler.instance().handleWorldDataLoad(this, worldInfo, nbttagcompound);
++                // Cauldron start - inject bukkit materials before plugins load
++                if (worldInfo.getDimension() == 0)
++                {
++                    GameData.injectBlockBukkitMaterials();
++                    GameData.injectItemBukkitMaterials();
++                    // since we modify bukkit enums, we need to guarantee that plugins are
++                    // loaded after all mods have been loaded by FML to avoid race conditions.
++                    MinecraftServer.getServer().server.loadPlugins();
++                    MinecraftServer.getServer().server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.STARTUP);
++                }
++                // Cauldron end
+                 return worldInfo;
+             }
+             catch (StartupQuery.AbortedException e)
+@@ -267,6 +290,14 @@
  
          if (nbttagcompound != null)
          {
@@ -74,7 +93,7 @@
              par1EntityPlayer.readFromNBT(nbttagcompound);
          }
  
-@@ -323,4 +342,80 @@
+@@ -323,4 +354,80 @@
      {
          return this.saveDirectoryName;
      }
