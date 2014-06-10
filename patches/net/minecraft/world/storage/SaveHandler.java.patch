@@ -22,15 +22,16 @@
  public class SaveHandler implements ISaveHandler, IPlayerFileData
  {
      private static final Logger logger = LogManager.getLogger();
-@@ -27,6 +35,7 @@
+@@ -27,6 +35,8 @@
      private final File mapDataDir;
      private final long initializationTime = MinecraftServer.getSystemTimeMillis();
      private final String saveDirectoryName;
 +    private UUID uuid = null; // CraftBukkit
++    private static boolean initializedBukkit = false; // Cauldron
      private static final String __OBFID = "CL_00000585";
  
      public SaveHandler(File par1File, String par2Str, boolean par3)
-@@ -65,7 +74,7 @@
+@@ -65,7 +75,7 @@
          catch (IOException ioexception)
          {
              ioexception.printStackTrace();
@@ -39,7 +40,7 @@
          }
      }
  
-@@ -85,7 +94,7 @@
+@@ -85,7 +95,7 @@
              {
                  if (datainputstream.readLong() != this.initializationTime)
                  {
@@ -48,7 +49,7 @@
                  }
              }
              finally
-@@ -95,7 +104,10 @@
+@@ -95,7 +105,10 @@
          }
          catch (IOException ioexception)
          {
@@ -60,25 +61,32 @@
          }
      }
  
-@@ -120,6 +132,17 @@
+@@ -120,6 +133,7 @@
                  nbttagcompound1 = nbttagcompound.getCompoundTag("Data");
                  worldInfo = new WorldInfo(nbttagcompound1);
                  FMLCommonHandler.instance().handleWorldDataLoad(this, worldInfo, nbttagcompound);
-+                // Cauldron start - inject bukkit materials before plugins load
-+                if (worldInfo.getDimension() == 0)
-+                {
-+                    GameData.injectBlockBukkitMaterials();
-+                    GameData.injectItemBukkitMaterials();
-+                    // since we modify bukkit enums, we need to guarantee that plugins are
-+                    // loaded after all mods have been loaded by FML to avoid race conditions.
-+                    MinecraftServer.getServer().server.loadPlugins();
-+                    MinecraftServer.getServer().server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.STARTUP);
-+                }
-+                // Cauldron end
++                this.initBukkitData(worldInfo); // Cauldron
                  return worldInfo;
              }
              catch (StartupQuery.AbortedException e)
-@@ -267,6 +290,14 @@
+@@ -143,6 +157,7 @@
+                 nbttagcompound1 = nbttagcompound.getCompoundTag("Data");
+                 worldInfo = new WorldInfo(nbttagcompound1);
+                 FMLCommonHandler.instance().handleWorldDataLoad(this, worldInfo, nbttagcompound);
++                this.initBukkitData(worldInfo); // Cauldron
+                 return worldInfo;
+             }
+             catch (StartupQuery.AbortedException e)
+@@ -154,7 +169,7 @@
+                 exception.printStackTrace();
+             }
+         }
+-
++        this.initBukkitData(worldInfo); // Cauldron
+         return null;
+     }
+ 
+@@ -267,6 +282,14 @@
  
          if (nbttagcompound != null)
          {
@@ -93,7 +101,7 @@
              par1EntityPlayer.readFromNBT(nbttagcompound);
          }
  
-@@ -323,4 +354,80 @@
+@@ -323,4 +346,97 @@
      {
          return this.saveDirectoryName;
      }
@@ -173,4 +181,21 @@
 +        return playersDirectory;
 +    }
 +    // CraftBukkit end
++
++    // Cauldron start
++    public void initBukkitData(WorldInfo worldInfo)
++    {
++        // inject bukkit materials before plugins load
++        if (!this.initializedBukkit && (worldInfo == null || worldInfo.getDimension() == 0))
++        {
++            GameData.injectBlockBukkitMaterials();
++            GameData.injectItemBukkitMaterials();
++            // since we modify bukkit enums, we need to guarantee that plugins are
++            // loaded after all mods have been loaded by FML to avoid race conditions.
++            MinecraftServer.getServer().server.loadPlugins();
++            MinecraftServer.getServer().server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.STARTUP);
++            this.initializedBukkit = true;
++        }
++    }
++    // Cauldron end
  }
