@@ -9,9 +9,10 @@ import org.bukkit.Bukkit;
 
 public final class Versioning {
     public static String getBukkitVersion() {
-        String result = "Unknown-Version";
+        // Cauldron start - disable file check as we no longer use maven
+        /*String result = "Unknown-Version";
 
-        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/net.minecraftforge.cauldron/cauldron-api/pom.properties"); // Cauldron
+        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/net.minecraftforge.cauldron/cauldron-api/pom.properties");
         Properties properties = new Properties();
 
         if (stream != null) {
@@ -24,6 +25,8 @@ public final class Versioning {
             }
         }
 
-        return result;
+        return result;*/
+        return "1.7.2-R0.4-SNAPSHOT"; // return current Bukkit API version used
+        // Cauldron end
     }
 }
