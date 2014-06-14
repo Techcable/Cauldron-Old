@@ -99,7 +99,6 @@ public class SpigotTimings {
         public final CustomTimingsHandler doTickTiles;
         public final CustomTimingsHandler doVillages;
         public final CustomTimingsHandler doChunkMap;
-        public final CustomTimingsHandler doChunkGC;
         public final CustomTimingsHandler doSounds;
         public final CustomTimingsHandler entityTick;
         public final CustomTimingsHandler tileEntityTick;
@@ -116,7 +115,6 @@ public class SpigotTimings {
             doVillages = new CustomTimingsHandler(name + "doVillages");
             doChunkMap = new CustomTimingsHandler(name + "doChunkMap");
             doSounds = new CustomTimingsHandler(name + "doSounds");
-            doChunkGC = new CustomTimingsHandler(name + "doChunkGC");
             doPortalForcer = new CustomTimingsHandler(name + "doPortalForcer");
             entityTick = new CustomTimingsHandler(name + "entityTick");
             tileEntityTick = new CustomTimingsHandler(name + "tileEntityTick");

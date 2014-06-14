@@ -156,8 +156,6 @@ public final class CraftServer implements Server {
     private int animalSpawn = -1;
     private int waterAnimalSpawn = -1;
     private int ambientSpawn = -1;
-    public int chunkGCPeriod = -1;
-    public int chunkGCLoadThresh = 0;
     private File container;
     private WarningState warningState = WarningState.DEFAULT;
     private final BooleanWrapper online = new BooleanWrapper();
@@ -243,8 +241,6 @@ public final class CraftServer implements Server {
         ambientSpawn = configuration.getInt("spawn-limits.ambient");
         console.autosavePeriod = configuration.getInt("ticks-per.autosave");
         warningState = WarningState.value(configuration.getString("settings.deprecated-verbose"));
-        chunkGCPeriod = configuration.getInt("chunk-gc.period-in-ticks");
-        chunkGCLoadThresh = configuration.getInt("chunk-gc.load-threshold");
         loadIcon();
         net.minecraftforge.cauldron.CauldronConfig.init();
 
@@ -698,8 +694,6 @@ public final class CraftServer implements Server {
         warningState = WarningState.value(configuration.getString("settings.deprecated-verbose"));
         printSaveWarning = false;
         console.autosavePeriod = configuration.getInt("ticks-per.autosave");
-        chunkGCPeriod = configuration.getInt("chunk-gc.period-in-ticks");
-        chunkGCLoadThresh = configuration.getInt("chunk-gc.load-threshold");
         loadIcon();
 
         playerList.getBannedIPs().loadBanList();
@@ -754,6 +748,7 @@ public final class CraftServer implements Server {
                 "This plugin is not properly shutting down its async tasks when it is being reloaded.  This may cause conflicts with the newly loaded version of the plugin"
             ));
         }
+ 
         loadPlugins();
         enablePlugins(PluginLoadOrder.STARTUP);
         enablePlugins(PluginLoadOrder.POSTWORLD);
