@@ -306,7 +306,7 @@
      }
  
      public String allowUserToConnect(SocketAddress p_148542_1_, GameProfile p_148542_2_)
-@@ -361,25 +518,190 @@
+@@ -361,9 +518,166 @@
          return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
      }
  
@@ -462,23 +462,19 @@
 +
      public EntityPlayerMP respawnPlayer(EntityPlayerMP par1EntityPlayerMP, int par2, boolean par3)
      {
-+        return this.moveToWorld(par1EntityPlayerMP, par2, par3, null, true);
++        return this.respawnPlayer(par1EntityPlayerMP, par2, par3, null, true);
 +    }
 +
-+    public EntityPlayerMP moveToWorld(EntityPlayerMP par1EntityPlayerMP, int par2, boolean flag, Location location, boolean avoidSuffocation)
++    public EntityPlayerMP respawnPlayer(EntityPlayerMP par1EntityPlayerMP, int par2, boolean flag, Location location, boolean avoidSuffocation)
 +    {
 +        // Cauldron start - handle canRespawnHere for mods
          World world = mcServer.worldServerForDimension(par2);
 +
-+        boolean canRespawnHere = true;
          if (world == null)
          {
              par2 = 0;
-         }
--        else if (!world.provider.canRespawnHere())
-+        else if (!world.provider.canRespawnHere() && par2 != 0 && par2 != -1 && par2 != 1 && !DimensionManager.isBukkitDimension(par2)) // ignore vanilla
+@@ -372,15 +686,18 @@
          {
-+            canRespawnHere = false;
              par2 = world.provider.getRespawnDimension(par1EntityPlayerMP);
          }
 -
@@ -493,15 +489,13 @@
 -        ChunkCoordinates chunkcoordinates = par1EntityPlayerMP.getBedLocation(par2);
 +        ChunkCoordinates chunkcoordinates = par1EntityPlayerMP.getBedLocation();
          boolean flag1 = par1EntityPlayerMP.isSpawnForced(par2);
-+        // Cauldron start
-+        if (!canRespawnHere)
-+            par1EntityPlayerMP.dimension = par2;
-+        // Cauldron end
-+        /* CraftBukkit start
          par1EntityPlayerMP.dimension = par2;
++        /* CraftBukkit start
++        par1EntityPlayerMP.dimension = par2;
          Object object;
  
-@@ -393,51 +715,214 @@
+         if (this.mcServer.isDemo())
+@@ -393,51 +710,211 @@
          }
  
          EntityPlayerMP entityplayermp1 = new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension), par1EntityPlayerMP.getGameProfile(), (ItemInWorldManager)object);
@@ -529,7 +523,7 @@
 +            boolean isBedSpawn = false;
 +            CraftWorld cworld = (CraftWorld) this.mcServer.server.getWorld(par1EntityPlayerMP.spawnWorld);
 +            // Cauldron start - handle canRespawnHere for mods
-+            if (world != null && !canRespawnHere)
++            if (world != null)
 +            {
 +                cworld = (CraftWorld) mcServer.worldServerForDimension(par2).getWorld(); // make sure to hotload the dimension if it got unloaded
 +                if (chunkcoordinates == null)
@@ -577,10 +571,7 @@
 +            }
 +
 +            // Spigot End
-+            if (canRespawnHere) // Cauldron - avoid plugins changing our respawn location if a forge mod wants a change. Breaks DimensionalDoors respawning in Limbo
-+            {
-+                location = respawnEvent.getRespawnLocation();
-+            }
++            location = respawnEvent.getRespawnLocation();
 +            par1EntityPlayerMP.reset();
          }
 +        else
@@ -720,7 +711,7 @@
 +        exitWorld.theChunkProviderServer.loadChunkOnProvideRequest = true;
 +        exitWorld.getDefaultTeleporter().adjustExit(entityplayermp, exit, velocity); // Should be getTravelAgent
 +        exitWorld.theChunkProviderServer.loadChunkOnProvideRequest = before;
-+        this.moveToWorld(entityplayermp, exitWorld.dimension, true, exit, false); // Vanilla doesn't check for suffocation when handling portals, so neither should we
++        this.respawnPlayer(entityplayermp, exitWorld.dimension, true, exit, false); // Vanilla doesn't check for suffocation when handling portals, so neither should we
 +
 +        if (entityplayermp.motionX != velocity.getX() || entityplayermp.motionY != velocity.getY() || entityplayermp.motionZ != velocity.getZ())
 +        {
@@ -733,7 +724,7 @@
      public void transferPlayerToDimension(EntityPlayerMP par1EntityPlayerMP, int par2)
      {
          transferPlayerToDimension(par1EntityPlayerMP, par2, mcServer.worldServerForDimension(par2).getDefaultTeleporter());
-@@ -465,12 +950,24 @@
+@@ -465,12 +942,24 @@
              PotionEffect potioneffect = (PotionEffect)iterator.next();
              par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S1DPacketEntityEffect(par1EntityPlayerMP.getEntityId(), potioneffect));
          }
@@ -759,7 +750,7 @@
      }
  
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer, Teleporter teleporter)
-@@ -556,6 +1053,192 @@
+@@ -556,6 +1045,192 @@
          par1Entity.setWorld(par4WorldServer);
      }
  
@@ -952,7 +943,7 @@
      public void sendPlayerInfoToAllPlayers()
      {
          if (++this.playerPingIndex > 600)
-@@ -563,11 +1246,13 @@
+@@ -563,11 +1238,13 @@
              this.playerPingIndex = 0;
          }
  
@@ -966,7 +957,7 @@
      }
  
      public void sendPacketToAllPlayers(Packet p_148540_1_)
-@@ -633,11 +1318,29 @@
+@@ -633,11 +1310,29 @@
      public void addOp(String par1Str)
      {
          this.ops.add(par1Str.toLowerCase());
@@ -996,7 +987,7 @@
      }
  
      public boolean isAllowedToLogin(String par1Str)
-@@ -648,6 +1351,7 @@
+@@ -648,6 +1343,7 @@
  
      public boolean isPlayerOpped(String par1Str)
      {
@@ -1004,7 +995,7 @@
          return this.ops.contains(par1Str.trim().toLowerCase()) || this.mcServer.isSinglePlayer() && this.mcServer.worldServers[0].getWorldInfo().areCommandsAllowed() && this.mcServer.getServerOwner().equalsIgnoreCase(par1Str) || this.commandsAllowedForAll;
      }
  
-@@ -810,14 +1514,29 @@
+@@ -810,14 +1506,29 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -1035,7 +1026,7 @@
                  if (d4 * d4 + d5 * d5 + d6 * d6 < p_148543_8_ * p_148543_8_)
                  {
                      entityplayermp.playerNetServerHandler.sendPacket(p_148543_11_);
-@@ -862,16 +1581,19 @@
+@@ -862,16 +1573,19 @@
  
          if (par2WorldServer.isRaining())
          {
@@ -1059,7 +1050,7 @@
          par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(par1EntityPlayerMP.inventory.currentItem));
      }
  
-@@ -887,7 +1609,10 @@
+@@ -887,7 +1601,10 @@
  
      public String[] getAvailablePlayerDat()
      {
@@ -1071,7 +1062,7 @@
      }
  
      public void setWhiteListEnabled(boolean par1)
-@@ -956,12 +1681,31 @@
+@@ -956,12 +1673,31 @@
  
      public void removeAllPlayers()
      {

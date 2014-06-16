@@ -355,7 +355,6 @@ public class CraftWorld implements World {
     // Cauldron start
     public net.minecraft.entity.Entity getEntity(Class<? extends net.minecraft.entity.Entity> clazz, net.minecraft.world.World world)
     {
-        System.out.println("getEntity " + clazz);
         net.minecraft.entity.EntityLiving entity = null;
         try
         {

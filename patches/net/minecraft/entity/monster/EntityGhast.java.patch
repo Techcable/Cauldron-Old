@@ -1,19 +1,18 @@
 --- ../src-base/minecraft/net/minecraft/entity/monster/EntityGhast.java
 +++ ../src-work/minecraft/net/minecraft/entity/monster/EntityGhast.java
-@@ -18,6 +18,12 @@
+@@ -18,6 +18,11 @@
  import net.minecraft.world.EnumDifficulty;
  import net.minecraft.world.World;
  
 +// CraftBukkit start
 +import org.bukkit.craftbukkit.entity.CraftEntity;
-+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 +import org.bukkit.event.entity.EntityTargetEvent;
 +// CraftBukkit end
 +
  public class EntityGhast extends EntityFlying implements IMob
  {
      public int courseChangeCooldown;
-@@ -117,13 +123,50 @@
+@@ -117,13 +122,50 @@
  
          if (this.targetedEntity != null && this.targetedEntity.isDead)
          {
@@ -66,7 +65,7 @@
              if (this.targetedEntity != null)
              {
                  this.aggroCooldown = 20;
-@@ -152,7 +195,8 @@
+@@ -152,7 +194,8 @@
                  {
                      this.worldObj.playAuxSFXAtEntity((EntityPlayer)null, 1008, (int)this.posX, (int)this.posY, (int)this.posZ, 0);
                      EntityLargeFireball entitylargefireball = new EntityLargeFireball(this.worldObj, this, d5, d6, d7);
@@ -76,33 +75,3 @@
                      double d8 = 4.0D;
                      Vec3 vec3 = this.getLook(1.0F);
                      entitylargefireball.posX = this.posX + vec3.xCoord * d8;
-@@ -231,20 +275,25 @@
- 
-     protected void dropFewItems(boolean par1, int par2)
-     {
-+        // CraftBukkit start
-+        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
-         int j = this.rand.nextInt(2) + this.rand.nextInt(1 + par2);
-         int k;
- 
--        for (k = 0; k < j; ++k)
-+        if (j > 0)
-         {
--            this.dropItem(Items.ghast_tear, 1);
-+            loot.add(CraftItemStack.asNewCraftStack(Items.ghast_tear, j));
-         }
- 
-         j = this.rand.nextInt(3) + this.rand.nextInt(1 + par2);
- 
--        for (k = 0; k < j; ++k)
-+        if (j > 0)
-         {
--            this.dropItem(Items.gunpowder, 1);
-+            loot.add(CraftItemStack.asNewCraftStack(Items.gunpowder, j));
-         }
-+
-+        org.bukkit.craftbukkit.event.CraftEventFactory.callEntityDeathEvent(this, loot);
-+        // CraftBukkit end
-     }
- 
-     protected float getSoundVolume()

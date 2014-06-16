@@ -55,17 +55,3 @@
                                      flag = this.worldObj.func_147480_a(j2, k, l, true) || flag;
                                  }
                              }
-@@ -517,8 +539,12 @@
- 
-     protected void dropFewItems(boolean par1, int par2)
-     {
--        this.dropItem(Items.nether_star, 1);
-+        // CraftBukkit start
-+        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
-+        loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(Items.nether_star), 1));
-+        CraftEventFactory.callEntityDeathEvent(this, loot);
- 
-+        // CraftBukkit end
-         if (!this.worldObj.isRemote)
-         {
-             Iterator iterator = this.worldObj.getEntitiesWithinAABB(EntityPlayer.class, this.boundingBox.expand(50.0D, 100.0D, 50.0D)).iterator();

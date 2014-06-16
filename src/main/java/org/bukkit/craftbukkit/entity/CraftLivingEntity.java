@@ -72,11 +72,13 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
             throw new IllegalArgumentException("Health must be between 0 and " + getMaxHealth());
         }
 
+        // Cauldron start - setHealth must be set before onDeath to respect events that may prevent death.
+        getHandle().setHealth((float) health);
+
         if (entity instanceof net.minecraft.entity.player.EntityPlayerMP && health == 0) {
             ((net.minecraft.entity.player.EntityPlayerMP) entity).onDeath(net.minecraft.util.DamageSource.generic);
         }
-
-        getHandle().setHealth((float) health);
+        // Cauldron end
     }
 
     public double getMaxHealth() {

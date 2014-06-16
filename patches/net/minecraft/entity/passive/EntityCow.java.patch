@@ -1,56 +1,18 @@
 --- ../src-base/minecraft/net/minecraft/entity/passive/EntityCow.java
 +++ ../src-work/minecraft/net/minecraft/entity/passive/EntityCow.java
-@@ -17,6 +17,12 @@
+@@ -17,6 +17,11 @@
  import net.minecraft.item.ItemStack;
  import net.minecraft.world.World;
  
 +// CraftBukkit start
 +import org.bukkit.craftbukkit.event.CraftEventFactory;
 +import org.bukkit.craftbukkit.inventory.CraftItemStack;
-+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 +// CraftBukkit end
 +
  public class EntityCow extends EntityAnimal
  {
      private static final String __OBFID = "CL_00001640";
-@@ -80,27 +86,25 @@
- 
-     protected void dropFewItems(boolean par1, int par2)
-     {
-+        // CraftBukkit start - Whole method
-+        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
-         int j = this.rand.nextInt(3) + this.rand.nextInt(1 + par2);
-         int k;
- 
--        for (k = 0; k < j; ++k)
-+        if (j > 0)
-         {
--            this.dropItem(Items.leather, 1);
-+            loot.add(new org.bukkit.inventory.ItemStack(CraftMagicNumbers.getMaterial(Items.leather), j));
-         }
- 
-         j = this.rand.nextInt(3) + 1 + this.rand.nextInt(1 + par2);
- 
--        for (k = 0; k < j; ++k)
-+        if (j > 0)
-         {
--            if (this.isBurning())
--            {
--                this.dropItem(Items.cooked_beef, 1);
--            }
--            else
--            {
--                this.dropItem(Items.beef, 1);
--            }
-+            loot.add(new org.bukkit.inventory.ItemStack(this.isBurning() ? CraftMagicNumbers.getMaterial(Items.cooked_beef) : CraftMagicNumbers.getMaterial(Items.beef), j));
-         }
-+
-+        CraftEventFactory.callEntityDeathEvent(this, loot);
-+        // CraftBukkit end
-     }
- 
-     public boolean interact(EntityPlayer par1EntityPlayer)
-@@ -109,15 +113,25 @@
+@@ -109,15 +114,25 @@
  
          if (itemstack != null && itemstack.getItem() == Items.bucket && !par1EntityPlayer.capabilities.isCreativeMode)
          {

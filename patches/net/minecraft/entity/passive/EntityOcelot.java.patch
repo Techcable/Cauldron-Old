@@ -9,19 +9,7 @@
      }
  
      public boolean isAIEnabled()
-@@ -161,7 +161,10 @@
-         }
-     }
- 
--    protected void dropFewItems(boolean par1, int par2) {}
-+    protected void dropFewItems(boolean par1, int par2)
-+    {
-+        org.bukkit.craftbukkit.event.CraftEventFactory.callEntityDeathEvent(this); // CraftBukkit - Call EntityDeathEvent
-+    }
- 
-     public boolean interact(EntityPlayer par1EntityPlayer)
-     {
-@@ -188,7 +191,8 @@
+@@ -188,7 +188,8 @@
  
              if (!this.worldObj.isRemote)
              {

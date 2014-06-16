@@ -9,24 +9,8 @@
  public class EntitySquid extends EntityWaterMob
  {
      public float squidPitch;
-@@ -71,18 +73,25 @@
- 
-     protected void dropFewItems(boolean par1, int par2)
-     {
--        int j = this.rand.nextInt(3 + par2) + 1;
-+        // CraftBukkit start - Whole method
-+        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
-+        int count = this.rand.nextInt(3 + par2) + 1;
- 
--        for (int k = 0; k < j; ++k)
-+        if (count > 0)
-         {
--            this.entityDropItem(new ItemStack(Items.dye, 1, 0), 0.0F);
-+            loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.Material.INK_SACK, count));
+@@ -79,10 +81,12 @@
          }
-+
-+        org.bukkit.craftbukkit.event.CraftEventFactory.callEntityDeathEvent(this, loot);
-+        // CraftBukkit end
      }
  
 +    /* CraftBukkit start - Delegate to Entity to use existing inWater value
@@ -38,7 +22,7 @@
  
      public void onLivingUpdate()
      {
-@@ -137,10 +146,12 @@
+@@ -137,10 +141,12 @@
              }
  
              f = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);

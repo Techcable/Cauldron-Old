@@ -21,25 +21,7 @@
      }
  
      protected boolean isAIEnabled()
-@@ -101,10 +108,16 @@
- 
-     protected void dropFewItems(boolean par1, int par2)
-     {
-+        // CraftBukkit start - Whole method
-+        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
-+
-         if (!this.getSheared())
-         {
--            this.entityDropItem(new ItemStack(Item.getItemFromBlock(Blocks.wool), 1, this.getFleeceColor()), 0.0F);
-+            loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.Material.WOOL, 1, (short) 0, (byte) this.getFleeceColor()));
-         }
-+
-+        org.bukkit.craftbukkit.event.CraftEventFactory.callEntityDeathEvent(this, loot);
-+        // CraftBukkit end
-     }
- 
-     protected Item getDropItem()
-@@ -127,6 +140,38 @@
+@@ -127,6 +134,38 @@
  
      public boolean interact(EntityPlayer par1EntityPlayer)
      {
@@ -78,7 +60,7 @@
          return super.interact(par1EntityPlayer);
      }
  
-@@ -231,8 +276,17 @@
+@@ -231,8 +270,17 @@
  
      public void eatGrassBonus()
      {
