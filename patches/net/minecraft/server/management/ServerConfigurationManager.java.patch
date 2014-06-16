@@ -306,7 +306,7 @@
      }
  
      public String allowUserToConnect(SocketAddress p_148542_1_, GameProfile p_148542_2_)
-@@ -361,9 +518,166 @@
+@@ -361,26 +518,186 @@
          return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
      }
  
@@ -473,7 +473,9 @@
          if (world == null)
          {
              par2 = 0;
-@@ -372,15 +686,18 @@
+         }
+-        else if (!world.provider.canRespawnHere())
++        else if (!world.provider.canRespawnHere() && DimensionManager.getProviderType(world.provider.getClass()) > 1) // ignore vanilla providers
          {
              par2 = world.provider.getRespawnDimension(par1EntityPlayerMP);
          }
@@ -487,7 +489,7 @@
          this.playerEntityList.remove(par1EntityPlayerMP);
          this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension).removePlayerEntityDangerously(par1EntityPlayerMP);
 -        ChunkCoordinates chunkcoordinates = par1EntityPlayerMP.getBedLocation(par2);
-+        ChunkCoordinates chunkcoordinates = par1EntityPlayerMP.getBedLocation();
++        ChunkCoordinates bedSpawnChunkCoords = par1EntityPlayerMP.getBedLocation(par2);
          boolean flag1 = par1EntityPlayerMP.isSpawnForced(par2);
          par1EntityPlayerMP.dimension = par2;
 +        /* CraftBukkit start
@@ -495,7 +497,7 @@
          Object object;
  
          if (this.mcServer.isDemo())
-@@ -393,51 +710,211 @@
+@@ -393,51 +710,243 @@
          }
  
          EntityPlayerMP entityplayermp1 = new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension), par1EntityPlayerMP.getGameProfile(), (ItemInWorldManager)object);
@@ -514,31 +516,37 @@
 +        // WorldServer worldserver = this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension); // CraftBukkit - handled later
 +        // this.func_72381_a(entityplayermp1, par1EntityPlayerMP, worldserver); // CraftBukkit - removed
          ChunkCoordinates chunkcoordinates1;
- 
+-
 -        if (chunkcoordinates != null)
 +        // CraftBukkit start
 +        if (location == null)
          {
 -            chunkcoordinates1 = EntityPlayer.verifyRespawnCoordinates(this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension), chunkcoordinates, flag1);
 +            boolean isBedSpawn = false;
-+            CraftWorld cworld = (CraftWorld) this.mcServer.server.getWorld(par1EntityPlayerMP.spawnWorld);
-+            // Cauldron start - handle canRespawnHere for mods
-+            if (world != null)
++            // Cauldron start - add compatibility for mods
++            CraftWorld cworld = null;
++            if (world.provider.canRespawnHere()) // Fixes Mystcraft age trapping
 +            {
-+                cworld = (CraftWorld) mcServer.worldServerForDimension(par2).getWorld(); // make sure to hotload the dimension if it got unloaded
-+                if (chunkcoordinates == null)
++                cworld = (CraftWorld) mcServer.worldServerForDimension(par2).getWorld();
++                // make sure spawnWorld is set correctly
++                if (cworld != null) par1EntityPlayerMP.spawnWorld = cworld.getName();
++                if (bedSpawnChunkCoords == null) // if there is no current saved bed location, revert to spawnpoint
 +                {
 +                    location = new Location(cworld, cworld.getSpawnLocation().getX() + 0.5, cworld.getSpawnLocation().getY(), cworld.getSpawnLocation().getZ() + 0.5); // use the spawnpoint as location
 +                }
 +            }
++            if (cworld == null)
++            {
++                cworld = (CraftWorld) this.mcServer.server.getWorld(par1EntityPlayerMP.spawnWorld);
++            }
 +            // Cauldron end
  
 -            if (chunkcoordinates1 != null)
-+            if (cworld != null && chunkcoordinates != null)
++            if (cworld != null && bedSpawnChunkCoords != null)
              {
 -                entityplayermp1.setLocationAndAngles((double)((float)chunkcoordinates1.posX + 0.5F), (double)((float)chunkcoordinates1.posY + 0.1F), (double)((float)chunkcoordinates1.posZ + 0.5F), 0.0F, 0.0F);
 -                entityplayermp1.setSpawnChunk(chunkcoordinates, flag1);
-+                chunkcoordinates1 = EntityPlayer.verifyRespawnCoordinates(cworld.getHandle(), chunkcoordinates, flag1);
++                chunkcoordinates1 = EntityPlayer.verifyRespawnCoordinates(cworld.getHandle(), bedSpawnChunkCoords, flag1);
 +
 +                if (chunkcoordinates1 != null)
 +                {
@@ -557,8 +565,18 @@
              {
 -                entityplayermp1.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(0, 0.0F));
 +                cworld = (CraftWorld) this.mcServer.server.getWorlds().get(0);
-+                chunkcoordinates = cworld.getHandle().getSpawnPoint();
-+                location = new Location(cworld, chunkcoordinates.posX + 0.5, chunkcoordinates.posY, chunkcoordinates.posZ + 0.5);
++                // Cauldron start
++                if (bedSpawnChunkCoords != null)
++                {
++                    isBedSpawn = true;
++                }
++                else
++                {
++                    bedSpawnChunkCoords = cworld.getHandle().getSpawnPoint();
++                    if (bedSpawnChunkCoords == null) bedSpawnChunkCoords = par1EntityPlayerMP.getBedLocation(0);
++                }
++                // Cauldron end
++                location = new Location(cworld, bedSpawnChunkCoords.posX + 0.5, bedSpawnChunkCoords.posY, bedSpawnChunkCoords.posZ + 0.5);
              }
 +
 +            Player respawnPlayer = this.cserver.getPlayer(entityplayermp1);
@@ -576,16 +594,33 @@
          }
 +        else
 +        {
++            // Cauldron start - make sure to use bed locations if one is found. Fixes issue with leaving End to a bed spawn
++            CraftWorld cworld = (CraftWorld) mcServer.worldServerForDimension(par2).getWorld();
 +            location.setWorld(this.mcServer.worldServerForDimension(par2).getWorld());
-+        }
++            if (bedSpawnChunkCoords != null)
++            {
++                chunkcoordinates1 = EntityPlayer.verifyRespawnCoordinates(this.mcServer.worldServerForDimension(entityplayermp1.dimension), bedSpawnChunkCoords, flag1);
  
 -        worldserver.theChunkProviderServer.loadChunk((int)entityplayermp1.posX >> 4, (int)entityplayermp1.posZ >> 4);
++                if (chunkcoordinates1 != null)
++                {
++                    location = new Location(cworld, chunkcoordinates1.posX + 0.5, chunkcoordinates1.posY, chunkcoordinates1.posZ + 0.5);
++                }
++                else
++                {
++                    entityplayermp1.setSpawnChunk(null, true);
++                    entityplayermp1.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(0, 0));
++                }
++            }
++            // Cauldron end
++        }
+ 
+-        while (!worldserver.getCollidingBoundingBoxes(entityplayermp1, entityplayermp1.boundingBox).isEmpty())
 +        WorldServer worldserver = ((CraftWorld) location.getWorld()).getHandle();
 +        entityplayermp1.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 +        // CraftBukkit end
 +        worldserver.theChunkProviderServer.loadChunk((int) entityplayermp1.posX >> 4, (int) entityplayermp1.posZ >> 4);
- 
--        while (!worldserver.getCollidingBoundingBoxes(entityplayermp1, entityplayermp1.boundingBox).isEmpty())
++
 +        while (avoidSuffocation && !worldserver.getCollidingBoundingBoxes(entityplayermp1, entityplayermp1.boundingBox).isEmpty())   // CraftBukkit
          {
              entityplayermp1.setPosition(entityplayermp1.posX, entityplayermp1.posY + 1.0D, entityplayermp1.posZ);
@@ -724,7 +759,7 @@
      public void transferPlayerToDimension(EntityPlayerMP par1EntityPlayerMP, int par2)
      {
          transferPlayerToDimension(par1EntityPlayerMP, par2, mcServer.worldServerForDimension(par2).getDefaultTeleporter());
-@@ -465,12 +942,24 @@
+@@ -465,12 +974,24 @@
              PotionEffect potioneffect = (PotionEffect)iterator.next();
              par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S1DPacketEntityEffect(par1EntityPlayerMP.getEntityId(), potioneffect));
          }
@@ -750,7 +785,7 @@
      }
  
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer, Teleporter teleporter)
-@@ -556,6 +1045,192 @@
+@@ -556,6 +1077,192 @@
          par1Entity.setWorld(par4WorldServer);
      }
  
@@ -943,7 +978,7 @@
      public void sendPlayerInfoToAllPlayers()
      {
          if (++this.playerPingIndex > 600)
-@@ -563,11 +1238,13 @@
+@@ -563,11 +1270,13 @@
              this.playerPingIndex = 0;
          }
  
@@ -957,7 +992,7 @@
      }
  
      public void sendPacketToAllPlayers(Packet p_148540_1_)
-@@ -633,11 +1310,29 @@
+@@ -633,11 +1342,29 @@
      public void addOp(String par1Str)
      {
          this.ops.add(par1Str.toLowerCase());
@@ -987,7 +1022,7 @@
      }
  
      public boolean isAllowedToLogin(String par1Str)
-@@ -648,6 +1343,7 @@
+@@ -648,6 +1375,7 @@
  
      public boolean isPlayerOpped(String par1Str)
      {
@@ -995,7 +1030,7 @@
          return this.ops.contains(par1Str.trim().toLowerCase()) || this.mcServer.isSinglePlayer() && this.mcServer.worldServers[0].getWorldInfo().areCommandsAllowed() && this.mcServer.getServerOwner().equalsIgnoreCase(par1Str) || this.commandsAllowedForAll;
      }
  
-@@ -810,14 +1506,29 @@
+@@ -810,14 +1538,29 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -1026,7 +1061,7 @@
                  if (d4 * d4 + d5 * d5 + d6 * d6 < p_148543_8_ * p_148543_8_)
                  {
                      entityplayermp.playerNetServerHandler.sendPacket(p_148543_11_);
-@@ -862,16 +1573,19 @@
+@@ -862,16 +1605,19 @@
  
          if (par2WorldServer.isRaining())
          {
@@ -1050,7 +1085,7 @@
          par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(par1EntityPlayerMP.inventory.currentItem));
      }
  
-@@ -887,7 +1601,10 @@
+@@ -887,7 +1633,10 @@
  
      public String[] getAvailablePlayerDat()
      {
@@ -1062,7 +1097,7 @@
      }
  
      public void setWhiteListEnabled(boolean par1)
-@@ -956,12 +1673,31 @@
+@@ -956,12 +1705,31 @@
  
      public void removeAllPlayers()
      {
