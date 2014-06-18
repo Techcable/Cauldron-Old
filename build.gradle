@@ -49,7 +49,8 @@ group = 'net.minecraftforge'
 ext.mcVersion = "1.7.2"
 ext.cauldronVersion = "1"
 ext.forgeVersion = "1126"
-version = "${mcVersion}-${cauldronVersion}.${forgeVersion}.${getBuild()}"
+ext.bukkitVersion = "04"
+version = "${mcVersion}-${cauldronVersion}.${forgeVersion}.${bukkitVersion}.${getBuild()}"
 
 jenkins {
     job = 'Cauldron'
