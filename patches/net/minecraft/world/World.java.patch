@@ -186,8 +186,8 @@
 +
 +    public static long chunkToKey(int x, int z)
 +    {
-+        long k = ((((long) x) & 0xFFFF0000L) << 16) | ((((long) x) & 0x0000FFFFL) << 0);
-+        k     |= ((((long) z) & 0xFFFF0000L) << 32) | ((((long) z) & 0x0000FFFFL) << 16);
++        long k = ((((long)x) & 0xFFFF0000L) << 16) | ((((long)x) & 0x0000FFFFL) << 0);
++        k |= ((((long)z) & 0xFFFF0000L) << 32) | ((((long)z) & 0x0000FFFFL) << 16);
 +        return k;
 +    }
 +
@@ -863,7 +863,7 @@
          this.onEntityRemoved(par1Entity);
      }
  
-@@ -1387,32 +1927,48 @@
+@@ -1387,35 +1927,53 @@
          int l = MathHelper.floor_double(par2AxisAlignedBB.maxY + 1.0D);
          int i1 = MathHelper.floor_double(par2AxisAlignedBB.minZ);
          int j1 = MathHelper.floor_double(par2AxisAlignedBB.maxZ + 1.0D);
@@ -926,7 +926,12 @@
          double d0 = 0.25D;
          List list = this.getEntitiesWithinAABBExcludingEntity(par1Entity, par2AxisAlignedBB.expand(d0, d0, d0));
  
-@@ -1746,11 +2302,37 @@
++        //net.minecraftforge.cauldron.CauldronHooks.logEntitySize(this, par1Entity, list); // Cauldron add logging for entity collisions
++
+         for (int j2 = 0; j2 < list.size(); ++j2)
+         {
+             AxisAlignedBB axisalignedbb1 = ((Entity)list.get(j2)).getBoundingBox();
+@@ -1746,11 +2304,37 @@
          Entity entity;
          CrashReport crashreport;
          CrashReportCategory crashreportcategory;
@@ -965,7 +970,7 @@
              try
              {
                  ++entity.ticksExisted;
-@@ -1787,6 +2369,7 @@
+@@ -1787,6 +2371,7 @@
              }
          }
  
@@ -973,7 +978,7 @@
          this.theProfiler.endStartSection("remove");
          this.loadedEntityList.removeAll(this.unloadedEntityList);
          int j;
-@@ -1811,11 +2394,30 @@
+@@ -1811,11 +2396,30 @@
  
          this.unloadedEntityList.clear();
          this.theProfiler.endStartSection("regular");
@@ -1006,7 +1011,7 @@
              if (entity.ridingEntity != null)
              {
                  if (!entity.ridingEntity.isDead && entity.ridingEntity.riddenByEntity == entity)
-@@ -1833,7 +2435,9 @@
+@@ -1833,7 +2437,9 @@
              {
                  try
                  {
@@ -1016,7 +1021,7 @@
                  }
                  catch (Throwable throwable1)
                  {
-@@ -1866,29 +2470,62 @@
+@@ -1866,29 +2472,62 @@
                      this.getChunkFromChunkCoords(j, l).removeEntity(entity);
                  }
  
@@ -1054,7 +1059,7 @@
 +            // CraftBukkit start - Don't tick entities in chunks queued for unload
 +            ChunkProviderServer chunkProviderServer = ((WorldServer) this).theChunkProviderServer;
 +            if (!isActiveBlockCoord(tileentity.xCoord, tileentity.zCoord)) continue; // Cauldron don't tick inactive chunks
-+            if (chunkProviderServer.chunksToUnload.contains(tileentity.xCoord >> 4, tileentity.zCoord >> 4))
++            if (chunkProviderServer.chunksToUnload.contains(chunkToKey(tileentity.xCoord >> 4, tileentity.zCoord >> 4)))
 +            {
 +                continue;
 +            }
@@ -1082,7 +1087,7 @@
                      crashreport = CrashReport.makeCrashReport(throwable, "Ticking block entity");
                      crashreportcategory = crashreport.makeCategory("Block entity being ticked");
                      tileentity.func_145828_a(crashreportcategory);
-@@ -1921,6 +2558,10 @@
+@@ -1921,6 +2560,10 @@
              }
          }
  
@@ -1093,7 +1098,7 @@
          if (!this.field_147483_b.isEmpty())
          {
              for (Object tile : field_147483_b)
-@@ -1965,16 +2606,20 @@
+@@ -1965,16 +2608,20 @@
              this.addedTileEntityList.clear();
          }
  
@@ -1117,7 +1122,7 @@
          }
      }
  
-@@ -1990,16 +2635,26 @@
+@@ -1990,16 +2637,26 @@
          boolean isForced = getPersistentChunks().containsKey(new ChunkCoordIntPair(i >> 4, j >> 4));
          byte b0 = isForced ? (byte)0 : 32;
          boolean canUpdate = !par2 || this.checkChunksExist(i - b0, 0, j - b0, i + b0, 0, j + b0);
@@ -1146,7 +1151,7 @@
              par1Entity.lastTickPosX = par1Entity.posX;
              par1Entity.lastTickPosY = par1Entity.posY;
              par1Entity.lastTickPosZ = par1Entity.posZ;
-@@ -2083,6 +2738,8 @@
+@@ -2083,6 +2740,8 @@
                      par1Entity.riddenByEntity = null;
                  }
              }
@@ -1155,7 +1160,7 @@
          }
      }
  
-@@ -2278,6 +2935,7 @@
+@@ -2278,6 +2937,7 @@
                  par3Entity.motionZ += vec3.zCoord * d1;
              }
  
@@ -1163,7 +1168,7 @@
              return flag;
          }
      }
-@@ -2369,6 +3027,7 @@
+@@ -2369,6 +3029,7 @@
          double d2 = 1.0D / ((par2AxisAlignedBB.maxZ - par2AxisAlignedBB.minZ) * 2.0D + 1.0D);
          int i = 0;
          int j = 0;
@@ -1171,7 +1176,7 @@
  
          for (float f = 0.0F; f <= 1.0F; f = (float)((double)f + d0))
          {
-@@ -2390,7 +3049,8 @@
+@@ -2390,7 +3051,8 @@
              }
          }
  
@@ -1181,7 +1186,7 @@
      }
  
      public boolean extinguishFire(EntityPlayer par1EntityPlayer, int par2, int par3, int par4, int par5)
-@@ -2510,7 +3170,7 @@
+@@ -2510,7 +3172,7 @@
              return;
          }
  
@@ -1190,7 +1195,7 @@
          {
              if (this.field_147481_N)
              {
-@@ -2658,7 +3318,16 @@
+@@ -2658,7 +3320,16 @@
  
                      if (i <= 0)
                      {
@@ -1208,7 +1213,7 @@
                      }
                  }
  
-@@ -2694,7 +3363,16 @@
+@@ -2694,7 +3365,16 @@
  
                      if (j <= 0)
                      {
@@ -1226,7 +1231,7 @@
                      }
                  }
  
-@@ -2716,28 +3394,72 @@
+@@ -2716,28 +3396,72 @@
  
      protected void setActivePlayerChunksAndCheckLight()
      {
@@ -1307,7 +1312,7 @@
          }
  
          this.theProfiler.endSection();
-@@ -2749,7 +3471,7 @@
+@@ -2749,7 +3473,7 @@
  
          this.theProfiler.startSection("playerCheckLight");
  
@@ -1316,7 +1321,7 @@
          {
              i = this.rand.nextInt(this.playerEntities.size());
              entityplayer = (EntityPlayer)this.playerEntities.get(i);
-@@ -3221,8 +3943,21 @@
+@@ -3221,8 +3945,21 @@
          {
              Entity entity = (Entity)this.loadedEntityList.get(j);
  
@@ -1339,7 +1344,7 @@
                  ++i;
              }
          }
-@@ -3251,8 +3986,14 @@
+@@ -3251,8 +3988,14 @@
      public boolean canPlaceEntityOnSide(Block p_147472_1_, int p_147472_2_, int p_147472_3_, int p_147472_4_, boolean p_147472_5_, int p_147472_6_, Entity p_147472_7_, ItemStack p_147472_8_)
      {
          Block block1 = this.getBlock(p_147472_2_, p_147472_3_, p_147472_4_);
@@ -1355,7 +1360,7 @@
      }
  
      public PathEntity getPathEntityToEntity(Entity par1Entity, Entity par2Entity, float par3, boolean par4, boolean par5, boolean par6, boolean par7)
-@@ -3400,7 +4141,15 @@
+@@ -3400,7 +4143,15 @@
  
          for (int i = 0; i < this.playerEntities.size(); ++i)
          {
@@ -1372,7 +1377,7 @@
              double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
  
              if ((par7 < 0.0D || d5 < par7 * par7) && (d4 == -1.0D || d5 < d4))
-@@ -3425,8 +4174,16 @@
+@@ -3425,8 +4176,16 @@
  
          for (int i = 0; i < this.playerEntities.size(); ++i)
          {
@@ -1390,7 +1395,7 @@
              if (!entityplayer1.capabilities.disableDamage && entityplayer1.isEntityAlive())
              {
                  double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
-@@ -3580,6 +4337,18 @@
+@@ -3580,6 +4339,18 @@
  
      public void updateAllPlayersSleepingFlag() {}
  
@@ -1409,7 +1414,7 @@
      public float getWeightedThunderStrength(float par1)
      {
          return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * par1) * this.getRainStrength(par1);
-@@ -3857,8 +4626,8 @@
+@@ -3857,8 +4628,8 @@
       */
      public void addTileEntity(TileEntity entity)
      {
@@ -1420,7 +1425,7 @@
          {
              dest.add(entity);
          }
-@@ -3954,4 +4723,43 @@
+@@ -3954,4 +4725,43 @@
          }
          return count;
      }

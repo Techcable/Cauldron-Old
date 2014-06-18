@@ -129,7 +129,7 @@
          {
              this.prevRotationYaw = this.rotationYaw = this.riddenByEntity.rotationYaw;
              this.rotationPitch = this.riddenByEntity.rotationPitch * 0.5F;
-@@ -1277,6 +1321,7 @@
+@@ -1278,6 +1322,7 @@
          par1NBTTagCompound.setInteger("Temper", this.getTemper());
          par1NBTTagCompound.setBoolean("Tame", this.isTame());
          par1NBTTagCompound.setString("OwnerName", this.getOwnerName());
@@ -137,7 +137,7 @@
  
          if (this.isChested())
          {
-@@ -1326,6 +1371,13 @@
+@@ -1327,6 +1372,13 @@
              this.setOwnerName(par1NBTTagCompound.getString("OwnerName"));
          }
  
@@ -151,7 +151,7 @@
          IAttributeInstance iattributeinstance = this.getAttributeMap().getAttributeInstanceByName("Speed");
  
          if (iattributeinstance != null)
-@@ -1561,28 +1613,38 @@
+@@ -1562,28 +1614,38 @@
          return true;
      }
  

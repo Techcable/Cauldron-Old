@@ -38,9 +38,9 @@
 +                    PlayerTeleportEvent teleEvent = new PlayerTeleportEvent(player, player.getLocation(), location, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
 +                    Bukkit.getPluginManager().callEvent(teleEvent);
  
--                    this.getThrower().setPositionAndUpdate(this.posX, this.posY, this.posZ);
+-                    this.getThrower().setPositionAndUpdate(event.targetX, event.targetY, event.targetZ);
 -                    this.getThrower().fallDistance = 0.0F;
--                    this.getThrower().attackEntityFrom(DamageSource.fall, 5.0F);
+-                    this.getThrower().attackEntityFrom(DamageSource.fall, event.attackDamage);
 +                    if (!teleEvent.isCancelled() && !entityplayermp.playerNetServerHandler.isDisconnected())
 +                    {
 +                        entityplayermp.playerNetServerHandler.teleport(teleEvent.getTo());

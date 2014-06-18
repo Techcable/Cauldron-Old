@@ -1,96 +1,14 @@
 --- ../src-base/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
 +++ ../src-work/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
-@@ -48,8 +48,53 @@
-         this.chunkSaveLocation = par1File;
-     }
- 
--    public Chunk loadChunk(World par1World, int par2, int par3) throws IOException
-+    // CraftBukkit start
-+    public boolean chunkExists(World world, int i, int j)
-     {
-+        ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(i, j);
-+
-+        synchronized (this.syncLockObject)
-+        {
-+            if (this.pendingAnvilChunksCoordinates.contains(chunkcoordintpair))
-+            {
-+                for (int k = 0; k < this.chunksToRemove.size(); ++k)
-+                {
-+                    if (((PendingChunk) this.chunksToRemove.get(k)).chunkCoordinate.equals(chunkcoordintpair))
-+                    {
-+                        return true;
-+                    }
-+                }
-+            }
-+        }
-+
-+        return RegionFileCache.createOrLoadRegionFile(this.chunkSaveLocation, i, j).chunkExists(i & 31, j & 31);
-+    }
-+    // CraftBukkit end
-+
-+    // CraftBukkit start - Add async variant, provide compatibility
-+
-+    /**
-+     * Loads the specified(XZ) chunk into the specified world.
-+     */
-+    public Chunk loadChunk(World par1World, int par2, int par3)
-+    {
-+        Object[] data = this.loadChunk__Async_CB(par1World, par2, par3); // Cauldron
-+
-+        if (data != null)
-+        {
-+            Chunk chunk = (Chunk) data[0];
-+            NBTTagCompound nbttagcompound = (NBTTagCompound) data[1];
-+            this.loadEntities(chunk, nbttagcompound.getCompoundTag("Level"), par1World);
+@@ -80,6 +80,7 @@
+             Chunk chunk = (Chunk) data[0];
+             NBTTagCompound nbttagcompound = (NBTTagCompound) data[1];
+             this.loadEntities(par1World, nbttagcompound.getCompoundTag("Level"), chunk);
 +            MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, nbttagcompound)); // Cauldron - Don't call ChunkDataEvent.Load async
-+            return chunk;
-+        }
-+
-+        return null;
-+    }
-+
-+    public Object[] loadChunk__Async_CB(World par1World, int par2, int par3)
-+    {
-+        // CraftBukkit end
-         NBTTagCompound nbttagcompound = null;
-         ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(par2, par3);
-         Object object = this.syncLockObject;
-@@ -60,9 +105,9 @@
-             {
-                 for (int k = 0; k < this.chunksToRemove.size(); ++k)
-                 {
--                    if (((AnvilChunkLoader.PendingChunk)this.chunksToRemove.get(k)).chunkCoordinate.equals(chunkcoordintpair))
-+                    if (((PendingChunk) this.chunksToRemove.get(k)).chunkCoordinate.equals(chunkcoordintpair))
-                     {
--                        nbttagcompound = ((AnvilChunkLoader.PendingChunk)this.chunksToRemove.get(k)).nbtTags;
-+                        nbttagcompound = ((PendingChunk) this.chunksToRemove.get(k)).nbtTags;
-                         break;
-                     }
-                 }
-@@ -78,13 +123,19 @@
-                 return null;
-             }
- 
--            nbttagcompound = CompressedStreamTools.read(datainputstream);
-+            // Cauldron start - catch exception for MCP binary compatibility
-+            try {
-+                nbttagcompound = CompressedStreamTools.read(datainputstream);
-+            } catch (Throwable t) {
-+                t.printStackTrace();
-+            }
-+            // Cauldron end
+             return chunk;
          }
  
--        return this.checkedReadChunkFromNBT(par1World, par2, par3, nbttagcompound);
-+        return this.checkedReadChunkFromNBT_CB(par1World, par2, par3, nbttagcompound);
-     }
- 
--    protected Chunk checkedReadChunkFromNBT(World par1World, int par2, int par3, NBTTagCompound par4NBTTagCompound)
-+    protected Object[] checkedReadChunkFromNBT_CB(World par1World, int par2, int par3, NBTTagCompound par4NBTTagCompound) // CraftBukkit - return Chunk -> Object[]
-     {
-         if (!par4NBTTagCompound.hasKey("Level", 10))
-         {
-@@ -103,20 +154,51 @@
+@@ -156,8 +157,8 @@
              if (!chunk.isAtLocation(par2, par3))
              {
                  logger.error("Chunk file at " + par2 + "," + par3 + " is in the wrong location; relocating. (Expected " + par2 + ", " + par3 + ", got " + chunk.xPosition + ", " + chunk.zPosition + ")");
@@ -98,39 +16,12 @@
 -                par4NBTTagCompound.setInteger("zPos", par3);
 +                par4NBTTagCompound.getCompoundTag("Level").setInteger("xPos", par2); // CraftBukkit - .getCompound("Level")
 +                par4NBTTagCompound.getCompoundTag("Level").setInteger("zPos", par3); // CraftBukkit - .getCompound("Level")
-+                // CraftBukkit start - Have to move tile entities since we don't load them at this stage
-+                NBTTagList tileEntities = par4NBTTagCompound.getCompoundTag("Level").getTagList("TileEntities", 10);
-+
-+                if (tileEntities != null)
-+                {
-+                    for (int te = 0; te < tileEntities.tagCount(); te++)
-+                    {
-+                        NBTTagCompound tileEntity = (NBTTagCompound) tileEntities.getCompoundTagAt(te);
-+                        int x = tileEntity.getInteger("x") - chunk.xPosition * 16;
-+                        int z = tileEntity.getInteger("z") - chunk.zPosition * 16;
-+                        tileEntity.setInteger("x", par2 * 16 + x);
-+                        tileEntity.setInteger("z", par3 * 16 + z);
-+                    }
-+                }
-+
-+                // CraftBukkit end
-                 chunk = this.readChunkFromNBT(par1World, par4NBTTagCompound.getCompoundTag("Level"));
-             }
+                 // Have to move tile entities since we don't load them at this stage
+                 NBTTagList tileEntities = par4NBTTagCompound.getCompoundTag("Level").getTagList("TileEntities", 10);
  
--            MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, par4NBTTagCompound));
--            return chunk;
-+            // CraftBukkit start
-+            Object[] data = new Object[2];
-+            data[0] = chunk;
-+            data[1] = par4NBTTagCompound;
-+            // MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, par4NBTTagCompound)); // Cauldron Don't call ChunkDataEvent.Load async
-+            return data;
-+            // CraftBukkit end
-         }
-     }
+@@ -187,8 +188,18 @@
  
--    public void saveChunk(World par1World, Chunk par2Chunk) throws MinecraftException, IOException
-+    public void saveChunk(World par1World, Chunk par2Chunk)
+     public void saveChunk(World par1World, Chunk par2Chunk) throws MinecraftException, IOException
      {
 -        par1World.checkSessionLock();
 +        // CraftBukkit start - "handle" exception
@@ -148,7 +39,7 @@
          try
          {
              NBTTagCompound nbttagcompound = new NBTTagCompound();
-@@ -142,15 +224,15 @@
+@@ -214,15 +225,15 @@
              {
                  for (int i = 0; i < this.chunksToRemove.size(); ++i)
                  {
@@ -167,7 +58,7 @@
              this.pendingAnvilChunksCoordinates.add(par1ChunkCoordIntPair);
              ThreadedFileIOBase.threadedIOInstance.queueIO(this);
          }
-@@ -158,7 +240,7 @@
+@@ -230,7 +241,7 @@
  
      public boolean writeNextIO()
      {
@@ -176,7 +67,7 @@
          Object object = this.syncLockObject;
  
          synchronized (this.syncLockObject)
-@@ -168,15 +250,15 @@
+@@ -240,15 +251,15 @@
                  return false;
              }
  
@@ -196,7 +87,7 @@
              }
              catch (Exception exception)
              {
-@@ -187,7 +269,7 @@
+@@ -259,7 +270,7 @@
          return true;
      }
  
@@ -205,7 +96,7 @@
      {
          DataOutputStream dataoutputstream = RegionFileCache.getChunkOutputStream(this.chunkSaveLocation, par1AnvilChunkLoaderPending.chunkCoordinate.chunkXPos, par1AnvilChunkLoaderPending.chunkCoordinate.chunkZPos);
          CompressedStreamTools.write(par1AnvilChunkLoaderPending.nbtTags, dataoutputstream);
-@@ -235,19 +317,19 @@
+@@ -307,19 +318,19 @@
  
                  if (extendedblockstorage.getBlockMSBArray() != null)
                  {
@@ -230,26 +121,3 @@
                  }
  
                  nbttaglist.appendTag(nbttagcompound1);
-@@ -377,6 +459,13 @@
-             chunk.setBiomeArray(par2NBTTagCompound.getByteArray("Biomes"));
-         }
- 
-+        // CraftBukkit start - End this method here and split off entity loading to another method
-+        return chunk;
-+    }
-+
-+    public void loadEntities(Chunk chunk, NBTTagCompound par2NBTTagCompound, World par1World)
-+    {
-+        // CraftBukkit end
-         NBTTagList nbttaglist1 = par2NBTTagCompound.getTagList("Entities", 10);
- 
-         if (nbttaglist1 != null)
-@@ -438,7 +527,7 @@
-             }
-         }
- 
--        return chunk;
-+        // return chunk; // CraftBukkit
-     }
- 
-     static class PendingChunk

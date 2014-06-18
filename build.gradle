@@ -48,9 +48,8 @@ minecraft {
 group = 'net.minecraftforge'
 ext.mcVersion = "1.7.2"
 ext.cauldronVersion = "1"
-ext.forgeVersion = "1112"
-ext.bukkitVersion = "04"
-version = "${mcVersion}-${cauldronVersion}.${forgeVersion}.${bukkitVersion}.${getBuild()}"
+ext.forgeVersion = "1126"
+version = "${mcVersion}-${cauldronVersion}.${forgeVersion}.${getBuild()}"
 
 jenkins {
     job = 'Cauldron'
@@ -78,8 +77,8 @@ tasks.packageUniversal.manifest {
     attributes([
     'Implementation-Vendor': 'Cauldron',
     'Implementation-Title': 'Cauldron',
-    'Implementation-Version': 'git-Cauldron-'+project.version+getBuild(),
-    'Forge-Version': '10.12.1.1112',
+    'Implementation-Version': 'git-Cauldron-'+project.version,
+    'Forge-Version': '10.12.1.1126',
     'Specification-Vendor': 'Bukkit Team',
     'Specification-Title': 'Bukkit',
     'Specification-Version': '1.7.2-R0.4-SNAPSHOT'
