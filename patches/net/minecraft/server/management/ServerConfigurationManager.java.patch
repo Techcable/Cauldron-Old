@@ -789,7 +789,7 @@
      }
  
      public void transferEntityToWorld(Entity par1Entity, int par2, WorldServer par3WorldServer, WorldServer par4WorldServer, Teleporter teleporter)
-@@ -562,6 +1078,192 @@
+@@ -562,6 +1078,197 @@
          par1Entity.setWorld(par4WorldServer);
      }
  
@@ -851,11 +851,16 @@
 +                chunkcoordinates = worldserver1.getEntrancePortalLocation();
 +            }
 +
-+            d0 = (double) chunkcoordinates.posX;
-+            y = (double) chunkcoordinates.posY;
-+            d1 = (double) chunkcoordinates.posZ;
-+            yaw = 90.0F;
-+            pitch = 0.0F;
++            // Cauldron start - validate chunkcoordinates
++            if (chunkcoordinates != null)
++            {
++                d0 = (double) chunkcoordinates.posX;
++                y = (double) chunkcoordinates.posY;
++                d1 = (double) chunkcoordinates.posZ;
++                yaw = 90.0F;
++                pitch = 0.0F;
++            }
++            // Cauldron end
 +            /*
 +            entity.setPositionRotation(d0, entity.locY, d1, 90.0F, 0.0F);
 +            if (entity.isAlive()) {
@@ -982,7 +987,7 @@
      public void sendPlayerInfoToAllPlayers()
      {
          if (++this.playerPingIndex > 600)
-@@ -569,11 +1271,13 @@
+@@ -569,11 +1276,13 @@
              this.playerPingIndex = 0;
          }
  
@@ -996,7 +1001,7 @@
      }
  
      public void sendPacketToAllPlayers(Packet p_148540_1_)
-@@ -639,11 +1343,29 @@
+@@ -639,11 +1348,29 @@
      public void addOp(String par1Str)
      {
          this.ops.add(par1Str.toLowerCase());
@@ -1026,7 +1031,7 @@
      }
  
      public boolean isAllowedToLogin(String par1Str)
-@@ -654,6 +1376,7 @@
+@@ -654,6 +1381,7 @@
  
      public boolean isPlayerOpped(String par1Str)
      {
@@ -1034,7 +1039,7 @@
          return this.ops.contains(par1Str.trim().toLowerCase()) || this.mcServer.isSinglePlayer() && this.mcServer.worldServers[0].getWorldInfo().areCommandsAllowed() && this.mcServer.getServerOwner().equalsIgnoreCase(par1Str) || this.commandsAllowedForAll;
      }
  
-@@ -816,14 +1539,29 @@
+@@ -816,14 +1544,29 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -1065,7 +1070,7 @@
                  if (d4 * d4 + d5 * d5 + d6 * d6 < p_148543_8_ * p_148543_8_)
                  {
                      entityplayermp.playerNetServerHandler.sendPacket(p_148543_11_);
-@@ -868,16 +1606,19 @@
+@@ -868,16 +1611,19 @@
  
          if (par2WorldServer.isRaining())
          {
@@ -1089,7 +1094,7 @@
          par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(par1EntityPlayerMP.inventory.currentItem));
      }
  
-@@ -893,7 +1634,10 @@
+@@ -893,7 +1639,10 @@
  
      public String[] getAvailablePlayerDat()
      {
@@ -1101,7 +1106,7 @@
      }
  
      public void setWhiteListEnabled(boolean par1)
-@@ -962,12 +1706,31 @@
+@@ -962,12 +1711,31 @@
  
      public void removeAllPlayers()
      {
