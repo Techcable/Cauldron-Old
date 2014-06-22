@@ -765,38 +765,72 @@
          WorldServer ret = DimensionManager.getWorld(par1);
          if (ret == null)
          {
-@@ -764,7 +1079,7 @@
+@@ -764,13 +1079,14 @@
  
      public List getPossibleCompletions(ICommandSender par1ICommandSender, String par2Str)
      {
 -        ArrayList arraylist = new ArrayList();
-+        java.util.HashSet arraylist = new java.util.HashSet(); // Cauldron - use a set here to avoid duplicates
++        // Cauldron start - add mod commands to list then pass to bukkit
++        java.util.HashSet arraylist = new java.util.HashSet(); // use a set here to avoid duplicates
  
          if (par2Str.startsWith("/"))
          {
-@@ -790,8 +1105,6 @@
+-            par2Str = par2Str.substring(1);
+-            boolean flag = !par2Str.contains(" ");
+-            List list = this.commandManager.getPossibleCommands(par1ICommandSender, par2Str);
++            String char1 = par2Str.substring(1); // rename var to avoid removing slash from passed message
++            boolean flag = !char1.contains(" ");
++            List list = this.commandManager.getPossibleCommands(par1ICommandSender, char1);
+ 
+             if (list != null)
+             {
+@@ -778,40 +1094,19 @@
+ 
+                 while (iterator.hasNext())
+                 {
+-                    String s3 = (String)iterator.next();
++                    String command = (String)iterator.next();
+ 
+                     if (flag)
+                     {
+-                        arraylist.add("/" + s3);
++                        arraylist.add("/" + command);
                      }
+-                    else
+-                    {
+-                        arraylist.add(s3);
+-                    }
                  }
              }
 -
 -            return arraylist;
          }
-         else
-         {
-@@ -809,9 +1122,10 @@
-                     arraylist.add(s2);
-                 }
-             }
+-        else
+-        {
+-            String[] astring = par2Str.split(" ", -1);
+-            String s1 = astring[astring.length - 1];
+-            String[] astring1 = this.serverConfigManager.getAllUsernames();
+-            int i = astring1.length;
+ 
+-            for (int j = 0; j < i; ++j)
+-            {
+-                String s2 = astring1[j];
+-
+-                if (CommandBase.doesStringStartWith(s1, s2))
+-                {
+-                    arraylist.add(s2);
+-                }
+-            }
 -
 -            return arraylist;
-         }
-+
-+        arraylist.addAll(this.server.tabComplete(par1ICommandSender, par2Str)); // Cauldron - Add craftbukkit commands
+-        }
++        arraylist.addAll(this.server.tabComplete(par1ICommandSender, par2Str));  // add craftbukkit commands
 +        return new ArrayList(arraylist);
++        // Cauldron end
      }
  
      public static MinecraftServer getServer()
-@@ -1014,7 +1328,7 @@
+@@ -1014,7 +1309,7 @@
  
      public boolean isServerInOnlineMode()
      {
@@ -805,7 +839,7 @@
      }
  
      public void setOnlineMode(boolean par1)
-@@ -1104,7 +1418,7 @@
+@@ -1104,7 +1399,7 @@
  
      public NetworkSystem func_147137_ag()
      {
@@ -814,7 +848,7 @@
      }
  
      @SideOnly(Side.CLIENT)
-@@ -1229,8 +1543,11 @@
+@@ -1229,8 +1524,11 @@
      {
          Bootstrap.func_151354_b();
  
@@ -826,7 +860,7 @@
              boolean flag = !GraphicsEnvironment.isHeadless();
              String s = null;
              String s1 = ".";
-@@ -1326,16 +1643,32 @@
+@@ -1326,16 +1624,32 @@
              {
                  dedicatedserver.setGuiEnabled();
              }
@@ -865,7 +899,7 @@
          }
          catch (Exception exception)
          {
-@@ -1343,6 +1676,203 @@
+@@ -1343,6 +1657,203 @@
          }
      }
  
@@ -1069,7 +1103,7 @@
      @SideOnly(Side.SERVER)
      public void logInfo(String par1Str)
      {
-@@ -1370,15 +1900,70 @@
+@@ -1370,15 +1881,70 @@
      @SideOnly(Side.SERVER)
      public String getPlugins()
      {
@@ -1145,7 +1179,7 @@
      }
  
      @SideOnly(Side.SERVER)
-@@ -1430,4 +2015,11 @@
+@@ -1430,4 +1996,11 @@
      {
          this.isGamemodeForced = par1;
      }
