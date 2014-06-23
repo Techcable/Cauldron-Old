@@ -479,7 +479,7 @@
              par2 = 0;
          }
 -        else if (!world.provider.canRespawnHere())
-+        else if (!world.provider.canRespawnHere() && par2 < -1 && par2 > 1 && !DimensionManager.isBukkitDimension(par2)) // ignore vanilla providers
++        else if (!world.provider.canRespawnHere() && ((par2 < -1 || par2 > 1) && !DimensionManager.isBukkitDimension(par2))) // ignore vanilla providers
          {
              par2 = world.provider.getRespawnDimension(par1EntityPlayerMP);
          }
