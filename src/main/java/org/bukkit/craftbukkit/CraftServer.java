@@ -130,7 +130,7 @@ import net.minecraftforge.event.world.WorldEvent;
 import jline.console.ConsoleReader;
 
 public final class CraftServer implements Server {
-    private final String serverName = "Cauldron";
+    private final String serverName = "Cauldron-MCPC-Plus"; // Cauldron - temporarily keep MCPC-Plus name until plugins adapt
     private final String serverVersion;
     private final String bukkitVersion = Versioning.getBukkitVersion();
     private final Logger logger = Logger.getLogger("Minecraft");

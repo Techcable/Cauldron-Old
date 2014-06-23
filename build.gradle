@@ -78,7 +78,7 @@ tasks.packageUniversal.manifest {
     attributes([
     'Implementation-Vendor': 'Cauldron',
     'Implementation-Title': 'Cauldron',
-    'Implementation-Version': 'git-Cauldron-'+project.version,
+    'Implementation-Version': 'git-Cauldron-MCPC-Plus-'+project.version,
     'Forge-Version': '10.12.1.1126',
     'Specification-Vendor': 'Bukkit Team',
     'Specification-Title': 'Bukkit',
