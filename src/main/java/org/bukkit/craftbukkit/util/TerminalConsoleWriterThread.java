@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jline.console.ConsoleReader;
 import com.mojang.util.QueueLogAppender;
-import org.bukkit.craftbukkit.Main;
+import net.minecraft.server.MinecraftServer; // Cauldron
 
 public class TerminalConsoleWriterThread implements Runnable {
     final private ConsoleReader reader;
@@ -28,7 +28,7 @@ public class TerminalConsoleWriterThread implements Runnable {
             }
 
             try {
-                if (Main.useJline) {
+                if (MinecraftServer.useJline) {
                     reader.print(ConsoleReader.RESET_LINE + "");
                     reader.flush();
                     output.write(message.getBytes());

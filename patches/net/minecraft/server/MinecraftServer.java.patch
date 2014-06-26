@@ -134,7 +134,7 @@
 +        if (System.console() == null)
 +        {
 +            System.setProperty("jline.terminal", "jline.UnsupportedTerminal");
-+            org.bukkit.craftbukkit.Main.useJline = false;
++            this.useJline = false; // Cauldron
 +        }
 +    
 +        try
@@ -149,7 +149,7 @@
 +                // Try again with jline disabled for Windows users without C++ 2008 Redistributable
 +                System.setProperty("jline.terminal", "jline.UnsupportedTerminal");
 +                System.setProperty("user.language", "en");
-+                org.bukkit.craftbukkit.Main.useJline = false;
++                this.useJline = false; // Cauldron
 +                this.reader = new ConsoleReader(System.in, System.out);
 +                this.reader.setExpandEvents(false);
 +            }
@@ -860,11 +860,12 @@
              boolean flag = !GraphicsEnvironment.isHeadless();
              String s = null;
              String s1 = ".";
-@@ -1326,16 +1624,32 @@
+@@ -1326,16 +1624,33 @@
              {
                  dedicatedserver.setGuiEnabled();
              }
 +            // */
++            if (CauldronUtils.deobfuscatedEnvironment()) useJline = false; // Cauldron
 +            DedicatedServer dedicatedserver = new DedicatedServer(options);
  
 -            dedicatedserver.startServerThread();
@@ -899,7 +900,7 @@
          }
          catch (Exception exception)
          {
-@@ -1343,6 +1657,203 @@
+@@ -1343,6 +1658,203 @@
          }
      }
  
@@ -1103,7 +1104,7 @@
      @SideOnly(Side.SERVER)
      public void logInfo(String par1Str)
      {
-@@ -1370,15 +1881,70 @@
+@@ -1370,15 +1882,70 @@
      @SideOnly(Side.SERVER)
      public String getPlugins()
      {
@@ -1179,7 +1180,7 @@
      }
  
      @SideOnly(Side.SERVER)
-@@ -1430,4 +1996,11 @@
+@@ -1430,4 +1997,11 @@
      {
          this.isGamemodeForced = par1;
      }

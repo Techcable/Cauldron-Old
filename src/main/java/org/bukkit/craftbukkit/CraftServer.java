@@ -191,7 +191,7 @@ public final class CraftServer implements Server {
         //PotionEffectType.stopAcceptingRegistrations(); // Cauldron - allow registrations
         // Ugly hack :(
 
-        if (!Main.useConsole) {
+        if (!MinecraftServer.useConsole) { // Cauldron
             getLogger().info("Console input is disabled due to --noconsole command argument");
         }
 
