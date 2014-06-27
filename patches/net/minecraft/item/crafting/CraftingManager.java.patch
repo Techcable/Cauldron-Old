@@ -61,11 +61,11 @@
 +            // Cauldron start - vanilla compatibility
 +            if (par1InventoryCrafting.resultInventory == null)
 +            {
-+                return new ItemStack(itemstack.getItem(), 1, j1);
++                return new ItemStack(itemstack.getItem(), 1, i1);
 +            }
 +            // Cauldron end
 +            // CraftBukkit start - Construct a dummy repair recipe
-+            ItemStack result = new ItemStack(itemstack.getItem(), 1, j1);
++            ItemStack result = new ItemStack(itemstack.getItem(), 1, i1);
 +            List<ItemStack> ingredients = new ArrayList<ItemStack>();
 +            ingredients.add(itemstack.copy());
 +            ingredients.add(itemstack1.copy());
