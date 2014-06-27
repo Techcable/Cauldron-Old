@@ -299,6 +299,8 @@ public class ActivationRange
             isActive = false;
         }
 
+        // Cauldron start - disabled, this breaks moving chunkloaders such as AnchorCarts when entering new chunks that are not yet loaded
+        /*
         // Make sure not on edge of unloaded chunk
 
         int x = net.minecraft.util.MathHelper.floor_double( entity.posX );
@@ -307,6 +309,8 @@ public class ActivationRange
         {
             isActive = false;
         }
+        */
+        // Cauldron end
         SpigotTimings.checkIfActiveTimer.stopTiming();
         return isActive;
     }
