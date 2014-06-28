@@ -482,17 +482,7 @@
      public boolean blockExists(int par1, int par2, int par3)
      {
          return par2 >= 0 && par2 < 256 ? this.chunkExists(par1 >> 4, par3 >> 4) : false;
-@@ -387,7 +727,8 @@
-             {
-                 for (int l1 = par3; l1 <= par6; ++l1)
-                 {
--                    if (!this.chunkExists(k1, l1))
-+                    // CraftBukkit - check unload queue too so we don't leak a chunk
-+                    if (!this.chunkExists(k1, l1) || ((WorldServer) this).theChunkProviderServer.chunksToUnload.contains(k1, l1))
-                     {
-                         return false;
-                     }
-@@ -402,7 +743,7 @@
+@@ -402,7 +742,7 @@
          }
      }
  
@@ -501,7 +491,7 @@
      {
          return this.chunkProvider.chunkExists(par1, par2);
      }
-@@ -419,6 +760,32 @@
+@@ -419,6 +759,32 @@
  
      public boolean setBlock(int p_147465_1_, int p_147465_2_, int p_147465_3_, Block p_147465_4_, int p_147465_5_, int p_147465_6_)
      {
@@ -534,7 +524,7 @@
          if (p_147465_1_ >= -30000000 && p_147465_3_ >= -30000000 && p_147465_1_ < 30000000 && p_147465_3_ < 30000000)
          {
              if (p_147465_2_ < 0)
-@@ -438,29 +805,31 @@
+@@ -438,29 +804,31 @@
                  {
                      block1 = chunk.getBlock(p_147465_1_ & 15, p_147465_2_, p_147465_3_ & 15);
                  }
@@ -581,7 +571,7 @@
  
                  return flag;
              }
-@@ -471,8 +840,42 @@
+@@ -471,8 +839,42 @@
          }
      }
  
@@ -624,7 +614,7 @@
          if (par1 >= -30000000 && par3 >= -30000000 && par1 < 30000000 && par3 < 30000000)
          {
              if (par2 < 0)
-@@ -587,6 +990,13 @@
+@@ -587,6 +989,13 @@
  
      public void notifyBlockChange(int p_147444_1_, int p_147444_2_, int p_147444_3_, Block p_147444_4_)
      {
@@ -638,7 +628,7 @@
          this.notifyBlocksOfNeighborChange(p_147444_1_, p_147444_2_, p_147444_3_, p_147444_4_);
      }
  
-@@ -671,6 +1081,21 @@
+@@ -671,6 +1080,21 @@
  
              try
              {
@@ -660,7 +650,7 @@
                  block.onNeighborBlockChange(this, p_147460_1_, p_147460_2_, p_147460_3_, p_147460_4_);
              }
              catch (Throwable throwable1)
-@@ -1199,6 +1624,7 @@
+@@ -1199,6 +1623,7 @@
  
                              if (movingobjectposition1 != null)
                              {
@@ -668,7 +658,7 @@
                                  return movingobjectposition1;
                              }
                          }
-@@ -1207,6 +1633,8 @@
+@@ -1207,6 +1632,8 @@
                              movingobjectposition2 = new MovingObjectPosition(l, i1, j1, b0, p_147447_1_, false);
                          }
                      }
@@ -677,7 +667,7 @@
                  }
  
                  return p_147447_5_ ? movingobjectposition2 : null;
-@@ -1284,32 +1712,110 @@
+@@ -1284,32 +1711,110 @@
  
      public boolean spawnEntityInWorld(Entity par1Entity)
      {
@@ -798,7 +788,7 @@
              return true;
          }
      }
-@@ -1320,6 +1826,8 @@
+@@ -1320,6 +1825,8 @@
          {
              ((IWorldAccess)this.worldAccesses.get(i)).onEntityCreate(par1Entity);
          }
@@ -807,7 +797,7 @@
      }
  
      public void onEntityRemoved(Entity par1Entity)
-@@ -1328,6 +1836,8 @@
+@@ -1328,6 +1835,8 @@
          {
              ((IWorldAccess)this.worldAccesses.get(i)).onEntityDestroy(par1Entity);
          }
@@ -816,7 +806,7 @@
      }
  
      public void removeEntity(Entity par1Entity)
-@@ -1369,7 +1879,20 @@
+@@ -1369,7 +1878,20 @@
              this.getChunkFromChunkCoords(i, j).removeEntity(par1Entity);
          }
  
@@ -838,7 +828,7 @@
          this.onEntityRemoved(par1Entity);
      }
  
-@@ -1387,35 +1910,53 @@
+@@ -1387,35 +1909,53 @@
          int l = MathHelper.floor_double(par2AxisAlignedBB.maxY + 1.0D);
          int i1 = MathHelper.floor_double(par2AxisAlignedBB.minZ);
          int j1 = MathHelper.floor_double(par2AxisAlignedBB.maxZ + 1.0D);
@@ -906,7 +896,7 @@
          for (int j2 = 0; j2 < list.size(); ++j2)
          {
              AxisAlignedBB axisalignedbb1 = ((Entity)list.get(j2)).getBoundingBox();
-@@ -1746,11 +2287,37 @@
+@@ -1746,11 +2286,23 @@
          Entity entity;
          CrashReport crashreport;
          CrashReportCategory crashreportcategory;
@@ -914,46 +904,24 @@
 +        entitiesTicked = 0;
 +        tilesTicked = 0;
 +        // Cauldron end
-+        long lastChunk = Long.MIN_VALUE; // Spigot - cache chunk x, z cords for unload queue
  
          for (i = 0; i < this.weatherEffects.size(); ++i)
          {
 -            entity = (Entity)this.weatherEffects.get(i);
 +            entity = (Entity) this.weatherEffects.get(i);
  
-+            // CraftBukkit start - Fixed an NPE, don't process entities in chunks queued for unload
++            // CraftBukkit start - Fixed an NPE
 +            if (entity == null)
 +            {
 +                continue;
 +            }
 +
-+            ChunkProviderServer chunkProviderServer = ((WorldServer) this).theChunkProviderServer;
-+            // Spigot start - check last chunk to see if this loaded (fast cache)
-+            long chunk = org.bukkit.craftbukkit.util.LongHash.toLong(MathHelper.floor_double(entity.posX) >> 4, MathHelper.floor_double(entity.posZ) >> 4);
-+
-+            if (lastChunk != chunk)
-+            {
-+                if (chunkProviderServer.chunksToUnload.contains(chunk))   // Spigot end
-+                {
-+                    continue;
-+                }
-+            }
-+
 +            // CraftBukkit end
-+            lastChunk = chunk; // Spigot
 +
              try
              {
                  ++entity.ticksExisted;
-@@ -1787,6 +2354,7 @@
-             }
-         }
- 
-+        lastChunk = Long.MIN_VALUE; // Spigot
-         this.theProfiler.endStartSection("remove");
-         this.loadedEntityList.removeAll(this.unloadedEntityList);
-         int j;
-@@ -1811,11 +2379,30 @@
+@@ -1811,10 +2363,14 @@
  
          this.unloadedEntityList.clear();
          this.theProfiler.endStartSection("regular");
@@ -967,26 +935,10 @@
          {
 -            entity = (Entity)this.loadedEntityList.get(i);
 +            entity = (Entity) this.loadedEntityList.get(this.tickPosition);
-+            // Don't tick entities in chunks queued for unload
-+            ChunkProviderServer chunkProviderServer = ((WorldServer) this).theChunkProviderServer;
-+            // Spigot start - check last chunk to see if this loaded (fast cache)
-+            long chunk = org.bukkit.craftbukkit.util.LongHash.toLong(MathHelper.floor_double(entity.posX) >> 4, MathHelper.floor_double(entity.posZ) >> 4);
  
-+            if (lastChunk != chunk)
-+            {
-+                if (chunkProviderServer.chunksToUnload.contains(chunk))   // Spigot end
-+                {
-+                    continue;
-+                }
-+            }
-+
-+            // CraftBukkit end
-+            lastChunk = Long.MIN_VALUE; // Spigot
-+
              if (entity.ridingEntity != null)
              {
-                 if (!entity.ridingEntity.isDead && entity.ridingEntity.riddenByEntity == entity)
-@@ -1833,7 +2420,9 @@
+@@ -1833,7 +2389,9 @@
              {
                  try
                  {
@@ -996,7 +948,7 @@
                  }
                  catch (Throwable throwable1)
                  {
-@@ -1866,29 +2455,61 @@
+@@ -1866,29 +2424,65 @@
                      this.getChunkFromChunkCoords(j, l).removeEntity(entity);
                  }
  
@@ -1015,6 +967,18 @@
          this.theProfiler.endStartSection("blockEntities");
 +        timings.tileEntityTick.startTiming(); // Spigot
          this.field_147481_N = true;
++        // CraftBukkit start - From below, clean up tile entities before ticking them
++        if (!this.field_147483_b.isEmpty())
++        {
++            for (Object tile : field_147483_b)
++            {
++               ((TileEntity)tile).onChunkUnload();
++            }
++            this.loadedTileEntityList.removeAll(this.field_147483_b);
++            this.field_147483_b.clear();
++        }
++        // CraftBukkit end
++
          Iterator iterator = this.loadedTileEntityList.iterator();
  
          while (iterator.hasNext())
@@ -1031,14 +995,6 @@
 +            }
 +
 +            // Spigot end
-+            // CraftBukkit start - Don't tick entities in chunks queued for unload
-+            ChunkProviderServer chunkProviderServer = ((WorldServer) this).theChunkProviderServer;
-+            if (chunkProviderServer.chunksToUnload.contains(chunkToKey(tileentity.xCoord >> 4, tileentity.zCoord >> 4)))
-+            {
-+                continue;
-+            }
-+
-+            // CraftBukkit end
 +
              if (!tileentity.isInvalid() && tileentity.hasWorldObj() && this.blockExists(tileentity.xCoord, tileentity.yCoord, tileentity.zCoord))
              {
@@ -1061,7 +1017,7 @@
                      crashreport = CrashReport.makeCrashReport(throwable, "Ticking block entity");
                      crashreportcategory = crashreport.makeCategory("Block entity being ticked");
                      tileentity.func_145828_a(crashreportcategory);
-@@ -1921,6 +2542,10 @@
+@@ -1921,6 +2515,11 @@
              }
          }
  
@@ -1069,10 +1025,19 @@
 +        timings.tileEntityPending.startTiming(); // Spigot
 +        this.field_147481_N = false;
 +
++        /* CraftBukkit start - Moved up
          if (!this.field_147483_b.isEmpty())
          {
              for (Object tile : field_147483_b)
-@@ -1965,16 +2590,20 @@
+@@ -1930,6 +2529,7 @@
+             this.loadedTileEntityList.removeAll(this.field_147483_b);
+             this.field_147483_b.clear();
+         }
++        */ // CraftBukkit end
+ 
+         this.field_147481_N = false;
+ 
+@@ -1965,16 +2565,20 @@
              this.addedTileEntityList.clear();
          }
  
@@ -1096,7 +1061,7 @@
          }
      }
  
-@@ -1990,16 +2619,26 @@
+@@ -1990,16 +2594,26 @@
          boolean isForced = getPersistentChunks().containsKey(new ChunkCoordIntPair(i >> 4, j >> 4));
          byte b0 = isForced ? (byte)0 : 32;
          boolean canUpdate = !par2 || this.checkChunksExist(i - b0, 0, j - b0, i + b0, 0, j + b0);
@@ -1125,7 +1090,7 @@
              par1Entity.lastTickPosX = par1Entity.posX;
              par1Entity.lastTickPosY = par1Entity.posY;
              par1Entity.lastTickPosZ = par1Entity.posZ;
-@@ -2083,6 +2722,8 @@
+@@ -2083,6 +2697,8 @@
                      par1Entity.riddenByEntity = null;
                  }
              }
@@ -1134,7 +1099,7 @@
          }
      }
  
-@@ -2278,6 +2919,7 @@
+@@ -2278,6 +2894,7 @@
                  par3Entity.motionZ += vec3.zCoord * d1;
              }
  
@@ -1142,7 +1107,7 @@
              return flag;
          }
      }
-@@ -2369,6 +3011,7 @@
+@@ -2369,6 +2986,7 @@
          double d2 = 1.0D / ((par2AxisAlignedBB.maxZ - par2AxisAlignedBB.minZ) * 2.0D + 1.0D);
          int i = 0;
          int j = 0;
@@ -1150,7 +1115,7 @@
  
          for (float f = 0.0F; f <= 1.0F; f = (float)((double)f + d0))
          {
-@@ -2390,7 +3033,8 @@
+@@ -2390,7 +3008,8 @@
              }
          }
  
@@ -1160,7 +1125,7 @@
      }
  
      public boolean extinguishFire(EntityPlayer par1EntityPlayer, int par2, int par3, int par4, int par5)
-@@ -2510,7 +3154,7 @@
+@@ -2510,7 +3129,7 @@
              return;
          }
  
@@ -1169,7 +1134,7 @@
          {
              if (this.field_147481_N)
              {
-@@ -2658,7 +3302,16 @@
+@@ -2658,7 +3277,16 @@
  
                      if (i <= 0)
                      {
@@ -1187,7 +1152,7 @@
                      }
                  }
  
-@@ -2694,7 +3347,16 @@
+@@ -2694,7 +3322,16 @@
  
                      if (j <= 0)
                      {
@@ -1205,7 +1170,7 @@
                      }
                  }
  
-@@ -2716,28 +3378,72 @@
+@@ -2716,28 +3353,72 @@
  
      protected void setActivePlayerChunksAndCheckLight()
      {
@@ -1286,7 +1251,7 @@
          }
  
          this.theProfiler.endSection();
-@@ -2749,7 +3455,7 @@
+@@ -2749,7 +3430,7 @@
  
          this.theProfiler.startSection("playerCheckLight");
  
@@ -1295,7 +1260,7 @@
          {
              i = this.rand.nextInt(this.playerEntities.size());
              entityplayer = (EntityPlayer)this.playerEntities.get(i);
-@@ -3221,8 +3927,21 @@
+@@ -3221,8 +3902,21 @@
          {
              Entity entity = (Entity)this.loadedEntityList.get(j);
  
@@ -1318,7 +1283,7 @@
                  ++i;
              }
          }
-@@ -3251,8 +3970,14 @@
+@@ -3251,8 +3945,14 @@
      public boolean canPlaceEntityOnSide(Block p_147472_1_, int p_147472_2_, int p_147472_3_, int p_147472_4_, boolean p_147472_5_, int p_147472_6_, Entity p_147472_7_, ItemStack p_147472_8_)
      {
          Block block1 = this.getBlock(p_147472_2_, p_147472_3_, p_147472_4_);
@@ -1334,7 +1299,7 @@
      }
  
      public PathEntity getPathEntityToEntity(Entity par1Entity, Entity par2Entity, float par3, boolean par4, boolean par5, boolean par6, boolean par7)
-@@ -3400,7 +4125,15 @@
+@@ -3400,7 +4100,15 @@
  
          for (int i = 0; i < this.playerEntities.size(); ++i)
          {
@@ -1351,7 +1316,7 @@
              double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
  
              if ((par7 < 0.0D || d5 < par7 * par7) && (d4 == -1.0D || d5 < d4))
-@@ -3425,8 +4158,16 @@
+@@ -3425,8 +4133,16 @@
  
          for (int i = 0; i < this.playerEntities.size(); ++i)
          {
@@ -1369,7 +1334,7 @@
              if (!entityplayer1.capabilities.disableDamage && entityplayer1.isEntityAlive())
              {
                  double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
-@@ -3580,6 +4321,18 @@
+@@ -3580,6 +4296,18 @@
  
      public void updateAllPlayersSleepingFlag() {}
  
@@ -1388,7 +1353,7 @@
      public float getWeightedThunderStrength(float par1)
      {
          return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * par1) * this.getRainStrength(par1);
-@@ -3857,8 +4610,8 @@
+@@ -3857,8 +4585,8 @@
       */
      public void addTileEntity(TileEntity entity)
      {
@@ -1399,7 +1364,7 @@
          {
              dest.add(entity);
          }
-@@ -3954,4 +4707,43 @@
+@@ -3954,4 +4682,43 @@
          }
          return count;
      }
