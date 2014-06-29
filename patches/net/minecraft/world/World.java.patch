@@ -1353,7 +1353,7 @@
      public float getWeightedThunderStrength(float par1)
      {
          return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * par1) * this.getRainStrength(par1);
-@@ -3857,8 +4585,8 @@
+@@ -3858,8 +4586,8 @@
       */
      public void addTileEntity(TileEntity entity)
      {
@@ -1364,7 +1364,7 @@
          {
              dest.add(entity);
          }
-@@ -3954,4 +4682,43 @@
+@@ -3955,4 +4683,43 @@
          }
          return count;
      }

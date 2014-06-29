@@ -86,7 +86,7 @@
          return null;
      }
  
-@@ -267,6 +282,14 @@
+@@ -268,6 +283,14 @@
  
          if (nbttagcompound != null)
          {
@@ -101,7 +101,7 @@
              par1EntityPlayer.readFromNBT(nbttagcompound);
          }
  
-@@ -323,4 +346,97 @@
+@@ -325,4 +348,97 @@
      {
          return this.saveDirectoryName;
      }
