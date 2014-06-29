@@ -9,7 +9,15 @@
  class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChunk, net.minecraft.world.chunk.Chunk, Runnable, RuntimeException> {
      private final AtomicInteger threadNumber = new AtomicInteger(1);
  
-@@ -41,7 +43,7 @@
+@@ -34,14 +36,14 @@
+     public void callStage2(QueuedChunk queuedChunk, net.minecraft.world.chunk.Chunk chunk) throws RuntimeException {
+         if(chunk == null) {
+             // If the chunk loading failed just do it synchronously (may generate)
+-            queuedChunk.provider.loadChunk(queuedChunk.x, queuedChunk.z);
++            queuedChunk.provider.originalLoadChunk(queuedChunk.x, queuedChunk.z);
+             return;
+         }
+ 
          queuedChunk.loader.loadEntities(queuedChunk.world, queuedChunk.compound.getCompoundTag("Level"), chunk);
          MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, queuedChunk.compound)); // Don't call ChunkDataEvent.Load async
          chunk.lastSaveTime = queuedChunk.provider.worldObj.getTotalWorldTime();
