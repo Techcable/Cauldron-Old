@@ -64,7 +64,7 @@
              extendedblockstorage.func_150818_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_4_);
              extendedblockstorage.setExtBlockMetadata(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_5_); // Move this above to prevent other mods/tile entites from creating invalid ones for the wrong metadata
  
-@@ -769,8 +794,12 @@
+@@ -769,8 +794,17 @@
  
          if (i != this.xPosition || j != this.zPosition)
          {
@@ -76,10 +76,15 @@
 +            // Thread.dumpStack();
 +            Bukkit.getLogger().warning("Entity is at " + par1Entity.posX + "," + par1Entity.posZ + " (chunk " + i + "," + j + ") but was stored in chunk " + this.xPosition + "," + this.zPosition);
 +            // CraftBukkit end
++            // Cauldron start - remove invalid entity to prevent a server crash
++            Bukkit.getLogger().warning("Cauldron has removed " + par1Entity + " to prevent a server crash.");
++            par1Entity.setDead();
++            return;
++            // Cauldron end
          }
  
          int k = MathHelper.floor_double(par1Entity.posY / 16.0D);
-@@ -791,6 +820,28 @@
+@@ -791,6 +825,28 @@
          par1Entity.chunkCoordY = k;
          par1Entity.chunkCoordZ = this.zPosition;
          this.entityLists[k].add(par1Entity);
@@ -108,7 +113,7 @@
      }
  
      public void removeEntity(Entity par1Entity)
-@@ -811,6 +862,28 @@
+@@ -811,6 +867,28 @@
          }
  
          this.entityLists[par2].remove(par1Entity);
@@ -137,7 +142,7 @@
      }
  
      public boolean canBlockSeeTheSky(int par1, int par2, int par3)
-@@ -877,7 +950,16 @@
+@@ -877,7 +955,16 @@
  
              p_150812_4_.validate();
              this.chunkTileEntityMap.put(chunkposition, p_150812_4_);
@@ -154,7 +159,7 @@
      }
  
      public void removeTileEntity(int p_150805_1_, int p_150805_2_, int p_150805_3_)
-@@ -922,12 +1004,28 @@
+@@ -922,12 +1009,28 @@
  
          while (iterator.hasNext())
          {
@@ -184,7 +189,7 @@
              this.worldObj.unloadEntities(this.entityLists[i]);
          }
          MinecraftForge.EVENT_BUS.post(new ChunkEvent.Unload(this));
-@@ -1176,8 +1274,8 @@
+@@ -1176,8 +1279,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getMetadataArray();
@@ -195,7 +200,7 @@
              }
          }
  
-@@ -1186,8 +1284,8 @@
+@@ -1186,8 +1289,8 @@
              if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getBlocklightArray();
@@ -206,7 +211,7 @@
              }
          }
  
-@@ -1198,8 +1296,8 @@
+@@ -1198,8 +1301,8 @@
                  if ((par2 & 1 << l) != 0 && this.storageArrays[l] != null)
                  {
                      nibblearray = this.storageArrays[l].getSkylightArray();
@@ -217,7 +222,7 @@
                  }
              }
          }
-@@ -1221,8 +1319,8 @@
+@@ -1221,8 +1324,8 @@
                          nibblearray = this.storageArrays[l].createBlockMSBArray();
                      }
  

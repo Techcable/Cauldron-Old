@@ -53,21 +53,16 @@
          if (par1NBTTagCompound.hasKey("CustomName", 8) && par1NBTTagCompound.getString("CustomName").length() > 0)
          {
              this.setCustomNameTag(par1NBTTagCompound.getString("CustomName"));
-@@ -521,15 +542,41 @@
+@@ -521,15 +542,36 @@
                      this.entityAge = 0;
                  }
              }
-+            else // Cauldron start - Despawn entities when a player isn't in the world
++            // Cauldron start - Force despawn of entity if a player isn't near
++            else if (this.worldObj.cauldronConfig.getBoolean("entities.despawn-immediate", true) && this.canDespawn())
 +            {
-+                if (this.worldObj.cauldronConfig.getBoolean("despawn-immediate", true) && this.canDespawn()) // Use flag for the assumption that being in another dimension entirely means no player is anywhere near
-+                {
-+                    this.despawn("No Player : Immediate");
-+                }
-+                else if (this.entityAge > 600 && this.rand.nextInt(800) == 0 && this.canDespawn()) // Otherwise, use the same logic as above
-+                {
-+                    this.despawn("No Player : Random Aged");
-+                }
-+            } // Cauldron end
++                this.despawn("No Player : Immediate");
++            }
++            // Cauldron end
          }
      }
  
@@ -95,7 +90,7 @@
          this.worldObj.theProfiler.startSection("sensing");
          this.senses.clearSensingCache();
          this.worldObj.theProfiler.endSection();
-@@ -1005,6 +1052,14 @@
+@@ -1005,6 +1047,14 @@
      {
          if (this.getLeashed() && this.getLeashedToEntity() == par1EntityPlayer)
          {
@@ -110,7 +105,7 @@
              this.clearLeashed(true, !par1EntityPlayer.capabilities.isCreativeMode);
              return true;
          }
-@@ -1016,6 +1071,14 @@
+@@ -1016,6 +1066,14 @@
              {
                  if (!(this instanceof EntityTameable) || !((EntityTameable)this).isTamed())
                  {
@@ -125,7 +120,7 @@
                      this.setLeashedToEntity(par1EntityPlayer, true);
                      --itemstack.stackSize;
                      return true;
-@@ -1023,6 +1086,14 @@
+@@ -1023,6 +1081,14 @@
  
                  if (par1EntityPlayer.getCommandSenderName().equalsIgnoreCase(((EntityTameable)this).getOwnerName()))
                  {
@@ -140,7 +135,7 @@
                      this.setLeashedToEntity(par1EntityPlayer, true);
                      --itemstack.stackSize;
                      return true;
-@@ -1049,6 +1120,7 @@
+@@ -1049,6 +1115,7 @@
          {
              if (this.leashedToEntity == null || this.leashedToEntity.isDead)
              {
@@ -148,7 +143,7 @@
                  this.clearLeashed(true, true);
              }
          }
-@@ -1136,10 +1208,16 @@
+@@ -1136,10 +1203,16 @@
              }
              else
              {

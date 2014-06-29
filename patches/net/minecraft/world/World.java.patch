@@ -22,7 +22,7 @@
  import net.minecraftforge.client.ForgeHooksClient;
  import net.minecraftforge.common.ForgeChunkManager;
  import net.minecraftforge.common.ForgeChunkManager.Ticket;
-@@ -70,6 +75,43 @@
+@@ -70,6 +75,44 @@
  import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
  import net.minecraft.entity.EnumCreatureType;
  
@@ -58,15 +58,16 @@
 +import net.minecraft.entity.item.EntityXPOrb;
 +import org.bukkit.craftbukkit.SpigotTimings;
 +// Spigot end
-+//Cauldron start
++// Cauldron start
 +import net.minecraft.nbt.NBTTagCompound;
 +import net.minecraftforge.common.DimensionManager;
 +import org.bukkit.block.BlockState;
++// Cauldron end
 +
  public abstract class World implements IBlockAccess
  {
     /**
-@@ -82,11 +124,32 @@
+@@ -82,11 +125,32 @@
      public final MapStorage perWorldStorage;
  
      public boolean scheduledUpdatesAreImmediate;
@@ -103,7 +104,7 @@
      public List playerEntities = new ArrayList();
      public List weatherEffects = new ArrayList();
      private long cloudColour = 16777215L;
-@@ -100,11 +163,11 @@
+@@ -100,11 +164,11 @@
      public int lastLightningBolt;
      public EnumDifficulty difficultySetting;
      public Random rand = new Random();
@@ -118,7 +119,7 @@
      public boolean findingSpawnPoint;
      public MapStorage mapStorage;
      public VillageCollection villageCollectionObj;
-@@ -112,15 +175,82 @@
+@@ -112,15 +176,82 @@
      public final Profiler theProfiler;
      private final Vec3Pool vecPool = new Vec3Pool(300, 2000);
      private final Calendar theCalendar = Calendar.getInstance();
@@ -205,7 +206,7 @@
      private static final String __OBFID = "CL_00000140";
  
      public BiomeGenBase getBiomeGenForCoords(final int par1, final int par2)
-@@ -164,6 +294,24 @@
+@@ -164,6 +295,24 @@
          return this.provider.worldChunkMgr;
      }
  
@@ -230,7 +231,7 @@
      @SideOnly(Side.CLIENT)
      public World(ISaveHandler p_i45368_1_, String p_i45368_2_, WorldProvider p_i45368_3_, WorldSettings p_i45368_4_, Profiler p_i45368_5_)
      {
-@@ -177,6 +325,13 @@
+@@ -177,6 +326,13 @@
          this.worldInfo = new WorldInfo(p_i45368_4_, p_i45368_2_);
          this.provider = p_i45368_3_;
          perWorldStorage = new MapStorage((ISaveHandler)null);
@@ -244,7 +245,7 @@
      }
  
      // Broken up so that the WorldClient gets the chance to set the mapstorage object before the dimension initializes
-@@ -205,8 +360,158 @@
+@@ -205,8 +361,158 @@
          this.calculateInitialWeather();
      }
  
@@ -403,7 +404,7 @@
          this.ambientTickCountdown = this.rand.nextInt(12000);
          this.spawnHostileMobs = true;
          this.spawnPeacefulMobs = true;
-@@ -214,7 +519,6 @@
+@@ -214,7 +520,6 @@
          this.lightUpdateBlockList = new int[32768];
          this.saveHandler = p_i45369_1_;
          this.theProfiler = p_i45369_5_;
@@ -411,7 +412,7 @@
          this.worldInfo = p_i45369_1_.loadWorldInfo();
  
          if (p_i45369_4_ != null)
-@@ -233,13 +537,26 @@
+@@ -233,13 +538,26 @@
          if (this.worldInfo == null)
          {
              this.worldInfo = new WorldInfo(p_i45369_3_, p_i45369_2_);
@@ -438,7 +439,7 @@
          this.chunkProvider = this.createChunkProvider();
  
          if (this instanceof WorldServer)
-@@ -292,6 +609,7 @@
+@@ -292,6 +610,7 @@
          this.calculateInitialSkylight();
          this.calculateInitialWeather();
      }
@@ -446,21 +447,18 @@
  
      private static MapStorage s_mapStorage;
      private static ISaveHandler s_savehandler;
-@@ -334,6 +652,21 @@
+@@ -334,6 +653,18 @@
  
      public Block getBlock(int p_147439_1_, int p_147439_2_, int p_147439_3_)
      {
 +        // Cauldron start - tree generation
 +        if (captureTreeGeneration) 
 +        {
-+            List<BlockState> blocks = (List<BlockState>) capturedBlockStates.clone(); // Avoid CME's
-+            Iterator<BlockState> it = blocks.iterator();
-+            while (it.hasNext())
++            for (BlockState blockstate : capturedBlockStates)
 +            {
-+                BlockState previous = it.next();
-+                if (previous.getX() == p_147439_1_ && previous.getY() == p_147439_2_ && previous.getZ() == p_147439_3_) 
++                if (blockstate.getX() == p_147439_1_ && blockstate.getY() == p_147439_2_ && blockstate.getZ() == p_147439_3_) 
 +                {
-+                    return CraftMagicNumbers.getBlock(previous.getTypeId());
++                    return CraftMagicNumbers.getBlock(blockstate.getTypeId());
 +                }
 +            }
 +        }
@@ -468,7 +466,7 @@
          if (p_147439_1_ >= -30000000 && p_147439_3_ >= -30000000 && p_147439_1_ < 30000000 && p_147439_3_ < 30000000 && p_147439_2_ >= 0 && p_147439_2_ < 256)
          {
              Chunk chunk = null;
-@@ -364,6 +697,13 @@
+@@ -364,6 +695,13 @@
          return block.isAir(this, p_147437_1_, p_147437_2_, p_147437_3_);
      }
  
@@ -482,7 +480,7 @@
      public boolean blockExists(int par1, int par2, int par3)
      {
          return par2 >= 0 && par2 < 256 ? this.chunkExists(par1 >> 4, par3 >> 4) : false;
-@@ -402,7 +742,7 @@
+@@ -402,7 +740,7 @@
          }
      }
  
@@ -491,7 +489,7 @@
      {
          return this.chunkProvider.chunkExists(par1, par2);
      }
-@@ -419,6 +759,32 @@
+@@ -419,6 +757,33 @@
  
      public boolean setBlock(int p_147465_1_, int p_147465_2_, int p_147465_3_, Block p_147465_4_, int p_147465_5_, int p_147465_6_)
      {
@@ -499,19 +497,20 @@
 +        if (this.captureTreeGeneration) 
 +        {
 +            BlockState blockstate = null;
-+            List<BlockState> blocks = (List<BlockState>) capturedBlockStates.clone(); // Avoid CME's
-+            Iterator<BlockState> it = blocks.iterator();
-+            while (it.hasNext()) 
++
++            for (BlockState previous : capturedBlockStates)
 +            {
-+                BlockState previous = it.next();
 +                if (previous.getX() == p_147465_1_ && previous.getY() == p_147465_2_ && previous.getZ() == p_147465_3_) 
 +                {
 +                    blockstate = previous;
-+                    it.remove();
 +                    break;
 +                }
 +            }
-+            if (blockstate == null) 
++            if (blockstate != null) 
++            {
++                capturedBlockStates.remove(blockstate);
++            }
++            else
 +            {
 +                blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, p_147465_1_, p_147465_2_, p_147465_3_, p_147465_6_);
 +            }
@@ -524,7 +523,7 @@
          if (p_147465_1_ >= -30000000 && p_147465_3_ >= -30000000 && p_147465_1_ < 30000000 && p_147465_3_ < 30000000)
          {
              if (p_147465_2_ < 0)
-@@ -438,29 +804,31 @@
+@@ -438,29 +803,31 @@
                  {
                      block1 = chunk.getBlock(p_147465_1_ & 15, p_147465_2_, p_147465_3_ & 15);
                  }
@@ -571,7 +570,7 @@
  
                  return flag;
              }
-@@ -471,8 +839,42 @@
+@@ -471,8 +838,40 @@
          }
      }
  
@@ -600,13 +599,11 @@
 +        // Cauldron start - tree generation
 +        if (captureTreeGeneration) 
 +        {
-+            Iterator<BlockState> it = capturedBlockStates.iterator();
-+            while (it.hasNext()) 
++            for (BlockState blockstate : capturedBlockStates)
 +            {
-+                BlockState previous = it.next();
-+                if (previous.getX() == par1 && previous.getY() == par2 && previous.getZ() == par3) 
++                if (blockstate.getX() == par1 && blockstate.getY() == par2 && blockstate.getZ() == par3) 
 +                {
-+                    return previous.getRawData();
++                    return blockstate.getRawData();
 +                }
 +            }
 +        }
@@ -614,7 +611,7 @@
          if (par1 >= -30000000 && par3 >= -30000000 && par1 < 30000000 && par3 < 30000000)
          {
              if (par2 < 0)
-@@ -587,6 +989,13 @@
+@@ -587,6 +986,13 @@
  
      public void notifyBlockChange(int p_147444_1_, int p_147444_2_, int p_147444_3_, Block p_147444_4_)
      {
@@ -628,7 +625,7 @@
          this.notifyBlocksOfNeighborChange(p_147444_1_, p_147444_2_, p_147444_3_, p_147444_4_);
      }
  
-@@ -671,6 +1080,21 @@
+@@ -671,6 +1077,21 @@
  
              try
              {
@@ -650,7 +647,7 @@
                  block.onNeighborBlockChange(this, p_147460_1_, p_147460_2_, p_147460_3_, p_147460_4_);
              }
              catch (Throwable throwable1)
-@@ -1199,6 +1623,7 @@
+@@ -1199,6 +1620,7 @@
  
                              if (movingobjectposition1 != null)
                              {
@@ -658,7 +655,7 @@
                                  return movingobjectposition1;
                              }
                          }
-@@ -1207,6 +1632,8 @@
+@@ -1207,6 +1629,8 @@
                              movingobjectposition2 = new MovingObjectPosition(l, i1, j1, b0, p_147447_1_, false);
                          }
                      }
@@ -667,7 +664,7 @@
                  }
  
                  return p_147447_5_ ? movingobjectposition2 : null;
-@@ -1284,32 +1711,110 @@
+@@ -1284,32 +1708,110 @@
  
      public boolean spawnEntityInWorld(Entity par1Entity)
      {
@@ -788,7 +785,7 @@
              return true;
          }
      }
-@@ -1320,6 +1825,8 @@
+@@ -1320,6 +1822,8 @@
          {
              ((IWorldAccess)this.worldAccesses.get(i)).onEntityCreate(par1Entity);
          }
@@ -797,7 +794,7 @@
      }
  
      public void onEntityRemoved(Entity par1Entity)
-@@ -1328,6 +1835,8 @@
+@@ -1328,6 +1832,8 @@
          {
              ((IWorldAccess)this.worldAccesses.get(i)).onEntityDestroy(par1Entity);
          }
@@ -806,7 +803,7 @@
      }
  
      public void removeEntity(Entity par1Entity)
-@@ -1369,7 +1878,20 @@
+@@ -1369,7 +1875,20 @@
              this.getChunkFromChunkCoords(i, j).removeEntity(par1Entity);
          }
  
@@ -828,7 +825,7 @@
          this.onEntityRemoved(par1Entity);
      }
  
-@@ -1387,35 +1909,53 @@
+@@ -1387,35 +1906,53 @@
          int l = MathHelper.floor_double(par2AxisAlignedBB.maxY + 1.0D);
          int i1 = MathHelper.floor_double(par2AxisAlignedBB.minZ);
          int j1 = MathHelper.floor_double(par2AxisAlignedBB.maxZ + 1.0D);
@@ -896,7 +893,7 @@
          for (int j2 = 0; j2 < list.size(); ++j2)
          {
              AxisAlignedBB axisalignedbb1 = ((Entity)list.get(j2)).getBoundingBox();
-@@ -1746,11 +2286,23 @@
+@@ -1746,11 +2283,23 @@
          Entity entity;
          CrashReport crashreport;
          CrashReportCategory crashreportcategory;
@@ -921,7 +918,7 @@
              try
              {
                  ++entity.ticksExisted;
-@@ -1811,10 +2363,14 @@
+@@ -1811,10 +2360,14 @@
  
          this.unloadedEntityList.clear();
          this.theProfiler.endStartSection("regular");
@@ -938,7 +935,7 @@
  
              if (entity.ridingEntity != null)
              {
-@@ -1833,7 +2389,9 @@
+@@ -1833,7 +2386,9 @@
              {
                  try
                  {
@@ -948,7 +945,7 @@
                  }
                  catch (Throwable throwable1)
                  {
-@@ -1866,29 +2424,65 @@
+@@ -1866,29 +2421,65 @@
                      this.getChunkFromChunkCoords(j, l).removeEntity(entity);
                  }
  
@@ -989,7 +986,7 @@
 +            // Spigot start
 +            if (tileentity == null)
 +            {
-+                getServer().getLogger().severe("Spigot has detected a null entity and has removed it, preventing a crash");
++                getServer().getLogger().severe("Cauldron has detected a null entity and has removed it, preventing a crash");
 +                iterator.remove();
 +                continue;
 +            }
@@ -1017,7 +1014,7 @@
                      crashreport = CrashReport.makeCrashReport(throwable, "Ticking block entity");
                      crashreportcategory = crashreport.makeCategory("Block entity being ticked");
                      tileentity.func_145828_a(crashreportcategory);
-@@ -1921,6 +2515,11 @@
+@@ -1921,6 +2512,11 @@
              }
          }
  
@@ -1029,7 +1026,7 @@
          if (!this.field_147483_b.isEmpty())
          {
              for (Object tile : field_147483_b)
-@@ -1930,6 +2529,7 @@
+@@ -1930,6 +2526,7 @@
              this.loadedTileEntityList.removeAll(this.field_147483_b);
              this.field_147483_b.clear();
          }
@@ -1037,7 +1034,7 @@
  
          this.field_147481_N = false;
  
-@@ -1965,16 +2565,20 @@
+@@ -1965,16 +2562,20 @@
              this.addedTileEntityList.clear();
          }
  
@@ -1061,7 +1058,7 @@
          }
      }
  
-@@ -1990,16 +2594,26 @@
+@@ -1990,16 +2591,26 @@
          boolean isForced = getPersistentChunks().containsKey(new ChunkCoordIntPair(i >> 4, j >> 4));
          byte b0 = isForced ? (byte)0 : 32;
          boolean canUpdate = !par2 || this.checkChunksExist(i - b0, 0, j - b0, i + b0, 0, j + b0);
@@ -1090,7 +1087,7 @@
              par1Entity.lastTickPosX = par1Entity.posX;
              par1Entity.lastTickPosY = par1Entity.posY;
              par1Entity.lastTickPosZ = par1Entity.posZ;
-@@ -2083,6 +2697,8 @@
+@@ -2083,6 +2694,8 @@
                      par1Entity.riddenByEntity = null;
                  }
              }
@@ -1099,7 +1096,7 @@
          }
      }
  
-@@ -2278,6 +2894,7 @@
+@@ -2278,6 +2891,7 @@
                  par3Entity.motionZ += vec3.zCoord * d1;
              }
  
@@ -1107,7 +1104,7 @@
              return flag;
          }
      }
-@@ -2369,6 +2986,7 @@
+@@ -2369,6 +2983,7 @@
          double d2 = 1.0D / ((par2AxisAlignedBB.maxZ - par2AxisAlignedBB.minZ) * 2.0D + 1.0D);
          int i = 0;
          int j = 0;
@@ -1115,7 +1112,7 @@
  
          for (float f = 0.0F; f <= 1.0F; f = (float)((double)f + d0))
          {
-@@ -2390,7 +3008,8 @@
+@@ -2390,7 +3005,8 @@
              }
          }
  
@@ -1125,7 +1122,7 @@
      }
  
      public boolean extinguishFire(EntityPlayer par1EntityPlayer, int par2, int par3, int par4, int par5)
-@@ -2510,7 +3129,7 @@
+@@ -2510,7 +3126,7 @@
              return;
          }
  
@@ -1134,7 +1131,7 @@
          {
              if (this.field_147481_N)
              {
-@@ -2658,7 +3277,16 @@
+@@ -2658,7 +3274,16 @@
  
                      if (i <= 0)
                      {
@@ -1152,7 +1149,7 @@
                      }
                  }
  
-@@ -2694,7 +3322,16 @@
+@@ -2694,7 +3319,16 @@
  
                      if (j <= 0)
                      {
@@ -1170,7 +1167,7 @@
                      }
                  }
  
-@@ -2716,28 +3353,72 @@
+@@ -2716,28 +3350,72 @@
  
      protected void setActivePlayerChunksAndCheckLight()
      {
@@ -1251,7 +1248,7 @@
          }
  
          this.theProfiler.endSection();
-@@ -2749,7 +3430,7 @@
+@@ -2749,7 +3427,7 @@
  
          this.theProfiler.startSection("playerCheckLight");
  
@@ -1260,7 +1257,7 @@
          {
              i = this.rand.nextInt(this.playerEntities.size());
              entityplayer = (EntityPlayer)this.playerEntities.get(i);
-@@ -3221,8 +3902,21 @@
+@@ -3221,8 +3899,21 @@
          {
              Entity entity = (Entity)this.loadedEntityList.get(j);
  
@@ -1283,7 +1280,7 @@
                  ++i;
              }
          }
-@@ -3251,8 +3945,14 @@
+@@ -3251,8 +3942,14 @@
      public boolean canPlaceEntityOnSide(Block p_147472_1_, int p_147472_2_, int p_147472_3_, int p_147472_4_, boolean p_147472_5_, int p_147472_6_, Entity p_147472_7_, ItemStack p_147472_8_)
      {
          Block block1 = this.getBlock(p_147472_2_, p_147472_3_, p_147472_4_);
@@ -1299,7 +1296,7 @@
      }
  
      public PathEntity getPathEntityToEntity(Entity par1Entity, Entity par2Entity, float par3, boolean par4, boolean par5, boolean par6, boolean par7)
-@@ -3400,7 +4100,15 @@
+@@ -3400,7 +4097,15 @@
  
          for (int i = 0; i < this.playerEntities.size(); ++i)
          {
@@ -1316,7 +1313,7 @@
              double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
  
              if ((par7 < 0.0D || d5 < par7 * par7) && (d4 == -1.0D || d5 < d4))
-@@ -3425,8 +4133,16 @@
+@@ -3425,8 +4130,16 @@
  
          for (int i = 0; i < this.playerEntities.size(); ++i)
          {
@@ -1334,7 +1331,7 @@
              if (!entityplayer1.capabilities.disableDamage && entityplayer1.isEntityAlive())
              {
                  double d5 = entityplayer1.getDistanceSq(par1, par3, par5);
-@@ -3580,6 +4296,18 @@
+@@ -3580,6 +4293,18 @@
  
      public void updateAllPlayersSleepingFlag() {}
  
@@ -1353,7 +1350,7 @@
      public float getWeightedThunderStrength(float par1)
      {
          return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * par1) * this.getRainStrength(par1);
-@@ -3858,8 +4586,8 @@
+@@ -3858,8 +4583,8 @@
       */
      public void addTileEntity(TileEntity entity)
      {
@@ -1364,7 +1361,7 @@
          {
              dest.add(entity);
          }
-@@ -3955,4 +4683,43 @@
+@@ -3955,4 +4680,43 @@
          }
          return count;
      }

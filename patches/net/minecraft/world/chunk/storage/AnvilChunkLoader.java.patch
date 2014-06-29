@@ -121,3 +121,39 @@
                  }
  
                  nbttaglist.appendTag(nbttagcompound1);
+@@ -468,20 +479,25 @@
+                 if (entity2 != null)
+                 {
+                     chunk.addEntity(entity2);
+-                    Entity entity = entity2;
+-
+-                    for (NBTTagCompound nbttagcompound2 = nbttagcompound3; nbttagcompound2.hasKey("Riding", 10); nbttagcompound2 = nbttagcompound2.getCompoundTag("Riding"))
++                    // Cauldron start - check to see if we killed entity due to invalid location
++                    if (!entity2.isDead)
+                     {
+-                        Entity entity1 = EntityList.createEntityFromNBT(nbttagcompound2.getCompoundTag("Riding"), par1World);
+-
+-                        if (entity1 != null)
++                        Entity entity = entity2;
++    
++                        for (NBTTagCompound nbttagcompound2 = nbttagcompound3; nbttagcompound2.hasKey("Riding", 10); nbttagcompound2 = nbttagcompound2.getCompoundTag("Riding"))
+                         {
+-                            chunk.addEntity(entity1);
+-                            entity.mountEntity(entity1);
++                            Entity entity1 = EntityList.createEntityFromNBT(nbttagcompound2.getCompoundTag("Riding"), par1World);
++    
++                            if (entity1 != null)
++                            {
++                                chunk.addEntity(entity1);
++                                entity.mountEntity(entity1);
++                            }
++    
++                            entity = entity1;
+                         }
+-
+-                        entity = entity1;
+                     }
++                    // Cauldron end
+                 }
+             }
+         }

@@ -299,17 +299,17 @@ public class ActivationRange
             isActive = false;
         }
 
-        // Cauldron start - disabled, this breaks moving chunkloaders such as AnchorCarts when entering new chunks that are not yet loaded
-        /*
-        // Make sure not on edge of unloaded chunk
-
-        int x = net.minecraft.util.MathHelper.floor_double( entity.posX );
-        int z = net.minecraft.util.MathHelper.floor_double( entity.posZ );
-        if ( isActive && !entity.worldObj.doChunksNearChunkExist( x, 0, z, 16 ) )
+        // Cauldron start - if disabled, this breaks moving chunkloaders such as AnchorCarts when entering new chunks that are not yet loaded
+        if (!entity.worldObj.cauldronConfig.getBoolean("entities.skip-ticks-near-unloaded-chunks", true))
         {
-            isActive = false;
+            // Make sure not on edge of unloaded chunk
+            int x = net.minecraft.util.MathHelper.floor_double( entity.posX );
+            int z = net.minecraft.util.MathHelper.floor_double( entity.posZ );
+            if ( isActive && !entity.worldObj.doChunksNearChunkExist( x, 0, z, 16 ) )
+            {
+                isActive = false;
+            }
         }
-        */
         // Cauldron end
         SpigotTimings.checkIfActiveTimer.stopTiming();
         return isActive;
