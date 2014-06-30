@@ -30,7 +30,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 
 import org.bukkit.craftbukkit.SpigotTimings;
- // Cauldron start
+// Cauldron start
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraftforge.common.util.FakePlayer;
 // Cauldron end
@@ -302,7 +302,7 @@ public class ActivationRange
         // Cauldron start - if disabled, this breaks moving chunkloaders such as AnchorCarts when entering new chunks that are not yet loaded
         if (entity.worldObj != null && entity.worldObj.cauldronConfig != null)
         {
-            if (!entity.worldObj.cauldronConfig.getBoolean("entities.skip-ticks-near-unloaded-chunks", true))
+            if (entity.worldObj.cauldronConfig.getBoolean("entities.skip-ticks-near-unloaded-chunks", false))
             {
                 // Make sure not on edge of unloaded chunk
                 int x = net.minecraft.util.MathHelper.floor_double( entity.posX );

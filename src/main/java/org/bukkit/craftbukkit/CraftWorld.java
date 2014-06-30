@@ -64,6 +64,8 @@ public class CraftWorld implements World {
     private int animalSpawn = -1;
     private int waterAnimalSpawn = -1;
     private int ambientSpawn = -1;
+    private int chunkLoadCount = 0;
+    private int chunkGCTickCount;
 
     private static final Random rand = new Random();
 
@@ -72,6 +74,10 @@ public class CraftWorld implements World {
         this.generator = gen;
 
         environment = env;
+
+        if (server.chunkGCPeriod > 0) {
+            chunkGCTickCount = rand.nextInt(server.chunkGCPeriod);
+        }
     }
 
     public Block getBlockAt(int x, int y, int z) {
@@ -231,11 +237,17 @@ public class CraftWorld implements World {
     }
 
     public boolean isChunkInUse(int x, int z) {
-        return world.getPlayerManager().isChunkInUse(x, z);
+        // Cauldron start
+        if (world.getPlayerManager().isChunkInUse(x, z) || world.isActiveChunk(x, z)) {
+            return true;
+        }
+        return false;
+        // Cauldron end
     }
 
     public boolean loadChunk(int x, int z, boolean generate) {
         if (Thread.currentThread() != net.minecraft.server.MinecraftServer.getServer().primaryThread) throw new IllegalStateException("Asynchronous chunk load!"); // Spigot
+        chunkLoadCount++;
 
         if (generate) {
             // Use the default variant of loadChunk when generate == true.
@@ -1344,6 +1356,34 @@ public class CraftWorld implements World {
 
     public boolean isGameRule(String rule) {
         return getHandle().getGameRules().hasRule(rule);
+    }
+
+    public void processChunkGC() {
+         chunkGCTickCount++;
+
+        if (chunkLoadCount >= server.chunkGCLoadThresh && server.chunkGCLoadThresh > 0) {
+            chunkLoadCount = 0;
+        } else if (chunkGCTickCount >= server.chunkGCPeriod && server.chunkGCPeriod > 0) {
+            chunkGCTickCount = 0;
+        } else {
+            return;
+        }
+
+        net.minecraft.world.gen.ChunkProviderServer cps = world.theChunkProviderServer;
+        for (net.minecraft.world.chunk.Chunk chunk : cps.loadedChunkHashMap.values()) {
+            // If in use, skip it
+            if (isChunkInUse(chunk.xPosition, chunk.zPosition)) {
+                continue;
+            }
+
+            // Already unloading?
+            if (cps.chunksToUnload.contains(chunk.xPosition, chunk.zPosition)) {
+                continue;
+            }
+
+            // Add unload request
+            cps.unloadChunksIfNotNearSpawn(chunk.xPosition, chunk.zPosition);
+        }
     }
 
     // Spigot start

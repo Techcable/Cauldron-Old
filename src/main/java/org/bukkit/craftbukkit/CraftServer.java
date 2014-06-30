@@ -156,6 +156,9 @@ public final class CraftServer implements Server {
     private int animalSpawn = -1;
     private int waterAnimalSpawn = -1;
     private int ambientSpawn = -1;
+    public boolean chunkGCEnabled = false; // Cauldron
+    public int chunkGCPeriod = -1;
+    public int chunkGCLoadThresh = 0;
     private File container;
     private WarningState warningState = WarningState.DEFAULT;
     private final BooleanWrapper online = new BooleanWrapper();
@@ -241,7 +244,9 @@ public final class CraftServer implements Server {
         ambientSpawn = configuration.getInt("spawn-limits.ambient");
         console.autosavePeriod = configuration.getInt("ticks-per.autosave");
         warningState = WarningState.value(configuration.getString("settings.deprecated-verbose"));
-        loadIcon();
+        chunkGCEnabled = configuration.getBoolean("chunk-gc.enabled"); // Cauldron
+        chunkGCPeriod = configuration.getInt("chunk-gc.period-in-ticks");
+        chunkGCLoadThresh = configuration.getInt("chunk-gc.load-threshold");
         net.minecraftforge.cauldron.CauldronConfig.init();
 
         updater = new AutoUpdater(new BukkitDLUpdaterService(configuration.getString("auto-updater.host")), getLogger(), configuration.getString("auto-updater.preferred-channel"));
