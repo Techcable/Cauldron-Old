@@ -15,6 +15,11 @@ We use Gradle to handle our dependencies.
 4. Build binaries  : gradlew buildPackages
 Note: all binaries will be in distributions folder
 
+Supporting Cauldron
+--------
+Click here to [Donate to bloodmc](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YNCKCALNQKFAS)
+Click here to [Become a Patreon] (http://www.patreon.com/bloodmc)
+
 
 Profiling
 ---------
@@ -75,8 +80,3 @@ Credits
 * [Forge](http://www.minecraftforge.net) - mod support.
 * [CraftBukkit](http://bukkit.org) - plugin support.
 * [Spigot](http://www.spigotmc.org) - performance optimizations.
-
-
-Donating
---------
-Click here to [Donate to bloodmc](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YNCKCALNQKFAS)
