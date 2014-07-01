@@ -44,9 +44,9 @@
 +        {
 +            worldType = Environment.getEnvironment(id).name().toLowerCase();
 +        }
-+        net.minecraftforge.cauldron.CauldronConfig.init();
-+        keepLoaded = net.minecraftforge.cauldron.CauldronConfig.getBoolean("world-environment-settings." + worldType + ".keep-world-loaded", keepLoaded);
-+        net.minecraftforge.cauldron.CauldronConfig.save();
++        net.minecraftforge.cauldron.configuration.CauldronConfig.init();
++        keepLoaded = net.minecraftforge.cauldron.configuration.CauldronConfig.getBoolean("world-environment-settings." + worldType + ".keep-world-loaded", keepLoaded);
++        net.minecraftforge.cauldron.configuration.CauldronConfig.save();
 +        // Cauldron end
          providers.put(id, provider);
 +        classToProviders.put(provider, id);
@@ -59,7 +59,7 @@
      {
 -        if (check)
 +        // Cauldron start - check config option and only log world leak messages if enabled
-+        if (net.minecraftforge.cauldron.CauldronConfig.Setting.worldLeakDebug.getValue())
++        if (net.minecraftforge.cauldron.configuration.CauldronConfig.worldLeakDebug.getValue())
          {
 -            List<World> allWorlds = Lists.newArrayList(weakWorldMap.keySet());
 -            allWorlds.removeAll(worlds.values());
@@ -107,7 +107,7 @@
              worlds.put(id, world);
 -            weakWorldMap.put(world, world);
 +            // Cauldron start - check config option and only log world leak messages if enabled
-+            if (net.minecraftforge.cauldron.CauldronConfig.Setting.worldLeakDebug.getValue())
++            if (net.minecraftforge.cauldron.configuration.CauldronConfig.worldLeakDebug.getValue())
 +            {
 +                weakWorldMap.put(world, world);
 +            }
@@ -179,8 +179,8 @@
 +            if (name == null) name = "DIM0";
 +        }
 +        // Cauldron start - add ability to disable dimensions
-+        boolean enabled = net.minecraftforge.cauldron.CauldronConfig.getBoolean("world-environment-settings." + worldType + ".enabled", true);
-+        net.minecraftforge.cauldron.CauldronConfig.save();
++        boolean enabled = net.minecraftforge.cauldron.configuration.CauldronConfig.getBoolean("world-environment-settings." + worldType + ".enabled", true);
++        net.minecraftforge.cauldron.configuration.CauldronConfig.save();
 +        if (!enabled)
 +            return;
 +        // Cauldron end

@@ -9,8 +9,8 @@
 +//import org.bouncycastle.util.io.Streams;
 +import net.md_5.specialsource.*;
 +import net.md_5.specialsource.repo.*;
-+import net.minecraftforge.cauldron.CauldronConfig;
 +import net.minecraftforge.cauldron.CauldronUtils;
++import net.minecraftforge.cauldron.configuration.CauldronConfig;
 +
 +import org.bukkit.plugin.PluginDescriptionFile;
 +import java.io.*;

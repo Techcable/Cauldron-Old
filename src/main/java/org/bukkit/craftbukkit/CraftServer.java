@@ -121,7 +121,7 @@ import cpw.mods.fml.common.FMLLog;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.storage.SaveHandler;
-import net.minecraftforge.cauldron.CauldronConfig;
+import net.minecraftforge.cauldron.configuration.CauldronConfig;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
@@ -248,7 +248,7 @@ public final class CraftServer implements Server {
         chunkGCEnabled = configuration.getBoolean("chunk-gc.enabled"); // Cauldron
         chunkGCPeriod = configuration.getInt("chunk-gc.period-in-ticks");
         chunkGCLoadThresh = configuration.getInt("chunk-gc.load-threshold");
-        net.minecraftforge.cauldron.CauldronConfig.init();
+        net.minecraftforge.cauldron.configuration.CauldronConfig.init();
 
         updater = new AutoUpdater(new BukkitDLUpdaterService(configuration.getString("auto-updater.host")), getLogger(), configuration.getString("auto-updater.preferred-channel"));
         updater.setEnabled(false); // Spigot
@@ -706,7 +706,7 @@ public final class CraftServer implements Server {
         playerList.getBannedPlayers().loadBanList();
 
         org.spigotmc.SpigotConfig.init(); // Spigot
-        net.minecraftforge.cauldron.CauldronConfig.init(); // Cauldron
+        net.minecraftforge.cauldron.configuration.CauldronConfig.init(); // Cauldron
         for (net.minecraft.world.WorldServer world : console.worlds) {
             world.difficultySetting = difficulty;
             world.setAllowedSpawnTypes(monsters, animals);

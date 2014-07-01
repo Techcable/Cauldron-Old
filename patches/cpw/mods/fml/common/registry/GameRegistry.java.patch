@@ -38,7 +38,7 @@
      }
  
      /**
-@@ -100,11 +111,28 @@
+@@ -100,11 +111,27 @@
          long zSeed = fmlRandom.nextLong() >> 2 + 1L;
          long chunkSeed = (xSeed * chunkX + zSeed * chunkZ) ^ worldSeed;
  
@@ -64,7 +64,6 @@
 +                generator.generate(fmlRandom, chunkX, chunkZ, world, chunkGenerator, chunkProvider);
 +            }
          }
-+        world.cauldronConfig.save();
 +        ((net.minecraft.world.WorldServer)world).theChunkProviderServer.loadChunkOnProvideRequest = before; // reset
 +        // Cauldron end
      }

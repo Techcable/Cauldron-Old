@@ -12,8 +12,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.cauldron.CauldronConfig;
 import net.minecraftforge.cauldron.CauldronHooks;
+import net.minecraftforge.cauldron.configuration.CauldronConfig;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -97,7 +97,7 @@ public class WatchdogThread extends Thread
 
                 log.log(Level.SEVERE, "------------------------------");
 
-                if (CauldronConfig.Setting.dumpChunksOnDeadlock.getValue())
+                if (CauldronConfig.dumpChunksOnDeadlock.getValue())
                 {
                     // Dump detailed world info to a watchdog report log
                     File file = new File(new File(new File("."), "crash-reports"), "watchdog-chunks-"
@@ -108,7 +108,7 @@ public class WatchdogThread extends Thread
                     log.log(Level.SEVERE, "Writing complete");
                     log.log(Level.SEVERE, "------------------------------");
                 }
-                if (CauldronConfig.Setting.dumpHeapOnDeadlock.getValue())
+                if (CauldronConfig.dumpHeapOnDeadlock.getValue())
                 {
                     // Dump detailed world info to a watchdog report log
                     File file = new File(new File(new File("."), "crash-reports"), "watchdog-heap-"
@@ -160,7 +160,7 @@ public class WatchdogThread extends Thread
                     log.log(Level.WARNING, "  Entities Last Tick: " + world.entitiesTicked);
                     log.log(Level.WARNING, "  Tiles Last Tick: " + world.tilesTicked);
                 }
-                if (CauldronConfig.Setting.dumpThreadsOnWarn.getValue())
+                if (CauldronConfig.dumpThreadsOnWarn.getValue())
                 {
                     log.log(Level.WARNING, "Server thread dump (Look for mods or plugins here before reporting to Cauldron!):");
                     dumpThread(ManagementFactory.getThreadMXBean().getThreadInfo(MinecraftServer.getServer().primaryThread.getId(), Integer.MAX_VALUE), log,

@@ -5,9 +5,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.cauldron.CauldronConfig.Setting;
+import net.minecraftforge.cauldron.configuration.BoolSetting;
+import net.minecraftforge.cauldron.configuration.CauldronConfig;
+import net.minecraftforge.cauldron.configuration.IntSetting;
+import net.minecraftforge.cauldron.configuration.Setting;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -59,7 +63,7 @@ public class CauldronCommand extends Command
         }
         if ((args.length == 1) && "reload".equalsIgnoreCase(args[0]))
         {
-            CauldronConfig.load();
+            CauldronConfig.load(true);
             sender.sendMessage(ChatColor.GREEN + "Config file reloaded");
             return true;
         }
@@ -131,7 +135,24 @@ public class CauldronCommand extends Command
     {
         try
         {
-            CauldronConfig.Setting toggle = CauldronConfig.settings.get(args[1]);
+            Setting toggle = CauldronConfig.settings.get(args[1]);
+            // check config directly
+            if (toggle == null && CauldronConfig.isSet(args[1]))
+            {
+                if (CauldronConfig.isBoolean(args[1]))
+                {
+                    toggle = new BoolSetting(args[1], CauldronConfig.getBoolean(args[1], false), "");
+                }
+                else if (CauldronConfig.isInt(args[1]))
+                {
+                    toggle = new IntSetting(args[1], CauldronConfig.getInt(args[1], 1), "");
+                }
+                if (toggle != null)
+                {
+                    CauldronConfig.settings.put(toggle.path, toggle);
+                    CauldronConfig.load(false);
+                }
+            }
             if (toggle == null)
             {
                 sender.sendMessage(ChatColor.RED + "Could not find option: " + args[1]);
@@ -168,7 +189,14 @@ public class CauldronCommand extends Command
     {
         try
         {
-            CauldronConfig.Setting toggle = CauldronConfig.settings.get(args[1]);
+            Setting toggle = CauldronConfig.settings.get(args[1]);
+            // check config directly
+            if (toggle == null && CauldronConfig.isSet(args[1]))
+            {
+                toggle = new BoolSetting(args[1], CauldronConfig.getBoolean(args[1], false), "");
+                CauldronConfig.settings.put(toggle.path, toggle);
+                CauldronConfig.load(true);
+            }
             if (toggle == null)
             {
                 sender.sendMessage(ChatColor.RED + "Could not find option: " + args[1]);
@@ -184,17 +212,14 @@ public class CauldronCommand extends Command
             String option = (Boolean.TRUE.equals(value) ? ChatColor.GREEN : ChatColor.RED) + " " + value;
             sender.sendMessage(ChatColor.GOLD + args[1] + " " + option);
             // Special case for load-on-request
-            if (toggle == CauldronConfig.Setting.loadChunkOnRequest)
+            if (toggle == CauldronConfig.loadChunkOnRequest)
             {
                 for (net.minecraft.world.WorldServer world : MinecraftServer.getServer().worlds)
                 {
-                    world.theChunkProviderServer.loadChunkOnProvideRequest = net.minecraftforge.cauldron.CauldronConfig.Setting.loadChunkOnRequest.getValue();
+                    world.theChunkProviderServer.loadChunkOnProvideRequest = CauldronConfig.loadChunkOnRequest.getValue();
                 }
             }
-            if (toggle == CauldronConfig.Setting.overrideTileTicks)
-            {
-                CauldronHooks.overrideTileTicks = CauldronConfig.Setting.overrideTileTicks.getValue();
-            }
+            CauldronConfig.save();
         }
         catch (Exception ex)
         {

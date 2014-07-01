@@ -1,32 +1,24 @@
-package net.minecraftforge.cauldron;
+package net.minecraftforge.cauldron.configuration;
 
 import java.util.List;
 
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
+import net.minecraftforge.cauldron.configuration.BoolSetting;
 
 public class CauldronWorldConfig
 {
     private final String worldName;
-    private final YamlConfiguration config;
+    public YamlConfiguration config;
     private boolean verbose;
+    public boolean entitiesDespawnImmediate = true;
 
     public CauldronWorldConfig(String worldName)
     {
         this.worldName = worldName.toLowerCase();
         this.config = CauldronConfig.config;
         if (worldName.toLowerCase().contains("dummy")) return;
-        try {
-            init();
-        } catch (Throwable t) {
-            log( "Something bad happened while trying init the cauldron config for [" + worldName + "]");
-            t.printStackTrace();
-        }
-    }
-
-    public void init()
-    {
-        CauldronConfig.readConfig( CauldronWorldConfig.class, this );
     }
 
     public void save()
@@ -54,6 +46,11 @@ public class CauldronWorldConfig
 
     public boolean getBoolean(String path, boolean def)
     {
+        if (CauldronConfig.settings.get("world-settings.default." + path) == null)
+        {
+            CauldronConfig.settings.put("world-settings.default." + path, new BoolSetting("world-settings.default." + path, def, ""));
+        }
+
         config.addDefault( "world-settings.default." + path, def );
         return config.getBoolean( "world-settings." + worldName + "." + path, config.getBoolean( "world-settings.default." + path ) );
     }
@@ -64,8 +61,13 @@ public class CauldronWorldConfig
         return config.getDouble( "world-settings." + worldName + "." + path, config.getDouble( "world-settings.default." + path ) );
     }
 
-    private int getInt(String path, int def)
+    public int getInt(String path, int def)
     {
+        if (CauldronConfig.settings.get("world-settings.default." + path) == null)
+        {
+            CauldronConfig.settings.put("world-settings.default." + path, new IntSetting("world-settings.default." + path, def, ""));
+        }
+
         config.addDefault( "world-settings.default." + path, def );
         return config.getInt( "world-settings." + worldName + "." + path, config.getInt( "world-settings.default." + path ) );
     }

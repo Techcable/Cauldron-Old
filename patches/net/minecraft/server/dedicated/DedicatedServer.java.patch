@@ -135,7 +135,7 @@
  
          if (this.isSinglePlayer())
          {
-@@ -160,22 +212,39 @@
+@@ -160,22 +212,42 @@
              this.setServerPort(this.settings.getIntProperty("server-port", 25565));
          }
  
@@ -144,7 +144,10 @@
 +        org.spigotmc.SpigotConfig.init();
 +        org.spigotmc.SpigotConfig.registerCommands();
 +        // Spigot end
-+        net.minecraftforge.cauldron.CauldronConfig.registerCommands(); // Cauldron
++        // Cauldron start
++        net.minecraftforge.cauldron.configuration.CauldronConfig.init();
++        net.minecraftforge.cauldron.configuration.CauldronConfig.registerCommands();
++        // Cauldron end
          field_155771_h.info("Generating keypair");
          this.setKeyPair(CryptManager.createNewKeyPair());
          field_155771_h.info("Starting Minecraft server on " + (this.getServerHostname().length() == 0 ? "*" : this.getServerHostname()) + ":" + this.getServerPort());
@@ -184,7 +187,7 @@
          if (!this.isServerInOnlineMode())
          {
              field_155771_h.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
-@@ -186,7 +255,8 @@
+@@ -186,7 +258,8 @@
  
          FMLCommonHandler.instance().onServerStarted();
  
@@ -194,7 +197,7 @@
          long j = System.nanoTime();
  
          if (this.getFolderName() == null)
-@@ -238,6 +308,21 @@
+@@ -238,6 +311,21 @@
          String s3 = String.format("%.3fs", new Object[] {Double.valueOf((double)i1 / 1.0E9D)});
          field_155771_h.info("Done (" + s3 + ")! For help, type \"help\" or \"?\"");
  
@@ -216,7 +219,7 @@
          if (this.settings.getBooleanProperty("enable-query", false))
          {
              field_155771_h.info("Starting GS4 status listener");
-@@ -250,12 +335,30 @@
+@@ -250,12 +338,30 @@
              field_155771_h.info("Starting remote control listener");
              this.theRConThreadMain = new RConThreadMain(this);
              this.theRConThreadMain.startThread();
@@ -248,7 +251,7 @@
      public boolean canStructuresSpawn()
      {
          return this.canSpawnStructures;
-@@ -358,8 +461,14 @@
+@@ -358,8 +464,14 @@
      {
          while (!this.pendingCommandList.isEmpty())
          {

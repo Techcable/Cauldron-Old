@@ -4,8 +4,8 @@
  import net.minecraft.world.chunk.IChunkProvider;
  import net.minecraft.world.chunk.storage.AnvilChunkLoader;
  import net.minecraft.world.chunk.storage.IChunkLoader;
-+import net.minecraftforge.cauldron.CauldronConfig;
 +import net.minecraftforge.cauldron.CauldronHooks;
++import net.minecraftforge.cauldron.configuration.CauldronConfig;
  import net.minecraftforge.common.DimensionManager;
  import net.minecraftforge.common.ForgeChunkManager;
  import net.minecraftforge.common.chunkio.ChunkIOExecutor;
@@ -38,7 +38,7 @@
 -    public boolean loadChunkOnProvideRequest = true;
 -    public LongHashMap loadedChunkHashMap = new LongHashMap();
 -    public List loadedChunks = new ArrayList();
-+    public boolean loadChunkOnProvideRequest = net.minecraftforge.cauldron.CauldronConfig.Setting.loadChunkOnRequest.getValue(); // Cauldron - if true, allows mods to force load chunks. to disable, set load-chunk-on-request in cauldron.yml to false
++    public boolean loadChunkOnProvideRequest = net.minecraftforge.cauldron.configuration.CauldronConfig.loadChunkOnRequest.getValue(); // Cauldron - if true, allows mods to force load chunks. to disable, set load-chunk-on-request in cauldron.yml to false
 +    public int initialTick; // Cauldron counter to keep track of when this loader was created
 +    public LongObjectHashMap<Chunk> loadedChunkHashMap = new LongObjectHashMap<Chunk>();
 +    public List loadedChunks = new ArrayList(); // Cauldron - vanilla compatibility
@@ -336,7 +336,7 @@
  
              if (par1)
              {
-@@ -318,31 +434,60 @@
+@@ -318,31 +434,51 @@
      {
          if (!this.worldObj.levelSaving)
          {
@@ -367,15 +367,6 @@
 -                    Chunk chunk = (Chunk)this.loadedChunkHashMap.getValueByKey(olong.longValue());
 +                    continue;
 +                }
-+
-+                // Cauldron static - check if the chunk was accessed recently and keep it loaded if there are players in world
-+                if (!shouldUnloadChunk(chunk) && this.worldObj.playerEntities.size() > 0)
-+                {
-+                    CauldronHooks.logChunkUnload(this, chunk.xPosition, chunk.zPosition, "** Chunk kept from unloading due to recent activity");
-+                    continue;
-+                }
-+                // Cauldron end
-+
 +
 +                ChunkUnloadEvent event = new ChunkUnloadEvent(chunk.bukkitChunk);
 +                server.getPluginManager().callEvent(event);
@@ -408,7 +399,7 @@
              if (this.currentChunkLoader != null)
              {
                  this.currentChunkLoader.chunkTick();
-@@ -359,7 +504,8 @@
+@@ -359,7 +495,8 @@
  
      public String makeString()
      {
@@ -418,7 +409,7 @@
      }
  
      public List getPossibleCreatures(EnumCreatureType par1EnumCreatureType, int par2, int par3, int par4)
-@@ -374,8 +520,32 @@
+@@ -374,8 +511,26 @@
  
      public int getLoadedChunkCount()
      {
@@ -434,7 +425,7 @@
 +    {
 +        return this.worldObj.findingSpawnPoint ||
 +                this.loadChunkOnProvideRequest ||
-+                (MinecraftServer.callingForgeTick && CauldronConfig.Setting.loadChunkOnForgeTick.getValue()) ||
++                (MinecraftServer.callingForgeTick && CauldronConfig.loadChunkOnForgeTick.getValue()) ||
 +                (MinecraftServer.currentTick - initialTick <= 100);
 +    }
 +
@@ -443,12 +434,6 @@
 +        long chunkHash = LongHash.toLong(x, z); 
 +        if (!loadedChunkHashMap.containsKey(chunkHash)) return 0;
 +        return loadedChunkHashMap.get(chunkHash).lastAccessedTick;
-+    }
-+
-+    private boolean shouldUnloadChunk(Chunk chunk)
-+    {
-+        if (chunk == null) return false;
-+        return MinecraftServer.getServer().getTickCounter() - chunk.lastAccessedTick > CauldronConfig.Setting.chunkGCGracePeriod.getValue();
 +    }
 +    // Cauldron end
  }

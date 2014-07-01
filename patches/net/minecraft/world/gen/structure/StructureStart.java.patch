@@ -1,0 +1,12 @@
+--- ../src-base/minecraft/net/minecraft/world/gen/structure/StructureStart.java
++++ ../src-work/minecraft/net/minecraft/world/gen/structure/StructureStart.java
+@@ -41,7 +41,8 @@
+         {
+             StructureComponent structurecomponent = (StructureComponent)iterator.next();
+ 
+-            if (structurecomponent.getBoundingBox().intersectsWith(par3StructureBoundingBox) && !structurecomponent.addComponentParts(par1World, par2Random, par3StructureBoundingBox))
++            // Cauldron - validate structurecomponent
++            if ((structurecomponent == null || structurecomponent.getBoundingBox() == null) || (structurecomponent.getBoundingBox().intersectsWith(par3StructureBoundingBox) && !structurecomponent.addComponentParts(par1World, par2Random, par3StructureBoundingBox)))
+             {
+                 iterator.remove();
+             }
