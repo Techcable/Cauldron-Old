@@ -669,12 +669,6 @@ public final class CraftServer implements Server {
 
         return false;
     }
-
-    public String getBukkitToForgeMapping(String name)
-    {
-        String result = CauldronConfig.getString("bukkit-to-forge-mappings." + name, name, false);
-        return result;
-    }
     // Cauldron end    
 
     public void reload() {
