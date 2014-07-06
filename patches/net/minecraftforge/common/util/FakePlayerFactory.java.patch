@@ -1,0 +1,26 @@
+--- ../src-base/minecraft/net/minecraftforge/common/util/FakePlayerFactory.java
++++ ../src-work/minecraft/net/minecraftforge/common/util/FakePlayerFactory.java
+@@ -34,12 +34,19 @@
+      */
+     public static FakePlayer get(WorldServer world, GameProfile username)
+     {
+-        if (!fakePlayers.containsKey(username))
++        // Cauldron start - handle null data in GameProfile
++        if (username == null) return null;
++
++        for (GameProfile gameprofile : fakePlayers.keySet())
+         {
+-            FakePlayer fakePlayer = new FakePlayer(world, username);
+-            fakePlayers.put(username, fakePlayer);
++            if (gameprofile == username)
++            {
++                return fakePlayers.get(username);
++            }
+         }
+-
++        // Cauldron end
++        FakePlayer fakePlayer = new FakePlayer(world, username);
++        fakePlayers.put(username, fakePlayer);
+         return fakePlayers.get(username);
+     }
+ 
