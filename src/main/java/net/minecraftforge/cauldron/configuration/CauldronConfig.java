@@ -225,7 +225,10 @@ public class CauldronConfig
 
     public static boolean getBoolean(String path, boolean def, boolean useDefault)
     {
-        config.addDefault(path, def);
+        if (useDefault)
+        {
+            config.addDefault(path, def);
+        }
         return config.getBoolean(path, def);
     }
 
@@ -248,7 +251,10 @@ public class CauldronConfig
 
     public static String getString(String path, String def, boolean useDefault)
     {
-        config.addDefault(path, def);
+        if (useDefault)
+        {
+            config.addDefault(path, def);
+        }
         return config.getString(path, def);
     }
 
