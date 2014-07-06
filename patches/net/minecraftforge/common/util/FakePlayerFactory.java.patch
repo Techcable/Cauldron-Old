@@ -1,25 +1,29 @@
 --- ../src-base/minecraft/net/minecraftforge/common/util/FakePlayerFactory.java
 +++ ../src-work/minecraft/net/minecraftforge/common/util/FakePlayerFactory.java
-@@ -34,12 +34,19 @@
+@@ -34,12 +34,23 @@
       */
      public static FakePlayer get(WorldServer world, GameProfile username)
      {
 -        if (!fakePlayers.containsKey(username))
-+        // Cauldron start - handle null data in GameProfile
-+        if (username == null) return null;
++        // Cauldron start - Refactored below to avoid a hashCode check with a null GameProfile ID
++        if (username == null || username.getName() == null) return null;
 +
 +        for (GameProfile gameprofile : fakePlayers.keySet())
          {
 -            FakePlayer fakePlayer = new FakePlayer(world, username);
 -            fakePlayers.put(username, fakePlayer);
-+            if (gameprofile == username)
++            if (gameprofile.getName().equals(username.getName()))
 +            {
 +                return fakePlayers.get(username);
 +            }
          }
 -
-+        // Cauldron end
 +        FakePlayer fakePlayer = new FakePlayer(world, username);
++        if (username.getId() == null) // GameProfile hashCode check will fail with a null ID
++        {
++            username = new GameProfile("", username.getName()); // Create new GameProfile with empty ID
++        }
++        // Cauldron end
 +        fakePlayers.put(username, fakePlayer);
          return fakePlayers.get(username);
      }
