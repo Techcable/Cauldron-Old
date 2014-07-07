@@ -1,13 +1,10 @@
 --- ../src-base/minecraft/net/minecraft/entity/item/EntityFallingBlock.java
 +++ ../src-work/minecraft/net/minecraft/entity/item/EntityFallingBlock.java
-@@ -19,9 +19,14 @@
+@@ -19,9 +19,11 @@
  import net.minecraft.util.MathHelper;
  import net.minecraft.world.World;
  
-+// CraftBukkit start
-+import org.bukkit.craftbukkit.event.CraftEventFactory;
-+import org.bukkit.event.entity.EntityDamageEvent;
-+// CraftBukkit end
++import org.bukkit.craftbukkit.event.CraftEventFactory; // CraftBukkit
 +
  public class EntityFallingBlock extends Entity
  {
@@ -16,7 +13,7 @@
      public int field_145814_a;
      public int field_145812_b;
      public boolean field_145813_c;
-@@ -103,7 +108,8 @@
+@@ -103,7 +105,8 @@
  
                  if (this.field_145812_b == 1)
                  {
@@ -26,7 +23,7 @@
                      {
                          this.setDead();
                          return;
-@@ -122,8 +128,17 @@
+@@ -122,8 +125,17 @@
                      {
                          this.setDead();
  
@@ -45,7 +42,7 @@
                              if (this.field_145811_e instanceof BlockFalling)
                              {
                                  ((BlockFalling)this.field_145811_e).func_149828_a(this.worldObj, i, j, k, this.field_145814_a);
-@@ -189,8 +204,10 @@
+@@ -189,8 +201,10 @@
  
                  while (iterator.hasNext())
                  {

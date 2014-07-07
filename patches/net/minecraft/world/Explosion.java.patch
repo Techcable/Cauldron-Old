@@ -1,14 +1,11 @@
 --- ../src-base/minecraft/net/minecraft/world/Explosion.java
 +++ ../src-work/minecraft/net/minecraft/world/Explosion.java
-@@ -20,6 +20,15 @@
+@@ -20,6 +20,12 @@
  import net.minecraft.util.MathHelper;
  import net.minecraft.util.Vec3;
  
++import org.bukkit.craftbukkit.event.CraftEventFactory;
 +// CraftBukkit start
-+import org.bukkit.Bukkit;
-+import org.bukkit.event.entity.EntityDamageByBlockEvent;
-+import org.bukkit.event.entity.EntityDamageByEntityEvent;
-+import org.bukkit.event.entity.EntityDamageEvent;
 +import org.bukkit.event.entity.EntityExplodeEvent;
 +import org.bukkit.Location;
 +// CraftBukkit end
@@ -16,7 +13,7 @@
  public class Explosion
  {
      public boolean isFlaming;
-@@ -34,6 +43,7 @@
+@@ -34,6 +40,7 @@
      public float explosionSize;
      public List affectedBlockPositions = new ArrayList();
      private Map field_77288_k = new HashMap();
@@ -24,7 +21,7 @@
      private static final String __OBFID = "CL_00000134";
  
      public Explosion(World p_i1948_1_, Entity p_i1948_2_, double p_i1948_3_, double p_i1948_5_, double p_i1948_7_, float p_i1948_9_)
-@@ -48,6 +58,13 @@
+@@ -48,6 +55,13 @@
  
      public void doExplosionA()
      {
@@ -38,7 +35,7 @@
          float f = this.explosionSize;
          HashSet hashset = new HashSet();
          int i;
-@@ -56,7 +73,7 @@
+@@ -56,7 +70,7 @@
          double d5;
          double d6;
          double d7;
@@ -47,7 +44,7 @@
          for (i = 0; i < this.field_77289_h; ++i)
          {
              for (j = 0; j < this.field_77289_h; ++j)
-@@ -76,25 +93,25 @@
+@@ -76,25 +90,25 @@
                          d5 = this.explosionX;
                          d6 = this.explosionY;
                          d7 = this.explosionZ;
@@ -77,7 +74,7 @@
                              d5 += d0 * (double)f2;
                              d6 += d1 * (double)f2;
                              d7 += d2 * (double)f2;
-@@ -103,7 +120,7 @@
+@@ -103,7 +117,7 @@
                  }
              }
          }
@@ -86,7 +83,24 @@
          this.affectedBlockPositions.addAll(hashset);
          this.explosionSize *= 2.0F;
          i = MathHelper.floor_double(this.explosionX - (double)this.explosionSize - 1.0D);
-@@ -173,6 +190,40 @@
+@@ -134,7 +148,15 @@
+                     d7 /= d9;
+                     double d10 = (double)this.worldObj.getBlockDensity(vec3, entity.boundingBox);
+                     double d11 = (1.0D - d4) * d10;
+-                    entity.attackEntityFrom(DamageSource.setExplosionSource(this), (float)((int)((d11 * d11 + d11) / 2.0D * 8.0D * (double)this.explosionSize + 1.0D)));
++
++                    // CraftBukkit start
++                    CraftEventFactory.entityDamage = exploder;
++                    if (!entity.attackEntityFrom(DamageSource.setExplosionSource(this), (float)((int)((d11 * d11 + d11) / 2.0D * 8.0D * (double)this.explosionSize + 1.0D))))
++                    {
++                        CraftEventFactory.entityDamage = null;
++                        continue;
++                    }
++                    // CraftBukkit end
+                     double d8 = EnchantmentProtection.func_92092_a(entity, d11);
+                     entity.motionX += d5 * d8;
+                     entity.motionY += d6 * d8;
+@@ -173,6 +195,40 @@
  
          if (this.isSmoking)
          {
@@ -127,7 +141,7 @@
              iterator = this.affectedBlockPositions.iterator();
  
              while (iterator.hasNext())
-@@ -208,7 +259,8 @@
+@@ -208,7 +264,8 @@
                  {
                      if (block.canDropFromExplosion(this))
                      {
@@ -137,7 +151,7 @@
                      }
  
                      block.onBlockExploded(this.worldObj, i, j, k, this);
-@@ -231,7 +283,13 @@
+@@ -231,7 +288,13 @@
  
                  if (block.getMaterial() == Material.air && block1.func_149730_j() && this.explosionRNG.nextInt(3) == 0)
                  {

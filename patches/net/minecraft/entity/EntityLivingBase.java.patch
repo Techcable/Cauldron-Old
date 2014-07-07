@@ -1,8 +1,10 @@
 --- ../src-base/minecraft/net/minecraft/entity/EntityLivingBase.java
 +++ ../src-work/minecraft/net/minecraft/entity/EntityLivingBase.java
-@@ -51,13 +51,23 @@
+@@ -50,14 +50,25 @@
+ import net.minecraft.world.World;
  import net.minecraft.world.WorldServer;
  import net.minecraftforge.common.ForgeHooks;
++import net.minecraftforge.common.ISpecialArmor.ArmorProperties;
  
 +// CraftBukkit start
 +import net.minecraft.nbt.NBTTagInt;
@@ -26,7 +28,7 @@
      private final ItemStack[] previousEquipment = new ItemStack[5];
      public boolean isSwingInProgress;
      public int swingProgressInt;
-@@ -83,7 +93,7 @@
+@@ -83,7 +94,7 @@
      public float rotationYawHead;
      public float prevRotationYawHead;
      public float jumpMovementFactor = 0.02F;
@@ -35,7 +37,7 @@
      protected int recentlyHit;
      protected boolean dead;
      protected int entityAge;
-@@ -93,7 +103,7 @@
+@@ -93,7 +104,7 @@
      protected float field_70763_ax;
      protected float field_70741_aB;
      protected int scoreValue;
@@ -44,7 +46,7 @@
      protected boolean isJumping;
      public float moveStrafing;
      public float moveForward;
-@@ -104,21 +114,26 @@
+@@ -104,21 +115,26 @@
      protected double newPosZ;
      protected double newRotationYaw;
      protected double newRotationPitch;
@@ -74,7 +76,7 @@
          this.preventEntitySpawning = true;
          this.field_70770_ap = (float)(Math.random() + 1.0D) * 0.01F;
          this.setPosition(this.posX, this.posY, this.posZ);
-@@ -173,7 +188,18 @@
+@@ -173,7 +189,18 @@
              }
              else if (!this.worldObj.isRemote && this.fallDistance > 3.0F)
              {
@@ -94,7 +96,7 @@
              }
  
              block.onFallenUpon(this.worldObj, i, j, k, this, this.fallDistance);
-@@ -234,7 +260,13 @@
+@@ -234,7 +261,13 @@
          }
          else
          {
@@ -109,7 +111,7 @@
          }
  
          if (this.isEntityAlive() && this.isWet())
-@@ -299,6 +331,22 @@
+@@ -299,6 +332,22 @@
          this.worldObj.theProfiler.endSection();
      }
  
@@ -132,7 +134,7 @@
      public boolean isChild()
      {
          return false;
-@@ -308,22 +356,21 @@
+@@ -308,22 +357,21 @@
      {
          ++this.deathTime;
  
@@ -164,7 +166,7 @@
              this.setDead();
  
              for (i = 0; i < 20; ++i)
-@@ -485,6 +532,23 @@
+@@ -485,6 +533,23 @@
              }
          }
  
@@ -188,7 +190,7 @@
          if (p_70037_1_.hasKey("HealF", 99))
          {
              this.setHealth(p_70037_1_.getFloat("HealF"));
-@@ -614,12 +678,14 @@
+@@ -614,12 +679,14 @@
  
      public boolean isPotionActive(int p_82165_1_)
      {
@@ -205,7 +207,7 @@
      }
  
      public PotionEffect getActivePotionEffect(Potion p_70660_1_)
-@@ -710,23 +776,66 @@
+@@ -710,23 +777,66 @@
          }
      }
  
@@ -273,7 +275,17 @@
          this.dataWatcher.updateObject(6, Float.valueOf(MathHelper.clamp_float(p_70606_1_, 0.0F, this.getMaxHealth())));
      }
  
-@@ -771,16 +880,27 @@
+@@ -755,7 +865,8 @@
+             }
+             else
+             {
+-                if ((p_70097_1_ == DamageSource.anvil || p_70097_1_ == DamageSource.fallingBlock) && this.getEquipmentInSlot(4) != null)
++                // CraftBukkit - Moved into damageEntity_CB(DamageSource, float)
++                if (false && (p_70097_1_ == DamageSource.anvil || p_70097_1_ == DamageSource.fallingBlock) && this.getEquipmentInSlot(4) != null)
+                 {
+                     this.getEquipmentInSlot(4).damageItem((int)(p_70097_2_ * 4.0F + this.rand.nextFloat() * p_70097_2_ * 2.0F), this);
+                     p_70097_2_ *= 0.75F;
+@@ -771,16 +882,27 @@
                          return false;
                      }
  
@@ -303,7 +315,7 @@
                      this.hurtTime = this.maxHurtTime = 10;
                  }
  
-@@ -936,6 +1056,21 @@
+@@ -936,6 +1058,21 @@
  
              if (!ForgeHooks.onLivingDrops(this, p_70645_1_, capturedDrops, i, recentlyHit > 0, j))
              {
@@ -325,7 +337,7 @@
                  for (EntityItem item : capturedDrops)
                  {
                      worldObj.spawnEntityInWorld(item);
-@@ -1008,8 +1143,17 @@
+@@ -1008,8 +1145,17 @@
  
          if (i > 0)
          {
@@ -344,7 +356,26 @@
              int j = MathHelper.floor_double(this.posX);
              int k = MathHelper.floor_double(this.posY - 0.20000000298023224D - (double)this.yOffset);
              int l = MathHelper.floor_double(this.posZ);
-@@ -1120,26 +1264,95 @@
+@@ -1063,7 +1209,7 @@
+         {
+             int i = 25 - this.getTotalArmorValue();
+             float f1 = p_70655_2_ * (float)i;
+-            this.damageArmor(p_70655_2_);
++            // this.damageArmor(p_70655_2_); // CraftBukkit - Moved into damageEntity_CB(DamageSource, float)
+             p_70655_2_ = f1 / 25.0F;
+         }
+ 
+@@ -1087,7 +1233,8 @@
+             int j;
+             float f1;
+ 
+-            if (this.isPotionActive(Potion.resistance) && p_70672_1_ != DamageSource.outOfWorld)
++            // CraftBukkit - Moved to damageEntity_CB(DamageSource, float)
++            if (false && this.isPotionActive(Potion.resistance) && p_70672_1_ != DamageSource.outOfWorld)
+             {
+                 i = (this.getActivePotionEffect(Potion.resistance).getAmplifier() + 1) * 5;
+                 j = 25 - i;
+@@ -1120,26 +1267,106 @@
          }
      }
  
@@ -365,7 +396,6 @@
 +    // Cauldron end
  
 -            if (p_70665_2_ != 0.0F)
--            {
 +    // CraftBukkit start
 +    protected boolean damageEntity_CB(DamageSource damagesource, float f) { // void -> boolean
 +        if (!this.isEntityInvulnerable()) {
@@ -380,6 +410,10 @@
 +            }
 +            float blockingModifier = 0;
 +            if (human) {
++                // Cauldron start - apply forge damage hook
++                f = ForgeHooks.onLivingHurt(this, damagesource, f);
++                if (f <= 0) return false;
++                // Cauldron end
 +                if (!damagesource.isUnblockable() && ((EntityPlayer) this).isBlocking() && f > 0.0F) {
 +                    f = (1.0F + f) * 0.5F;
 +                    blockingModifier = preDamage - f;
@@ -400,6 +434,13 @@
 +            float resistanceModifier = preDamage - f;
 +            preDamage = f;
 +            // Magic modifier
++            // Cauldron start - apply forge armor hook
++            if (human)
+             {
++                f = ArmorProperties.ApplyArmor(this, ((EntityPlayer)this).inventory.armorInventory, damagesource, f);
++                if (f <= 0) return false;
++            }
++            // Cauldron end
 +            f = this.applyPotionDamageCalculations(damagesource, f);
 +            float magicModifier = preDamage - f;
 +            float f1 = f;
@@ -454,7 +495,7 @@
      }
  
      public CombatTracker func_110142_aN()
-@@ -1619,7 +1832,8 @@
+@@ -1619,7 +1846,8 @@
          {
              f3 = 1.0F;
              f2 = (float)Math.sqrt((double)f) * 3.0F;
@@ -464,7 +505,7 @@
          }
  
          if (this.swingProgress > 0.0F)
-@@ -1827,17 +2041,37 @@
+@@ -1827,17 +2055,37 @@
      {
          List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
  
