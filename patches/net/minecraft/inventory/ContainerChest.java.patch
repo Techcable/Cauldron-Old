@@ -21,7 +21,7 @@
 +
 +    public CraftInventoryView getBukkitView()
 +    {
-+        if (bukkitEntity != null)
++        if (bukkitEntity != null || player == null) // Cauldron
 +        {
 +            return bukkitEntity;
 +        }
@@ -48,18 +48,20 @@
      private static final String __OBFID = "CL_00001742";
  
      public ContainerChest(IInventory p_i1806_1_, IInventory p_i1806_2_)
-@@ -15,6 +51,10 @@
+@@ -15,6 +51,12 @@
          this.numRows = p_i1806_2_.getSizeInventory() / 9;
          p_i1806_2_.openInventory();
          int i = (this.numRows - 4) * 18;
 +        // CraftBukkit start - Save player
-+        // TODO: Should we check to make sure it really is an InventoryPlayer?
-+        this.player = (InventoryPlayer) p_i1806_1_;
++        if (p_i1806_1_ instanceof InventoryPlayer) // Cauldron - make sure it is an InventoryPlayer before casting
++        {
++            this.player = (InventoryPlayer) p_i1806_1_;
++        }
 +        // CraftBukkit end
          int j;
          int k;
  
-@@ -42,6 +82,13 @@
+@@ -42,6 +84,13 @@
  
      public boolean canInteractWith(EntityPlayer p_75145_1_)
      {

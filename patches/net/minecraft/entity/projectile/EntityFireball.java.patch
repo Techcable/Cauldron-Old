@@ -103,7 +103,7 @@
              if (p_70097_1_.getEntity() != null)
              {
 +                // CraftBukkit start
-+                if (!CraftEventFactory.handleNonLivingEntityDamageEvent(this, p_70097_1_, p_70097_2_))
++                if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, p_70097_1_, p_70097_2_))
 +                {
 +                    return false;
 +                }
@@ -112,3 +112,11 @@
                  Vec3 vec3 = p_70097_1_.getEntity().getLookVec();
  
                  if (vec3 != null)
+@@ -288,6 +327,7 @@
+                 if (p_70097_1_.getEntity() instanceof EntityLivingBase)
+                 {
+                     this.shootingEntity = (EntityLivingBase)p_70097_1_.getEntity();
++                    this.projectileSource = (org.bukkit.projectiles.ProjectileSource) this.shootingEntity.getBukkitEntity(); // CraftBukkit
+                 }
+ 
+                 return true;
