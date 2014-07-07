@@ -2,6 +2,10 @@ package org.bukkit.craftbukkit.inventory;
 
 import java.util.Map;
 
+import com.mojang.authlib.GameProfile;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -16,7 +20,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
     static final ItemMetaKey SKULL_OWNER = new ItemMetaKey("SkullOwner", "skull-owner");
     static final int MAX_OWNER_LENGTH = 16;
 
-    private String player;
+    private GameProfile profile;
 
     CraftMetaSkull(CraftMetaItem meta) {
         super(meta);
@@ -24,14 +28,16 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
             return;
         }
         CraftMetaSkull skullMeta = (CraftMetaSkull) meta;
-        this.player = skullMeta.player;
+        this.profile = skullMeta.profile;
     }
 
     CraftMetaSkull(net.minecraft.nbt.NBTTagCompound tag) {
         super(tag);
 
-        if (tag.hasKey(SKULL_OWNER.NBT)) {
-            player = tag.getString(SKULL_OWNER.NBT);
+        if (tag.hasKey(SKULL_OWNER.NBT, 10)) {
+            profile = NBTUtil.func_152459_a(tag.getCompoundTag(SKULL_OWNER.NBT));
+        } else if (tag.hasKey(SKULL_OWNER.NBT, 8)) {
+            profile = new GameProfile(null, tag.getString(SKULL_OWNER.NBT));
         }
     }
 
@@ -45,7 +51,9 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
         super.applyToItem(tag);
 
         if (hasOwner()) {
-            tag.setString(SKULL_OWNER.NBT, player);
+            NBTTagCompound owner = new NBTTagCompound();
+            NBTUtil.func_152460_a(owner, profile);
+            tag.setTag(SKULL_OWNER.NBT, owner);
         }
     }
 
@@ -74,18 +82,24 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
     }
 
     public boolean hasOwner() {
-        return !Strings.isNullOrEmpty(player);
+        return profile != null;
     }
 
     public String getOwner() {
-        return player;
+        return hasOwner() ? profile.getName() : null;
     }
 
     public boolean setOwner(String name) {
         if (name != null && name.length() > MAX_OWNER_LENGTH) {
             return false;
         }
-        player = name;
+
+        if (name == null) {
+            profile = null;
+        } else {
+            profile = new GameProfile(null, name);
+        }
+
         return true;
     }
 
@@ -94,7 +108,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
         final int original;
         int hash = original = super.applyHash();
         if (hasOwner()) {
-            hash = 61 * hash + player.hashCode();
+            hash = 61 * hash + profile.hashCode();
         }
         return original != hash ? CraftMetaSkull.class.hashCode() ^ hash : hash;
     }
@@ -107,7 +121,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
         if (meta instanceof CraftMetaSkull) {
             CraftMetaSkull that = (CraftMetaSkull) meta;
 
-            return (this.hasOwner() ? that.hasOwner() && this.player.equals(that.player) : !that.hasOwner());
+            return (this.hasOwner() ? that.hasOwner() && this.profile.equals(that.profile) : !that.hasOwner());
         }
         return true;
     }
@@ -121,7 +135,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
     Builder<String, Object> serialize(Builder<String, Object> builder) {
         super.serialize(builder);
         if (hasOwner()) {
-            return builder.put(SKULL_OWNER.BUKKIT, this.player);
+            return builder.put(SKULL_OWNER.BUKKIT, this.profile.getName());
         }
         return builder;
     }

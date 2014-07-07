@@ -8,7 +8,7 @@
  import io.netty.buffer.Unpooled;
  import java.io.IOException;
  import java.util.ArrayList;
-@@ -82,6 +83,7 @@
+@@ -83,6 +84,7 @@
  import net.minecraft.tileentity.TileEntityFurnace;
  import net.minecraft.tileentity.TileEntityHopper;
  import net.minecraft.tileentity.TileEntitySign;
@@ -16,7 +16,7 @@
  import net.minecraft.util.ChunkCoordinates;
  import net.minecraft.util.DamageSource;
  import net.minecraft.util.EntityDamageSource;
-@@ -105,10 +107,24 @@
+@@ -106,24 +108,38 @@
  import net.minecraftforge.event.entity.player.PlayerDropsEvent;
  import net.minecraftforge.event.world.ChunkWatchEvent;
  
@@ -42,7 +42,13 @@
      public NetHandlerPlayServer playerNetServerHandler;
      public final MinecraftServer mcServer;
      public final ItemInWorldManager theItemInWorldManager;
-@@ -121,8 +137,8 @@
+     public double managedPosX;
+     public double managedPosZ;
+     public final List loadedChunks = new LinkedList();
+-    private final List destroyedItemsNetCache = new LinkedList();
++    public final List destroyedItemsNetCache = new LinkedList();
+     private final StatisticsFile field_147103_bO;
+     private float field_130068_bO = Float.MIN_VALUE;
      private float lastHealth = -1.0E8F;
      private int lastFoodLevel = -99999999;
      private boolean wasHungry = true;
@@ -50,9 +56,9 @@
 -    private int field_147101_bU = 60;
 +    public int lastExperience = -99999999; // CraftBukkit - private -> public
 +    public int field_147101_bU = 60; // CraftBukkit - private -> public
-     private int renderDistance;
      private EntityPlayer.EnumChatVisibility chatVisibility;
      private boolean chatColours = true;
+     private long field_143005_bX = System.currentTimeMillis();
 @@ -131,6 +147,39 @@
      public boolean isChangingQuantityOnly;
      public int ping;
@@ -93,7 +99,7 @@
      private static final String __OBFID = "CL_00001440";
  
      public EntityPlayerMP(MinecraftServer p_i45285_1_, WorldServer p_i45285_2_, GameProfile p_i45285_3_, ItemInWorldManager p_i45285_4_)
-@@ -154,6 +203,13 @@
+@@ -153,6 +202,13 @@
          {
              this.setPosition(this.posX, this.posY + 1.0D, this.posZ);
          }
@@ -106,20 +112,20 @@
 +        // CraftBukkit end
      }
  
-     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
-@@ -171,14 +227,57 @@
-                 this.theItemInWorldManager.setGameType(WorldSettings.GameType.getByID(par1NBTTagCompound.getInteger("playerGameType")));
+     public void readEntityFromNBT(NBTTagCompound p_70037_1_)
+@@ -170,14 +226,57 @@
+                 this.theItemInWorldManager.setGameType(WorldSettings.GameType.getByID(p_70037_1_.getInteger("playerGameType")));
              }
          }
 +
-+        this.getBukkitEntity().readExtraData(par1NBTTagCompound); // CraftBukkit
++        this.getBukkitEntity().readExtraData(p_70037_1_); // CraftBukkit
      }
  
-     public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound)
+     public void writeEntityToNBT(NBTTagCompound p_70014_1_)
      {
-         super.writeEntityToNBT(par1NBTTagCompound);
-         par1NBTTagCompound.setInteger("playerGameType", this.theItemInWorldManager.getGameType().getID());
-+        this.getBukkitEntity().setExtraData(par1NBTTagCompound); // CraftBukkit
+         super.writeEntityToNBT(p_70014_1_);
+         p_70014_1_.setInteger("playerGameType", this.theItemInWorldManager.getGameType().getID());
++        this.getBukkitEntity().setExtraData(p_70014_1_); // CraftBukkit
      }
  
 +    // CraftBukkit start - World fallback code, either respawn location or global spawn
@@ -162,10 +168,10 @@
 +    }
 +    // CraftBukkit end
 +
-     public void addExperienceLevel(int par1)
+     public void addExperienceLevel(int p_82242_1_)
      {
-         super.addExperienceLevel(par1);
-@@ -241,7 +340,7 @@
+         super.addExperienceLevel(p_82242_1_);
+@@ -240,7 +339,7 @@
              ArrayList arraylist1 = new ArrayList();
              Chunk chunk;
  
@@ -174,7 +180,7 @@
              {
                  ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair)iterator1.next();
  
-@@ -254,8 +353,7 @@
+@@ -253,8 +352,7 @@
                          if (chunk.func_150802_k())
                          {
                              arraylist.add(chunk);
@@ -184,7 +190,7 @@
                              iterator1.remove();
                          }
                      }
-@@ -315,9 +413,10 @@
+@@ -309,9 +407,10 @@
                  }
              }
  
@@ -196,7 +202,7 @@
                  this.lastHealth = this.getHealth();
                  this.lastFoodLevel = this.foodStats.getFoodLevel();
                  this.wasHungry = this.foodStats.getSaturationLevel() == 0.0F;
-@@ -326,16 +425,18 @@
+@@ -320,16 +419,18 @@
              if (this.getHealth() + this.getAbsorptionAmount() != this.field_130068_bO)
              {
                  this.field_130068_bO = this.getHealth() + this.getAbsorptionAmount();
@@ -222,7 +228,7 @@
              if (this.experienceTotal != this.lastExperience)
              {
                  this.lastExperience = this.experienceTotal;
-@@ -346,6 +447,20 @@
+@@ -340,6 +441,20 @@
              {
                  this.func_147098_j();
              }
@@ -243,14 +249,14 @@
          }
          catch (Throwable throwable)
          {
-@@ -408,34 +523,88 @@
+@@ -402,34 +517,88 @@
  
-     public void onDeath(DamageSource par1DamageSource)
+     public void onDeath(DamageSource p_70645_1_)
      {
--        if (ForgeHooks.onLivingDeath(this, par1DamageSource)) return;
+-        if (ForgeHooks.onLivingDeath(this, p_70645_1_)) return;
 -        this.mcServer.getConfigurationManager().sendChatMsg(this.func_110142_aN().func_151521_b());
 +        // CraftBukkit start
-+        if (this.isDead || ForgeHooks.onLivingDeath(this, par1DamageSource)) // Cauldron - call Forge hook
++        if (this.isDead || ForgeHooks.onLivingDeath(this, p_70645_1_)) // Cauldron - call Forge hook
 +        {
 +            return;
 +        }
@@ -312,9 +318,9 @@
 +            }
 +            // Cauldron start
              captureDrops = false;
--            PlayerDropsEvent event = new PlayerDropsEvent(this, par1DamageSource, capturedDrops, recentlyHit > 0);
+-            PlayerDropsEvent event = new PlayerDropsEvent(this, p_70645_1_, capturedDrops, recentlyHit > 0);
 -            if (!MinecraftForge.EVENT_BUS.post(event))
-+            PlayerDropsEvent forgeEvent = new PlayerDropsEvent(this, par1DamageSource, capturedDrops, recentlyHit > 0);
++            PlayerDropsEvent forgeEvent = new PlayerDropsEvent(this, p_70645_1_, capturedDrops, recentlyHit > 0);
 +
 +            if (!MinecraftForge.EVENT_BUS.post(forgeEvent))
              {
@@ -341,29 +347,29 @@
              score.func_96648_a();
          }
  
-@@ -500,7 +669,8 @@
+@@ -495,7 +664,8 @@
  
-     public boolean canAttackPlayer(EntityPlayer par1EntityPlayer)
+     public boolean canAttackPlayer(EntityPlayer p_96122_1_)
      {
--        return !this.mcServer.isPVPEnabled() ? false : super.canAttackPlayer(par1EntityPlayer);
+-        return !this.mcServer.isPVPEnabled() ? false : super.canAttackPlayer(p_96122_1_);
 +        // CraftBukkit - this.mcServer.isPVPEnabled() -> this.world.pvpMode
-+        return !this.worldObj.pvpMode ? false : super.canAttackPlayer(par1EntityPlayer);
++        return !this.worldObj.pvpMode ? false : super.canAttackPlayer(p_96122_1_);
      }
  
-     public void travelToDimension(int par1)
-@@ -517,6 +687,8 @@
-             if (this.dimension == 0 && par1 == 1)
+     public void travelToDimension(int p_71027_1_)
+@@ -512,6 +682,8 @@
+             if (this.dimension == 0 && p_71027_1_ == 1)
              {
                  this.triggerAchievement(AchievementList.theEnd);
 +                // CraftBukkit start - Rely on custom portal management
 +                /*
-                 ChunkCoordinates chunkcoordinates = this.mcServer.worldServerForDimension(par1).getEntrancePortalLocation();
+                 ChunkCoordinates chunkcoordinates = this.mcServer.worldServerForDimension(p_71027_1_).getEntrancePortalLocation();
  
                  if (chunkcoordinates != null)
-@@ -525,13 +697,18 @@
+@@ -520,13 +692,18 @@
                  }
  
-                 par1 = 1;
+                 p_71027_1_ = 1;
 +                */
 +                // CraftBukkit end
              }
@@ -372,17 +378,17 @@
                  this.triggerAchievement(AchievementList.portal);
              }
  
--            this.mcServer.getConfigurationManager().transferPlayerToDimension(this, par1);
+-            this.mcServer.getConfigurationManager().transferPlayerToDimension(this, p_71027_1_);
 +            // CraftBukkit start
-+            TeleportCause cause = (this.dimension == 1 || par1 == 1) ? TeleportCause.END_PORTAL : TeleportCause.NETHER_PORTAL;
-+            this.mcServer.getConfigurationManager().changeDimension(this, par1, cause);
++            TeleportCause cause = (this.dimension == 1 || p_71027_1_ == 1) ? TeleportCause.END_PORTAL : TeleportCause.NETHER_PORTAL;
++            this.mcServer.getConfigurationManager().changeDimension(this, p_71027_1_, cause);
 +            // CraftBukkit end
              this.lastExperience = -1;
              this.lastHealth = -1.0F;
              this.lastFoodLevel = -1;
-@@ -574,6 +751,11 @@
+@@ -569,6 +746,11 @@
  
-     public void wakeUpPlayer(boolean par1, boolean par2, boolean par3)
+     public void wakeUpPlayer(boolean p_70999_1_, boolean p_70999_2_, boolean p_70999_3_)
      {
 +        if (this.fauxSleeping && !this.sleeping)
 +        {
@@ -392,15 +398,15 @@
          if (this.isPlayerSleeping())
          {
              this.getServerForPlayer().getEntityTracker().func_151248_b(this, new S0BPacketAnimation(this, 2));
-@@ -589,11 +771,27 @@
+@@ -584,11 +766,27 @@
  
-     public void mountEntity(Entity par1Entity)
+     public void mountEntity(Entity p_70078_1_)
      {
--        super.mountEntity(par1Entity);
+-        super.mountEntity(p_70078_1_);
 -        this.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, this, this.ridingEntity));
 -        this.playerNetServerHandler.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
 +        // CraftBukkit start
-+        this.setPassengerOf(par1Entity);
++        this.setPassengerOf(p_70078_1_);
      }
  
 +    public void setPassengerOf(Entity entity)
@@ -420,10 +426,10 @@
 +        // CraftBukkit end
 +    }
 +
-     protected void updateFallState(double par1, boolean par3) {}
+     protected void updateFallState(double p_70064_1_, boolean p_70064_3_) {}
  
-     public void handleFalling(double par1, boolean par3)
-@@ -615,29 +813,64 @@
+     public void handleFalling(double p_71122_1_, boolean p_71122_3_)
+@@ -610,29 +808,64 @@
          this.currentWindowId = this.currentWindowId % 100 + 1;
      }
  
@@ -435,11 +441,10 @@
 +    }
 +    // CraftBukkit end
 +
-     public void displayGUIWorkbench(int par1, int par2, int par3)
+     public void displayGUIWorkbench(int p_71058_1_, int p_71058_2_, int p_71058_3_)
      {
--        this.getNextWindowId();
 +        // CraftBukkit start - Inventory open hook
-+        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerWorkbench(this.inventory, this.worldObj, par1, par2, par3));
++        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerWorkbench(this.inventory, this.worldObj, p_71058_1_, p_71058_2_, p_71058_3_));
 +
 +        if (container == null)
 +        {
@@ -447,19 +452,18 @@
 +        }
 +
 +        // CraftBukkit end
-+        this.nextContainerCounter();
+         this.getNextWindowId();
          this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 1, "Crafting", 9, true));
--        this.openContainer = new ContainerWorkbench(this.inventory, this.worldObj, par1, par2, par3);
+-        this.openContainer = new ContainerWorkbench(this.inventory, this.worldObj, p_71058_1_, p_71058_2_, p_71058_3_);
 +        this.openContainer = container; // CraftBukkit - Use container we passed to event
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
  
-     public void displayGUIEnchantment(int par1, int par2, int par3, String par4Str)
+     public void displayGUIEnchantment(int p_71002_1_, int p_71002_2_, int p_71002_3_, String p_71002_4_)
      {
--        this.getNextWindowId();
 +        // CraftBukkit start - Inventory open hook
-+        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerEnchantment(this.inventory, this.worldObj, par1, par2, par3));
++        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerEnchantment(this.inventory, this.worldObj, p_71002_1_, p_71002_2_, p_71002_3_));
 +
 +        if (container == null)
 +        {
@@ -467,19 +471,18 @@
 +        }
 +
 +        // CraftBukkit end
-+        this.nextContainerCounter();
-         this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 4, par4Str == null ? "" : par4Str, 9, par4Str != null));
--        this.openContainer = new ContainerEnchantment(this.inventory, this.worldObj, par1, par2, par3);
+         this.getNextWindowId();
+         this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 4, p_71002_4_ == null ? "" : p_71002_4_, 9, p_71002_4_ != null));
+-        this.openContainer = new ContainerEnchantment(this.inventory, this.worldObj, p_71002_1_, p_71002_2_, p_71002_3_);
 +        this.openContainer = container; // CraftBukkit - Use container we passed to event
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
  
-     public void displayGUIAnvil(int par1, int par2, int par3)
+     public void displayGUIAnvil(int p_82244_1_, int p_82244_2_, int p_82244_3_)
      {
--        this.getNextWindowId();
 +        // CraftBukkit start - Inventory open hook
-+        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerRepair(this.inventory, this.worldObj, par1, par2, par3, this));
++        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerRepair(this.inventory, this.worldObj, p_82244_1_, p_82244_2_, p_82244_3_, this));
 +
 +        if (container == null)
 +        {
@@ -487,31 +490,30 @@
 +        }
 +
 +        // CraftBukkit end
-+        this.nextContainerCounter();
+         this.getNextWindowId();
          this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 8, "Repairing", 9, true));
--        this.openContainer = new ContainerRepair(this.inventory, this.worldObj, par1, par2, par3, this);
+-        this.openContainer = new ContainerRepair(this.inventory, this.worldObj, p_82244_1_, p_82244_2_, p_82244_3_, this);
 +        this.openContainer = container; // CraftBukkit - Use container we passed to event
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -649,71 +882,150 @@
+@@ -644,71 +877,150 @@
              this.closeScreen();
          }
  
--        this.getNextWindowId();
 +        // CraftBukkit start - Inventory open hook
-+        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerChest(this.inventory, par1IInventory));
++        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerChest(this.inventory, p_71007_1_));
 +
 +        if (container == null)
 +        {
-+            par1IInventory.closeInventory(); // Cauldron - prevent chest from being stuck in open state on clients
++            p_71007_1_.closeInventory(); // Cauldron - prevent chest from being stuck in open state on clients
 +            return;
 +        }
 +
 +        // CraftBukkit end
-+        this.nextContainerCounter();
-         this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 0, par1IInventory.getInventoryName(), par1IInventory.getSizeInventory(), par1IInventory.hasCustomInventoryName()));
--        this.openContainer = new ContainerChest(this.inventory, par1IInventory);
+         this.getNextWindowId();
+         this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 0, p_71007_1_.getInventoryName(), p_71007_1_.getSizeInventory(), p_71007_1_.hasCustomInventoryName()));
+-        this.openContainer = new ContainerChest(this.inventory, p_71007_1_);
 +        this.openContainer = container; // CraftBukkit - Use container we passed to event
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
@@ -519,7 +521,6 @@
  
      public void func_146093_a(TileEntityHopper p_146093_1_)
      {
--        this.getNextWindowId();
 +        // CraftBukkit start - Inventory open hook
 +        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerHopper(this.inventory, p_146093_1_));
 +
@@ -530,7 +531,7 @@
 +        }
 +
 +        // CraftBukkit end
-+        this.nextContainerCounter();
+         this.getNextWindowId();
          this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 9, p_146093_1_.getInventoryName(), p_146093_1_.getSizeInventory(), p_146093_1_.hasCustomInventoryName()));
 -        this.openContainer = new ContainerHopper(this.inventory, p_146093_1_);
 +        this.openContainer = container; // CraftBukkit - Use container we passed to event
@@ -538,22 +539,21 @@
          this.openContainer.addCraftingToCrafters(this);
      }
  
-     public void displayGUIHopperMinecart(EntityMinecartHopper par1EntityMinecartHopper)
+     public void displayGUIHopperMinecart(EntityMinecartHopper p_96125_1_)
      {
--        this.getNextWindowId();
 +        // CraftBukkit start - Inventory open hook
-+        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerHopper(this.inventory, par1EntityMinecartHopper));
++        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerHopper(this.inventory, p_96125_1_));
 +
 +        if (container == null)
 +        {
-+            par1EntityMinecartHopper.closeInventory(); // Cauldron - prevent chest from being stuck in open state on clients
++            p_96125_1_.closeInventory(); // Cauldron - prevent chest from being stuck in open state on clients
 +            return;
 +        }
 +
 +        // CraftBukkit end
-+        this.nextContainerCounter();
-         this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 9, par1EntityMinecartHopper.getInventoryName(), par1EntityMinecartHopper.getSizeInventory(), par1EntityMinecartHopper.hasCustomInventoryName()));
--        this.openContainer = new ContainerHopper(this.inventory, par1EntityMinecartHopper);
+         this.getNextWindowId();
+         this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 9, p_96125_1_.getInventoryName(), p_96125_1_.getSizeInventory(), p_96125_1_.hasCustomInventoryName()));
+-        this.openContainer = new ContainerHopper(this.inventory, p_96125_1_);
 +        this.openContainer = container; // CraftBukkit - Use container we passed to event
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
@@ -561,7 +561,6 @@
  
      public void func_146101_a(TileEntityFurnace p_146101_1_)
      {
--        this.getNextWindowId();
 +        // CraftBukkit start - Inventory open hook
 +        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerFurnace(this.inventory, p_146101_1_));
 +
@@ -572,7 +571,7 @@
 +        }
 +
 +        // CraftBukkit end
-+        this.nextContainerCounter();
+         this.getNextWindowId();
          this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 2, p_146101_1_.getInventoryName(), p_146101_1_.getSizeInventory(), p_146101_1_.hasCustomInventoryName()));
 -        this.openContainer = new ContainerFurnace(this.inventory, p_146101_1_);
 +        this.openContainer = container; // CraftBukkit - Use container we passed to event
@@ -582,7 +581,6 @@
  
      public void func_146102_a(TileEntityDispenser p_146102_1_)
      {
--        this.getNextWindowId();
 +        // CraftBukkit start - Inventory open hook
 +        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerDispenser(this.inventory, p_146102_1_));
 +
@@ -593,7 +591,7 @@
 +        }
 +
 +        // CraftBukkit end
-+        this.nextContainerCounter();
+         this.getNextWindowId();
          this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, p_146102_1_ instanceof TileEntityDropper ? 10 : 3, p_146102_1_.getInventoryName(), p_146102_1_.getSizeInventory(), p_146102_1_.hasCustomInventoryName()));
 -        this.openContainer = new ContainerDispenser(this.inventory, p_146102_1_);
 +        this.openContainer = container; // CraftBukkit - Use container we passed to event
@@ -603,7 +601,6 @@
  
      public void func_146098_a(TileEntityBrewingStand p_146098_1_)
      {
--        this.getNextWindowId();
 +        // CraftBukkit start - Inventory open hook
 +        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerBrewingStand(this.inventory, p_146098_1_));
 +
@@ -614,7 +611,7 @@
 +        }
 +
 +        // CraftBukkit end
-+        this.nextContainerCounter();
+         this.getNextWindowId();
          this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 5, p_146098_1_.getInventoryName(), p_146098_1_.getSizeInventory(), p_146098_1_.hasCustomInventoryName()));
 -        this.openContainer = new ContainerBrewingStand(this.inventory, p_146098_1_);
 +        this.openContainer = container; // CraftBukkit - Use container we passed to event
@@ -624,7 +621,6 @@
  
      public void func_146104_a(TileEntityBeacon p_146104_1_)
      {
--        this.getNextWindowId();
 +        // CraftBukkit start - Inventory open hook
 +        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerBeacon(this.inventory, p_146104_1_));
 +
@@ -635,7 +631,7 @@
 +        }
 +
 +        // CraftBukkit end
-+        this.nextContainerCounter();
+         this.getNextWindowId();
          this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 7, p_146104_1_.getInventoryName(), p_146104_1_.getSizeInventory(), p_146104_1_.hasCustomInventoryName()));
 -        this.openContainer = new ContainerBeacon(this.inventory, p_146104_1_);
 +        this.openContainer = container; // CraftBukkit - Use container we passed to event
@@ -643,12 +639,10 @@
          this.openContainer.addCraftingToCrafters(this);
      }
  
-     public void displayGUIMerchant(IMerchant par1IMerchant, String par2Str)
+     public void displayGUIMerchant(IMerchant p_71030_1_, String p_71030_2_)
      {
--        this.getNextWindowId();
--        this.openContainer = new ContainerMerchant(this.inventory, par1IMerchant, this.worldObj);
 +        // CraftBukkit start - Inventory open hook
-+        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerMerchant(this.inventory, par1IMerchant, this.worldObj));
++        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerMerchant(this.inventory, p_71030_1_, this.worldObj));
 +
 +        if (container == null)
 +        {
@@ -656,12 +650,13 @@
 +        }
 +
 +        // CraftBukkit end
-+        this.nextContainerCounter();
+         this.getNextWindowId();
+-        this.openContainer = new ContainerMerchant(this.inventory, p_71030_1_, this.worldObj);
 +        this.openContainer = container; // CraftBukkit - Use container we passed to event
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
          InventoryMerchant inventorymerchant = ((ContainerMerchant)this.openContainer).getMerchantInventory();
-@@ -729,7 +1041,7 @@
+@@ -725,7 +1037,7 @@
                  merchantrecipelist.func_151391_a(packetbuffer);
                  this.playerNetServerHandler.sendPacket(new S3FPacketCustomPayload("MC|TrList", packetbuffer));
              }
@@ -670,16 +665,16 @@
              {
                  logger.error("Couldn\'t send trade list", ioexception);
              }
-@@ -738,14 +1050,25 @@
+@@ -738,6 +1050,17 @@
  
-     public void displayGUIHorse(EntityHorse par1EntityHorse, IInventory par2IInventory)
+     public void displayGUIHorse(EntityHorse p_110298_1_, IInventory p_110298_2_)
      {
 +        // CraftBukkit start - Inventory open hook
-+        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerHorseInventory(this.inventory, par2IInventory, par1EntityHorse));
++        Container container = CraftEventFactory.callInventoryOpenEvent(this, new ContainerHorseInventory(this.inventory, p_110298_2_, p_110298_1_));
 +
 +        if (container == null)
 +        {
-+            par2IInventory.closeInventory(); // Cauldron - prevent chests from being stuck in open state on clients
++            p_110298_2_.closeInventory(); // Cauldron - prevent chests from being stuck in open state on clients
 +            return;
 +        }
 +
@@ -688,32 +683,31 @@
          if (this.openContainer != this.inventoryContainer)
          {
              this.closeScreen();
-         }
+@@ -745,7 +1068,7 @@
  
--        this.getNextWindowId();
-+        this.nextContainerCounter();
-         this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 11, par2IInventory.getInventoryName(), par2IInventory.getSizeInventory(), par2IInventory.hasCustomInventoryName(), par1EntityHorse.getEntityId()));
--        this.openContainer = new ContainerHorseInventory(this.inventory, par2IInventory, par1EntityHorse);
+         this.getNextWindowId();
+         this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 11, p_110298_2_.getInventoryName(), p_110298_2_.getSizeInventory(), p_110298_2_.hasCustomInventoryName(), p_110298_1_.getEntityId()));
+-        this.openContainer = new ContainerHorseInventory(this.inventory, p_110298_2_, p_110298_1_);
 +        this.openContainer = container; // CraftBukkit - Use container we passed to event
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
 @@ -770,6 +1093,15 @@
      {
-         this.playerNetServerHandler.sendPacket(new S30PacketWindowItems(par1Container.windowId, par2List));
+         this.playerNetServerHandler.sendPacket(new S30PacketWindowItems(p_71110_1_.windowId, p_71110_2_));
          this.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, this.inventory.getItemStack()));
 +
-+        if (par1Container.getBukkitView() == null) return; // Cauldron - allow vanilla mods to bypass
++        if (p_71110_1_.getBukkitView() == null) return; // Cauldron - allow vanilla mods to bypass
 +        // CraftBukkit start - Send a Set Slot to update the crafting result slot
-+        if (java.util.EnumSet.of(InventoryType.CRAFTING, InventoryType.WORKBENCH).contains(par1Container.getBukkitView().getType()))
++        if (java.util.EnumSet.of(InventoryType.CRAFTING, InventoryType.WORKBENCH).contains(p_71110_1_.getBukkitView().getType()))
 +        {
-+            this.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(par1Container.windowId, 0, par1Container.getSlot(0).getStack()));
++            this.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(p_71110_1_.windowId, 0, p_71110_1_.getSlot(0).getStack()));
 +        }
 +
 +        // CraftBukkit end
      }
  
-     public void sendProgressBarUpdate(Container par1Container, int par2, int par3)
+     public void sendProgressBarUpdate(Container p_71112_1_, int p_71112_2_, int p_71112_3_)
 @@ -779,6 +1111,7 @@
  
      public void closeScreen()
@@ -730,8 +724,8 @@
      }
  
      public void addChatComponentMessage(IChatComponent p_146105_1_)
-@@ -1000,6 +1334,114 @@
-         return this.field_147103_bO;
+@@ -1036,6 +1370,114 @@
+         return this.field_143005_bX;
      }
  
 +    // CraftBukkit start

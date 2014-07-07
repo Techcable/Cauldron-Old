@@ -16,6 +16,6 @@
 +    }
 +    // CraftBukkit end
 +
-     public boolean matches(InventoryCrafting par1InventoryCrafting, World par2World)
+     public boolean matches(InventoryCrafting p_77569_1_, World p_77569_2_)
      {
          ItemStack itemstack = null;

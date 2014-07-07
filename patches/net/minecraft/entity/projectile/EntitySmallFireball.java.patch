@@ -11,16 +11,16 @@
      private static final String __OBFID = "CL_00001721";
 @@ -36,7 +38,16 @@
              {
-                 if (!par1MovingObjectPosition.entityHit.isImmuneToFire() && par1MovingObjectPosition.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 5.0F))
+                 if (!p_70227_1_.entityHit.isImmuneToFire() && p_70227_1_.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 5.0F))
                  {
--                    par1MovingObjectPosition.entityHit.setFire(5);
+-                    p_70227_1_.entityHit.setFire(5);
 +                    // CraftBukkit start - Entity damage by entity event + combust event
-+                    EntityCombustByEntityEvent event = new EntityCombustByEntityEvent((org.bukkit.entity.Projectile) this.getBukkitEntity(), par1MovingObjectPosition.entityHit.getBukkitEntity(), 5);
-+                    par1MovingObjectPosition.entityHit.worldObj.getServer().getPluginManager().callEvent(event);
++                    EntityCombustByEntityEvent event = new EntityCombustByEntityEvent((org.bukkit.entity.Projectile) this.getBukkitEntity(), p_70227_1_.entityHit.getBukkitEntity(), 5);
++                    p_70227_1_.entityHit.worldObj.getServer().getPluginManager().callEvent(event);
 +
 +                    if (!event.isCancelled())
 +                    {
-+                        par1MovingObjectPosition.entityHit.setFire(event.getDuration());
++                        p_70227_1_.entityHit.setFire(event.getDuration());
 +                    }
 +
 +                    // CraftBukkit end

@@ -3,31 +3,31 @@
 @@ -80,6 +80,7 @@
              Chunk chunk = (Chunk) data[0];
              NBTTagCompound nbttagcompound = (NBTTagCompound) data[1];
-             this.loadEntities(par1World, nbttagcompound.getCompoundTag("Level"), chunk);
+             this.loadEntities(p_75815_1_, nbttagcompound.getCompoundTag("Level"), chunk);
 +            MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(chunk, nbttagcompound)); // Cauldron - Don't call ChunkDataEvent.Load async
              return chunk;
          }
  
 @@ -156,8 +157,8 @@
-             if (!chunk.isAtLocation(par2, par3))
+             if (!chunk.isAtLocation(p_75822_2_, p_75822_3_))
              {
-                 logger.error("Chunk file at " + par2 + "," + par3 + " is in the wrong location; relocating. (Expected " + par2 + ", " + par3 + ", got " + chunk.xPosition + ", " + chunk.zPosition + ")");
--                par4NBTTagCompound.setInteger("xPos", par2);
--                par4NBTTagCompound.setInteger("zPos", par3);
-+                par4NBTTagCompound.getCompoundTag("Level").setInteger("xPos", par2); // CraftBukkit - .getCompound("Level")
-+                par4NBTTagCompound.getCompoundTag("Level").setInteger("zPos", par3); // CraftBukkit - .getCompound("Level")
+                 logger.error("Chunk file at " + p_75822_2_ + "," + p_75822_3_ + " is in the wrong location; relocating. (Expected " + p_75822_2_ + ", " + p_75822_3_ + ", got " + chunk.xPosition + ", " + chunk.zPosition + ")");
+-                p_75822_4_.setInteger("xPos", p_75822_2_);
+-                p_75822_4_.setInteger("zPos", p_75822_3_);
++                p_75822_4_.getCompoundTag("Level").setInteger("xPos", p_75822_2_); // CraftBukkit - .getCompound("Level")
++                p_75822_4_.getCompoundTag("Level").setInteger("zPos", p_75822_3_); // CraftBukkit - .getCompound("Level")
                  // Have to move tile entities since we don't load them at this stage
-                 NBTTagList tileEntities = par4NBTTagCompound.getCompoundTag("Level").getTagList("TileEntities", 10);
+                 NBTTagList tileEntities = p_75822_4_.getCompoundTag("Level").getTagList("TileEntities", 10);
  
 @@ -187,8 +188,18 @@
  
-     public void saveChunk(World par1World, Chunk par2Chunk) throws MinecraftException, IOException
+     public void saveChunk(World p_75816_1_, Chunk p_75816_2_) throws MinecraftException, IOException
      {
--        par1World.checkSessionLock();
+-        p_75816_1_.checkSessionLock();
 +        // CraftBukkit start - "handle" exception
 +        try
 +        {
-+            par1World.checkSessionLock();
++            p_75816_1_.checkSessionLock();
 +        }
 +        catch (MinecraftException ex)
 +        {
@@ -39,25 +39,6 @@
          try
          {
              NBTTagCompound nbttagcompound = new NBTTagCompound();
-@@ -214,15 +225,15 @@
-             {
-                 for (int i = 0; i < this.chunksToRemove.size(); ++i)
-                 {
--                    if (((AnvilChunkLoader.PendingChunk)this.chunksToRemove.get(i)).chunkCoordinate.equals(par1ChunkCoordIntPair))
-+                    if (((PendingChunk) this.chunksToRemove.get(i)).chunkCoordinate.equals(par1ChunkCoordIntPair))
-                     {
--                        this.chunksToRemove.set(i, new AnvilChunkLoader.PendingChunk(par1ChunkCoordIntPair, par2NBTTagCompound));
-+                        this.chunksToRemove.set(i, new PendingChunk(par1ChunkCoordIntPair, par2NBTTagCompound));
-                         return;
-                     }
-                 }
-             }
- 
--            this.chunksToRemove.add(new AnvilChunkLoader.PendingChunk(par1ChunkCoordIntPair, par2NBTTagCompound));
-+            this.chunksToRemove.add(new PendingChunk(par1ChunkCoordIntPair, par2NBTTagCompound));
-             this.pendingAnvilChunksCoordinates.add(par1ChunkCoordIntPair);
-             ThreadedFileIOBase.threadedIOInstance.queueIO(this);
-         }
 @@ -230,7 +241,7 @@
  
      public boolean writeNextIO()
@@ -91,11 +72,11 @@
          return true;
      }
  
--    private void writeChunkNBTTags(AnvilChunkLoader.PendingChunk par1AnvilChunkLoaderPending) throws IOException
-+    public void writeChunkNBTTags(PendingChunk par1AnvilChunkLoaderPending) throws java.io.IOException   // CraftBukkit - public -> private, added throws
+-    private void writeChunkNBTTags(AnvilChunkLoader.PendingChunk p_75821_1_) throws IOException
++    public void writeChunkNBTTags(AnvilChunkLoader.PendingChunk p_75821_1_) throws java.io.IOException   // CraftBukkit - public -> private, added throws
      {
-         DataOutputStream dataoutputstream = RegionFileCache.getChunkOutputStream(this.chunkSaveLocation, par1AnvilChunkLoaderPending.chunkCoordinate.chunkXPos, par1AnvilChunkLoaderPending.chunkCoordinate.chunkZPos);
-         CompressedStreamTools.write(par1AnvilChunkLoaderPending.nbtTags, dataoutputstream);
+         DataOutputStream dataoutputstream = RegionFileCache.getChunkOutputStream(this.chunkSaveLocation, p_75821_1_.chunkCoordinate.chunkXPos, p_75821_1_.chunkCoordinate.chunkZPos);
+         CompressedStreamTools.write(p_75821_1_.nbtTags, dataoutputstream);
 @@ -307,19 +318,19 @@
  
                  if (extendedblockstorage.getBlockMSBArray() != null)
@@ -131,27 +112,26 @@
 +                    // Cauldron start - check to see if we killed entity due to invalid location
 +                    if (!entity2.isDead)
                      {
--                        Entity entity1 = EntityList.createEntityFromNBT(nbttagcompound2.getCompoundTag("Riding"), par1World);
--
--                        if (entity1 != null)
+-                        Entity entity1 = EntityList.createEntityFromNBT(nbttagcompound2.getCompoundTag("Riding"), p_75823_1_);
 +                        Entity entity = entity2;
-+    
+ 
+-                        if (entity1 != null)
 +                        for (NBTTagCompound nbttagcompound2 = nbttagcompound3; nbttagcompound2.hasKey("Riding", 10); nbttagcompound2 = nbttagcompound2.getCompoundTag("Riding"))
                          {
 -                            chunk.addEntity(entity1);
 -                            entity.mountEntity(entity1);
-+                            Entity entity1 = EntityList.createEntityFromNBT(nbttagcompound2.getCompoundTag("Riding"), par1World);
-+    
+-                        }
++                            Entity entity1 = EntityList.createEntityFromNBT(nbttagcompound2.getCompoundTag("Riding"), p_75823_1_);
+ 
+-                        entity = entity1;
 +                            if (entity1 != null)
 +                            {
 +                                chunk.addEntity(entity1);
 +                                entity.mountEntity(entity1);
 +                            }
-+    
++
 +                            entity = entity1;
-                         }
--
--                        entity = entity1;
++                        }
                      }
 +                    // Cauldron end
                  }

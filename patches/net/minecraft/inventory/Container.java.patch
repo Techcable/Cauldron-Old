@@ -69,18 +69,18 @@
 +    }
 +    // CraftBukkit end
 +
-     protected Slot addSlotToContainer(Slot par1Slot)
+     protected Slot addSlotToContainer(Slot p_75146_1_)
      {
-         par1Slot.slotNumber = this.inventorySlots.size();
+         p_75146_1_.slotNumber = this.inventorySlots.size();
 @@ -109,6 +160,10 @@
  
-     public Slot getSlot(int par1)
+     public Slot getSlot(int p_75139_1_)
      {
 +        // Cauldron start - vanilla compatibility. fixes NPE with ProjectRed's Item Stock Keeper
-+        if (par1 < 0 || par1 >= this.inventorySlots.size())
++        if (p_75139_1_ < 0 || p_75139_1_ >= this.inventorySlots.size())
 +            return null;
 +        // Cauldron end
-         return (Slot)this.inventorySlots.get(par1);
+         return (Slot)this.inventorySlots.get(p_75139_1_);
      }
  
 @@ -168,6 +223,7 @@
@@ -119,7 +119,7 @@
 +                    ItemStack oldCursor = inventoryplayer.getItemStack();
 +                    inventoryplayer.setItemStack(CraftItemStack.asNMSCopy(newcursor));
 +                    InventoryDragEvent event = new InventoryDragEvent(view, (newcursor.getType() != org.bukkit.Material.AIR ? newcursor : null), CraftItemStack.asBukkitCopy(oldCursor), this.field_94535_f == i1, eventmap); // Should be dragButton
-+                    par4EntityPlayer.worldObj.getServer().getPluginManager().callEvent(event);
++                    p_75144_4_.worldObj.getServer().getPluginManager().callEvent(event);
 +                    // Whether or not a change was made to the inventory that requires an update.
 +                    boolean needsUpdate = event.getResult() != Result.DEFAULT;
 +
@@ -143,9 +143,9 @@
 +                        inventoryplayer.setItemStack(oldCursor);
 +                    }
 +
-+                    if (needsUpdate && par4EntityPlayer instanceof EntityPlayerMP)
++                    if (needsUpdate && p_75144_4_ instanceof EntityPlayerMP)
 +                    {
-+                        ((EntityPlayerMP) par4EntityPlayer).sendContainerToPlayer(this);
++                        ((EntityPlayerMP) p_75144_4_).sendContainerToPlayer(this);
 +                    }
 +
 +                    // CraftBukkit end
@@ -154,16 +154,15 @@
                  this.func_94533_d();
 @@ -235,10 +328,17 @@
  
-                         if (par2 == 1)
+                         if (p_75144_2_ == 1)
                          {
--                            par4EntityPlayer.dropPlayerItemWithRandomChoice(inventoryplayer.getItemStack().splitStack(1), true);
+-                            p_75144_4_.dropPlayerItemWithRandomChoice(inventoryplayer.getItemStack().splitStack(1), true);
 +                            // CraftBukkit start - Store a reference
 +                            ItemStack itemstack4 = inventoryplayer.getItemStack();
  
--                            if (inventoryplayer.getItemStack().stackSize == 0)
-+                            if (itemstack4.stackSize > 0)
+                             if (inventoryplayer.getItemStack().stackSize == 0)
                              {
-+                                par4EntityPlayer.dropPlayerItemWithRandomChoice(itemstack4.splitStack(1), true);
++                                p_75144_4_.dropPlayerItemWithRandomChoice(inventoryplayer.getItemStack().splitStack(1), true);
 +                            }
 +
 +                            if (itemstack4.stackSize == 0)

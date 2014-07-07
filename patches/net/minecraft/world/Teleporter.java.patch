@@ -13,13 +13,38 @@
  public class Teleporter
  {
      private final WorldServer worldServerInstance;
-@@ -38,82 +44,154 @@
+@@ -20,100 +26,172 @@
+     private final List destinationCoordinateKeys = new ArrayList();
+     private static final String __OBFID = "CL_00000153";
+ 
+-    public Teleporter(WorldServer p_i1963_1_)
++    public Teleporter(WorldServer par1WorldServer)
+     {
+-        this.worldServerInstance = p_i1963_1_;
+-        this.random = new Random(p_i1963_1_.getSeed());
++        this.worldServerInstance = par1WorldServer;
++        this.random = new Random(par1WorldServer.getSeed());
+     }
+ 
+-    public void placeInPortal(Entity p_77185_1_, double p_77185_2_, double p_77185_4_, double p_77185_6_, float p_77185_8_)
++    public void placeInPortal(Entity par1Entity, double par2, double par4, double par6, float par8)
+     {
+         if (this.worldServerInstance.provider.dimensionId != 1)
+         {
+-            if (!this.placeInExistingPortal(p_77185_1_, p_77185_2_, p_77185_4_, p_77185_6_, p_77185_8_))
++            if (!this.placeInExistingPortal(par1Entity, par2, par4, par6, par8))
+             {
+-                this.makePortal(p_77185_1_);
+-                this.placeInExistingPortal(p_77185_1_, p_77185_2_, p_77185_4_, p_77185_6_, p_77185_8_);
++                this.makePortal(par1Entity);
++                this.placeInExistingPortal(par1Entity, par2, par4, par6, par8);
+             }
          }
          else
          {
--            int i = MathHelper.floor_double(par1Entity.posX);
--            int j = MathHelper.floor_double(par1Entity.posY) - 1;
--            int k = MathHelper.floor_double(par1Entity.posZ);
+-            int i = MathHelper.floor_double(p_77185_1_.posX);
+-            int j = MathHelper.floor_double(p_77185_1_.posY) - 1;
+-            int k = MathHelper.floor_double(p_77185_1_.posZ);
 -            byte b0 = 1;
 -            byte b1 = 0;
 +            // CraftBukkit start - Modularize end portal creation
@@ -92,25 +117,23 @@
                      }
                  }
              }
--
--            par1Entity.setLocationAndAngles((double)i, (double)j, (double)k, par1Entity.rotationYaw, 0.0F);
--            par1Entity.motionX = par1Entity.motionY = par1Entity.motionZ = 0.0D;
-         }
-+
-+        return new ChunkCoordinates(i, j, k);
-     }
-+    // CraftBukkit end
++        }
  
-     public boolean placeInExistingPortal(Entity par1Entity, double par2, double par4, double par6, float par8)
-     {
--        short short1 = 128;
+-            p_77185_1_.setLocationAndAngles((double)i, (double)j, (double)k, p_77185_1_.rotationYaw, 0.0F);
+-            p_77185_1_.motionX = p_77185_1_.motionY = p_77185_1_.motionZ = 0.0D;
++        return new ChunkCoordinates(i, j, k);
++    }
++    // CraftBukkit end
++
++    public boolean placeInExistingPortal(Entity par1Entity, double par2, double par4, double par6, float par8)
++    {
 +        // CraftBukkit start - Modularize portal search process and entity teleportation
 +        ChunkCoordinates found = this.findPortal(par1Entity.posX, par1Entity.posY, par1Entity.posZ, 128);
 +
 +        if (found == null)
 +        {
 +            return false;
-+        }
+         }
 +
 +        Location exit = new Location(this.worldServerInstance.getWorld(), found.posX, found.posY, found.posZ, par8, par1Entity.rotationPitch);
 +        Vector velocity = par1Entity.getBukkitEntity().getVelocity();
@@ -123,10 +146,12 @@
 +        }
 +
 +        return true;
-+    }
-+
+     }
+ 
+-    public boolean placeInExistingPortal(Entity p_77184_1_, double p_77184_2_, double p_77184_4_, double p_77184_6_, float p_77184_8_)
 +    public ChunkCoordinates findPortal(double x, double y, double z, int short1)
-+    {
+     {
+-        short short1 = 128;
 +        if (this.worldServerInstance.getWorld().getEnvironment() == org.bukkit.World.Environment.THE_END)
 +        {
 +            return this.findEndPortal(this.worldServerInstance.provider.getEntrancePortalLocation());
@@ -137,8 +162,8 @@
          int i = 0;
          int j = 0;
          int k = 0;
--        int l = MathHelper.floor_double(par1Entity.posX);
--        int i1 = MathHelper.floor_double(par1Entity.posZ);
+-        int l = MathHelper.floor_double(p_77184_1_.posX);
+-        int i1 = MathHelper.floor_double(p_77184_1_.posZ);
 +        // CraftBukkit start
 +        int l = MathHelper.floor_double(x);
 +        int i1 = MathHelper.floor_double(z);
@@ -170,12 +195,12 @@
 -            for (l3 = l - short1; l3 <= l + short1; ++l3)
 +            for (k1 = l - short1; k1 <= l + short1; ++k1)
              {
--                double d4 = (double)l3 + 0.5D - par1Entity.posX;
+-                double d4 = (double)l3 + 0.5D - p_77184_1_.posX;
 +                double d5 = (double) k1 + 0.5D - x; // CraftBukkit
  
                  for (int l1 = i1 - short1; l1 <= i1 + short1; ++l1)
                  {
--                    double d5 = (double)l1 + 0.5D - par1Entity.posZ;
+-                    double d5 = (double)l1 + 0.5D - p_77184_1_.posZ;
 +                    double d6 = (double) l1 + 0.5D - z; // CraftBukkit
  
                      for (int i2 = this.worldServerInstance.getActualHeight() - 1; i2 >= 0; --i2)
@@ -189,7 +214,7 @@
                                  --i2;
                              }
  
--                            d7 = (double)i2 + 0.5D - par1Entity.posY;
+-                            d7 = (double)i2 + 0.5D - p_77184_1_.posY;
 -                            double d8 = d4 * d4 + d7 * d7 + d5 * d5;
 +                            d4 = (double) i2 + 0.5D - y; // CraftBukkit
 +                            double d7 = d5 * d5 + d4 * d4 + d6 * d6;
@@ -278,7 +303,7 @@
 +                j2 = 1;
              }
  
--            int j2 = par1Entity.getTeleportDirection();
+-            int j2 = p_77184_1_.getTeleportDirection();
 +            int k2 = entity.getTeleportDirection();
  
 -            if (i4 > -1)
@@ -362,11 +387,11 @@
                      f6 = 1.0F;
                  }
  
--                double d9 = par1Entity.motionX;
--                double d10 = par1Entity.motionZ;
--                par1Entity.motionX = d9 * (double)f3 + d10 * (double)f6;
--                par1Entity.motionZ = d9 * (double)f5 + d10 * (double)f4;
--                par1Entity.rotationYaw = par8 - (float)(j2 * 90) + (float)(i4 * 90);
+-                double d9 = p_77184_1_.motionX;
+-                double d10 = p_77184_1_.motionZ;
+-                p_77184_1_.motionX = d9 * (double)f3 + d10 * (double)f6;
+-                p_77184_1_.motionZ = d9 * (double)f5 + d10 * (double)f4;
+-                p_77184_1_.rotationYaw = p_77184_8_ - (float)(j2 * 90) + (float)(i4 * 90);
 +                // CraftBukkit start
 +                double d10 = velocity.getX();
 +                double d11 = velocity.getZ();
@@ -378,14 +403,14 @@
              }
              else
              {
--                par1Entity.motionX = par1Entity.motionY = par1Entity.motionZ = 0.0D;
+-                p_77184_1_.motionX = p_77184_1_.motionY = p_77184_1_.motionZ = 0.0D;
 +                // entity.motX = entity.motY = entity.motZ = 0.0D;
 +                velocity.setX(0);
 +                velocity.setY(0);
 +                velocity.setZ(0);
              }
  
--            par1Entity.setLocationAndAngles(d11, d6, d7, par1Entity.rotationYaw, par1Entity.rotationPitch);
+-            p_77184_1_.setLocationAndAngles(d11, d6, d7, p_77184_1_.rotationYaw, p_77184_1_.rotationPitch);
 -            return true;
 +            // entity.setPositionRotation(d8, d9, d4, entity.yaw, entity.pitch);
 +            position.setX(d8);
@@ -421,7 +446,8 @@
 +        // CraftBukkit end
      }
  
-     public boolean makePortal(Entity par1Entity)
+-    public boolean makePortal(Entity p_85188_1_)
++    public boolean makePortal(Entity par1Entity)
      {
 -        byte b0 = 16;
 +        // CraftBukkit start - Allow for portal creation to be based on coordinates instead of entity
@@ -438,9 +464,9 @@
 + 
 +        // CraftBukkit end
          double d0 = -1.0D;
--        int i = MathHelper.floor_double(par1Entity.posX);
--        int j = MathHelper.floor_double(par1Entity.posY);
--        int k = MathHelper.floor_double(par1Entity.posZ);
+-        int i = MathHelper.floor_double(p_85188_1_.posX);
+-        int j = MathHelper.floor_double(p_85188_1_.posY);
+-        int k = MathHelper.floor_double(p_85188_1_.posZ);
 +        // CraftBukkit start
 +        int i = MathHelper.floor_double(x);
 +        int j = MathHelper.floor_double(y);
@@ -473,14 +499,14 @@
 + 
          for (i2 = i - b0; i2 <= i + b0; ++i2)
          {
--            d1 = (double)i2 + 0.5D - par1Entity.posX;
+-            d1 = (double)i2 + 0.5D - p_85188_1_.posX;
 -
 -            for (k2 = k - b0; k2 <= k + b0; ++k2)
 +            d1 = (double) i2 + 0.5D - x; // CraftBukkit
 + 
 +            for (j2 = k - b0; j2 <= k + b0; ++j2)
              {
--                d2 = (double)k2 + 0.5D - par1Entity.posZ;
+-                d2 = (double)k2 + 0.5D - p_85188_1_.posZ;
 +                d2 = (double) j2 + 0.5D - z; // CraftBukkit
                  label274:
 -
@@ -543,7 +569,7 @@
                                  }
                              }
 -
--                            d3 = (double)i3 + 0.5D - par1Entity.posY;
+-                            d3 = (double)i3 + 0.5D - p_85188_1_.posY;
 + 
 +                            d3 = (double) k2 + 0.5D - y; // CraftBukkit
                              d4 = d1 * d1 + d3 * d3 + d2 * d2;
@@ -571,14 +597,14 @@
          {
              for (i2 = i - b0; i2 <= i + b0; ++i2)
              {
--                d1 = (double)i2 + 0.5D - par1Entity.posX;
+-                d1 = (double)i2 + 0.5D - p_85188_1_.posX;
 -
 -                for (k2 = k - b0; k2 <= k + b0; ++k2)
 +                d1 = (double) i2 + 0.5D - x; // CraftBukkit
 + 
 +                for (j2 = k - b0; j2 <= k + b0; ++j2)
                  {
--                    d2 = (double)k2 + 0.5D - par1Entity.posZ;
+-                    d2 = (double)k2 + 0.5D - p_85188_1_.posZ;
 +                    d2 = (double) j2 + 0.5D - z; // CraftBukkit
                      label222:
 -
@@ -628,7 +654,7 @@
                                      }
                                  }
 -
--                                d3 = (double)i3 + 0.5D - par1Entity.posY;
+-                                d3 = (double)i3 + 0.5D - p_85188_1_.posY;
 + 
 +                                d3 = (double) k2 + 0.5D - y; // CraftBukkit
                                  d4 = d1 * d1 + d3 * d3 + d2 * d2;
@@ -647,7 +673,7 @@
                                  }
                              }
                          }
-@@ -397,77 +551,77 @@
+@@ -397,93 +551,93 @@
                  }
              }
          }
@@ -764,11 +790,16 @@
          return true;
      }
  
-@@ -477,13 +631,13 @@
+-    public void removeStalePortalLocations(long p_85189_1_)
++    public void removeStalePortalLocations(long par1)
+     {
+-        if (p_85189_1_ % 100L == 0L)
++        if (par1 % 100L == 0L)
          {
              Iterator iterator = this.destinationCoordinateKeys.iterator();
-             long j = par1 - 600L;
+-            long j = p_85189_1_ - 600L;
 -
++            long j = par1 - 600L;
 + 
              while (iterator.hasNext())
              {
@@ -783,7 +814,7 @@
                  {
                      iterator.remove();
                      this.destinationCoordinateCache.remove(olong.longValue());
-@@ -491,12 +645,12 @@
+@@ -491,16 +645,16 @@
              }
          }
      }
@@ -794,7 +825,14 @@
          public long lastUpdateTime;
          private static final String __OBFID = "CL_00000154";
 -
+-        public PortalPosition(int p_i1962_2_, int p_i1962_3_, int p_i1962_4_, long p_i1962_5_)
 + 
-         public PortalPosition(int par2, int par3, int par4, long par5)
++        public PortalPosition(int par2, int par3, int par4, long par5)
          {
-             super(par2, par3, par4);
+-            super(p_i1962_2_, p_i1962_3_, p_i1962_4_);
+-            this.lastUpdateTime = p_i1962_5_;
++            super(par2, par3, par4);
++            this.lastUpdateTime = par5;
+         }
+     }
+ }

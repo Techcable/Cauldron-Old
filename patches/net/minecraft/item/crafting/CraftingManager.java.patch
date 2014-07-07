@@ -59,7 +59,7 @@
  
 -            return new ItemStack(itemstack.getItem(), 1, i1);
 +            // Cauldron start - vanilla compatibility
-+            if (par1InventoryCrafting.resultInventory == null)
++            if (p_82787_1_.resultInventory == null)
 +            {
 +                return new ItemStack(itemstack.getItem(), 1, i1);
 +            }
@@ -70,8 +70,8 @@
 +            ingredients.add(itemstack.copy());
 +            ingredients.add(itemstack1.copy());
 +            ShapelessRecipes recipe = new ShapelessRecipes(result.copy(), ingredients);
-+            par1InventoryCrafting.currentRecipe = recipe;
-+            result = CraftEventFactory.callPreCraftEvent(par1InventoryCrafting, result, lastCraftView, true);
++            p_82787_1_.currentRecipe = recipe;
++            result = CraftEventFactory.callPreCraftEvent(p_82787_1_, result, lastCraftView, true);
 +            return result;
 +            // CraftBukkit end
          }
@@ -81,24 +81,24 @@
              {
                  IRecipe irecipe = (IRecipe)this.recipes.get(j);
  
--                if (irecipe.matches(par1InventoryCrafting, par2World))
-+                if (irecipe.matches(par1InventoryCrafting, par2World) && par1InventoryCrafting.resultInventory != null) // Cauldron - add null check for vanilla compatibility
+-                if (irecipe.matches(p_82787_1_, p_82787_2_))
++                if (irecipe.matches(p_82787_1_, p_82787_2_) && p_82787_1_.resultInventory != null) // Cauldron - add null check for vanilla compatibility
                  {
 +                    // CraftBukkit start - INVENTORY_PRE_CRAFT event
-+                    par1InventoryCrafting.currentRecipe = irecipe;
-+                    ItemStack result = irecipe.getCraftingResult(par1InventoryCrafting);
-+                    return CraftEventFactory.callPreCraftEvent(par1InventoryCrafting, result, lastCraftView, false);
++                    p_82787_1_.currentRecipe = irecipe;
++                    ItemStack result = irecipe.getCraftingResult(p_82787_1_);
++                    return CraftEventFactory.callPreCraftEvent(p_82787_1_, result, lastCraftView, false);
 +                    // CraftBukkit end
 +                }
 +                // Cauldron start - vanilla
-+                else if (irecipe.matches(par1InventoryCrafting, par2World))
++                else if (irecipe.matches(p_82787_1_, p_82787_2_))
 +                {
-                     return irecipe.getCraftingResult(par1InventoryCrafting);
+                     return irecipe.getCraftingResult(p_82787_1_);
                  }
 +                // Cauldron end
              }
  
-+            par1InventoryCrafting.currentRecipe = null; // CraftBukkit - Clear recipe when no recipe is found
++            p_82787_1_.currentRecipe = null; // CraftBukkit - Clear recipe when no recipe is found
              return null;
          }
      }

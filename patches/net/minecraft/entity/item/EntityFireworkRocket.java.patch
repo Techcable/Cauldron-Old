@@ -8,4 +8,4 @@
 +    public int lifetime; // CraftBukkit - private -> public
      private static final String __OBFID = "CL_00001718";
  
-     public EntityFireworkRocket(World par1World)
+     public EntityFireworkRocket(World p_i1762_1_)

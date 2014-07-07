@@ -12,7 +12,7 @@
 @@ -30,4 +32,20 @@
      void closeInventory();
  
-     boolean isItemValidForSlot(int var1, ItemStack var2);
+     boolean isItemValidForSlot(int p_94041_1_, ItemStack p_94041_2_);
 +
 +    // CraftBukkit start
 +    ItemStack[] getContents();

@@ -17,10 +17,10 @@
      private static final String __OBFID = "CL_00001693";
 @@ -122,6 +124,24 @@
  
-     private void becomeAngryAt(Entity par1Entity)
+     private void becomeAngryAt(Entity p_70835_1_)
      {
 +        // CraftBukkit start
-+        org.bukkit.entity.Entity bukkitTarget = par1Entity == null ? null : par1Entity.getBukkitEntity();
++        org.bukkit.entity.Entity bukkitTarget = p_70835_1_ == null ? null : p_70835_1_.getBukkitEntity();
 +        EntityTargetEvent event = new EntityTargetEvent(this.getBukkitEntity(), bukkitTarget, EntityTargetEvent.TargetReason.PIG_ZOMBIE_TARGET);
 +        this.worldObj.getServer().getPluginManager().callEvent(event);
 +
@@ -35,8 +35,8 @@
 +            return;
 +        }
 +
-+        par1Entity = ((org.bukkit.craftbukkit.entity.CraftEntity) event.getTarget()).getHandle();
++        p_70835_1_ = ((org.bukkit.craftbukkit.entity.CraftEntity) event.getTarget()).getHandle();
 +        // CraftBukkit end
-         this.entityToAttack = par1Entity;
+         this.entityToAttack = p_70835_1_;
          this.angerLevel = 400 + this.rand.nextInt(400);
          this.randomSoundDelay = this.rand.nextInt(40);

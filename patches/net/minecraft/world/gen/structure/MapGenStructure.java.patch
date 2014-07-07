@@ -4,11 +4,11 @@
      {
          if (this.field_143029_e == null)
          {
--            this.field_143029_e = (MapGenStructureData)par1World.perWorldStorage.loadData(MapGenStructureData.class, this.func_143025_a());
+-            this.field_143029_e = (MapGenStructureData)p_143027_1_.perWorldStorage.loadData(MapGenStructureData.class, this.func_143025_a());
 +            // Spigot Start
-+            if (par1World.spigotConfig.saveStructureInfo && !this.func_143025_a().equals("Mineshaft"))
++            if (p_143027_1_.spigotConfig.saveStructureInfo && !this.func_143025_a().equals("Mineshaft"))
 +            {
-+                this.field_143029_e = (MapGenStructureData) par1World.loadItemData(MapGenStructureData.class, this.func_143025_a());
++                this.field_143029_e = (MapGenStructureData) p_143027_1_.loadItemData(MapGenStructureData.class, this.func_143025_a());
 +            }
 +            else
 +            {

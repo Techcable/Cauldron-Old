@@ -10,24 +10,7 @@
      }
  
      protected String getHurtSound()
-@@ -389,13 +390,14 @@
- 
-             if (!this.worldObj.isRemote)
-             {
--                if (this.rand.nextInt(3) == 0)
-+                // CraftBukkit - added event call and isCancelled check.
-+                if (this.rand.nextInt(3) == 0 && !org.bukkit.craftbukkit.event.CraftEventFactory.callEntityTameEvent(this, par1EntityPlayer).isCancelled())
-                 {
-                     this.setTamed(true);
-                     this.setPathToEntity((PathEntity)null);
-                     this.setAttackTarget((EntityLivingBase)null);
-                     this.aiSit.setSitting(true);
--                    this.setHealth(20.0F);
-+                    this.setHealth(this.getMaxHealth()); // CraftBukkit - 20.0 -> getMaxHealth()
-                     this.setOwner(par1EntityPlayer.getCommandSenderName());
-                     this.playTameEffect(true);
-                     this.worldObj.setEntityState(this, (byte)7);
-@@ -527,7 +529,7 @@
+@@ -527,7 +528,7 @@
  
      protected boolean canDespawn()
      {
@@ -35,4 +18,4 @@
 +        return !this.isTamed(); // CraftBukkit
      }
  
-     public boolean func_142018_a(EntityLivingBase par1EntityLivingBase, EntityLivingBase par2EntityLivingBase)
+     public boolean func_142018_a(EntityLivingBase p_142018_1_, EntityLivingBase p_142018_2_)

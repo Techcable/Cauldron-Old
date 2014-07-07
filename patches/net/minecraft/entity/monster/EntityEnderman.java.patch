@@ -70,24 +70,3 @@
                  if (this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox).isEmpty() && !this.worldObj.isAnyLiquid(this.boundingBox))
                  {
                      flag = true;
-@@ -368,12 +397,17 @@
- 
-         if (item != null)
-         {
--            int j = this.rand.nextInt(2 + par2);
-+            // CraftBukkit start - Whole method
-+            java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
-+            int count = this.rand.nextInt(2 + par2);
- 
--            for (int k = 0; k < j; ++k)
-+            if (count > 0)
-             {
--                this.dropItem(item, 1);
-+                loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(item), count));
-             }
-+
-+            CraftEventFactory.callEntityDeathEvent(this, loot);
-+            // CraftBukkit end
-         }
-     }
- 

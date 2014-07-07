@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/player/EntityPlayer.java
 +++ ../src-work/minecraft/net/minecraft/entity/player/EntityPlayer.java
-@@ -93,6 +93,22 @@
+@@ -92,6 +92,22 @@
  import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
  import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
  
@@ -23,7 +23,7 @@
  public abstract class EntityPlayer extends EntityLivingBase implements ICommandSender
  {
      public static final String PERSISTED_NBT_TAG = "PlayerPersisted";
-@@ -103,7 +119,7 @@
+@@ -102,7 +118,7 @@
      private InventoryEnderChest theInventoryEnderChest = new InventoryEnderChest();
      public Container inventoryContainer;
      public Container openContainer;
@@ -32,7 +32,7 @@
      protected int flyToggleTimer;
      public float prevCameraYaw;
      public float cameraYaw;
-@@ -114,9 +130,20 @@
+@@ -113,9 +129,20 @@
      public double field_71094_bP;
      public double field_71095_bQ;
      public double field_71085_bR;
@@ -55,7 +55,7 @@
      public float field_71079_bU;
      @SideOnly(Side.CLIENT)
      public float field_71082_cx;
-@@ -125,6 +152,7 @@
+@@ -124,6 +151,7 @@
      private boolean spawnForced;
      private ChunkCoordinates startMinecartRidingCoordinate;
      public PlayerCapabilities capabilities = new PlayerCapabilities();
@@ -63,7 +63,7 @@
      public int experienceLevel;
      public int experienceTotal;
      public float experience;
-@@ -417,6 +445,41 @@
+@@ -416,6 +444,41 @@
          {
              this.updateItemUse(this.itemInUse, 16);
              int i = this.itemInUse.stackSize;
@@ -105,7 +105,7 @@
              ItemStack itemstack = this.itemInUse.onFoodEaten(this.worldObj, this);
  
              itemstack = ForgeEventFactory.onItemUseFinish(this, itemInUse, itemInUseCount, itemstack);
-@@ -453,6 +516,7 @@
+@@ -452,6 +515,7 @@
          return this.getHealth() <= 0.0F || this.isPlayerSleeping();
      }
  
@@ -113,13 +113,13 @@
      public void closeScreen()
      {
          this.openContainer = this.inventoryContainer;
-@@ -460,23 +524,42 @@
+@@ -459,23 +523,42 @@
  
-     public void mountEntity(Entity par1Entity)
+     public void mountEntity(Entity p_70078_1_)
      {
--        if (this.ridingEntity != null && par1Entity == null)
+-        if (this.ridingEntity != null && p_70078_1_ == null)
 +        // CraftBukkit start - mirror Entity mount changes
-+        this.setPassengerOf(par1Entity);
++        this.setPassengerOf(p_70078_1_);
 +    }
 +
 +    public void setPassengerOf(Entity entity)
@@ -159,12 +159,12 @@
          }
          else
          {
--            super.mountEntity(par1Entity);
+-            super.mountEntity(p_70078_1_);
 +            super.setPassengerOf(entity); // CraftBukkit - call new parent
          }
      }
  
-@@ -533,7 +616,8 @@
+@@ -532,7 +615,8 @@
  
          if (this.worldObj.difficultySetting == EnumDifficulty.PEACEFUL && this.getHealth() < this.getMaxHealth() && this.worldObj.getGameRules().getGameRuleBooleanValue("naturalRegeneration") && this.ticksExisted % 20 * 12 == 0)
          {
@@ -174,7 +174,7 @@
          }
  
          this.inventory.decrementAnimations();
-@@ -555,7 +639,8 @@
+@@ -554,7 +638,8 @@
  
          this.setAIMoveSpeed((float)iattributeinstance.getAttributeValue());
          float f = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
@@ -184,7 +184,7 @@
  
          if (f > 0.1F)
          {
-@@ -590,7 +675,7 @@
+@@ -589,7 +674,7 @@
  
              List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, axisalignedbb);
  
@@ -193,15 +193,15 @@
              {
                  for (int i = 0; i < list.size(); ++i)
                  {
-@@ -688,12 +773,14 @@
-     public void addToPlayerScore(Entity par1Entity, int par2)
+@@ -687,12 +772,14 @@
+     public void addToPlayerScore(Entity p_70084_1_, int p_70084_2_)
      {
-         this.addScore(par2);
+         this.addScore(p_70084_2_);
 -        Collection collection = this.getWorldScoreboard().func_96520_a(IScoreObjectiveCriteria.totalKillCount);
 +        // CraftBukkit - Get our scores instead
 +        Collection<Score> collection = this.worldObj.getServer().getScoreboardManager().getScoreboardScores(IScoreObjectiveCriteria.totalKillCount, this.getCommandSenderName(), new java.util.ArrayList<Score>());
  
-         if (par1Entity instanceof EntityPlayer)
+         if (p_70084_1_ instanceof EntityPlayer)
          {
              this.addStat(StatList.playerKillsStat, 1);
 -            collection.addAll(this.getWorldScoreboard().func_96520_a(IScoreObjectiveCriteria.playerKillCount));
@@ -210,7 +210,7 @@
          }
          else
          {
-@@ -704,8 +791,7 @@
+@@ -703,8 +790,7 @@
  
          while (iterator.hasNext())
          {
@@ -220,7 +220,7 @@
              score.func_96648_a();
          }
      }
-@@ -778,6 +864,19 @@
+@@ -777,6 +863,19 @@
                  entityitem.motionZ += Math.sin((double)f1) * (double)f;
              }
  
@@ -240,12 +240,12 @@
              this.joinEntityItemWithWorld(entityitem);
              this.addStat(StatList.dropStat, 1);
              return entityitem;
-@@ -882,6 +981,16 @@
+@@ -881,6 +980,16 @@
              this.wakeUpPlayer(true, true, false);
          }
  
 +        // CraftBukkit start
-+        this.spawnWorld = par1NBTTagCompound.getString("SpawnWorld");
++        this.spawnWorld = p_70037_1_.getString("SpawnWorld");
 +
 +        if ("".equals(spawnWorld))
 +        {
@@ -254,49 +254,49 @@
 +
 +        // CraftBukkit end
 +
-         if (par1NBTTagCompound.hasKey("SpawnX", 99) && par1NBTTagCompound.hasKey("SpawnY", 99) && par1NBTTagCompound.hasKey("SpawnZ", 99))
+         if (p_70037_1_.hasKey("SpawnX", 99) && p_70037_1_.hasKey("SpawnY", 99) && p_70037_1_.hasKey("SpawnZ", 99))
          {
-             this.spawnChunk = new ChunkCoordinates(par1NBTTagCompound.getInteger("SpawnX"), par1NBTTagCompound.getInteger("SpawnY"), par1NBTTagCompound.getInteger("SpawnZ"));
-@@ -926,6 +1035,7 @@
-             par1NBTTagCompound.setInteger("SpawnY", this.spawnChunk.posY);
-             par1NBTTagCompound.setInteger("SpawnZ", this.spawnChunk.posZ);
-             par1NBTTagCompound.setBoolean("SpawnForced", this.spawnForced);
-+            par1NBTTagCompound.setString("SpawnWorld", spawnWorld); // CraftBukkit - fixes bed spawns for multiworld worlds
+             this.spawnChunk = new ChunkCoordinates(p_70037_1_.getInteger("SpawnX"), p_70037_1_.getInteger("SpawnY"), p_70037_1_.getInteger("SpawnZ"));
+@@ -925,6 +1034,7 @@
+             p_70014_1_.setInteger("SpawnY", this.spawnChunk.posY);
+             p_70014_1_.setInteger("SpawnZ", this.spawnChunk.posZ);
+             p_70014_1_.setBoolean("SpawnForced", this.spawnForced);
++            p_70014_1_.setString("SpawnWorld", spawnWorld); // CraftBukkit - fixes bed spawns for multiworld worlds
          }
  
          NBTTagList spawnlist = new NBTTagList();
-@@ -1004,7 +1114,7 @@
+@@ -1003,7 +1113,7 @@
                  {
                      if (this.worldObj.difficultySetting == EnumDifficulty.PEACEFUL)
                      {
--                        par2 = 0.0F;
-+                        return false; // CraftBukkit - f = 0.0f -> return false
+-                        p_70097_2_ = 0.0F;
++                        return false; // CraftBukkit - p_70097_2_ = 0.0F; -> return false
                      }
  
                      if (this.worldObj.difficultySetting == EnumDifficulty.EASY)
-@@ -1018,7 +1128,7 @@
+@@ -1017,7 +1127,7 @@
                      }
                  }
  
--                if (par2 == 0.0F)
-+                if (false && par2 == 0.0F)   // CraftBukkit - Don't filter out 0 damage
+-                if (p_70097_2_ == 0.0F)
++                if (false && p_70097_2_ == 0.0F)   // CraftBukkit - Don't filter out 0 damage
                  {
                      return false;
                  }
-@@ -1040,9 +1150,39 @@
+@@ -1039,9 +1149,39 @@
  
-     public boolean canAttackPlayer(EntityPlayer par1EntityPlayer)
+     public boolean canAttackPlayer(EntityPlayer p_96122_1_)
      {
 -        Team team = this.getTeam();
--        Team team1 = par1EntityPlayer.getTeam();
+-        Team team1 = p_96122_1_.getTeam();
 -        return team == null ? true : (!team.isSameTeam(team1) ? true : team.getAllowFriendlyFire());
 +        // CraftBukkit start - Change to check OTHER player's scoreboard team according to API
 +        // To summarize this method's logic, it's "Can parameter hurt this"
 +        org.bukkit.scoreboard.Team team;
 +
-+        if (par1EntityPlayer instanceof EntityPlayerMP)
++        if (p_96122_1_ instanceof EntityPlayerMP)
 +        {
-+            EntityPlayerMP thatPlayer = (EntityPlayerMP) par1EntityPlayer;
++            EntityPlayerMP thatPlayer = (EntityPlayerMP) p_96122_1_;
 +            team = thatPlayer.getBukkitEntity().getScoreboard().getPlayerTeam(thatPlayer.getBukkitEntity());
 +
 +            if (team == null || team.allowFriendlyFire())
@@ -307,8 +307,8 @@
 +        else
 +        {
 +            // This should never be called, but is implemented anyway
-+            org.bukkit.OfflinePlayer thisPlayer = par1EntityPlayer.worldObj.getServer().getOfflinePlayer(par1EntityPlayer.getCommandSenderName());
-+            team = par1EntityPlayer.worldObj.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(thisPlayer);
++            org.bukkit.OfflinePlayer thisPlayer = p_96122_1_.worldObj.getServer().getOfflinePlayer(p_96122_1_.getCommandSenderName());
++            team = p_96122_1_.worldObj.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(thisPlayer);
 +
 +            if (team == null || team.allowFriendlyFire())
 +            {
@@ -325,10 +325,10 @@
 +        // CraftBukkit end
      }
  
-     protected void damageArmor(float par1)
-@@ -1135,7 +1275,8 @@
+     protected void damageArmor(float p_70675_1_)
+@@ -1134,7 +1274,8 @@
  
-                 if (itemstack.interactWithEntity(this, (EntityLivingBase)par1Entity))
+                 if (itemstack.interactWithEntity(this, (EntityLivingBase)p_70998_1_))
                  {
 -                    if (itemstack.stackSize <= 0 && !this.capabilities.isCreativeMode)
 +                    // CraftBukkit - bypass infinite items; <= 0 -> == 0
@@ -336,7 +336,7 @@
                      {
                          this.destroyCurrentEquippedItem();
                      }
-@@ -1282,7 +1423,8 @@
+@@ -1281,7 +1422,8 @@
                          {
                              itemstack.hitEntity((EntityLivingBase)object, this);
  
@@ -346,25 +346,25 @@
                              {
                                  this.destroyCurrentEquippedItem();
                              }
-@@ -1294,7 +1436,16 @@
+@@ -1293,7 +1435,16 @@
  
                              if (j > 0)
                              {
--                                par1Entity.setFire(j * 4);
+-                                p_71059_1_.setFire(j * 4);
 +                                // CraftBukkit start - Call a combust event when somebody hits with a fire enchanted item
-+                                EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), par1Entity.getBukkitEntity(), j * 4);
++                                EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), p_71059_1_.getBukkitEntity(), j * 4);
 +                                org.bukkit.Bukkit.getPluginManager().callEvent(combustEvent);
 +
 +                                if (!combustEvent.isCancelled())
 +                                {
-+                                    par1Entity.setFire(combustEvent.getDuration());
++                                    p_71059_1_.setFire(combustEvent.getDuration());
 +                                }
 +
 +                                // CraftBukkit end
                              }
                          }
  
-@@ -1323,6 +1474,10 @@
+@@ -1322,6 +1473,10 @@
  
          if (this.openContainer != null)
          {
@@ -375,7 +375,7 @@
              this.openContainer.onContainerClosed(this);
          }
      }
-@@ -1382,6 +1537,21 @@
+@@ -1381,6 +1536,21 @@
              this.mountEntity((Entity)null);
          }
  
@@ -383,7 +383,7 @@
 +        if (this.getBukkitEntity() instanceof Player)
 +        {
 +            Player player = (Player) this.getBukkitEntity();
-+            org.bukkit.block.Block bed = this.worldObj.getWorld().getBlockAt(par1, par2, par3);
++            org.bukkit.block.Block bed = this.worldObj.getWorld().getBlockAt(p_71018_1_, p_71018_2_, p_71018_3_);
 +            PlayerBedEnterEvent cbEvent = new PlayerBedEnterEvent(player, bed);
 +            this.worldObj.getServer().getPluginManager().callEvent(cbEvent);
 +
@@ -397,7 +397,7 @@
          this.setSize(0.2F, 0.2F);
          this.yOffset = 0.2F;
  
-@@ -1476,6 +1646,27 @@
+@@ -1475,6 +1645,27 @@
              this.worldObj.updateAllPlayersSleepingFlag();
          }
  
@@ -422,13 +422,13 @@
 +
 +        // CraftBukkit end
 +
-         if (par1)
+         if (p_70999_1_)
          {
              this.sleepTimer = 0;
-@@ -1606,11 +1797,13 @@
+@@ -1605,11 +1796,13 @@
          {
-             this.spawnChunk = new ChunkCoordinates(par1ChunkCoordinates);
-             this.spawnForced = par2;
+             this.spawnChunk = new ChunkCoordinates(p_71063_1_);
+             this.spawnForced = p_71063_2_;
 +            this.spawnWorld = this.worldObj.worldInfo.getWorldName(); // CraftBukkit
          }
          else

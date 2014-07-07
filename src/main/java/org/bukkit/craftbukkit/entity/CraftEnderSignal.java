@@ -1,17 +1,18 @@
 package org.bukkit.craftbukkit.entity;
 
+import net.minecraft.entity.item.EntityEnderEye;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EnderSignal;
 import org.bukkit.entity.EntityType;
 
 public class CraftEnderSignal extends CraftEntity implements EnderSignal {
-    public CraftEnderSignal(CraftServer server, net.minecraft.entity.item.EntityEnderEye entity) {
+    public CraftEnderSignal(CraftServer server, EntityEnderEye entity) {
         super(server, entity);
     }
 
     @Override
-    public net.minecraft.entity.item.EntityEnderEye getHandle() {
-        return (net.minecraft.entity.item.EntityEnderEye) entity;
+    public EntityEnderEye getHandle() {
+        return (EntityEnderEye) entity;
     }
 
     @Override

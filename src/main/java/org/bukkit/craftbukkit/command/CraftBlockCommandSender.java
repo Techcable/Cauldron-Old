@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.command;
 
-
+import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandBlockLogic;
 
 import org.bukkit.block.Block;
@@ -39,7 +39,7 @@ public class CraftBlockCommandSender extends ServerCommandSender implements Bloc
         throw new UnsupportedOperationException("Cannot change operator status of a block");
     }
 
-    public net.minecraft.command.ICommandSender getTileEntity() {
+    public ICommandSender getTileEntity() {
         return commandBlock;
     }
 }

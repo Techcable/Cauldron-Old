@@ -55,21 +55,21 @@
 +    // CraftBukkit end
      private static final String __OBFID = "CL_00001745";
  
-     public ContainerEnchantment(InventoryPlayer par1InventoryPlayer, World par2World, int par3, int par4, int par5)
+     public ContainerEnchantment(InventoryPlayer p_i1811_1_, World p_i1811_2_, int p_i1811_3_, int p_i1811_4_, int p_i1811_5_)
 @@ -66,6 +73,11 @@
          {
-             this.addSlotToContainer(new Slot(par1InventoryPlayer, l, 8 + l * 18, 142));
+             this.addSlotToContainer(new Slot(p_i1811_1_, l, 8 + l * 18, 142));
          }
 +
 +        // CraftBukkit start
-+        player = (Player) par1InventoryPlayer.player.getBukkitEntity();
++        player = (Player) p_i1811_1_.player.getBukkitEntity();
 +        tableInventory_CB.player = player; // Cauldron
 +        // CraftBukkit end
      }
  
-     public void addCraftingToCrafters(ICrafting par1ICrafting)
+     public void addCraftingToCrafters(ICrafting p_75132_1_)
 @@ -109,7 +121,7 @@
-             ItemStack itemstack = par1IInventory.getStackInSlot(0);
+             ItemStack itemstack = p_75130_1_.getStackInSlot(0);
              int i;
  
 -            if (itemstack != null && itemstack.isItemEnchantable())
@@ -105,7 +105,7 @@
  
                  if (list != null)
                  {
--                    par1EntityPlayer.addExperienceLevel(-this.enchantLevels[par2]);
+-                    p_75140_1_.addExperienceLevel(-this.enchantLevels[p_75140_2_]);
 +                    // CraftBukkit start
 +                    Map<org.bukkit.enchantments.Enchantment, Integer> enchants = new java.util.HashMap<org.bukkit.enchantments.Enchantment, Integer>();
  
@@ -119,12 +119,12 @@
  
 -                    int j = flag && list.size() > 1 ? this.rand.nextInt(list.size()) : -1;
 +                    CraftItemStack item = CraftItemStack.asCraftMirror(itemstack);
-+                    EnchantItemEvent event = new EnchantItemEvent((Player) par1EntityPlayer.getBukkitEntity(), this.getBukkitView(), this.worldPointer.getWorld().getBlockAt(this.posX, this.posY, this.posZ), item, this.enchantLevels[par2], enchants, par2);
++                    EnchantItemEvent event = new EnchantItemEvent((Player) p_75140_1_.getBukkitEntity(), this.getBukkitView(), this.worldPointer.getWorld().getBlockAt(this.posX, this.posY, this.posZ), item, this.enchantLevels[p_75140_2_], enchants, p_75140_2_);
 +                    if (this.getBukkitView() != null) this.worldPointer.getServer().getPluginManager().callEvent(event); // Cauldron - allow vanilla mods to bypass
 +                    int level = event.getExpLevelCost();
  
 -                    for (int k = 0; k < list.size(); ++k)
-+                    if (event.isCancelled() || (level > par1EntityPlayer.experienceLevel && !par1EntityPlayer.capabilities.isCreativeMode) || enchants.isEmpty())
++                    if (event.isCancelled() || (level > p_75140_1_.experienceLevel && !p_75140_1_.capabilities.isCreativeMode) || enchants.isEmpty())
                      {
 -                        EnchantmentData enchantmentdata = (EnchantmentData)list.get(k);
 +                        return false;
@@ -168,27 +168,25 @@
 +                    // Only down level if we've applied the enchantments
 +                    if (applied)
 +                    {
-+                        par1EntityPlayer.addExperienceLevel(-level);
++                        p_75140_1_.addExperienceLevel(-level);
 +                    }
 +
 +                    // CraftBukkit end
                      this.onCraftMatrixChanged(this.tableInventory);
                  }
              }
-@@ -225,7 +286,12 @@
+@@ -225,6 +286,11 @@
  
-     public boolean canInteractWith(EntityPlayer par1EntityPlayer)
+     public boolean canInteractWith(EntityPlayer p_75145_1_)
      {
--        return this.worldPointer.getBlock(this.posX, this.posY, this.posZ) != Blocks.enchanting_table ? false : par1EntityPlayer.getDistanceSq((double)this.posX + 0.5D, (double)this.posY + 0.5D, (double)this.posZ + 0.5D) <= 64.0D;
 +        if (!this.checkReachable)
 +        {
 +            return true;    // CraftBukkit
 +        }
 +
-+        return this.worldPointer.getBlock(this.posX, this.posY, this.posZ) != Blocks.enchanting_table ? false : par1EntityPlayer.getDistanceSq((double) this.posX + 0.5D, (double) this.posY + 0.5D, (double) this.posZ + 0.5D) <= 64.0D;
+         return this.worldPointer.getBlock(this.posX, this.posY, this.posZ) != Blocks.enchanting_table ? false : p_75145_1_.getDistanceSq((double)this.posX + 0.5D, (double)this.posY + 0.5D, (double)this.posZ + 0.5D) <= 64.0D;
      }
  
-     public ItemStack transferStackInSlot(EntityPlayer par1EntityPlayer, int par2)
 @@ -283,4 +349,18 @@
  
          return itemstack;

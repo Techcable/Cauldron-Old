@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockSkull.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockSkull.java
-@@ -26,6 +26,11 @@
+@@ -27,6 +27,11 @@
  import net.minecraft.world.IBlockAccess;
  import net.minecraft.world.World;
  
@@ -13,15 +13,15 @@
  {
      private static final String __OBFID = "CL_00000307";
 @@ -117,7 +122,7 @@
+             p_149681_5_ |= 8;
              p_149681_1_.setBlockMetadataWithNotify(p_149681_2_, p_149681_3_, p_149681_4_, p_149681_5_, 4);
          }
- 
 -        this.dropBlockAsItem(p_149681_1_, p_149681_2_, p_149681_3_, p_149681_4_, p_149681_5_, 0);
 +        //this.dropBlockAsItem(p_149681_1_, p_149681_2_, p_149681_3_, p_149681_4_, p_149681_5_, 0); // Cauldron - disable Forge's drops for now, use CB drop instead
  
          super.onBlockHarvested(p_149681_1_, p_149681_2_, p_149681_3_, p_149681_4_, p_149681_5_, p_149681_6_);
      }
-@@ -170,16 +175,18 @@
+@@ -172,16 +177,18 @@
              {
                  if (p_149965_1_.getBlock(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l) == Blocks.soul_sand && p_149965_1_.getBlock(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 1) == Blocks.soul_sand && p_149965_1_.getBlock(p_149965_2_, p_149965_3_ - 2, p_149965_4_ + l + 1) == Blocks.soul_sand && p_149965_1_.getBlock(p_149965_2_, p_149965_3_ - 1, p_149965_4_ + l + 2) == Blocks.soul_sand && this.func_149966_a(p_149965_1_, p_149965_2_, p_149965_3_, p_149965_4_ + l, 1) && this.func_149966_a(p_149965_1_, p_149965_2_, p_149965_3_, p_149965_4_ + l + 1, 1) && this.func_149966_a(p_149965_1_, p_149965_2_, p_149965_3_, p_149965_4_ + l + 2, 1))
                  {
@@ -47,7 +47,7 @@
  
                      if (!p_149965_1_.isRemote)
                      {
-@@ -188,18 +195,21 @@
+@@ -190,18 +197,21 @@
                          entitywither.renderYawOffset = 90.0F;
                          entitywither.func_82206_m();
  
@@ -77,7 +77,7 @@
                      }
  
                      for (i1 = 0; i1 < 120; ++i1)
-@@ -207,13 +217,7 @@
+@@ -209,13 +219,7 @@
                          p_149965_1_.spawnParticle("snowballpoof", (double)p_149965_2_ + p_149965_1_.rand.nextDouble(), (double)(p_149965_3_ - 2) + p_149965_1_.rand.nextDouble() * 3.9D, (double)(p_149965_4_ + l + 1) + p_149965_1_.rand.nextDouble(), 0.0D, 0.0D, 0.0D);
                      }
  
@@ -92,7 +92,7 @@
                      return;
                  }
              }
-@@ -222,16 +226,18 @@
+@@ -224,16 +228,18 @@
              {
                  if (p_149965_1_.getBlock(p_149965_2_ + l, p_149965_3_ - 1, p_149965_4_) == Blocks.soul_sand && p_149965_1_.getBlock(p_149965_2_ + l + 1, p_149965_3_ - 1, p_149965_4_) == Blocks.soul_sand && p_149965_1_.getBlock(p_149965_2_ + l + 1, p_149965_3_ - 2, p_149965_4_) == Blocks.soul_sand && p_149965_1_.getBlock(p_149965_2_ + l + 2, p_149965_3_ - 1, p_149965_4_) == Blocks.soul_sand && this.func_149966_a(p_149965_1_, p_149965_2_ + l, p_149965_3_, p_149965_4_, 1) && this.func_149966_a(p_149965_1_, p_149965_2_ + l + 1, p_149965_3_, p_149965_4_, 1) && this.func_149966_a(p_149965_1_, p_149965_2_ + l + 2, p_149965_3_, p_149965_4_, 1))
                  {
@@ -118,7 +118,7 @@
  
                      if (!p_149965_1_.isRemote)
                      {
-@@ -239,18 +245,21 @@
+@@ -241,18 +247,21 @@
                          entitywither.setLocationAndAngles((double)(p_149965_2_ + l) + 1.5D, (double)p_149965_3_ - 1.45D, (double)p_149965_4_ + 0.5D, 0.0F, 0.0F);
                          entitywither.func_82206_m();
  
@@ -148,7 +148,7 @@
                      }
  
                      for (i1 = 0; i1 < 120; ++i1)
-@@ -258,13 +267,7 @@
+@@ -260,13 +269,7 @@
                          p_149965_1_.spawnParticle("snowballpoof", (double)(p_149965_2_ + l + 1) + p_149965_1_.rand.nextDouble(), (double)(p_149965_3_ - 2) + p_149965_1_.rand.nextDouble() * 3.9D, (double)p_149965_4_ + p_149965_1_.rand.nextDouble(), 0.0D, 0.0D, 0.0D);
                      }
  

@@ -10,4 +10,4 @@
 +    public float walkSpeed = 0.1F; // CraftBukkit private -> public
      private static final String __OBFID = "CL_00001708";
  
-     public void writeCapabilitiesToNBT(NBTTagCompound par1NBTTagCompound)
+     public void writeCapabilitiesToNBT(NBTTagCompound p_75091_1_)

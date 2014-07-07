@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
+import net.minecraft.tileentity.TileEntityNote;
 
 import org.bukkit.Instrument;
 import org.bukkit.Material;
@@ -11,36 +12,36 @@ import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 
 public class CraftNoteBlock extends CraftBlockState implements NoteBlock {
     private final CraftWorld world;
-    private final net.minecraft.tileentity.TileEntityNote tileNote;
+    private final TileEntityNote note;
 
     public CraftNoteBlock(final Block block) {
         super(block);
 
         world = (CraftWorld) block.getWorld();
-        tileNote = (net.minecraft.tileentity.TileEntityNote) world.getTileEntityAt(getX(), getY(), getZ());
+        note = (TileEntityNote) world.getTileEntityAt(getX(), getY(), getZ());
     }
 
     public Note getNote() {
-        return new Note(tileNote.note);
+        return new Note(note.note);
     }
 
     public byte getRawNote() {
-        return tileNote.note;
+        return note.note;
     }
 
     public void setNote(Note n) {
-        tileNote.note = n.getId();
+        note.note = n.getId();
     }
 
     public void setRawNote(byte n) {
-        tileNote.note = n;
+        note.note = n;
     }
 
     public boolean play() {
         Block block = getBlock();
 
         if (block.getType() == Material.NOTE_BLOCK) {
-            tileNote.triggerNote(world.getHandle(), getX(), getY(), getZ());
+            note.triggerNote(world.getHandle(), getX(), getY(), getZ());
             return true;
         } else {
             return false;

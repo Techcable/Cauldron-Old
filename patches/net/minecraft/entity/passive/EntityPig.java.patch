@@ -15,10 +15,10 @@
              EntityPigZombie entitypigzombie = new EntityPigZombie(this.worldObj);
 +
 +            // Cauldron start
-+            if (par1EntityLightningBolt != null)
++            if (p_70077_1_ != null)
 +            {
 +                // CraftBukkit start
-+                if (CraftEventFactory.callPigZapEvent(this, par1EntityLightningBolt, entitypigzombie).isCancelled())
++                if (CraftEventFactory.callPigZapEvent(this, p_70077_1_, entitypigzombie).isCancelled())
 +                {
 +                    return;
 +                }

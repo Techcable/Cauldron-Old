@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
+import net.minecraft.tileentity.TileEntityHopper;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -7,12 +8,12 @@ import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.inventory.Inventory;
 
 public class CraftHopper extends CraftBlockState implements Hopper {
-    private final net.minecraft.tileentity.TileEntityHopper hopper;
+    private final TileEntityHopper hopper;
 
     public CraftHopper(final Block block) {
         super(block);
 
-        hopper = (net.minecraft.tileentity.TileEntityHopper) ((CraftWorld) block.getWorld()).getTileEntityAt(getX(), getY(), getZ());
+        hopper = (TileEntityHopper) ((CraftWorld) block.getWorld()).getTileEntityAt(getX(), getY(), getZ());
     }
 
     public Inventory getInventory() {

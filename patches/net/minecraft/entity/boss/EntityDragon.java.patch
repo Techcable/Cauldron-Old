@@ -27,7 +27,7 @@
 +    private Explosion explosionSource = new Explosion(null, this, Double.NaN, Double.NaN, Double.NaN, Float.NaN); // CraftBukkit - reusable source for CraftTNTPrimed.getSource()
      private static final String __OBFID = "CL_00001659";
  
-     public EntityDragon(World par1World)
+     public EntityDragon(World p_i1700_1_)
 @@ -355,14 +369,33 @@
              {
                  if (!this.worldObj.isRemote)
@@ -91,7 +91,7 @@
          else
          {
 @@ -468,6 +518,10 @@
-         int j1 = MathHelper.floor_double(par1AxisAlignedBB.maxZ);
+         int j1 = MathHelper.floor_double(p_70972_1_.maxZ);
          boolean flag = false;
          boolean flag1 = false;
 +        // CraftBukkit start - Create a list to hold all the destroyed blocks
@@ -114,14 +114,10 @@
                          }
                          else
                          {
-@@ -494,10 +552,56 @@
+@@ -494,6 +552,52 @@
  
          if (flag1)
          {
--            double d1 = par1AxisAlignedBB.minX + (par1AxisAlignedBB.maxX - par1AxisAlignedBB.minX) * (double)this.rand.nextFloat();
--            double d2 = par1AxisAlignedBB.minY + (par1AxisAlignedBB.maxY - par1AxisAlignedBB.minY) * (double)this.rand.nextFloat();
--            double d0 = par1AxisAlignedBB.minZ + (par1AxisAlignedBB.maxZ - par1AxisAlignedBB.minZ) * (double)this.rand.nextFloat();
--            this.worldObj.spawnParticle("largeexplode", d1, d2, d0, 0.0D, 0.0D, 0.0D);
 +            // CraftBukkit start - Set off an EntityExplodeEvent for the dragon exploding all these blocks
 +            org.bukkit.entity.Entity bukkitEntity = this.getBukkitEntity();
 +            EntityExplodeEvent event = new EntityExplodeEvent(bukkitEntity, bukkitEntity.getLocation(), destroyedBlocks, 0F);
@@ -168,21 +164,17 @@
 +            }
 +
 +            // CraftBukkit end
-+            double d0 = par1AxisAlignedBB.minX + (par1AxisAlignedBB.maxX - par1AxisAlignedBB.minX) * (double) this.rand.nextFloat();
-+            double d1 = par1AxisAlignedBB.minY + (par1AxisAlignedBB.maxY - par1AxisAlignedBB.minY) * (double) this.rand.nextFloat();
-+            double d2 = par1AxisAlignedBB.minZ + (par1AxisAlignedBB.maxZ - par1AxisAlignedBB.minZ) * (double) this.rand.nextFloat();
-+            this.worldObj.spawnParticle("largeexplode", d0, d1, d2, 0.0D, 0.0D, 0.0D);
-         }
- 
-         return flag;
+             double d1 = p_70972_1_.minX + (p_70972_1_.maxX - p_70972_1_.minX) * (double)this.rand.nextFloat();
+             double d2 = p_70972_1_.minY + (p_70972_1_.maxY - p_70972_1_.minY) * (double)this.rand.nextFloat();
+             double d0 = p_70972_1_.minZ + (p_70972_1_.maxZ - p_70972_1_.minZ) * (double)this.rand.nextFloat();
 @@ -531,13 +635,18 @@
          return false;
      }
  
--    protected boolean func_82195_e(DamageSource par1DamageSource, float par2)
-+    public boolean func_82195_e(DamageSource par1DamageSource, float par2) // CraftBukkit - protected -> public
+-    protected boolean func_82195_e(DamageSource p_82195_1_, float p_82195_2_)
++    public boolean func_82195_e(DamageSource p_82195_1_, float p_82195_2_) // CraftBukkit - protected -> public
      {
-         return super.attackEntityFrom(par1DamageSource, par2);
+         return super.attackEntityFrom(p_82195_1_, p_82195_2_);
      }
  
      protected void onDeathUpdate()
@@ -222,52 +214,10 @@
  
          for (int k = b0 - 1; k <= b0 + 32; ++k)
          {
-@@ -612,35 +723,64 @@
-                         {
-                             if (d2 <= ((double)(b1 - 1) - 0.5D) * ((double)(b1 - 1) - 0.5D))
-                             {
--                                this.worldObj.setBlock(l, k, i1, Blocks.bedrock);
-+                                world.setTypeUpdate(l, k, i1, Blocks.bedrock);
-                             }
-                         }
-                         else if (k > b0)
-                         {
--                            this.worldObj.setBlock(l, k, i1, Blocks.air);
-+                            world.setTypeUpdate(l, k, i1, Blocks.air);
-                         }
-                         else if (d2 > ((double)(b1 - 1) - 0.5D) * ((double)(b1 - 1) - 0.5D))
-                         {
--                            this.worldObj.setBlock(l, k, i1, Blocks.bedrock);
-+                            world.setTypeUpdate(l, k, i1, Blocks.bedrock);
-                         }
-                         else
-                         {
--                            this.worldObj.setBlock(l, k, i1, Blocks.end_portal);
-+                            world.setTypeUpdate(l, k, i1, Blocks.end_portal);
-                         }
-                     }
-                 }
-             }
-         }
- 
--        this.worldObj.setBlock(par1, b0 + 0, par2, Blocks.bedrock);
--        this.worldObj.setBlock(par1, b0 + 1, par2, Blocks.bedrock);
--        this.worldObj.setBlock(par1, b0 + 2, par2, Blocks.bedrock);
--        this.worldObj.setBlock(par1 - 1, b0 + 2, par2, Blocks.torch);
--        this.worldObj.setBlock(par1 + 1, b0 + 2, par2, Blocks.torch);
--        this.worldObj.setBlock(par1, b0 + 2, par2 - 1, Blocks.torch);
--        this.worldObj.setBlock(par1, b0 + 2, par2 + 1, Blocks.torch);
--        this.worldObj.setBlock(par1, b0 + 3, par2, Blocks.bedrock);
--        this.worldObj.setBlock(par1, b0 + 4, par2, Blocks.dragon_egg);
-+        world.setType(par1, b0 + 0, par2, Blocks.bedrock);
-+        world.setType(par1, b0 + 1, par2, Blocks.bedrock);
-+        world.setType(par1, b0 + 2, par2, Blocks.bedrock);
-+        world.setTypeAndData(par1 - 1, b0 + 2, par2, Blocks.torch, 2, 0);
-+        world.setTypeAndData(par1 + 1, b0 + 2, par2, Blocks.torch, 1, 0);
-+        world.setTypeAndData(par1, b0 + 2, par2 - 1, Blocks.torch, 4, 0);
-+        world.setTypeAndData(par1, b0 + 2, par2 + 1, Blocks.torch, 3, 0);
-+        world.setType(par1, b0 + 3, par2, Blocks.bedrock);
-+        world.setType(par1, b0 + 4, par2, Blocks.dragon_egg);
+@@ -641,6 +752,35 @@
+         this.worldObj.setBlock(p_70975_1_, b0 + 2, p_70975_2_ + 1, Blocks.torch);
+         this.worldObj.setBlock(p_70975_1_, b0 + 3, p_70975_2_, Blocks.bedrock);
+         this.worldObj.setBlock(p_70975_1_, b0 + 4, p_70975_2_, Blocks.dragon_egg);
 +        EntityCreatePortalEvent event = new EntityCreatePortalEvent((org.bukkit.entity.LivingEntity) this.getBukkitEntity(), java.util.Collections.unmodifiableList(world.getList()), org.bukkit.PortalType.ENDER);
 +        this.worldObj.getServer().getPluginManager().callEvent(event);
 +

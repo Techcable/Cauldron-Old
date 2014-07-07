@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/network/rcon/RConConsoleSource.java
 +++ ../src-work/minecraft/net/minecraft/network/rcon/RConConsoleSource.java
-@@ -36,6 +36,13 @@
+@@ -25,6 +25,13 @@
          return new ChatComponentText(this.getCommandSenderName());
      }
  
@@ -11,6 +11,6 @@
 +    }
 +    // CraftBukkit end
 +
-     public void addChatMessage(IChatComponent ichatcomponent)
+     public void addChatMessage(IChatComponent p_145747_1_)
      {
-         this.buffer.append(ichatcomponent.getUnformattedText());
+         this.buffer.append(p_145747_1_.getUnformattedText());

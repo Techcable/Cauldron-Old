@@ -19,8 +19,8 @@
 -    protected boolean startServer() throws IOException
 +    protected boolean startServer() throws java.net.UnknownHostException // Cauldron
      {
-         logger.info("Starting integrated minecraft server version 1.7.2");
-         this.setOnlineMode(false);
+         logger.info("Starting integrated minecraft server version 1.7.10");
+         this.setOnlineMode(true);
 @@ -103,7 +105,15 @@
          {
              logger.info("Saving and pausing game...");
@@ -38,7 +38,16 @@
          }
  
          if (!this.isGamePaused)
-@@ -266,4 +276,10 @@
+@@ -236,7 +246,7 @@
+         }
+     }
+ 
+-    public void stopServer()
++    public void stopServer() throws MinecraftException // Cauldron
+     {
+         super.stopServer();
+ 
+@@ -277,4 +287,10 @@
      {
          return 4;
      }

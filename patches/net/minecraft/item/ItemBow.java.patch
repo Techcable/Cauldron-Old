@@ -5,7 +5,7 @@
              }
  
 +            // CraftBukkit start
-+            org.bukkit.event.entity.EntityShootBowEvent cbEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callEntityShootBowEvent(par3EntityPlayer, par1ItemStack, entityarrow, f);
++            org.bukkit.event.entity.EntityShootBowEvent cbEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callEntityShootBowEvent(p_77615_3_, p_77615_1_, entityarrow, f);
 +
 +            if (cbEvent.isCancelled())
 +            {
@@ -15,19 +15,19 @@
 +
 +            if (cbEvent.getProjectile() == entityarrow.getBukkitEntity())
 +            {
-+                par2World.spawnEntityInWorld(entityarrow);
++                p_77615_2_.spawnEntityInWorld(entityarrow);
 +            }
 +
 +            // CraftBukkit end
-             par1ItemStack.damageItem(1, par3EntityPlayer);
-             par2World.playSoundAtEntity(par3EntityPlayer, "random.bow", 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + f * 0.5F);
+             p_77615_1_.damageItem(1, p_77615_3_);
+             p_77615_2_.playSoundAtEntity(p_77615_3_, "random.bow", 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + f * 0.5F);
  
 @@ -98,7 +113,7 @@
  
-             if (!par2World.isRemote)
+             if (!p_77615_2_.isRemote)
              {
--                par2World.spawnEntityInWorld(entityarrow);
-+                // par2World.spawnEntityInWorld(entityarrow); // CraftBukkit - moved up
+-                p_77615_2_.spawnEntityInWorld(entityarrow);
++                // p_77615_2_.spawnEntityInWorld(entityarrow); // CraftBukkit - moved up
              }
          }
      }

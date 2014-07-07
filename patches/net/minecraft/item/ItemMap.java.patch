@@ -13,9 +13,9 @@
  {
      private static final String __OBFID = "CL_00000047";
 @@ -60,6 +65,10 @@
-             mapdata.dimension = par2World.provider.dimensionId;
+             mapdata.dimension = p_77873_2_.provider.dimensionId;
              mapdata.markDirty();
-             par2World.setItemData(s, mapdata);
+             p_77873_2_.setItemData(s, mapdata);
 +            // CraftBukkit start
 +            MapInitializeEvent event = new MapInitializeEvent(mapdata.mapView);
 +            Bukkit.getServer().getPluginManager().callEvent(event);
@@ -26,7 +26,7 @@
 @@ -279,6 +288,10 @@
              mapdata1.dimension = mapdata.dimension;
              mapdata1.markDirty();
-             par2World.setItemData("map_" + par1ItemStack.getItemDamage(), mapdata1);
+             p_77622_2_.setItemData("map_" + p_77622_1_.getItemDamage(), mapdata1);
 +            // CraftBukkit start
 +            MapInitializeEvent event = new MapInitializeEvent(mapdata1.mapView);
 +            Bukkit.getServer().getPluginManager().callEvent(event);

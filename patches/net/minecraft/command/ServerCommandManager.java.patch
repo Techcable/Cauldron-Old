@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/command/ServerCommandManager.java
 +++ ../src-work/minecraft/net/minecraft/command/ServerCommandManager.java
-@@ -37,8 +37,16 @@
+@@ -39,8 +39,16 @@
  {
      private static final String __OBFID = "CL_00000922";
  
@@ -17,7 +17,7 @@
          this.registerCommand(new CommandTime());
          this.registerCommand(new CommandGameMode());
          this.registerCommand(new CommandDifficulty());
-@@ -54,7 +62,6 @@
+@@ -56,7 +64,6 @@
          this.registerCommand(new CommandEmote());
          this.registerCommand(new CommandShowSeed());
          this.registerCommand(new CommandHelp());
@@ -25,7 +25,7 @@
          this.registerCommand(new CommandMessage());
          this.registerCommand(new CommandBroadcast());
          this.registerCommand(new CommandSetSpawnpoint());
-@@ -62,17 +69,22 @@
+@@ -64,17 +71,23 @@
          this.registerCommand(new CommandGameRule());
          this.registerCommand(new CommandClearInventory());
          this.registerCommand(new CommandTestFor());
@@ -48,6 +48,7 @@
 +        this.registerCommand("vanilla.command", new CommandSetBlock());
 +        this.registerCommand("vanilla.command", new CommandTestForBlock());
 +        this.registerCommand("vanilla.command", new CommandMessageRaw());
++        this.registerCommand("vanilla.command", new CommandNetstat());
 +        // Cauldron end
  
          if (MinecraftServer.getServer().isDedicatedServer())
@@ -56,19 +57,20 @@
              this.registerCommand(new CommandOp());
              this.registerCommand(new CommandDeOp());
              this.registerCommand(new CommandStop());
-@@ -88,13 +100,13 @@
+@@ -90,7 +103,7 @@
              this.registerCommand(new CommandListPlayers());
              this.registerCommand(new CommandWhitelist());
              this.registerCommand(new CommandSetPlayerTimeout());
+-            this.registerCommand(new CommandNetstat());
 +            */
          }
          else
          {
-             this.registerCommand(new CommandPublishLocalServer());
+@@ -98,6 +111,7 @@
          }
--
--        CommandBase.setAdminCommander(this);
+ 
+         CommandBase.setAdminCommander(this);
 +        // Cauldron end
      }
  
-     public void notifyAdmins(ICommandSender par1ICommandSender, int par2, String par3Str, Object ... par4ArrayOfObj)
+     public void func_152372_a(ICommandSender p_152372_1_, ICommand p_152372_2_, int p_152372_3_, String p_152372_4_, Object ... p_152372_5_)

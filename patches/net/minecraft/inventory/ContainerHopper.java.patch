@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/inventory/ContainerHopper.java
 +++ ../src-work/minecraft/net/minecraft/inventory/ContainerHopper.java
-@@ -4,14 +4,37 @@
+@@ -4,13 +4,36 @@
  import net.minecraft.entity.player.InventoryPlayer;
  import net.minecraft.item.ItemStack;
  
@@ -31,22 +31,21 @@
 +    }
 +    // CraftBukkit end
 +
-     public ContainerHopper(InventoryPlayer par1InventoryPlayer, IInventory par2IInventory)
+     public ContainerHopper(InventoryPlayer p_i1814_1_, IInventory p_i1814_2_)
      {
-         this.field_94538_a = par2IInventory;
-+        this.player = par1InventoryPlayer; // CraftBukkit - save player
-         par2IInventory.openInventory();
++        this.player = p_i1814_1_; // CraftBukkit - save player
+         this.field_94538_a = p_i1814_2_;
+         p_i1814_2_.openInventory();
          byte b0 = 51;
-         int i;
 @@ -37,6 +60,11 @@
  
-     public boolean canInteractWith(EntityPlayer par1EntityPlayer)
+     public boolean canInteractWith(EntityPlayer p_75145_1_)
      {
 +        if (!this.checkReachable)
 +        {
 +            return true;    // CraftBukkit
 +        }
 +
-         return this.field_94538_a.isUseableByPlayer(par1EntityPlayer);
+         return this.field_94538_a.isUseableByPlayer(p_75145_1_);
      }
  

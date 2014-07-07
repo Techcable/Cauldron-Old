@@ -30,7 +30,7 @@
 +            if (this.ticks % 10 == 0 && itemstack != null && itemstack.getItem() instanceof ItemMap)   // CraftBukkit - Moved this.m % 10 logic here so item frames do not enter the other blocks
              {
                  MapData mapdata = Items.filled_map.getMapData(itemstack, this.myEntity.worldObj);
--                Iterator iterator = par1List.iterator();
+-                Iterator iterator = p_73122_1_.iterator();
 +                Iterator iterator = this.trackingPlayers.iterator(); // CraftBukkit
  
                  while (iterator.hasNext())
@@ -141,32 +141,32 @@
                  this.func_151261_b(new S20PacketEntityProperties(this.myEntity.getEntityId(), set));
              }
  
-@@ -355,6 +417,19 @@
+@@ -353,6 +415,19 @@
+ 
+             if (d0 >= (double)(-this.blocksDistanceThreshold) && d0 <= (double)this.blocksDistanceThreshold && d1 >= (double)(-this.blocksDistanceThreshold) && d1 <= (double)this.blocksDistanceThreshold)
              {
-                 if (!this.trackingPlayers.contains(par1EntityPlayerMP) && (this.isPlayerWatchingThisChunk(par1EntityPlayerMP) || this.myEntity.forceSpawn))
-                 {
-+                    // CraftBukkit start
-+                    if (this.myEntity instanceof EntityPlayerMP)
++                // CraftBukkit start
++                if (this.myEntity instanceof EntityPlayerMP)
++                {
++                    Player player = ((EntityPlayerMP) this.myEntity).getBukkitEntity();
++
++                    if (!p_73117_1_.getBukkitEntity().canSee(player))
 +                    {
-+                        Player player = ((EntityPlayerMP) this.myEntity).getBukkitEntity();
-+
-+                        if (!par1EntityPlayerMP.getBukkitEntity().canSee(player))
-+                        {
-+                            return;
-+                        }
++                        return;
 +                    }
++                }
++                // CraftBukkit end
 +
-+                    par1EntityPlayerMP.destroyedItemsNetCache.remove(Integer.valueOf(this.myEntity.getEntityId()));
-+                    // CraftBukkit end
-                     this.trackingPlayers.add(par1EntityPlayerMP);
-                     Packet packet = this.func_151260_c();
-                     par1EntityPlayerMP.playerNetServerHandler.sendPacket(packet);
++                p_73117_1_.destroyedItemsNetCache.remove(Integer.valueOf(this.myEntity.getEntityId()));
+                 if (!this.trackingPlayers.contains(p_73117_1_) && (this.isPlayerWatchingThisChunk(p_73117_1_) || this.myEntity.forceSpawn))
+                 {
+                     this.trackingPlayers.add(p_73117_1_);
 @@ -369,6 +444,13 @@
                          ServersideAttributeMap serversideattributemap = (ServersideAttributeMap)((EntityLivingBase)this.myEntity).getAttributeMap();
                          Collection collection = serversideattributemap.getWatchedAttributes();
  
 +                        // CraftBukkit start - If sending own attributes send scaled health instead of current maximum health
-+                        if (this.myEntity.getEntityId() == par1EntityPlayerMP.getEntityId())
++                        if (this.myEntity.getEntityId() == p_73117_1_.getEntityId())
 +                        {
 +                            ((EntityPlayerMP) this.myEntity).getBukkitEntity().injectScaledMaxHealth(collection, false);
 +                        }
@@ -174,22 +174,22 @@
 +                        // CraftBukkit end
                          if (!collection.isEmpty())
                          {
-                             par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S20PacketEntityProperties(this.myEntity.getEntityId(), collection));
+                             p_73117_1_.playerNetServerHandler.sendPacket(new S20PacketEntityProperties(this.myEntity.getEntityId(), collection));
 @@ -397,6 +479,14 @@
-                         par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, this.myEntity, this.myEntity.ridingEntity));
+                         p_73117_1_.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, this.myEntity, this.myEntity.ridingEntity));
                      }
  
 +                    // CraftBukkit start
 +                    if (this.myEntity.riddenByEntity != null)
 +                    {
-+                        par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, this.myEntity.riddenByEntity, this.myEntity));
++                        p_73117_1_.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, this.myEntity.riddenByEntity, this.myEntity));
 +                    }
 +
 +                    // CraftBukkit end
 +
                      if (this.myEntity instanceof EntityLiving && ((EntityLiving)this.myEntity).getLeashedToEntity() != null)
                      {
-                         par1EntityPlayerMP.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this.myEntity, ((EntityLiving)this.myEntity).getLeashedToEntity()));
+                         p_73117_1_.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this.myEntity, ((EntityLiving)this.myEntity).getLeashedToEntity()));
 @@ -425,6 +515,11 @@
                          }
                      }

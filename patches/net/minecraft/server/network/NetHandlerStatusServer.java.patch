@@ -53,7 +53,7 @@
 +        ping.func_151320_a(event.icon.value);
 +        ping.func_151315_a(new ChatComponentText(event.getMotd()));
 +        ping.func_151319_a(new ServerStatusResponse.PlayerCountData(event.getMaxPlayers(), field_147314_a.getConfigurationManager().getCurrentPlayerCount()));
-+        ping.func_151321_a(new ServerStatusResponse.MinecraftProtocolVersionIdentifier(field_147314_a.getServerModName() + " " + field_147314_a.getMinecraftVersion(), 4)); // TODO: Update when protocol changes
++        ping.func_151321_a(new ServerStatusResponse.MinecraftProtocolVersionIdentifier(field_147314_a.getServerModName() + " " + field_147314_a.getMinecraftVersion(), 5)); // TODO: Update when protocol changes
 +        this.field_147313_b.scheduleOutboundPacket(new S00PacketServerInfo(ping), new GenericFutureListener[0]);
 +        // CraftBukkit end
      }

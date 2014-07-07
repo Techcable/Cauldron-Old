@@ -1,0 +1,10 @@
+--- ../src-base/minecraft/org/bukkit/plugin/SimplePluginManager.java
++++ ../src-work/minecraft/org/bukkit/plugin/SimplePluginManager.java
+@@ -295,6 +295,7 @@
+             }
+         }
+ 
++        org.bukkit.command.defaults.TimingsCommand.timingStart = System.nanoTime(); // Spigot
+         return result.toArray(new Plugin[result.size()]);
+     }
+ 

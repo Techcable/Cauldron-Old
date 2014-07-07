@@ -24,8 +24,8 @@ apply plugin: 'maven'
 apply plugin: 'cauldron'
 
 minecraft {
-    version = '1.7.2'
-    mcpVersion = '9.03'
+    version = '1.7.10'
+    mcpVersion = '9.05'
     mainClass = 'cpw.mods.fml.relauncher.ServerLaunchWrapper'
     tweakClass = 'cpw.mods.fml.common.launcher.FMLTweaker'
     installerVersion = "1.4"
@@ -42,14 +42,14 @@ minecraft {
             }
         }
     }
-    srgExtra "PK: org/bukkit/craftbukkit org/bukkit/craftbukkit/v1_7_R1"
+    srgExtra "PK: org/bukkit/craftbukkit org/bukkit/craftbukkit/v1_7_R3"
 }
 
 group = 'net.minecraftforge'
-ext.mcVersion = "1.7.2"
+ext.mcVersion = "1.7.10"
 ext.cauldronVersion = "1"
-ext.forgeVersion = "1147"
-ext.bukkitVersion = "04"
+ext.forgeVersion = "1169"
+ext.bukkitVersion = "03"
 version = "${mcVersion}-${cauldronVersion}.${forgeVersion}.${bukkitVersion}.${getBuild()}"
 
 jenkins {
@@ -79,10 +79,10 @@ tasks.packageUniversal.manifest {
     'Implementation-Vendor': 'Cauldron',
     'Implementation-Title': 'Cauldron',
     'Implementation-Version': 'git-Cauldron-MCPC-Plus-'+project.version,
-    'Forge-Version': '10.12.1.1147',
+    'Forge-Version': '10.13.0.1169',
     'Specification-Vendor': 'Bukkit Team',
     'Specification-Title': 'Bukkit',
-    'Specification-Version': '1.7.2-R0.4-SNAPSHOT'
+    'Specification-Version': '1.7.10-R0.3-SNAPSHOT'
     ])
 }
 

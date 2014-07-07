@@ -30,7 +30,7 @@
 +    private static boolean initializedBukkit = false; // Cauldron
      private static final String __OBFID = "CL_00000585";
  
-     public SaveHandler(File par1File, String par2Str, boolean par3)
+     public SaveHandler(File p_i2146_1_, String p_i2146_2_, boolean p_i2146_3_)
 @@ -65,7 +75,7 @@
          catch (IOException ioexception)
          {
@@ -86,22 +86,54 @@
          return null;
      }
  
-@@ -268,6 +283,14 @@
+@@ -282,6 +297,18 @@
  
          if (nbttagcompound != null)
          {
 +            // CraftBukkit start
-+            if (par1EntityPlayer instanceof EntityPlayerMP)
++            if (p_75752_1_ instanceof EntityPlayerMP)
 +            {
-+                CraftPlayer player = (CraftPlayer) par1EntityPlayer.getBukkitEntity(); // Cauldron
-+                player.setFirstPlayed(new File(playersDirectory, par1EntityPlayer.getCommandSenderName() + ".dat").lastModified());
++                CraftPlayer player = (CraftPlayer) p_75752_1_.getBukkitEntity(); // Cauldron
++                // Only update first played if it is older than the one we have
++                long modified = new File(playersDirectory, p_75752_1_.getCommandSenderName() + ".dat").lastModified();
++                if (modified < player.getFirstPlayed()) {
++                    player.setFirstPlayed(modified);
++                }
 +            }
-+
 +            // CraftBukkit end
-             par1EntityPlayer.readFromNBT(nbttagcompound);
++
+             p_75752_1_.readFromNBT(nbttagcompound);
          }
  
-@@ -325,4 +348,97 @@
+@@ -289,6 +316,27 @@
+         return nbttagcompound;
+     }
+ 
++    // CraftBukkit start
++    public NBTTagCompound getPlayerData(String par1Str)
++    {
++        try
++        {
++            File file1 = new File(this.playersDirectory, par1Str + ".dat");
++
++            if (file1.exists())
++            {
++                return CompressedStreamTools.readCompressed(new FileInputStream(file1));
++            }
++        }
++        catch (Exception exception)
++        {
++            logger.warn("Failed to load player data for " + par1Str);
++        }
++
++        return null;
++    }
++    // CraftBukkit end
++
+     public IPlayerFileData getSaveHandler()
+     {
+         return this;
+@@ -320,4 +368,97 @@
      {
          return this.saveDirectoryName;
      }

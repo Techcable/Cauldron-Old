@@ -10,6 +10,9 @@ import java.util.Set;
 import java.util.UUID;
 
 
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.IEntityLivingData;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.BlockChangeDelegate;
 import org.bukkit.Bukkit;
@@ -30,6 +33,7 @@ import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.metadata.BlockMetadataStore;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.entity.*;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
@@ -246,9 +250,7 @@ public class CraftWorld implements World {
     }
 
     public boolean loadChunk(int x, int z, boolean generate) {
-        if (Thread.currentThread() != net.minecraft.server.MinecraftServer.getServer().primaryThread) throw new IllegalStateException("Asynchronous chunk load!"); // Spigot
         chunkLoadCount++;
-
         if (generate) {
             // Use the default variant of loadChunk when generate == true.
             return world.theChunkProviderServer.loadChunk(x, z) != null;
@@ -411,6 +413,9 @@ public class CraftWorld implements World {
             break;
         case SMALL_JUNGLE:
             gen = new net.minecraft.world.gen.feature.WorldGenTrees(true, 4 + rand.nextInt(7), 3, 3, false);
+            break;
+        case COCOA_TREE:
+            gen = new net.minecraft.world.gen.feature.WorldGenTrees(true, 4 + rand.nextInt(7), 3, 3, true);
             break;
         case JUNGLE_BUSH:
             gen = new net.minecraft.world.gen.feature.WorldGenShrub(3, 0);
@@ -1137,6 +1142,10 @@ public class CraftWorld implements World {
         }
 
         if (entity != null) {
+            if (entity instanceof EntityLiving) {
+                ((EntityLiving) entity).onSpawnWithEgg((IEntityLivingData) null);
+            }
+
             world.addEntity(entity, reason);
             return (T) entity.getBukkitEntity();
         }

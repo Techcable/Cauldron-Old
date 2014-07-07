@@ -22,8 +22,8 @@
                  k = MathHelper.floor_double(entityplayer.posZ / 16.0D);
                  byte b0 = 8;
 +                // Spigot Start
-+                b0 = par1WorldServer.spigotConfig.mobSpawnRange;
-+                b0 = (b0 > par1WorldServer.spigotConfig.viewDistance) ? (byte) par1WorldServer.spigotConfig.viewDistance : b0;
++                b0 = p_77192_1_.spigotConfig.mobSpawnRange;
++                b0 = (b0 > p_77192_1_.spigotConfig.viewDistance) ? (byte) p_77192_1_.spigotConfig.viewDistance : b0;
 +                b0 = (b0 > 8) ? 8 : b0;
 +                // Spigot End
  
@@ -59,20 +59,20 @@
 +                // CraftBukkit start - Use per-world spawn limits
 +                int limit = enumcreaturetype.getMaxNumberOfCreature();
  
--                if ((!enumcreaturetype.getPeacefulCreature() || par3) && (enumcreaturetype.getPeacefulCreature() || par2) && (!enumcreaturetype.getAnimal() || par4) && par1WorldServer.countEntities(enumcreaturetype, true) <= enumcreaturetype.getMaxNumberOfCreature() * this.eligibleChunksForSpawning.size() / 256)
+-                if ((!enumcreaturetype.getPeacefulCreature() || p_77192_3_) && (enumcreaturetype.getPeacefulCreature() || p_77192_2_) && (!enumcreaturetype.getAnimal() || p_77192_4_) && p_77192_1_.countEntities(enumcreaturetype, true) <= enumcreaturetype.getMaxNumberOfCreature() * this.eligibleChunksForSpawning.size() / 256)
 +                switch (enumcreaturetype)
                  {
 +                    case monster:
-+                        limit = par1WorldServer.getWorld().getMonsterSpawnLimit();
++                        limit = p_77192_1_.getWorld().getMonsterSpawnLimit();
 +                        break;
 +                    case creature:
-+                        limit = par1WorldServer.getWorld().getAnimalSpawnLimit();
++                        limit = p_77192_1_.getWorld().getAnimalSpawnLimit();
 +                        break;
 +                    case waterCreature:
-+                        limit = par1WorldServer.getWorld().getWaterAnimalSpawnLimit();
++                        limit = p_77192_1_.getWorld().getWaterAnimalSpawnLimit();
 +                        break;
 +                    case ambient:
-+                        limit = par1WorldServer.getWorld().getAmbientSpawnLimit();
++                        limit = p_77192_1_.getWorld().getAmbientSpawnLimit();
 +                        break;
 +                }
 +
@@ -83,7 +83,7 @@
 +
 +                // CraftBukkit end
 +
-+                if ((!enumcreaturetype.getPeacefulCreature() || par3) && (enumcreaturetype.getPeacefulCreature() || par2) && (!enumcreaturetype.getAnimal() || par4) && par1WorldServer.countEntities(enumcreaturetype.getCreatureClass()) <= limit * eligibleChunksForSpawning.size() / 256)   // CraftBukkit - use per-world limits
++                if ((!enumcreaturetype.getPeacefulCreature() || p_77192_3_) && (enumcreaturetype.getPeacefulCreature() || p_77192_2_) && (!enumcreaturetype.getAnimal() || p_77192_4_) && p_77192_1_.countEntities(enumcreaturetype.getCreatureClass()) <= limit * eligibleChunksForSpawning.size() / 256)   // CraftBukkit - use per-world limits
 +                {
                      Iterator iterator = this.eligibleChunksForSpawning.keySet().iterator();
 -                    ArrayList<ChunkCoordIntPair> tmp = new ArrayList(eligibleChunksForSpawning.keySet());
@@ -100,34 +100,30 @@
 -                        if (!((Boolean)this.eligibleChunksForSpawning.get(chunkcoordintpair1)).booleanValue())
 +                        if (!(this.eligibleChunksForSpawning.get(key)))
                          {
--                            ChunkPosition chunkposition = func_151350_a(par1WorldServer, chunkcoordintpair1.chunkXPos, chunkcoordintpair1.chunkZPos);
-+                            ChunkPosition chunkposition = func_151350_a(par1WorldServer, LongHash.msw(key), LongHash.lsw(key));
+-                            ChunkPosition chunkposition = func_151350_a(p_77192_1_, chunkcoordintpair1.chunkXPos, chunkcoordintpair1.chunkZPos);
++                            ChunkPosition chunkposition = func_151350_a(p_77192_1_, LongHash.msw(key), LongHash.lsw(key));
 +                            // CraftBukkit end
                              int j1 = chunkposition.chunkPosX;
                              int k1 = chunkposition.chunkPosY;
                              int l1 = chunkposition.chunkPosZ;
-@@ -170,11 +208,12 @@
+@@ -170,7 +208,8 @@
                                                              if (canSpawn == Result.ALLOW || (canSpawn == Result.DEFAULT && entityliving.getCanSpawnHere()))
                                                              {
                                                                  ++i2;
--                                                                par1WorldServer.spawnEntityInWorld(entityliving);
-                                                                 if (!ForgeEventFactory.doSpecialSpawn(entityliving, par1WorldServer, f, f1, f2))
+-                                                                p_77192_1_.spawnEntityInWorld(entityliving);
++                                                                // CraftBukkit start - Added a reason for spawning this creature, moved entityliving.onSpawnWithEgg(ientitylivingdata) up
++                                                                p_77192_1_.addEntity(entityliving, SpawnReason.NATURAL);
+                                                                 if (!ForgeEventFactory.doSpecialSpawn(entityliving, p_77192_1_, f, f1, f2))
                                                                  {
                                                                      ientitylivingdata = entityliving.onSpawnWithEgg(ientitylivingdata);
-                                                                 }
-+                                                                // CraftBukkit start - Added a reason for spawning this creature, moved entityliving.onSpawnWithEgg(ientitylivingdata) up
-+                                                                par1WorldServer.addEntity(entityliving, SpawnReason.NATURAL);
- 
-                                                                 if (j2 >= ForgeEventFactory.getMaxSpawnPackSize(entityliving))
-                                                                 {
 @@ -266,8 +305,10 @@
                              }
  
-                             entityliving.setLocationAndAngles((double)f, (double)f1, (double)f2, par6Random.nextFloat() * 360.0F, 0.0F);
--                            par0World.spawnEntityInWorld(entityliving);
+                             entityliving.setLocationAndAngles((double)f, (double)f1, (double)f2, p_77191_6_.nextFloat() * 360.0F, 0.0F);
+-                            p_77191_0_.spawnEntityInWorld(entityliving);
 +                            // CraftBukkit start - Added a reason for spawning this creature, moved entityliving.a(ientitylivingdata) up
                              ientitylivingdata = entityliving.onSpawnWithEgg(ientitylivingdata);
-+                            par0World.addEntity(entityliving, SpawnReason.CHUNK_GEN);
++                            p_77191_0_.addEntity(entityliving, SpawnReason.CHUNK_GEN);
 +                            // CraftBukkit end
                              flag = true;
                          }

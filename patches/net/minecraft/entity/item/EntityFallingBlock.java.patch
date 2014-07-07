@@ -45,24 +45,16 @@
                              if (this.field_145811_e instanceof BlockFalling)
                              {
                                  ((BlockFalling)this.field_145811_e).func_149828_a(this.worldObj, i, j, k, this.field_145814_a);
-@@ -189,8 +204,18 @@
+@@ -189,8 +204,10 @@
  
                  while (iterator.hasNext())
                  {
 -                    Entity entity = (Entity)iterator.next();
 -                    entity.attackEntityFrom(damagesource, (float)Math.min(MathHelper.floor_float((float)i * this.field_145816_i), this.field_145815_h));
 +                    Entity entity = (Entity) iterator.next();
-+                    // CraftBukkit start
-+                    float damage = (float) Math.min(MathHelper.floor_float((float) i * this.field_145816_i), this.field_145815_h);
-+                    EntityDamageEvent event = CraftEventFactory.callEntityDamageEvent(this, entity, EntityDamageEvent.DamageCause.FALLING_BLOCK, damage);
-+
-+                    if (event.isCancelled())
-+                    {
-+                        continue;
-+                    }
-+
-+                    entity.attackEntityFrom(damagesource, (float) event.getDamage());
-+                    // CraftBukkit end
++                    CraftEventFactory.entityDamage = this; // CraftBukkit
++                    entity.attackEntityFrom(damagesource,(float) Math.min(MathHelper.floor_float((float) i * this.field_145816_i), this.field_145815_h));
++                    CraftEventFactory.entityDamage = null; // CraftBukkit
                  }
  
                  if (flag && (double)this.rand.nextFloat() < 0.05000000074505806D + (double)i * 0.05D)

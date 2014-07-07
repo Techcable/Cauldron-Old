@@ -30,22 +30,22 @@
 +    public int knockbackStrength; // CraftBukkit - private -> public
      private static final String __OBFID = "CL_00001715";
  
-     public EntityArrow(World par1World)
+     public EntityArrow(World p_i1753_1_)
 @@ -61,6 +68,7 @@
-         super(par1World);
+         super(p_i1755_1_);
          this.renderDistanceWeight = 10.0D;
-         this.shootingEntity = par2EntityLivingBase;
-+        this.projectileSource = (LivingEntity) par2EntityLivingBase.getBukkitEntity(); // CraftBukkit
+         this.shootingEntity = p_i1755_2_;
++        this.projectileSource = (LivingEntity) p_i1755_2_.getBukkitEntity(); // CraftBukkit
  
-         if (par2EntityLivingBase instanceof EntityPlayer)
+         if (p_i1755_2_ instanceof EntityPlayer)
          {
 @@ -91,6 +99,7 @@
-         super(par1World);
+         super(p_i1756_1_);
          this.renderDistanceWeight = 10.0D;
-         this.shootingEntity = par2EntityLivingBase;
-+        this.projectileSource = (LivingEntity) par2EntityLivingBase.getBukkitEntity(); // CraftBukkit
+         this.shootingEntity = p_i1756_2_;
++        this.projectileSource = (LivingEntity) p_i1756_2_.getBukkitEntity(); // CraftBukkit
  
-         if (par2EntityLivingBase instanceof EntityPlayer)
+         if (p_i1756_2_ instanceof EntityPlayer)
          {
 @@ -199,7 +208,7 @@
              {
@@ -103,15 +103,6 @@
                          if (movingobjectposition.entityHit instanceof EntityLivingBase)
                          {
                              EntityLivingBase entitylivingbase = (EntityLivingBase)movingobjectposition.entityHit;
-@@ -358,7 +379,7 @@
-                     this.field_145791_d = movingobjectposition.blockX;
-                     this.field_145792_e = movingobjectposition.blockY;
-                     this.field_145789_f = movingobjectposition.blockZ;
--                    this.field_145790_g = block;
-+                    this.field_145790_g = this.worldObj.getBlock(field_145791_d, field_145792_e, field_145789_f); // CraftBukkit - Get correct block for storage
-                     this.inData = this.worldObj.getBlockMetadata(this.field_145791_d, this.field_145792_e, this.field_145789_f);
-                     this.motionX = (double)((float)(movingobjectposition.hitVec.xCoord - this.posX));
-                     this.motionY = (double)((float)(movingobjectposition.hitVec.yCoord - this.posY));
 @@ -487,6 +508,23 @@
      {
          if (!this.worldObj.isRemote && this.inGround && this.arrowShake <= 0)
@@ -119,10 +110,10 @@
 +            // CraftBukkit start
 +            ItemStack itemstack = new ItemStack(Items.arrow);
 +
-+            if (this.canBePickedUp == 1 && par1EntityPlayer.inventory.canHold(itemstack) > 0)
++            if (this.canBePickedUp == 1 && p_70100_1_.inventory.canHold(itemstack) > 0)
 +            {
 +                EntityItem item = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, itemstack);
-+                PlayerPickupItemEvent event = new PlayerPickupItemEvent((org.bukkit.entity.Player) par1EntityPlayer.getBukkitEntity(), new org.bukkit.craftbukkit.entity.CraftItem(this.worldObj.getServer(), this, item), 0);
++                PlayerPickupItemEvent event = new PlayerPickupItemEvent((org.bukkit.entity.Player) p_70100_1_.getBukkitEntity(), new org.bukkit.craftbukkit.entity.CraftItem(this.worldObj.getServer(), this, item), 0);
 +                // event.setCancelled(!entityplayer.canPickUpLoot); TODO
 +                this.worldObj.getServer().getPluginManager().callEvent(event);
 +
@@ -133,9 +124,9 @@
 +            }
 +
 +            // CraftBukkit end
-             boolean flag = this.canBePickedUp == 1 || this.canBePickedUp == 2 && par1EntityPlayer.capabilities.isCreativeMode;
+             boolean flag = this.canBePickedUp == 1 || this.canBePickedUp == 2 && p_70100_1_.capabilities.isCreativeMode;
  
-             if (this.canBePickedUp == 1 && !par1EntityPlayer.inventory.addItemStackToInventory(new ItemStack(Items.arrow, 1)))
+             if (this.canBePickedUp == 1 && !p_70100_1_.inventory.addItemStackToInventory(new ItemStack(Items.arrow, 1)))
 @@ -553,4 +591,11 @@
          byte b0 = this.dataWatcher.getWatchableObjectByte(16);
          return (b0 & 1) != 0;

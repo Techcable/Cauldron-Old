@@ -8,4 +8,4 @@
 +    public WorldServer theWorldServer; // CraftBukkit - private -> public
      private static final String __OBFID = "CL_00001433";
  
-     public WorldManager(MinecraftServer par1MinecraftServer, WorldServer par2WorldServer)
+     public WorldManager(MinecraftServer p_i1517_1_, WorldServer p_i1517_2_)

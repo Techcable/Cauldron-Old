@@ -28,37 +28,37 @@
      private Entity currentTarget;
      protected int numTicksToChaseTarget;
 @@ -311,9 +318,23 @@
-     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
+     public void readEntityFromNBT(NBTTagCompound p_70037_1_)
      {
-         super.readEntityFromNBT(par1NBTTagCompound);
--        this.setCanPickUpLoot(par1NBTTagCompound.getBoolean("CanPickUpLoot"));
--        this.persistenceRequired = par1NBTTagCompound.getBoolean("PersistenceRequired");
+         super.readEntityFromNBT(p_70037_1_);
+-        this.setCanPickUpLoot(p_70037_1_.getBoolean("CanPickUpLoot"));
+-        this.persistenceRequired = p_70037_1_.getBoolean("PersistenceRequired");
 +        // CraftBukkit start - If looting or persistence is false only use it if it was set after we started using it
-+        boolean data = par1NBTTagCompound.getBoolean("CanPickUpLoot");
++        boolean data = p_70037_1_.getBoolean("CanPickUpLoot");
  
-+        if (isLevelAtLeast(par1NBTTagCompound, 1) || data)
++        if (isLevelAtLeast(p_70037_1_, 1) || data)
 +        {
 +            this.canPickUpLoot = data;
 +        }
 +
-+        data = par1NBTTagCompound.getBoolean("PersistenceRequired");
++        data = p_70037_1_.getBoolean("PersistenceRequired");
 +
-+        if (isLevelAtLeast(par1NBTTagCompound, 1) || data)
++        if (isLevelAtLeast(p_70037_1_, 1) || data)
 +        {
 +            this.persistenceRequired = data;
 +        }
 +
 +        // CraftBukkit end
 +
-         if (par1NBTTagCompound.hasKey("CustomName", 8) && par1NBTTagCompound.getString("CustomName").length() > 0)
+         if (p_70037_1_.hasKey("CustomName", 8) && p_70037_1_.getString("CustomName").length() > 0)
          {
-             this.setCustomNameTag(par1NBTTagCompound.getString("CustomName"));
+             this.setCustomNameTag(p_70037_1_.getString("CustomName"));
 @@ -521,15 +542,36 @@
                      this.entityAge = 0;
                  }
              }
 +            // Cauldron start - Force despawn of entity if a player isn't near
-+            else if (this.worldObj.cauldronConfig.entitiesDespawnImmediate && this.canDespawn())//getBoolean("entities.despawn-immediate", true) && this.canDespawn())
++            else if (this.worldObj.cauldronConfig.getBoolean("entities.despawn-immediate", true) && this.canDespawn())
 +            {
 +                this.despawn("No Player : Immediate");
 +            }
@@ -92,17 +92,17 @@
          this.worldObj.theProfiler.endSection();
 @@ -1005,6 +1047,14 @@
      {
-         if (this.getLeashed() && this.getLeashedToEntity() == par1EntityPlayer)
+         if (this.getLeashed() && this.getLeashedToEntity() == p_130002_1_)
          {
 +            // CraftBukkit start
-+            if (CraftEventFactory.callPlayerUnleashEntityEvent(this, par1EntityPlayer).isCancelled())
++            if (CraftEventFactory.callPlayerUnleashEntityEvent(this, p_130002_1_).isCancelled())
 +            {
-+                ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
++                ((EntityPlayerMP) p_130002_1_).playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
 +                return false;
 +            }
 +
 +            // CraftBukkit end
-             this.clearLeashed(true, !par1EntityPlayer.capabilities.isCreativeMode);
+             this.clearLeashed(true, !p_130002_1_.capabilities.isCreativeMode);
              return true;
          }
 @@ -1016,6 +1066,14 @@
@@ -110,29 +110,29 @@
                  if (!(this instanceof EntityTameable) || !((EntityTameable)this).isTamed())
                  {
 +                    // CraftBukkit start
-+                    if (CraftEventFactory.callPlayerLeashEntityEvent(this, par1EntityPlayer, par1EntityPlayer).isCancelled())
++                    if (CraftEventFactory.callPlayerLeashEntityEvent(this, p_130002_1_, p_130002_1_).isCancelled())
 +                    {
-+                        ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
++                        ((EntityPlayerMP) p_130002_1_).playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
 +                        return false;
 +                    }
 +
 +                    // CraftBukkit end
-                     this.setLeashedToEntity(par1EntityPlayer, true);
+                     this.setLeashedToEntity(p_130002_1_, true);
                      --itemstack.stackSize;
                      return true;
 @@ -1023,6 +1081,14 @@
  
-                 if (par1EntityPlayer.getCommandSenderName().equalsIgnoreCase(((EntityTameable)this).getOwnerName()))
+                 if (((EntityTameable)this).func_152114_e(p_130002_1_))
                  {
 +                    // CraftBukkit start
-+                    if (CraftEventFactory.callPlayerLeashEntityEvent(this, par1EntityPlayer, par1EntityPlayer).isCancelled())
++                    if (CraftEventFactory.callPlayerLeashEntityEvent(this, p_130002_1_, p_130002_1_).isCancelled())
 +                    {
-+                        ((EntityPlayerMP) par1EntityPlayer).playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
++                        ((EntityPlayerMP) p_130002_1_).playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(1, this, this.getLeashedToEntity()));
 +                        return false;
 +                    }
 +
 +                    // CraftBukkit end
-                     this.setLeashedToEntity(par1EntityPlayer, true);
+                     this.setLeashedToEntity(p_130002_1_, true);
                      --itemstack.stackSize;
                      return true;
 @@ -1049,6 +1115,7 @@

@@ -16,7 +16,7 @@
  {
      private static final String __OBFID = "CL_00001731";
 @@ -12,6 +20,65 @@
-         super(par1Str, false, par2);
+         super(p_i1796_1_, false, p_i1796_2_);
      }
  
 +    // CraftBukkit start
@@ -79,5 +79,5 @@
 +    // CraftBukkit end
 +
      @SideOnly(Side.CLIENT)
-     public AnimalChest(String par1Str, boolean par2, int par3)
+     public AnimalChest(String p_i1797_1_, boolean p_i1797_2_, int p_i1797_3_)
      {

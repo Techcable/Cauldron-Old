@@ -53,7 +53,7 @@
 +    // CraftBukkit end
      private static final String __OBFID = "CL_00001756";
  
-     public InventoryMerchant(EntityPlayer par1EntityPlayer, IMerchant par2IMerchant)
+     public InventoryMerchant(EntityPlayer p_i1820_1_, IMerchant p_i1820_2_)
 @@ -124,7 +164,7 @@
  
      public int getInventoryStackLimit()
@@ -62,4 +62,4 @@
 +        return maxStack; // CraftBukkit
      }
  
-     public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer)
+     public boolean isUseableByPlayer(EntityPlayer p_70300_1_)

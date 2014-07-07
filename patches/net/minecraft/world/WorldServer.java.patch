@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/WorldServer.java
 +++ ../src-work/minecraft/net/minecraft/world/WorldServer.java
-@@ -66,11 +66,26 @@
+@@ -67,11 +67,26 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -28,7 +28,7 @@
      private final PlayerManager thePlayerManager;
      private Set pendingTickListEntriesHashSet;
      private TreeSet pendingTickListEntriesTreeSet;
-@@ -87,6 +102,9 @@
+@@ -88,6 +103,9 @@
      private IntHashMap entityIdMap;
      private static final String __OBFID = "CL_00001437";
  
@@ -38,15 +38,15 @@
      /** Stores the recently processed (lighting) chunks */
      protected Set<ChunkCoordIntPair> doneChunks = new HashSet<ChunkCoordIntPair>();
      public List<Teleporter> customTeleporters = new ArrayList<Teleporter>();
-@@ -94,6 +112,7 @@
+@@ -95,6 +113,7 @@
      public WorldServer(MinecraftServer p_i45284_1_, ISaveHandler p_i45284_2_, String p_i45284_3_, int p_i45284_4_, WorldSettings p_i45284_5_, Profiler p_i45284_6_)
      {
          super(p_i45284_2_, p_i45284_3_, p_i45284_5_, WorldProvider.getProviderForDimension(p_i45284_4_), p_i45284_6_);
 +        this.dimension = p_i45284_4_;
          this.mcServer = p_i45284_1_;
          this.theEntityTracker = new EntityTracker(this);
-         this.thePlayerManager = new PlayerManager(this, p_i45284_1_.getConfigurationManager().getViewDistance());
-@@ -123,6 +142,46 @@
+         this.thePlayerManager = new PlayerManager(this);
+@@ -124,6 +143,46 @@
              this.mapStorage.setData("scoreboard", scoreboardsavedata);
          }
  
@@ -93,7 +93,7 @@
          if (!(this instanceof WorldServerMulti)) //Forge: We fix the global mapStorage, which causes us to share scoreboards early. So don't associate the save data with the temporary scoreboard
          {
              scoreboardsavedata.func_96499_a(this.worldScoreboard);
-@@ -131,6 +190,30 @@
+@@ -132,6 +191,30 @@
          DimensionManager.setWorld(p_i45284_4_, this);
      }
  
@@ -124,7 +124,7 @@
      public void tick()
      {
          super.tick();
-@@ -154,12 +237,18 @@
+@@ -155,12 +238,18 @@
          }
  
          this.theProfiler.startSection("mobSpawner");
@@ -145,7 +145,7 @@
          this.theProfiler.endStartSection("chunkSource");
          this.chunkProvider.unloadQueuedChunks();
          int j = this.calculateSkylightSubtracted(1.0F);
-@@ -176,23 +265,44 @@
+@@ -177,23 +266,36 @@
              this.worldInfo.setWorldTime(this.worldInfo.getWorldTime() + 1L);
          }
  
@@ -179,18 +179,10 @@
 +        timings.doSounds.startTiming(); // Spigot
          this.func_147488_Z();
 +        timings.doSounds.stopTiming(); // Spigot
-+        // Cauldron start - if enabled, this can cause issues with IC2 TE's and BoP WorldGen
-+        if (this.getServer() != null && this.getServer().chunkGCEnabled)
-+        {
-+            timings.doChunkGC.startTiming(); // Spigot
-+            this.getWorld().processChunkGC(); // CraftBukkit
-+            timings.doChunkGC.stopTiming(); // Spigot
-+        }
-+        // Cauldron end
      }
  
-     public BiomeGenBase.SpawnListEntry spawnRandomCreature(EnumCreatureType par1EnumCreatureType, int par2, int par3, int par4)
-@@ -211,7 +321,7 @@
+     public BiomeGenBase.SpawnListEntry spawnRandomCreature(EnumCreatureType p_73057_1_, int p_73057_2_, int p_73057_3_, int p_73057_4_)
+@@ -212,7 +314,7 @@
          {
              EntityPlayer entityplayer = (EntityPlayer)iterator.next();
  
@@ -199,7 +191,7 @@
              {
                  this.allPlayersSleeping = false;
                  break;
-@@ -239,7 +349,26 @@
+@@ -240,7 +342,26 @@
  
      private void resetRainAndThunder()
      {
@@ -227,7 +219,7 @@
      }
  
      public boolean areAllPlayersAsleep()
-@@ -247,19 +376,28 @@
+@@ -248,19 +369,28 @@
          if (this.allPlayersSleeping && !this.isRemote)
          {
              Iterator iterator = this.playerEntities.iterator();
@@ -259,7 +251,7 @@
              return false;
          }
          else
-@@ -301,30 +439,32 @@
+@@ -302,30 +432,32 @@
          super.func_147456_g();
          int i = 0;
          int j = 0;
@@ -310,7 +302,7 @@
              this.theProfiler.endStartSection("thunder");
              int i1;
              int j1;
-@@ -357,12 +497,34 @@
+@@ -358,12 +490,34 @@
  
                  if (this.isBlockFreezableNaturally(j1 + k, l1 - 1, k1 + l))
                  {
@@ -347,7 +339,7 @@
                  }
  
                  if (this.isRaining())
-@@ -386,20 +548,21 @@
+@@ -387,20 +541,21 @@
  
                  if (extendedblockstorage != null && extendedblockstorage.getNeedsRandomTick())
                  {
@@ -376,7 +368,7 @@
                          }
                      }
                  }
-@@ -407,6 +570,15 @@
+@@ -408,6 +563,15 @@
  
              this.theProfiler.endSection();
          }
@@ -392,7 +384,7 @@
      }
  
      public boolean isBlockTickScheduledThisTick(int p_147477_1_, int p_147477_2_, int p_147477_3_, Block p_147477_4_)
-@@ -485,7 +657,7 @@
+@@ -486,7 +650,7 @@
  
      public void updateEntities()
      {
@@ -401,7 +393,7 @@
          {
              if (this.updateEntityTick++ >= 1200)
              {
-@@ -517,7 +689,17 @@
+@@ -518,7 +682,17 @@
          {
              if (i > 1000)
              {
@@ -420,7 +412,7 @@
              }
  
              this.theProfiler.startSection("cleaning");
-@@ -662,7 +844,36 @@
+@@ -663,7 +837,36 @@
      protected IChunkProvider createChunkProvider()
      {
          IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
@@ -458,7 +450,7 @@
          return this.theChunkProviderServer;
      }
  
-@@ -670,29 +881,31 @@
+@@ -671,29 +874,31 @@
      {
          ArrayList arraylist = new ArrayList();
  
@@ -504,7 +496,7 @@
          return arraylist;
      }
  
-@@ -744,6 +957,29 @@
+@@ -745,6 +950,29 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 0;
  
@@ -534,15 +526,15 @@
              if (chunkposition != null)
              {
                  i = chunkposition.chunkPosX;
-@@ -874,6 +1110,20 @@
+@@ -887,6 +1115,20 @@
  
-     public boolean addWeatherEffect(Entity par1Entity)
+     public boolean addWeatherEffect(Entity p_72942_1_)
      {
 +        // Cauldron start - vanilla compatibility
-+        if (par1Entity instanceof net.minecraft.entity.effect.EntityLightningBolt) 
++        if (p_72942_1_ instanceof net.minecraft.entity.effect.EntityLightningBolt) 
 +        {
 +            // CraftBukkit start
-+            LightningStrikeEvent lightning = new LightningStrikeEvent(this.getWorld(), (org.bukkit.entity.LightningStrike) par1Entity.getBukkitEntity());
++            LightningStrikeEvent lightning = new LightningStrikeEvent(this.getWorld(), (org.bukkit.entity.LightningStrike) p_72942_1_.getBukkitEntity());
 +            this.getServer().getPluginManager().callEvent(lightning);
 +
 +            if (lightning.isCancelled())
@@ -552,15 +544,15 @@
 +            // CraftBukkit end
 +        }
 +        // Cauldron end
-         if (super.addWeatherEffect(par1Entity))
+         if (super.addWeatherEffect(p_72942_1_))
          {
-             this.mcServer.getConfigurationManager().sendToAllNear(par1Entity.posX, par1Entity.posY, par1Entity.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(par1Entity));
-@@ -892,11 +1142,22 @@
+             this.mcServer.getConfigurationManager().sendToAllNear(p_72942_1_.posX, p_72942_1_.posY, p_72942_1_.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(p_72942_1_));
+@@ -905,11 +1147,22 @@
  
-     public Explosion newExplosion(Entity par1Entity, double par2, double par4, double par6, float par8, boolean par9, boolean par10)
+     public Explosion newExplosion(Entity p_72885_1_, double p_72885_2_, double p_72885_4_, double p_72885_6_, float p_72885_8_, boolean p_72885_9_, boolean p_72885_10_)
      {
 +        // CraftBukkit start
-+        Explosion explosion = super.newExplosion(par1Entity, par2, par4, par6, par8, par9, par10);
++        Explosion explosion = super.newExplosion(p_72885_1_, p_72885_2_, p_72885_4_, p_72885_6_, p_72885_8_, p_72885_9_, p_72885_10_);
 +
 +        if (explosion.wasCanceled)
 +        {
@@ -568,17 +560,17 @@
 +        }
 +
 +        /* Remove
-         Explosion explosion = new Explosion(this, par1Entity, par2, par4, par6, par8);
-         explosion.isFlaming = par9;
-         explosion.isSmoking = par10;
+         Explosion explosion = new Explosion(this, p_72885_1_, p_72885_2_, p_72885_4_, p_72885_6_, p_72885_8_);
+         explosion.isFlaming = p_72885_9_;
+         explosion.isSmoking = p_72885_10_;
          explosion.doExplosionA();
          explosion.doExplosionB(false);
 +        */
 +        // CraftBukkit end - TODO: Check if explosions are still properly implemented
  
-         if (!par10)
+         if (!p_72885_10_)
          {
-@@ -975,6 +1236,7 @@
+@@ -988,6 +1241,7 @@
          boolean flag = this.isRaining();
          super.updateWeather();
  
@@ -586,7 +578,7 @@
          if (this.prevRainingStrength != this.rainingStrength)
          {
              this.mcServer.getConfigurationManager().sendPacketToAllPlayersInDimension(new S2BPacketChangeGameState(7, this.rainingStrength), this.provider.dimensionId);
-@@ -999,6 +1261,20 @@
+@@ -1012,6 +1266,20 @@
              this.mcServer.getConfigurationManager().sendPacketToAllPlayers(new S2BPacketChangeGameState(7, this.rainingStrength));
              this.mcServer.getConfigurationManager().sendPacketToAllPlayers(new S2BPacketChangeGameState(8, this.thunderingStrength));
          }
@@ -606,15 +598,8 @@
 +        }
      }
  
-     public MinecraftServer func_73046_m()
-@@ -1041,20 +1317,48 @@
-         }
-     }
- 
-+
-     public File getChunkSaveLocation()
-     {
-         return ((AnvilChunkLoader)theChunkProviderServer.currentChunkLoader).chunkSaveLocation;
+     protected int func_152379_p()
+@@ -1065,14 +1333,41 @@
      }
  
      static class ServerBlockEventList extends ArrayList
@@ -626,11 +611,11 @@
 -            private ServerBlockEventList() {}
 +        private ServerBlockEventList() {}
  
--            ServerBlockEventList(Object par1ServerBlockEvent)
+-            ServerBlockEventList(Object p_i1521_1_)
 -            {
 -                this();
 -            }
-+        ServerBlockEventList(Object par1ServerBlockEvent)
++        ServerBlockEventList(Object p_i1521_1_)
 +        {
 +            this();
          }

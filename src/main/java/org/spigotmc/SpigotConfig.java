@@ -187,7 +187,8 @@ public class SpigotConfig
     }
 
     public static boolean bungee;
-    private static void bungee() {
+    private static void bungee() 
+    {
         if ( version < 4 )
         {
             set( "settings.bungeecord", false );

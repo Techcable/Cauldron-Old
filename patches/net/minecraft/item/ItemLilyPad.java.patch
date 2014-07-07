@@ -2,19 +2,19 @@
 +++ ../src-work/minecraft/net/minecraft/item/ItemLilyPad.java
 @@ -46,7 +46,15 @@
  
-                 if (par2World.getBlock(i, j, k).getMaterial() == Material.water && par2World.getBlockMetadata(i, j, k) == 0 && par2World.isAirBlock(i, j + 1, k))
+                 if (p_77659_2_.getBlock(i, j, k).getMaterial() == Material.water && p_77659_2_.getBlockMetadata(i, j, k) == 0 && p_77659_2_.isAirBlock(i, j + 1, k))
                  {
 +                    // Cauldron start - special case for handling block placement with water lilies
-+                    org.bukkit.block.BlockState blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(par2World, i, j + 1, k);
-                     par2World.setBlock(i, j + 1, k, Blocks.waterlily);
-+                    org.bukkit.event.block.BlockPlaceEvent placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(par2World, par3EntityPlayer, blockstate, i, j, k);
++                    org.bukkit.block.BlockState blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(p_77659_2_, i, j + 1, k);
+                     p_77659_2_.setBlock(i, j + 1, k, Blocks.waterlily);
++                    org.bukkit.event.block.BlockPlaceEvent placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(p_77659_2_, p_77659_3_, blockstate, i, j, k);
 +                    if (placeEvent != null && (placeEvent.isCancelled() || !placeEvent.canBuild())) {
 +                        blockstate.update(true, false);
-+                        return par1ItemStack;
++                        return p_77659_1_;
 +                    }
 +                    // Cauldron end
  
-                     if (!par3EntityPlayer.capabilities.isCreativeMode)
+                     if (!p_77659_3_.capabilities.isCreativeMode)
                      {
 @@ -59,6 +67,12 @@
          }
@@ -27,5 +27,5 @@
 +    }
 +
      @SideOnly(Side.CLIENT)
-     public int getColorFromItemStack(ItemStack par1ItemStack, int par2)
+     public int getColorFromItemStack(ItemStack p_82790_1_, int p_82790_2_)
      {

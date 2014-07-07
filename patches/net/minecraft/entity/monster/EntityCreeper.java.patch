@@ -13,16 +13,16 @@
  {
      private int lastActiveTime;
 @@ -207,9 +212,35 @@
-     public void onStruckByLightning(EntityLightningBolt par1EntityLightningBolt)
+     public void onStruckByLightning(EntityLightningBolt p_70077_1_)
      {
-         super.onStruckByLightning(par1EntityLightningBolt);
+         super.onStruckByLightning(p_70077_1_);
 -        this.dataWatcher.updateObject(17, Byte.valueOf((byte)1));
 +
 +        // Cauldron start
-+        if (par1EntityLightningBolt != null)
++        if (p_70077_1_ != null)
 +        {
 +            // CraftBukkit start
-+            if (CraftEventFactory.callCreeperPowerEvent(this, par1EntityLightningBolt, org.bukkit.event.entity.CreeperPowerEvent.PowerCause.LIGHTNING).isCancelled())
++            if (CraftEventFactory.callCreeperPowerEvent(this, p_70077_1_, org.bukkit.event.entity.CreeperPowerEvent.PowerCause.LIGHTNING).isCancelled())
 +            {
 +                return;
 +            }
@@ -46,9 +46,9 @@
 +        // CraftBukkit end
 +    }
 +
-     protected boolean interact(EntityPlayer par1EntityPlayer)
+     protected boolean interact(EntityPlayer p_70085_1_)
      {
-         ItemStack itemstack = par1EntityPlayer.inventory.getCurrentItem();
+         ItemStack itemstack = p_70085_1_.inventory.getCurrentItem();
 @@ -235,17 +266,22 @@
          if (!this.worldObj.isRemote)
          {

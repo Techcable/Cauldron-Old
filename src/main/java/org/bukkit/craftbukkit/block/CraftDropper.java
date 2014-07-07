@@ -1,5 +1,8 @@
 package org.bukkit.craftbukkit.block;
 
+import net.minecraft.block.BlockDropper;
+import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntityDropper;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -10,13 +13,13 @@ import org.bukkit.inventory.Inventory;
 
 public class CraftDropper extends CraftBlockState implements Dropper {
     private final CraftWorld world;
-    private final net.minecraft.tileentity.TileEntityDropper dropper;
+    private final TileEntityDropper dropper;
 
     public CraftDropper(final Block block) {
         super(block);
 
         world = (CraftWorld) block.getWorld();
-        dropper = (net.minecraft.tileentity.TileEntityDropper) world.getTileEntityAt(getX(), getY(), getZ());
+        dropper = (TileEntityDropper) world.getTileEntityAt(getX(), getY(), getZ());
     }
 
     public Inventory getInventory() {
@@ -27,7 +30,7 @@ public class CraftDropper extends CraftBlockState implements Dropper {
         Block block = getBlock();
 
         if (block.getType() == Material.DROPPER) {
-            net.minecraft.block.BlockDropper drop = (net.minecraft.block.BlockDropper) net.minecraft.init.Blocks.dropper;
+            BlockDropper drop = (BlockDropper) Blocks.dropper;
 
             drop.func_149941_e(world.getHandle(), getX(), getY(), getZ());
         }

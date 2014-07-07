@@ -1,5 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
+import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.boss.EntityDragon;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
@@ -7,7 +9,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDamageEvent;
 
 public class CraftComplexPart extends CraftEntity implements ComplexEntityPart {
-    public CraftComplexPart(CraftServer server, net.minecraft.entity.boss.EntityDragonPart entity) {
+    public CraftComplexPart(CraftServer server, EntityDragonPart entity) {
         super(server, entity);
     }
 
@@ -33,8 +35,8 @@ public class CraftComplexPart extends CraftEntity implements ComplexEntityPart {
     }
 
     @Override
-    public net.minecraft.entity.boss.EntityDragonPart getHandle() {
-        return (net.minecraft.entity.boss.EntityDragonPart) entity;
+    public EntityDragonPart getHandle() {
+        return (EntityDragonPart) entity;
     }
 
     @Override

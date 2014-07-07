@@ -1,8 +1,8 @@
 --- ../src-base/minecraft/net/minecraft/enchantment/Enchantment.java
 +++ ../src-work/minecraft/net/minecraft/enchantment/Enchantment.java
-@@ -55,6 +55,8 @@
+@@ -56,6 +56,8 @@
          {
-             enchantmentsList[par1] = this;
+             enchantmentsList[p_i1926_1_] = this;
          }
 +
 +        org.bukkit.enchantments.Enchantment.registerEnchantment(new org.bukkit.craftbukkit.enchantments.CraftEnchantment(this)); // CraftBukkit

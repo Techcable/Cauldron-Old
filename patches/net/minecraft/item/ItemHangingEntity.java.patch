@@ -15,14 +15,14 @@
      private final Class hangingEntityClass;
 @@ -44,6 +50,28 @@
                  {
-                     if (!par3World.isRemote)
+                     if (!p_77648_3_.isRemote)
                      {
 +                        // CraftBukkit start
-+                        Player who = (par2EntityPlayer == null) ? null : (Player) par2EntityPlayer.getBukkitEntity();
-+                        org.bukkit.block.Block blockClicked = par3World.getWorld().getBlockAt(par4, par5, par6);
-+                        org.bukkit.block.BlockFace blockFace = org.bukkit.craftbukkit.block.CraftBlock.notchToBlockFace(par7);
++                        Player who = (p_77648_2_ == null) ? null : (Player) p_77648_2_.getBukkitEntity();
++                        org.bukkit.block.Block blockClicked = p_77648_3_.getWorld().getBlockAt(p_77648_4_, p_77648_5_, p_77648_6_);
++                        org.bukkit.block.BlockFace blockFace = org.bukkit.craftbukkit.block.CraftBlock.notchToBlockFace(p_77648_7_);
 +                        HangingPlaceEvent event = new HangingPlaceEvent((org.bukkit.entity.Hanging) entityhanging.getBukkitEntity(), who, blockClicked, blockFace);
-+                        par3World.getServer().getPluginManager().callEvent(event);
++                        p_77648_3_.getServer().getPluginManager().callEvent(event);
 +                        PaintingPlaceEvent paintingEvent = null;
 +
 +                        if (entityhanging instanceof EntityPainting)
@@ -30,7 +30,7 @@
 +                            // Fire old painting event until it can be removed
 +                            paintingEvent = new PaintingPlaceEvent((org.bukkit.entity.Painting) entityhanging.getBukkitEntity(), who, blockClicked, blockFace);
 +                            paintingEvent.setCancelled(event.isCancelled());
-+                            par3World.getServer().getPluginManager().callEvent(paintingEvent);
++                            p_77648_3_.getServer().getPluginManager().callEvent(paintingEvent);
 +                        }
 +
 +                        if (event.isCancelled() || (paintingEvent != null && paintingEvent.isCancelled()))
@@ -39,6 +39,6 @@
 +                        }
 +
 +                        // CraftBukkit end
-                         par3World.spawnEntityInWorld(entityhanging);
+                         p_77648_3_.spawnEntityInWorld(entityhanging);
                      }
  

@@ -1,5 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
+import net.minecraft.entity.projectile.EntityFireball;
+import net.minecraft.util.MathHelper;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.craftbukkit.CraftServer;
@@ -10,7 +12,7 @@ import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
 public class CraftFireball extends AbstractProjectile implements Fireball {
-    public CraftFireball(CraftServer server, net.minecraft.entity.projectile.EntityFireball entity) {
+    public CraftFireball(CraftServer server, EntityFireball entity) {
         super(server, entity);
     }
 
@@ -52,15 +54,15 @@ public class CraftFireball extends AbstractProjectile implements Fireball {
         double x = direction.getX();
         double y = direction.getY();
         double z = direction.getZ();
-        double magnitude = (double) net.minecraft.util.MathHelper.sqrt_double(x * x + y * y + z * z);
+        double magnitude = (double) MathHelper.sqrt_double(x * x + y * y + z * z);
         getHandle().accelerationX = x / magnitude;
         getHandle().accelerationY = y / magnitude;
         getHandle().accelerationZ = z / magnitude;
     }
 
     @Override
-    public net.minecraft.entity.projectile.EntityFireball getHandle() {
-        return (net.minecraft.entity.projectile.EntityFireball) entity;
+    public EntityFireball getHandle() {
+        return (EntityFireball) entity;
     }
 
     @Override

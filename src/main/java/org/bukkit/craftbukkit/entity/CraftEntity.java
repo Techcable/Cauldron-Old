@@ -23,6 +23,7 @@ import net.minecraftforge.cauldron.entity.CraftCustomEntity;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.common.util.FakePlayerFactory;
+// Cauldron end
 
 public abstract class CraftEntity implements org.bukkit.entity.Entity {
     protected final CraftServer server;

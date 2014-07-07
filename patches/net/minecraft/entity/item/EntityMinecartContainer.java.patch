@@ -59,12 +59,12 @@
 +    }
 +    // CraftBukkit end
 +
-     public EntityMinecartContainer(World par1World)
+     public EntityMinecartContainer(World p_i1716_1_)
      {
-         super(par1World);
+         super(p_i1716_1_);
 @@ -147,6 +196,13 @@
  
-     public void travelToDimension(int par1)
+     public void travelToDimension(int p_71027_1_)
      {
 +        // Spigot Start
 +        for (HumanEntity human : new java.util.ArrayList<HumanEntity>(transaction))
@@ -74,5 +74,5 @@
 +
 +        // Spigot End
          this.dropContentsWhenDead = false;
-         super.travelToDimension(par1);
+         super.travelToDimension(p_71027_1_);
      }

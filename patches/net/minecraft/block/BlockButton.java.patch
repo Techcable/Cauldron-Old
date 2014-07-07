@@ -51,7 +51,7 @@
                  {
                      this.func_150046_n(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_);
 @@ -309,6 +338,36 @@
-         List list = p_150046_1_.getEntitiesWithinAABB(EntityArrow.class, AxisAlignedBB.getAABBPool().getAABB((double)p_150046_2_ + this.minX, (double)p_150046_3_ + this.minY, (double)p_150046_4_ + this.minZ, (double)p_150046_2_ + this.maxX, (double)p_150046_3_ + this.maxY, (double)p_150046_4_ + this.maxZ));
+         List list = p_150046_1_.getEntitiesWithinAABB(EntityArrow.class, AxisAlignedBB.getBoundingBox((double)p_150046_2_ + this.minX, (double)p_150046_3_ + this.minY, (double)p_150046_4_ + this.minZ, (double)p_150046_2_ + this.maxX, (double)p_150046_3_ + this.maxY, (double)p_150046_4_ + this.maxZ));
          boolean flag1 = !list.isEmpty();
  
 +        // CraftBukkit start - Call interact event when arrows turn on wooden buttons

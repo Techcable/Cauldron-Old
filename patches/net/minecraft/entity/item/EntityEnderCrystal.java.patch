@@ -29,7 +29,7 @@
              if (!this.isDead && !this.worldObj.isRemote)
              {
 +                // CraftBukkit start - All non-living entities need this
-+                if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, par1DamageSource, par2))
++                if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, p_70097_1_, p_70097_2_))
 +                {
 +                    return false;
 +                }

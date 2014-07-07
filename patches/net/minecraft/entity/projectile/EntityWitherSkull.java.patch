@@ -11,7 +11,7 @@
      private static final String __OBFID = "CL_00001728";
 @@ -68,7 +70,7 @@
                  {
-                     if (par1MovingObjectPosition.entityHit.attackEntityFrom(DamageSource.causeMobDamage(this.shootingEntity), 8.0F) && !par1MovingObjectPosition.entityHit.isEntityAlive())
+                     if (p_70227_1_.entityHit.attackEntityFrom(DamageSource.causeMobDamage(this.shootingEntity), 8.0F) && !p_70227_1_.entityHit.isEntityAlive())
                      {
 -                        this.shootingEntity.heal(5.0F);
 +                        this.shootingEntity.heal(5.0F, org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason.WITHER); // CraftBukkit

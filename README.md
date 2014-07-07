@@ -1,6 +1,6 @@
 Cauldron
 ===========
-Note: 1.6.4 repository has been moved to [branch v164](https://github.com/MinecraftPortCentral/Cauldron/tree/v164)
+Note: 1.7.2 repository has been moved to [branch v172](https://github.com/MinecraftPortCentral/Cauldron/tree/v172)
 
 A Forge/Bukkit/Spigot Minecraft Server
 

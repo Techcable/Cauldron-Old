@@ -50,7 +50,7 @@
      public TileEntityChest()
      {
          this.cachedChestType = -1;
-@@ -289,6 +325,12 @@
+@@ -296,6 +332,12 @@
      public void updateEntity()
      {
          super.updateEntity();
@@ -63,7 +63,7 @@
          this.checkForAdjacentChests();
          ++this.ticksSinceSync;
          float f;
-@@ -403,8 +445,28 @@
+@@ -410,8 +452,28 @@
              this.numPlayersUsing = 0;
          }
  
@@ -92,7 +92,7 @@
          this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord, this.zCoord, this.getBlockType());
          this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord - 1, this.zCoord, this.getBlockType());
      }
-@@ -413,8 +475,28 @@
+@@ -420,8 +482,28 @@
      {
          if (this.getBlockType() instanceof BlockChest)
          {

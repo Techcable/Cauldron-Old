@@ -15,16 +15,20 @@ import org.bukkit.scoreboard.Score;
  * Also, as an added perk, a CraftScore will (intentionally) stay a valid reference so long as objective is valid.
  */
 final class CraftScore implements Score {
-    private final String playerName;
+    private final String entry;
     private final CraftObjective objective;
 
-    CraftScore(CraftObjective objective, String playerName) {
+    CraftScore(CraftObjective objective, String entry) {
         this.objective = objective;
-        this.playerName = playerName;
+        this.entry = entry;
     }
 
     public OfflinePlayer getPlayer() {
-        return Bukkit.getOfflinePlayer(playerName);
+        return Bukkit.getOfflinePlayer(entry);
+    }
+
+    public String getEntry() {
+        return entry;
     }
 
     public Objective getObjective() {
@@ -34,18 +38,19 @@ final class CraftScore implements Score {
     public int getScore() throws IllegalStateException {
         net.minecraft.scoreboard.Scoreboard board = objective.checkState().board;
 
-        if (board.getObjectiveNames().contains(playerName)) { // Lazy
-            Map<String, net.minecraft.scoreboard.Score> scores = board.func_96510_d(playerName);
+        if (board.getObjectiveNames().contains(entry)) { // Lazy
+            Map<String, net.minecraft.scoreboard.Score> scores = board.func_96510_d(entry);
             net.minecraft.scoreboard.Score score = scores.get(objective.getHandle());
             if (score != null) { // Lazy
                 return score.getScorePoints();
             }
         }
+
         return 0; // Lazy
     }
 
     public void setScore(int score) throws IllegalStateException {
-        objective.checkState().board.func_96529_a(playerName, objective.getHandle()).setScorePoints(score);
+        objective.checkState().board.func_96529_a(entry, objective.getHandle()).setScorePoints(score);
     }
 
     public CraftScoreboard getScoreboard() {

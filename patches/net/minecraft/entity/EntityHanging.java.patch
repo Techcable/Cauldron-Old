@@ -62,17 +62,17 @@
 +                HangingBreakEvent event = new HangingBreakEvent((Hanging) this.getBukkitEntity(), HangingBreakEvent.RemoveCause.DEFAULT);
 +                PaintingBreakEvent paintingEvent = null;
 +
-+                if (par1DamageSource.getEntity() != null)
++                if (p_70097_1_.getEntity() != null)
 +                {
-+                    event = new org.bukkit.event.hanging.HangingBreakByEntityEvent((Hanging) this.getBukkitEntity(), par1DamageSource.getEntity() == null ? null : par1DamageSource.getEntity().getBukkitEntity());
++                    event = new org.bukkit.event.hanging.HangingBreakByEntityEvent((Hanging) this.getBukkitEntity(), p_70097_1_.getEntity() == null ? null : p_70097_1_.getEntity().getBukkitEntity());
 +
 +                    if (this instanceof EntityPainting)
 +                    {
 +                        // Fire old painting event until it can be removed
-+                        paintingEvent = new org.bukkit.event.painting.PaintingBreakByEntityEvent((Painting) this.getBukkitEntity(), par1DamageSource.getEntity() == null ? null : par1DamageSource.getEntity().getBukkitEntity());
++                        paintingEvent = new org.bukkit.event.painting.PaintingBreakByEntityEvent((Painting) this.getBukkitEntity(), p_70097_1_.getEntity() == null ? null : p_70097_1_.getEntity().getBukkitEntity());
 +                    }
 +                }
-+                else if (par1DamageSource.isExplosion())
++                else if (p_70097_1_.isExplosion())
 +                {
 +                    event = new HangingBreakEvent((Hanging) this.getBukkitEntity(), HangingBreakEvent.RemoveCause.EXPLOSION);
 +                }
@@ -93,10 +93,10 @@
 +                // CraftBukkit end
                  this.setDead();
                  this.setBeenAttacked();
-                 this.onBroken(par1DamageSource.getEntity());
+                 this.onBroken(p_70097_1_.getEntity());
 @@ -246,6 +319,22 @@
      {
-         if (!this.worldObj.isRemote && !this.isDead && par1 * par1 + par3 * par3 + par5 * par5 > 0.0D)
+         if (!this.worldObj.isRemote && !this.isDead && p_70091_1_ * p_70091_1_ + p_70091_3_ * p_70091_3_ + p_70091_5_ * p_70091_5_ > 0.0D)
          {
 +            if (this.isDead)
 +            {

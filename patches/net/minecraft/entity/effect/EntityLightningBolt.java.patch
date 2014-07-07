@@ -9,65 +9,64 @@
  public class EntityLightningBolt extends EntityWeatherEffect
  {
      private int lightningState;
-@@ -17,15 +19,26 @@
+@@ -17,15 +19,25 @@
      private int boltLivingTime;
      private static final String __OBFID = "CL_00001666";
  
 +    // CraftBukkit start
 +    public boolean isEffect = false;
 +
-     public EntityLightningBolt(World par1World, double par2, double par4, double par6)
+     public EntityLightningBolt(World p_i1703_1_, double p_i1703_2_, double p_i1703_4_, double p_i1703_6_)
      {
-+        this(par1World, par2, par4, par6, false);
++        this(p_i1703_1_, p_i1703_2_, p_i1703_4_, p_i1703_6_, false);
 +    }
 +
-+    public EntityLightningBolt(World par1World, double par2, double par4, double par6, boolean isEffect)
++    public EntityLightningBolt(World p_i1703_1_, double p_i1703_2_, double p_i1703_4_, double p_i1703_6_, boolean isEffect)
 +    {
-         super(par1World);
+         super(p_i1703_1_);
 +        this.isEffect = isEffect;
 +        // CraftBukkit end
-         this.setLocationAndAngles(par2, par4, par6, 0.0F, 0.0F);
+         this.setLocationAndAngles(p_i1703_2_, p_i1703_4_, p_i1703_6_, 0.0F, 0.0F);
          this.lightningState = 2;
          this.boltVertex = this.rand.nextLong();
          this.boltLivingTime = this.rand.nextInt(3) + 1;
  
--        if (!par1World.isRemote && par1World.getGameRules().getGameRuleBooleanValue("doFireTick") && (par1World.difficultySetting == EnumDifficulty.NORMAL || par1World.difficultySetting == EnumDifficulty.HARD) && par1World.doChunksNearChunkExist(MathHelper.floor_double(par2), MathHelper.floor_double(par4), MathHelper.floor_double(par6), 10))
-+        // CraftBukkit
-+        if (!isEffect && !par1World.isRemote && par1World.getGameRules().getGameRuleBooleanValue("doFireTick") && (par1World.difficultySetting == EnumDifficulty.NORMAL || par1World.difficultySetting == EnumDifficulty.HARD) && par1World.doChunksNearChunkExist(MathHelper.floor_double(par2), MathHelper.floor_double(par4), MathHelper.floor_double(par6), 10))
+-        if (!p_i1703_1_.isRemote && p_i1703_1_.getGameRules().getGameRuleBooleanValue("doFireTick") && (p_i1703_1_.difficultySetting == EnumDifficulty.NORMAL || p_i1703_1_.difficultySetting == EnumDifficulty.HARD) && p_i1703_1_.doChunksNearChunkExist(MathHelper.floor_double(p_i1703_2_), MathHelper.floor_double(p_i1703_4_), MathHelper.floor_double(p_i1703_6_), 10))
++        if (!isEffect && !p_i1703_1_.isRemote && p_i1703_1_.getGameRules().getGameRuleBooleanValue("doFireTick") && (p_i1703_1_.difficultySetting == EnumDifficulty.NORMAL || p_i1703_1_.difficultySetting == EnumDifficulty.HARD) && p_i1703_1_.doChunksNearChunkExist(MathHelper.floor_double(p_i1703_2_), MathHelper.floor_double(p_i1703_4_), MathHelper.floor_double(p_i1703_6_), 10))  // CraftBukkit
          {
-             int i = MathHelper.floor_double(par2);
-             int j = MathHelper.floor_double(par4);
-@@ -33,7 +46,13 @@
+             int i = MathHelper.floor_double(p_i1703_2_);
+             int j = MathHelper.floor_double(p_i1703_4_);
+@@ -33,7 +45,13 @@
  
-             if (par1World.getBlock(i, j, k).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(par1World, i, j, k))
+             if (p_i1703_1_.getBlock(i, j, k).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(p_i1703_1_, i, j, k))
              {
--                par1World.setBlock(i, j, k, Blocks.fire);
+-                p_i1703_1_.setBlock(i, j, k, Blocks.fire);
 +                // CraftBukkit start
-+                if (!CraftEventFactory.callBlockIgniteEvent(par1World, i, j, k, this).isCancelled())
++                if (!CraftEventFactory.callBlockIgniteEvent(p_i1703_1_, i, j, k, this).isCancelled())
 +                {
-+                    par1World.setBlock(i, j, k, Blocks.fire);
++                    p_i1703_1_.setBlock(i, j, k, Blocks.fire);
 +                }
 +
 +                // CraftBukkit end
              }
  
              for (i = 0; i < 4; ++i)
-@@ -44,7 +63,13 @@
+@@ -44,7 +62,13 @@
  
-                 if (par1World.getBlock(j, k, l).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(par1World, j, k, l))
+                 if (p_i1703_1_.getBlock(j, k, l).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(p_i1703_1_, j, k, l))
                  {
--                    par1World.setBlock(j, k, l, Blocks.fire);
+-                    p_i1703_1_.setBlock(j, k, l, Blocks.fire);
 +                    // CraftBukkit start
-+                    if (!CraftEventFactory.callBlockIgniteEvent(par1World, j, k, l, this).isCancelled())
++                    if (!CraftEventFactory.callBlockIgniteEvent(p_i1703_1_, j, k, l, this).isCancelled())
 +                    {
-+                        par1World.setBlock(j, k, l, Blocks.fire);
++                        p_i1703_1_.setBlock(j, k, l, Blocks.fire);
 +                    }
 +
 +                    // CraftBukkit end
                  }
              }
          }
-@@ -74,7 +99,8 @@
+@@ -74,7 +98,8 @@
                  this.lightningState = 1;
                  this.boltVertex = this.rand.nextLong();
  
@@ -77,7 +76,7 @@
                  {
                      int i = MathHelper.floor_double(this.posX);
                      int j = MathHelper.floor_double(this.posY);
-@@ -82,13 +108,19 @@
+@@ -82,13 +107,19 @@
  
                      if (this.worldObj.getBlock(i, j, k).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(this.worldObj, i, j, k))
                      {

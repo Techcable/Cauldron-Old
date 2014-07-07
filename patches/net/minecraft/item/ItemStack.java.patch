@@ -8,7 +8,7 @@
  import net.minecraft.block.Block;
  import net.minecraft.enchantment.Enchantment;
  import net.minecraft.enchantment.EnchantmentDurability;
-@@ -34,6 +35,20 @@
+@@ -35,6 +36,20 @@
  import net.minecraft.world.World;
  import net.minecraftforge.event.ForgeEventFactory;
  
@@ -29,7 +29,7 @@
  public final class ItemStack
  {
      public static final DecimalFormat field_111284_a = new DecimalFormat("#.###");
-@@ -42,7 +57,13 @@
+@@ -43,7 +58,13 @@
      private Item field_151002_e;
      public NBTTagCompound stackTagCompound;
      int itemDamage;
@@ -43,10 +43,10 @@
 +    public static EntityPlayer currentPlayer; // Cauldron - reference to current player calling onItemUse
      private static final String __OBFID = "CL_00000043";
  
-     public ItemStack(Block par1Block)
-@@ -123,12 +144,116 @@
+     public ItemStack(Block p_i1876_1_)
+@@ -124,12 +145,116 @@
  
-     public boolean tryPlaceItemIntoWorld(EntityPlayer par1EntityPlayer, World par2World, int par3, int par4, int par5, int par6, float par7, float par8, float par9)
+     public boolean tryPlaceItemIntoWorld(EntityPlayer p_77943_1_, World p_77943_2_, int p_77943_3_, int p_77943_4_, int p_77943_5_, int p_77943_6_, float p_77943_7_, float p_77943_8_, float p_77943_9_)
      {
 +        // Cauldron start - handle all placement events here
 +        int meta = this.getItemDamage();
@@ -59,32 +59,32 @@
 +
 +        if (!(this.getItem() instanceof ItemBucket)) // if not bucket
 +        {
-+            par2World.captureBlockStates = true;
++            p_77943_2_.captureBlockStates = true;
 +            if (this.getItem() instanceof ItemDye && this.getItemDamage() == 15) 
 +            {
-+                Block block= par2World.getBlock(par3, par4, par5);
++                Block block= p_77943_2_.getBlock(p_77943_3_, p_77943_4_, p_77943_5_);
 +                if (block != null && (block instanceof BlockSapling || block instanceof BlockMushroom))
 +                {
-+                    par2World.captureTreeGeneration = true;
++                    p_77943_2_.captureTreeGeneration = true;
 +                }
 +            }
 +        }
-+        currentPlayer = par1EntityPlayer;
-         boolean flag = this.getItem().onItemUse(this, par1EntityPlayer, par2World, par3, par4, par5, par6, par7, par8, par9);
-+        par2World.captureBlockStates = false;
++        currentPlayer = p_77943_1_;
+         boolean flag = this.getItem().onItemUse(this, p_77943_1_, p_77943_2_, p_77943_3_, p_77943_4_, p_77943_5_, p_77943_6_, p_77943_7_, p_77943_8_, p_77943_9_);
++        p_77943_2_.captureBlockStates = false;
 +        currentPlayer = null;
-+        if (flag && par2World.captureTreeGeneration && par2World.capturedBlockStates.size() > 0) 
++        if (flag && p_77943_2_.captureTreeGeneration && p_77943_2_.capturedBlockStates.size() > 0) 
 +        {
-+            par2World.captureTreeGeneration = false;
-+            Location location = new Location(par2World.getWorld(), par3, par4, par5);
++            p_77943_2_.captureTreeGeneration = false;
++            Location location = new Location(p_77943_2_.getWorld(), p_77943_3_, p_77943_4_, p_77943_5_);
 +            TreeType treeType = BlockSapling.treeType;
 +            BlockSapling.treeType = null;
-+            List<BlockState> blocks = (List<BlockState>) par2World.capturedBlockStates.clone();
-+            par2World.capturedBlockStates.clear();
++            List<BlockState> blocks = (List<BlockState>) p_77943_2_.capturedBlockStates.clone();
++            p_77943_2_.capturedBlockStates.clear();
 +            StructureGrowEvent event = null;
 +            if (treeType != null)
 +            {
-+                event = new StructureGrowEvent(location, treeType, false, (Player) par1EntityPlayer.getBukkitEntity(), blocks);
++                event = new StructureGrowEvent(location, treeType, false, (Player) p_77943_1_.getBukkitEntity(), blocks);
 +                org.bukkit.Bukkit.getPluginManager().callEvent(event);
 +            }
 +            if (event == null || !event.isCancelled())
@@ -100,17 +100,17 @@
 +
          if (flag)
          {
--            par1EntityPlayer.addStat(StatList.objectUseStats[Item.getIdFromItem(this.field_151002_e)], 1);
+-            p_77943_1_.addStat(StatList.objectUseStats[Item.getIdFromItem(this.field_151002_e)], 1);
 +            org.bukkit.event.block.BlockPlaceEvent placeEvent = null;
-+            List<BlockState> blockstates = (List<BlockState>) par2World.capturedBlockStates.clone();
-+            par2World.capturedBlockStates.clear();
++            List<BlockState> blockstates = (List<BlockState>) p_77943_2_.capturedBlockStates.clone();
++            p_77943_2_.capturedBlockStates.clear();
 +            if (blockstates.size() > 1) 
 +            {
-+                placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockMultiPlaceEvent(par2World, par1EntityPlayer, blockstates, par3, par4, par5);
++                placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockMultiPlaceEvent(p_77943_2_, p_77943_1_, blockstates, p_77943_3_, p_77943_4_, p_77943_5_);
 +            } 
 +            else if (blockstates.size() == 1)
 +            {
-+                placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(par2World, par1EntityPlayer, blockstates.get(0), par3, par4, par5);
++                placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(p_77943_2_, p_77943_1_, blockstates.get(0), p_77943_3_, p_77943_4_, p_77943_5_);
 +            }
 +            if (placeEvent != null && (placeEvent.isCancelled() || !placeEvent.canBuild()))
 +            {
@@ -118,9 +118,9 @@
 +                // revert back all captured blocks
 +                for (BlockState blockstate : blockstates)
 +                {
-+                    par2World.restoringBlockStates = true;
++                    p_77943_2_.restoringBlockStates = true;
 +                    blockstate.update(true, false); // restore blockstate
-+                    par2World.restoringBlockStates = false;
++                    p_77943_2_.restoringBlockStates = false;
 +                }
 +                // make sure to restore stack after cancel
 +                this.setItemDamage(meta);
@@ -133,9 +133,9 @@
 +            else
 +            {
 +                // drop items
-+                for (int i = 0; i < par2World.capturedItems.size(); i++)
++                for (int i = 0; i < p_77943_2_.capturedItems.size(); i++)
 +                {
-+                    par2World.spawnEntityInWorld(par2World.capturedItems.get(i));
++                    p_77943_2_.spawnEntityInWorld(p_77943_2_.capturedItems.get(i));
 +                }
 +
 +                for (BlockState blockstate : blockstates)
@@ -143,26 +143,26 @@
 +                    int x = blockstate.getX();
 +                    int y = blockstate.getY();
 +                    int z = blockstate.getZ();
-+                    int metadata = par2World.getBlockMetadata(x, y, z);
++                    int metadata = p_77943_2_.getBlockMetadata(x, y, z);
 +                    int updateFlag = ((CraftBlockState)blockstate).getFlag();
 +                    Block oldBlock = CraftMagicNumbers.getBlock(blockstate.getTypeId());
-+                    Block newBlock = par2World.getBlock(x, y, z);
++                    Block newBlock = p_77943_2_.getBlock(x, y, z);
 +                    if (newBlock != null && !(newBlock.hasTileEntity(metadata))) { // Containers get placed automatically
-+                        newBlock.onBlockAdded(par2World, x, y, z);
++                        newBlock.onBlockAdded(p_77943_2_, x, y, z);
 +                    }
 +
-+                    par2World.markAndNotifyBlock(x, y, z, null, oldBlock, newBlock, updateFlag);
++                    p_77943_2_.markAndNotifyBlock(x, y, z, null, oldBlock, newBlock, updateFlag);
 +                }
-+                par1EntityPlayer.addStat(StatList.objectUseStats[Item.getIdFromItem(this.field_151002_e)], 1);
++                p_77943_1_.addStat(StatList.objectUseStats[Item.getIdFromItem(this.field_151002_e)], 1);
 +            }
          }
-+        par2World.capturedBlockStates.clear();
-+        par2World.capturedItems.clear();
++        p_77943_2_.capturedBlockStates.clear();
++        p_77943_2_.capturedItems.clear();
 +        // Cauldron end
  
          return flag;
      }
-@@ -224,8 +349,22 @@
+@@ -225,8 +350,22 @@
          return getItem().getMaxDamage(this);
      }
  
@@ -174,26 +174,26 @@
 +     * getMaxDamage(). Returns false otherwise or if the ItemStack can't be damaged or if all points of damage are
 +     * negated.
 +     */
-     public boolean attemptDamageItem(int par1, Random par2Random)
+     public boolean attemptDamageItem(int p_96631_1_, Random p_96631_2_)
      {
-+        return isDamaged(par1, par2Random, null);
++        return isDamaged(p_96631_1_, p_96631_2_, null);
 +    }
 +
-+    public boolean isDamaged(int par1, Random par2Random, EntityLivingBase entitylivingbase)
++    public boolean isDamaged(int p_96631_1_, Random p_96631_2_, EntityLivingBase entitylivingbase)
 +    {
 +        // Spigot end
          if (!this.isItemStackDamageable())
          {
              return false;
-@@ -247,6 +386,22 @@
+@@ -248,6 +387,23 @@
  
-                 par1 -= k;
+                 p_96631_1_ -= k;
  
 +                // Spigot start
 +                if (entitylivingbase instanceof EntityPlayerMP)
 +                {
 +                    org.bukkit.craftbukkit.inventory.CraftItemStack item = org.bukkit.craftbukkit.inventory.CraftItemStack.asCraftMirror(this);
-+                    org.bukkit.event.player.PlayerItemDamageEvent event = new org.bukkit.event.player.PlayerItemDamageEvent((org.bukkit.entity.Player) entitylivingbase.getBukkitEntity(), item, par1);
++                    org.bukkit.event.player.PlayerItemDamageEvent event = new org.bukkit.event.player.PlayerItemDamageEvent((org.bukkit.entity.Player) entitylivingbase.getBukkitEntity(), item, p_96631_1_);
 +                    org.bukkit.Bukkit.getServer().getPluginManager().callEvent(event);
 +
 +                    if (event.isCancelled())
@@ -201,32 +201,33 @@
 +                        return false;
 +                    }
 +
-+                    par1 = event.getDamage();
++                    p_96631_1_ = event.getDamage();
 +                }
 +
 +                // Spigot end
-                 if (par1 <= 0)
++
+                 if (p_96631_1_ <= 0)
                  {
                      return false;
-@@ -285,6 +440,13 @@
+@@ -286,6 +442,13 @@
                          this.stackSize = 0;
                      }
  
 +                    // CraftBukkit start - Check for item breaking
-+                    if (this.stackSize == 0 && par2EntityLivingBase instanceof EntityPlayer)
++                    if (this.stackSize == 0 && p_77972_2_ instanceof EntityPlayer)
 +                    {
-+                        org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerItemBreakEvent((EntityPlayer) par2EntityLivingBase, this);
++                        org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerItemBreakEvent((EntityPlayer) p_77972_2_, this);
 +                    }
 +
 +                    // CraftBukkit end
                      this.itemDamage = 0;
                  }
              }
-@@ -416,6 +578,7 @@
+@@ -417,6 +580,7 @@
  
-     public void setTagCompound(NBTTagCompound par1NBTTagCompound)
+     public void setTagCompound(NBTTagCompound p_77982_1_)
      {
 +        // Cauldron - do not alter name of compound. Fixes Ars Magica 2 Spellbooks
-         this.stackTagCompound = par1NBTTagCompound;
+         this.stackTagCompound = p_77982_1_;
      }
  

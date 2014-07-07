@@ -27,50 +27,49 @@
 +    // CraftBukkit end
      private static final String __OBFID = "CL_00000577";
  
-     public MapData(String par1Str)
+     public MapData(String p_i2140_1_)
      {
-         super(par1Str);
+         super(p_i2140_1_);
 +        // CraftBukkit start
 +        mapView = new CraftMapView(this);
 +        server = (CraftServer) org.bukkit.Bukkit.getServer();
 +        // CraftBukkit end
      }
  
-     public void readFromNBT(NBTTagCompound par1NBTTagCompound)
+     public void readFromNBT(NBTTagCompound p_76184_1_)
 @@ -107,7 +125,7 @@
      {
-         if (!this.playersHashMap.containsKey(par1EntityPlayer))
+         if (!this.playersHashMap.containsKey(p_76191_1_))
          {
--            MapData.MapInfo mapinfo = new MapData.MapInfo(par1EntityPlayer);
-+            MapData.MapInfo mapinfo = new MapData.MapInfo(this, par1EntityPlayer); // Cauldron
-             this.playersHashMap.put(par1EntityPlayer, mapinfo);
+-            MapData.MapInfo mapinfo = new MapData.MapInfo(p_76191_1_);
++            MapData.MapInfo mapinfo = new MapData.MapInfo(this, p_76191_1_); // Cauldron
+             this.playersHashMap.put(p_76191_1_, mapinfo);
              this.playersArrayList.add(mapinfo);
          }
 @@ -265,7 +283,7 @@
  
          if (mapinfo == null)
          {
--            mapinfo = new MapData.MapInfo(par1EntityPlayer);
-+            mapinfo = new MapData.MapInfo(this, par1EntityPlayer); // Cauldron
-             this.playersHashMap.put(par1EntityPlayer, mapinfo);
+-            mapinfo = new MapData.MapInfo(p_82568_1_);
++            mapinfo = new MapData.MapInfo(this, p_82568_1_); // Cauldron
+             this.playersHashMap.put(p_82568_1_, mapinfo);
              this.playersArrayList.add(mapinfo);
          }
-@@ -300,10 +318,13 @@
+@@ -300,10 +318,12 @@
          private byte[] lastPlayerLocationOnMap;
          public int field_82569_d;
          private boolean field_82570_i;
-+        /** reference in MapInfo to MapData object */
 +        final MapData mapDataObj; // Cauldron
          private static final String __OBFID = "CL_00000578";
  
--        public MapInfo(EntityPlayer par2EntityPlayer)
-+        public MapInfo(MapData mapData, EntityPlayer par2EntityPlayer)
+-        public MapInfo(EntityPlayer p_i2138_2_)
++        public MapInfo(MapData mapData, EntityPlayer p_i2138_2_)
          {
-+            this.mapDataObj = mapData;
-             this.entityplayerObj = par2EntityPlayer;
++            this.mapDataObj = mapData; // Cauldron
+             this.entityplayerObj = p_i2138_2_;
  
              for (int i = 0; i < this.field_76209_b.length; ++i)
-@@ -328,20 +349,37 @@
+@@ -328,20 +348,37 @@
                  int i;
                  int i1;
  
@@ -113,5 +112,5 @@
 +                    // Spigot end
 +                    // CraftBukkit end
  
-                     boolean flag = !par1ItemStack.isOnItemFrame();
+                     boolean flag = !p_76204_1_.isOnItemFrame();
  

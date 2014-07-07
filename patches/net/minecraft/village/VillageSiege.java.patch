@@ -9,13 +9,3 @@
              ChunkCoordinates chunkcoordinates = this.theVillage.getCenter();
              entityzombie.setHomeArea(chunkcoordinates.posX, chunkcoordinates.posY, chunkcoordinates.posZ, this.theVillage.getVillageRadius());
              return true;
-@@ -213,7 +213,8 @@
- 
-             if (this.theVillage.isInRange(i1, j1, k1) && SpawnerAnimals.canCreatureTypeSpawnAtLocation(EnumCreatureType.monster, this.worldObj, i1, j1, k1))
-             {
--                this.worldObj.getWorldVec3Pool().getVecFromPool((double)i1, (double)j1, (double)k1);
-+                // CraftBukkit - add Return
-+                return this.worldObj.getWorldVec3Pool().getVecFromPool((double) i1, (double) j1, (double) k1);
-             }
-         }
- 

@@ -1,5 +1,8 @@
 package org.bukkit.craftbukkit.block;
 
+import net.minecraft.block.BlockDispenser;
+import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntityDispenser;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -12,13 +15,13 @@ import org.bukkit.projectiles.BlockProjectileSource;
 
 public class CraftDispenser extends CraftBlockState implements Dispenser {
     private final CraftWorld world;
-    private final net.minecraft.tileentity.TileEntityDispenser dispenser;
+    private final TileEntityDispenser dispenser;
 
     public CraftDispenser(final Block block) {
         super(block);
 
         world = (CraftWorld) block.getWorld();
-        dispenser = (net.minecraft.tileentity.TileEntityDispenser) world.getTileEntityAt(getX(), getY(), getZ());
+        dispenser = (TileEntityDispenser) world.getTileEntityAt(getX(), getY(), getZ());
     }
 
     public Inventory getInventory() {
@@ -39,7 +42,7 @@ public class CraftDispenser extends CraftBlockState implements Dispenser {
         Block block = getBlock();
 
         if (block.getType() == Material.DISPENSER) {
-            net.minecraft.block.BlockDispenser dispense = (net.minecraft.block.BlockDispenser) net.minecraft.init.Blocks.dispenser;
+            BlockDispenser dispense = (BlockDispenser) Blocks.dispenser;
 
             dispense.func_149941_e(world.getHandle(), getX(), getY(), getZ());
             return true;

@@ -1,5 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
+import net.minecraft.entity.projectile.EntityFishHook;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MathHelper;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.craftbukkit.CraftServer;
@@ -11,7 +14,7 @@ import org.bukkit.projectiles.ProjectileSource;
 public class CraftFish extends AbstractProjectile implements Fish {
     private double biteChance = -1;
 
-    public CraftFish(CraftServer server, net.minecraft.entity.projectile.EntityFishHook entity) {
+    public CraftFish(CraftServer server, EntityFishHook entity) {
         super(server, entity);
     }
 
@@ -25,13 +28,13 @@ public class CraftFish extends AbstractProjectile implements Fish {
 
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof CraftHumanEntity) {
-            getHandle().field_146042_b = (net.minecraft.entity.player.EntityPlayer) ((CraftHumanEntity) shooter).entity;
+            getHandle().field_146042_b = (EntityPlayer) ((CraftHumanEntity) shooter).entity;
         }
     }
 
     @Override
-    public net.minecraft.entity.projectile.EntityFishHook getHandle() {
-        return (net.minecraft.entity.projectile.EntityFishHook) entity;
+    public EntityFishHook getHandle() {
+        return (EntityFishHook) entity;
     }
 
     @Override
@@ -44,10 +47,10 @@ public class CraftFish extends AbstractProjectile implements Fish {
     }
 
     public double getBiteChance() {
-        net.minecraft.entity.projectile.EntityFishHook hook = getHandle();
+        EntityFishHook hook = getHandle();
 
         if (this.biteChance == -1) {
-            if (hook.worldObj.canLightningStrikeAt(net.minecraft.util.MathHelper.floor_double(hook.posX), net.minecraft.util.MathHelper.floor_double(hook.posY) + 1, net.minecraft.util.MathHelper.floor_double(hook.posZ))) {
+            if (hook.worldObj.canLightningStrikeAt(MathHelper.floor_double(hook.posX), net.minecraft.util.MathHelper.floor_double(hook.posY) + 1, net.minecraft.util.MathHelper.floor_double(hook.posZ))) {
                 return 1/300.0;
             }
             return 1/500.0;

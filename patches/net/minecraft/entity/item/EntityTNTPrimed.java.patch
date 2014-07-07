@@ -14,7 +14,7 @@
 +    public float yield = 4; // CraftBukkit
 +    public boolean isIncendiary = false; // CraftBukkit
  
-     public EntityTNTPrimed(World par1World)
+     public EntityTNTPrimed(World p_i1729_1_)
      {
 @@ -68,12 +72,14 @@
  
@@ -54,4 +54,4 @@
 +        // CraftBukkit end
      }
  
-     protected void writeEntityToNBT(NBTTagCompound par1NBTTagCompound)
+     protected void writeEntityToNBT(NBTTagCompound p_70014_1_)

@@ -31,23 +31,23 @@
 +    private CraftInventoryView bukkitEntity = null;
 +    private InventoryPlayer player;
  
-     public ContainerRepair(InventoryPlayer par1InventoryPlayer, final World par2World, final int par3, final int par4, final int par5, EntityPlayer par6EntityPlayer)
+     public ContainerRepair(InventoryPlayer p_i1800_1_, final World p_i1800_2_, final int p_i1800_3_, final int p_i1800_4_, final int p_i1800_5_, EntityPlayer p_i1800_6_)
      {
-+        this.player = par1InventoryPlayer;
++        this.player = p_i1800_1_;
 +        // CraftBukkit end
-         this.theWorld = par2World;
-         this.field_82861_i = par3;
-         this.field_82858_j = par4;
+         this.theWorld = p_i1800_2_;
+         this.field_82861_i = p_i1800_3_;
+         this.field_82858_j = p_i1800_4_;
 @@ -458,6 +457,11 @@
  
-     public boolean canInteractWith(EntityPlayer par1EntityPlayer)
+     public boolean canInteractWith(EntityPlayer p_75145_1_)
      {
 +        if (!this.checkReachable)
 +        {
 +            return true;    // CraftBukkit
 +        }
 +
-         return this.theWorld.getBlock(this.field_82861_i, this.field_82858_j, this.field_82859_k) != Blocks.anvil ? false : par1EntityPlayer.getDistanceSq((double)this.field_82861_i + 0.5D, (double)this.field_82858_j + 0.5D, (double)this.field_82859_k + 0.5D) <= 64.0D;
+         return this.theWorld.getBlock(this.field_82861_i, this.field_82858_j, this.field_82859_k) != Blocks.anvil ? false : p_75145_1_.getDistanceSq((double)this.field_82861_i + 0.5D, (double)this.field_82858_j + 0.5D, (double)this.field_82859_k + 0.5D) <= 64.0D;
      }
  
 @@ -532,4 +536,18 @@

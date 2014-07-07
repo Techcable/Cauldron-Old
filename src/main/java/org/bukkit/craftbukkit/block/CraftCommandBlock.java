@@ -1,11 +1,13 @@
 package org.bukkit.craftbukkit.block;
 
+import net.minecraft.tileentity.TileEntityCommandBlock;
+
 import org.bukkit.block.Block;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.craftbukkit.CraftWorld;
 
 public class CraftCommandBlock extends CraftBlockState implements CommandBlock {
-    private final net.minecraft.tileentity.TileEntityCommandBlock commandBlock;
+    private final TileEntityCommandBlock commandBlock;
     private String command;
     private String name;
 
@@ -13,7 +15,7 @@ public class CraftCommandBlock extends CraftBlockState implements CommandBlock {
         super(block);
 
         CraftWorld world = (CraftWorld) block.getWorld();
-        commandBlock = (net.minecraft.tileentity.TileEntityCommandBlock) world.getTileEntityAt(getX(), getY(), getZ());
+        commandBlock = (TileEntityCommandBlock) world.getTileEntityAt(getX(), getY(), getZ());
         command = commandBlock.func_145993_a().field_145763_e;
         name = commandBlock.func_145993_a().getCommandSenderName();
     }

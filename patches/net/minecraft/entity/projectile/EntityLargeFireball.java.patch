@@ -10,7 +10,7 @@
  {
      public int field_92057_e = 1;
 @@ -39,7 +41,17 @@
-                 par1MovingObjectPosition.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 6.0F);
+                 p_70227_1_.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 6.0F);
              }
  
 -            this.worldObj.newExplosion((Entity)null, this.posX, this.posY, this.posZ, (float)this.field_92057_e, true, this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing"));
@@ -30,11 +30,11 @@
      }
 @@ -56,7 +68,8 @@
  
-         if (par1NBTTagCompound.hasKey("ExplosionPower", 99))
+         if (p_70037_1_.hasKey("ExplosionPower", 99))
          {
--            this.field_92057_e = par1NBTTagCompound.getInteger("ExplosionPower");
+-            this.field_92057_e = p_70037_1_.getInteger("ExplosionPower");
 +            // CraftBukkit - set bukkitYield when setting explosionpower
-+            this.bukkitYield = this.field_92057_e = par1NBTTagCompound.getInteger("ExplosionPower");
++            this.bukkitYield = this.field_92057_e = p_70037_1_.getInteger("ExplosionPower");
          }
      }
  }

@@ -56,4 +56,4 @@
 +        return maxStack; // CraftBukkit
      }
  
-     public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer)
+     public boolean isUseableByPlayer(EntityPlayer p_70300_1_)

@@ -1,18 +1,16 @@
 --- ../src-base/minecraft/net/minecraft/entity/item/EntityItemFrame.java
 +++ ../src-work/minecraft/net/minecraft/entity/item/EntityItemFrame.java
-@@ -45,6 +45,15 @@
+@@ -45,6 +45,13 @@
          {
              if (!this.worldObj.isRemote)
              {
 +                // CraftBukkit start
-+                org.bukkit.event.entity.EntityDamageEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.handleEntityDamageEvent(this, par1DamageSource, par2);
-+
-+                if ((event != null && event.isCancelled()) || this.isDead)
++                if (org.bukkit.craftbukkit.event.CraftEventFactory.handleNonLivingEntityDamageEvent(this, p_70097_1_, p_70097_2_) || this.isDead)
 +                {
 +                    return true;
 +                }
-+
 +                // CraftBukkit end
-                 this.func_146065_b(par1DamageSource.getEntity(), false);
++
+                 this.func_146065_b(p_70097_1_.getEntity(), false);
                  this.setDisplayedItem((ItemStack)null);
              }

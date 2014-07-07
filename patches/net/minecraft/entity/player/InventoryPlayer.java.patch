@@ -68,9 +68,9 @@
 +    }
 +    // CraftBukkit end
 +
-     public InventoryPlayer(EntityPlayer par1EntityPlayer)
+     public InventoryPlayer(EntityPlayer p_i1750_1_)
      {
-         this.player = par1EntityPlayer;
+         this.player = p_i1750_1_;
 @@ -81,6 +128,34 @@
          return -1;
      }

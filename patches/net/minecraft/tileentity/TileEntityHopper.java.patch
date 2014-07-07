@@ -53,7 +53,7 @@
      private static final String __OBFID = "CL_00000359";
  
      public void readFromNBT(NBTTagCompound p_145839_1_)
-@@ -203,12 +244,18 @@
+@@ -212,12 +253,18 @@
  
                  if (flag)
                  {
@@ -73,74 +73,86 @@
              return false;
          }
          else
-@@ -232,11 +279,64 @@
-                 if (this.getStackInSlot(i) != null)
+@@ -284,19 +331,71 @@
                  {
-                     ItemStack itemstack = this.getStackInSlot(i).copy();
--                    ItemStack itemstack1 = func_145889_a(iinventory, this.decrStackSize(i, 1), Facing.oppositeSide[BlockHopper.getDirectionFromMetadata(this.getBlockMetadata())]);
-+                    // CraftBukkit start - Call event when pushing items into other inventories
-+                    CraftItemStack oitemstack = CraftItemStack.asCraftMirror(this.decrStackSize(i, 1));
-+                    Inventory destinationInventory;
- 
-+                    // Have to special case large chests as they work oddly
-+                    if (iinventory instanceof InventoryLargeChest)
-+                    {
-+                        destinationInventory = new org.bukkit.craftbukkit.inventory.CraftInventoryDoubleChest((InventoryLargeChest) iinventory);
-+                    }
-+                    else
-+                    {
-+                        // Cauldron start - support mod inventories, with no owners
-+                        try {
-+                            if (iinventory.getOwner() != null) {
-+                                destinationInventory = iinventory.getOwner().getInventory();
-+                            } else {
-+                                // TODO: create a mod inventory for passing to the event, instead of null
-+                                destinationInventory = null;
-+                            }
-+                         } catch (AbstractMethodError e) { // fixes openblocks AbstractMethodError
-+                            if (iinventory instanceof net.minecraft.tileentity.TileEntity) {
-+                                org.bukkit.inventory.InventoryHolder holder = net.minecraftforge.cauldron.CauldronUtils.getOwner((net.minecraft.tileentity.TileEntity)iinventory);
-+                                if (holder != null) {
-+                                    destinationInventory = holder.getInventory();
-+                                } else {
-+                                    destinationInventory = null;
-+                                }
-+                            } else {
-+                                destinationInventory = null;
-+                            }
-+                        }
-+                        // Cauldron end
-+                    }
-+
-+                    InventoryMoveItemEvent event = new InventoryMoveItemEvent(this.getOwner().getInventory(), oitemstack.clone(), destinationInventory, true);
-+                    this.getWorldObj().getServer().getPluginManager().callEvent(event);
-+
-+                    if (event.isCancelled())
-+                    {
-+                        this.setInventorySlotContents(i, itemstack);
-+                        this.func_145896_c(worldObj.spigotConfig.hopperTransfer); // Spigot
-+                        return false;
-+                    }
-+
-+                    ItemStack itemstack1 = func_145889_a(iinventory, CraftItemStack.asNMSCopy(event.getItem()), Facing.oppositeSide[BlockHopper.getDirectionFromMetadata(this.getBlockMetadata())]);
-+
-                     if (itemstack1 == null || itemstack1.stackSize == 0)
+                     if (this.getStackInSlot(j) != null)
                      {
--                        iinventory.markDirty();
-+                        if (event.getItem().equals(oitemstack))
+-                        ItemStack itemstack = this.getStackInSlot(j).copy();
+-                        ItemStack itemstack1 = func_145889_a(iinventory, this.decrStackSize(j, 1), i);
+-
++                        ItemStack itemstack = this.getStackInSlot(i).copy();
++                        // CraftBukkit start - Call event when pushing items into other inventories
++                        CraftItemStack oitemstack = CraftItemStack.asCraftMirror(this.decrStackSize(i, 1));
++                        Inventory destinationInventory;
++    
++                        // Have to special case large chests as they work oddly
++                        if (iinventory instanceof InventoryLargeChest)
 +                        {
-+                            iinventory.markDirty();
++                            destinationInventory = new org.bukkit.craftbukkit.inventory.CraftInventoryDoubleChest((InventoryLargeChest) iinventory);
 +                        }
 +                        else
 +                        {
-+                            this.setInventorySlotContents(i, itemstack);
++                            // Cauldron start - support mod inventories, with no owners
++                            try {
++                                if (iinventory.getOwner() != null) {
++                                    destinationInventory = iinventory.getOwner().getInventory();
++                                } else {
++                                    // TODO: create a mod inventory for passing to the event, instead of null
++                                    destinationInventory = null;
++                                }
++                             } catch (AbstractMethodError e) { // fixes openblocks AbstractMethodError
++                                if (iinventory instanceof net.minecraft.tileentity.TileEntity) {
++                                    org.bukkit.inventory.InventoryHolder holder = net.minecraftforge.cauldron.CauldronUtils.getOwner((net.minecraft.tileentity.TileEntity)iinventory);
++                                    if (holder != null) {
++                                        destinationInventory = holder.getInventory();
++                                    } else {
++                                        destinationInventory = null;
++                                    }
++                                } else {
++                                    destinationInventory = null;
++                                }
++                            }
++                            // Cauldron end
 +                        }
-+
-+                        // CraftBukkit end
-                         return true;
++    
++                        InventoryMoveItemEvent event = new InventoryMoveItemEvent(this.getOwner().getInventory(), oitemstack.clone(), destinationInventory, true);
++                        this.getWorldObj().getServer().getPluginManager().callEvent(event);
++    
++                        if (event.isCancelled())
++                        {
++                            this.setInventorySlotContents(i, itemstack);
++                            this.func_145896_c(worldObj.spigotConfig.hopperTransfer); // Spigot
++                            return false;
++                        }
++    
++                        ItemStack itemstack1 = func_145889_a(iinventory, CraftItemStack.asNMSCopy(event.getItem()), Facing.oppositeSide[BlockHopper.getDirectionFromMetadata(this.getBlockMetadata())]);
++    
+                         if (itemstack1 == null || itemstack1.stackSize == 0)
+                         {
+-                            iinventory.markDirty();
++                            if (event.getItem().equals(oitemstack))
++                            {
++                                iinventory.markDirty();
++                            }
++                            else
++                            {
++                                this.setInventorySlotContents(i, itemstack);
++                            }
++    
++                            // CraftBukkit end
+                             return true;
+                         }
+-
+-                        this.setInventorySlotContents(j, itemstack);
++    
++                        this.setInventorySlotContents(i, itemstack);
                      }
- 
-@@ -302,11 +402,70 @@
+                 }
+-
+                 return false;
+             }
+         }
+@@ -427,11 +526,70 @@
          if (itemstack != null && func_145890_b(p_145892_1_, itemstack, p_145892_2_, p_145892_3_))
          {
              ItemStack itemstack1 = itemstack.copy();
@@ -213,7 +225,7 @@
                  return true;
              }
  
-@@ -326,6 +485,20 @@
+@@ -451,6 +609,20 @@
          }
          else
          {

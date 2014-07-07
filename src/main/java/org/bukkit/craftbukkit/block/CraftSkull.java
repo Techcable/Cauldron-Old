@@ -1,7 +1,8 @@
 package org.bukkit.craftbukkit.block;
 
-import com.google.common.base.Strings;
-
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntitySkull;
+import com.mojang.authlib.GameProfile;
 
 import org.bukkit.SkullType;
 import org.bukkit.block.Block;
@@ -10,18 +11,18 @@ import org.bukkit.block.Skull;
 import org.bukkit.craftbukkit.CraftWorld;
 
 public class CraftSkull extends CraftBlockState implements Skull {
-    private final net.minecraft.tileentity.TileEntitySkull skull;
-    private String player;
+    private static final int MAX_OWNER_LENGTH = 16;
+    private final TileEntitySkull skull;
+    private GameProfile profile;
     private SkullType skullType;
     private byte rotation;
-    private final int MAX_OWNER_LENGTH = 16;
 
     public CraftSkull(final Block block) {
         super(block);
 
         CraftWorld world = (CraftWorld) block.getWorld();
-        skull = (net.minecraft.tileentity.TileEntitySkull) world.getTileEntityAt(getX(), getY(), getZ());
-        player = skull.func_145907_c();
+        skull = (TileEntitySkull) world.getTileEntityAt(getX(), getY(), getZ());
+        profile = skull.func_152108_a();
         skullType = getSkullType(skull.func_145904_a());
         rotation = (byte) skull.getRotation();
     }
@@ -139,23 +140,28 @@ public class CraftSkull extends CraftBlockState implements Skull {
     }
 
     public boolean hasOwner() {
-        return !Strings.isNullOrEmpty(player);
+        return profile != null;
     }
 
     public String getOwner() {
-        return player;
+        return hasOwner() ? profile.getName() : null;
     }
 
     public boolean setOwner(String name) {
         if (name == null || name.length() > MAX_OWNER_LENGTH) {
             return false;
         }
-        player = name;
+
+        GameProfile profile = MinecraftServer.getServer().func_152358_ax().func_152655_a (name);
+        if (profile == null) {
+            return false;
+        }
 
         if (skullType != SkullType.PLAYER) {
             skullType = SkullType.PLAYER;
         }
 
+        this.profile = profile;
         return true;
     }
 
@@ -175,7 +181,7 @@ public class CraftSkull extends CraftBlockState implements Skull {
         this.skullType = skullType;
 
         if (skullType != SkullType.PLAYER) {
-            player = "";
+            profile = null;
         }
     }
 
@@ -184,7 +190,12 @@ public class CraftSkull extends CraftBlockState implements Skull {
         boolean result = super.update(force, applyPhysics);
 
         if (result) {
-            skull.func_145905_a(getSkullType(skullType), player);
+            if (skullType == SkullType.PLAYER) {
+                skull.func_152106_a(profile);
+            } else {
+                skull.func_152107_a(getSkullType(skullType));
+            }
+
             skull.func_145903_a(rotation);
             skull.markDirty();
         }

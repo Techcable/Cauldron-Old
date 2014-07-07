@@ -29,7 +29,7 @@
 +                }
 +                else if (this instanceof EntityAINearestAttackableTarget)
 +                {
-+                    if (par1EntityLivingBase instanceof EntityPlayer)
++                    if (p_75296_1_ instanceof EntityPlayer)
 +                    {
 +                        reason = EntityTargetEvent.TargetReason.CLOSEST_PLAYER;
 +                    }
@@ -43,14 +43,14 @@
 +                    reason = EntityTargetEvent.TargetReason.OWNER_ATTACKED_TARGET;
 +                }
 +
-+                org.bukkit.event.entity.EntityTargetLivingEntityEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callEntityTargetLivingEvent(this.taskOwner, par1EntityLivingBase, reason);
++                org.bukkit.event.entity.EntityTargetLivingEntityEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callEntityTargetLivingEvent(this.taskOwner, p_75296_1_, reason);
 +
 +                if (event.isCancelled() || event.getTarget() == null)
 +                {
 +                    this.taskOwner.setAttackTarget(null);
 +                    return false;
 +                }
-+                else if (par1EntityLivingBase.getBukkitEntity() != event.getTarget())
++                else if (p_75296_1_.getBukkitEntity() != event.getTarget())
 +                {
 +                    this.taskOwner.setAttackTarget((EntityLivingBase)((CraftEntity) event.getTarget()).getHandle());
 +                }

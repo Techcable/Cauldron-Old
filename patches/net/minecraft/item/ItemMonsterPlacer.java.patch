@@ -2,10 +2,10 @@
 +++ ../src-work/minecraft/net/minecraft/item/ItemMonsterPlacer.java
 @@ -55,7 +55,7 @@
  
-     public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
+     public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
      {
--        if (par3World.isRemote)
-+        if (par3World.isRemote || par1ItemStack.getItemDamage() == 48 || par1ItemStack.getItemDamage() == 49 || par1ItemStack.getItemDamage() == 63 || par1ItemStack.getItemDamage() == 64)   // CraftBukkit
+-        if (p_77648_3_.isRemote)
++        if (p_77648_3_.isRemote || p_77648_1_.getItemDamage() == 48 || p_77648_1_.getItemDamage() == 49 || p_77648_1_.getItemDamage() == 63 || p_77648_1_.getItemDamage() == 64)   // CraftBukkit
          {
              return true;
          }
@@ -13,8 +13,8 @@
                      entityliving.rotationYawHead = entityliving.rotationYaw;
                      entityliving.renderYawOffset = entityliving.rotationYaw;
                      entityliving.onSpawnWithEgg((IEntityLivingData)null);
--                    par0World.spawnEntityInWorld(entity);
-+                    par0World.addEntity(entity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SPAWNER_EGG); // CraftBukkit
+-                    p_77840_0_.spawnEntityInWorld(entity);
++                    p_77840_0_.addEntity(entity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SPAWNER_EGG); // CraftBukkit
                      entityliving.playLivingSound();
                  }
              }

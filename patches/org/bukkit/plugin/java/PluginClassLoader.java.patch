@@ -9,8 +9,8 @@
 +//import org.bouncycastle.util.io.Streams;
 +import net.md_5.specialsource.*;
 +import net.md_5.specialsource.repo.*;
-+import net.minecraftforge.cauldron.CauldronUtils;
 +import net.minecraftforge.cauldron.configuration.CauldronConfig;
++import net.minecraftforge.cauldron.CauldronUtils;
 +
 +import org.bukkit.plugin.PluginDescriptionFile;
 +import java.io.*;
@@ -23,7 +23,7 @@
  import java.io.File;
  import java.net.MalformedURLException;
  import java.net.URL;
-@@ -15,16 +32,40 @@
+@@ -15,16 +32,42 @@
  /**
   * A ClassLoader for plugins, to allow shared classes across multiple plugins
   */
@@ -53,11 +53,13 @@
 +    private static final int F_REMAP_NMS162     = 1 << 6;
 +    private static final int F_REMAP_NMS164     = 1 << 7;
 +    private static final int F_REMAP_NMS172     = 1 << 8;
-+    private static final int F_REMAP_OBC152     = 1 << 9;
-+    private static final int F_REMAP_OBC161     = 1 << 10;
-+    private static final int F_REMAP_OBC162     = 1 << 11;
-+    private static final int F_REMAP_OBC164     = 1 << 12;
-+    private static final int F_REMAP_OBC172     = 1 << 13;
++    private static final int F_REMAP_NMS1710    = 1 << 9;
++    private static final int F_REMAP_OBC152     = 1 << 10;
++    private static final int F_REMAP_OBC161     = 1 << 11;
++    private static final int F_REMAP_OBC162     = 1 << 12;
++    private static final int F_REMAP_OBC164     = 1 << 13;
++    private static final int F_REMAP_OBC172     = 1 << 14;
++    private static final int F_REMAP_OBC1710    = 1 << 15;
 +    private static final int F_REMAP_NMSPRE_MASK= 0xfff00000;  // "unversioned" NMS plugin version
 +
 +    // This trick bypasses Maven Shade's package rewriting when using String literals [same trick in jline]
@@ -67,7 +69,7 @@
      PluginClassLoader(final JavaPluginLoader loader, final ClassLoader parent, final PluginDescriptionFile description, final File dataFolder, final File file) throws InvalidPluginException, MalformedURLException {
          super(new URL[] {file.toURI().toURL()}, parent);
          Validate.notNull(loader, "Loader cannot be null");
-@@ -34,6 +75,116 @@
+@@ -34,6 +77,122 @@
          this.dataFolder = dataFolder;
          this.file = file;
  
@@ -79,12 +81,14 @@
 +        boolean useCustomClassLoader = CauldronConfig.getBoolean("plugin-settings.default.custom-class-loader", true);
 +        debug = CauldronConfig.getBoolean("plugin-settings.default.debug", false);
 +        boolean useGuava10 = CauldronConfig.getBoolean("plugin-settings.default.use-guava10", true);
++        boolean remapNMS1710 = CauldronConfig.getBoolean("plugin-settings.default.remap-nms-v1_7_R3", true);
 +        boolean remapNMS172 = CauldronConfig.getBoolean("plugin-settings.default.remap-nms-v1_7_R1", true);
 +        boolean remapNMS164 = CauldronConfig.getBoolean("plugin-settings.default.remap-nms-v1_6_R3", true);
 +        boolean remapNMS162 = CauldronConfig.getBoolean("plugin-settings.default.remap-nms-v1_6_R2", true);
 +        boolean remapNMS161 = CauldronConfig.getBoolean("plugin-settings.default.remap-nms-v1_6_R1", true);
 +        boolean remapNMS152 = CauldronConfig.getBoolean("plugin-settings.default.remap-nms-v1_5_R3", true);
 +        String remapNMSPre = CauldronConfig.getString("plugin-settings.default.remap-nms-pre", "false");
++        boolean remapOBC1710 = CauldronConfig.getBoolean("plugin-settings.default.remap-obc-v1_7_R3", true);
 +        boolean remapOBC172 = CauldronConfig.getBoolean("plugin-settings.default.remap-obc-v1_7_R1", true);
 +        boolean remapOBC164 = CauldronConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R3", true);
 +        boolean remapOBC162 = CauldronConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R2", true);
@@ -101,6 +105,7 @@
 +        useCustomClassLoader = CauldronConfig.getBoolean("plugin-settings."+pluginName+".custom-class-loader", useCustomClassLoader, false);
 +        debug = CauldronConfig.getBoolean("plugin-settings."+pluginName+".debug", debug, false);
 +        useGuava10 = CauldronConfig.getBoolean("plugin-settings."+pluginName+".use-guava10", useGuava10, false);
++        remapNMS1710 = CauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_7_R3", remapNMS1710, false);
 +        remapNMS172 = CauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_7_R1", remapNMS172, false);
 +        remapNMS164 = CauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_6_R3", remapNMS164, false);
 +        remapNMS162 = CauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_6_R2", remapNMS162, false);
@@ -130,6 +135,7 @@
 +
 +        int flags = 0;
 +        if (useGuava10) flags |= F_USE_GUAVA10;
++        if (remapNMS1710) flags |= F_REMAP_NMS1710;
 +        if (remapNMS172) flags |= F_REMAP_NMS172;
 +        if (remapNMS164) flags |= F_REMAP_NMS164;
 +        if (remapNMS162) flags |= F_REMAP_NMS162;
@@ -137,7 +143,8 @@
 +        if (remapNMS152) flags |= F_REMAP_NMS152;
 +        //if (remapNMS146) flags |= F_REMAP_NMS146;
 +        if (!remapNMSPre.equals("false")) {
-+            if      (remapNMSPre.equals("1.7.2")) flags |= 0x17200000;
++            if      (remapNMSPre.equals("1.7.10")) flags |= 0x17100000;
++            else if (remapNMSPre.equals("1.7.2")) flags |= 0x17200000;
 +            else if (remapNMSPre.equals("1.6.4")) flags |= 0x16400000;
 +            else if (remapNMSPre.equals("1.6.2")) flags |= 0x16200000;
 +            else if (remapNMSPre.equals("1.6.1")) flags |= 0x16100000;
@@ -146,6 +153,7 @@
 +                System.out.println("Unsupported nms-remap-pre version '"+remapNMSPre+"', disabling");
 +            }
 +        }
++        if (remapOBC1710) flags |= F_REMAP_OBC1710;
 +        if (remapOBC172) flags |= F_REMAP_OBC172;
 +        if (remapOBC164) flags |= F_REMAP_OBC164;
 +        if (remapOBC162) flags |= F_REMAP_OBC162;
@@ -184,7 +192,7 @@
          try {
              Class<?> jarClass;
              try {
-@@ -62,30 +213,265 @@
+@@ -62,30 +221,272 @@
          return findClass(name, true);
      }
  
@@ -212,8 +220,8 @@
 +        // mc-dev jar to CB, apply version shading (aka plugin safeguard)
 +        relocations.put("net.minecraft.server", "net.minecraft.server." + obfVersion);
 +
-+        if (obfVersion.contains("v1_7_R")) { // Use R1 mappings
-+            obfVersion = "v1_7_R1";
++        if (obfVersion.contains("v1_7_R2")) { // Use R3 mappings
++            obfVersion = "v1_7_R3";
 +        }
 +        jarMapping.loadMappings(
 +                new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/"+obfVersion+"/cb2numpkg.srg"))),
@@ -221,7 +229,7 @@
 +                null, false);
 +
 +        // support for plugins that build in Cauldron 1.7 dev
-+        if (obfVersion.equals("v1_7_R1")) {
++        if (obfVersion.equals("v1_7_R3")) {
 +            jarMapping.loadMappings(
 +                    new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/"+obfVersion+"/obf2numpkg.srg"))),
 +                    new MavenShade(relocations),
@@ -260,10 +268,13 @@
 +            jarMapping.packages.put("net/minecraft/util/gnu", "gnu");
 +            jarMapping.packages.put("net/minecraft/util/org", "org");
 +
++            if ((flags & F_REMAP_NMS1710) != 0) {
++                loadNmsMappings(jarMapping, "v1_7_R3");
++            }
++
 +            if ((flags & F_REMAP_NMS172) != 0) {
 +                loadNmsMappings(jarMapping, "v1_7_R1");
 +                loadNmsMappings(jarMapping, "v1_7_R2");
-+                loadNmsMappings(jarMapping, "v1_7_R3");
 +            }
 +
 +            if ((flags & F_REMAP_NMS164) != 0) {
@@ -282,10 +293,13 @@
 +                loadNmsMappings(jarMapping, "v1_5_R3");
 +            }
 +
++            if ((flags & F_REMAP_OBC1710) != 0) {
++                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R3", org_bukkit_craftbukkit+"/"+getNativeVersion());
++            }
++
 +            if ((flags & F_REMAP_OBC172) != 0) {
 +                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R1", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R2", org_bukkit_craftbukkit+"/"+getNativeVersion());
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R3", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
 +
 +            if ((flags & F_REMAP_OBC164) != 0) {
@@ -318,6 +332,7 @@
 +                String filename;
 +                switch (flags & F_REMAP_NMSPRE_MASK)
 +                {
++                    case 0x01710000: filename = "mappings/v1_7_R3/cb2numpkg.srg"; break;
 +                    case 0x01720000: filename = "mappings/v1_7_R1/cb2numpkg.srg"; break;
 +                    case 0x01640000: filename = "mappings/v1_6_R3/cb2numpkg.srg"; break;
 +                    case 0x01620000: filename = "mappings/v1_6_R2/cb2numpkg.srg"; break;

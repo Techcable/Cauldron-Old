@@ -20,27 +20,23 @@
      private static final String __OBFID = "CL_00001669";
  
      /**
-@@ -54,9 +60,17 @@
- 
-     public EntityItem(World par1World, double par2, double par4, double par6, ItemStack par8ItemStack)
+@@ -55,6 +61,15 @@
+     public EntityItem(World p_i1710_1_, double p_i1710_2_, double p_i1710_4_, double p_i1710_6_, ItemStack p_i1710_8_)
      {
--        this(par1World, par2, par4, par6);        
-+        this(par1World, par2, par4, par6);
+         this(p_i1710_1_, p_i1710_2_, p_i1710_4_, p_i1710_6_);        
 +
 +        // CraftBukkit start - Can't set null items in the datawatcher
-+        if (par8ItemStack == null || par8ItemStack.getItem() == null)
++        if (p_i1710_8_ == null || p_i1710_8_.getItem() == null)
 +        {
 +            return;
 +        }
 +
 +        // CraftBukkit end
-         this.setEntityItemStack(par8ItemStack);
--        this.lifespan = (par8ItemStack.getItem() == null ? 6000 : par8ItemStack.getItem().getEntityLifespan(par8ItemStack, par1World));
-+        this.lifespan = (par8ItemStack.getItem() == null ? par1World.spigotConfig.itemDespawnRate : par8ItemStack.getItem().getEntityLifespan(par8ItemStack, par1World)); // Spigot
++
+         this.setEntityItemStack(p_i1710_8_);
+         this.lifespan = (p_i1710_8_.getItem() == null ? 6000 : p_i1710_8_.getItem().getEntityLifespan(p_i1710_8_, p_i1710_1_));
      }
- 
-     protected boolean canTriggerWalking()
-@@ -89,93 +103,102 @@
+@@ -89,93 +104,102 @@
              }
          }
  
@@ -202,29 +198,28 @@
  
          while (iterator.hasNext())
          {
-@@ -225,11 +248,13 @@
+@@ -225,11 +249,13 @@
              }
              else
              {
 -                itemstack1.stackSize += itemstack.stackSize;
--                par1EntityItem.delayBeforeCanPickup = Math.max(par1EntityItem.delayBeforeCanPickup, this.delayBeforeCanPickup);
--                par1EntityItem.age = Math.min(par1EntityItem.age, this.age);
--                par1EntityItem.setEntityItemStack(itemstack1);
--                this.setDead();
+-                p_70289_1_.delayBeforeCanPickup = Math.max(p_70289_1_.delayBeforeCanPickup, this.delayBeforeCanPickup);
+-                p_70289_1_.age = Math.min(p_70289_1_.age, this.age);
+-                p_70289_1_.setEntityItemStack(itemstack1);
 +                // Spigot start
 +                itemstack.stackSize += itemstack1.stackSize;
-+                this.delayBeforeCanPickup = Math.max(par1EntityItem.delayBeforeCanPickup, this.delayBeforeCanPickup);
-+                this.age = Math.min(par1EntityItem.age, this.age);
++                this.delayBeforeCanPickup = Math.max(p_70289_1_.delayBeforeCanPickup, this.delayBeforeCanPickup);
++                this.age = Math.min(p_70289_1_.age, this.age);
 +                this.setEntityItemStack(itemstack);
-+                par1EntityItem.setDead();
+                 this.setDead();
 +                // Spigot end
                  return true;
              }
          }
-@@ -316,8 +341,27 @@
+@@ -316,8 +342,27 @@
          }
  
-         NBTTagCompound nbttagcompound1 = par1NBTTagCompound.getCompoundTag("Item");
+         NBTTagCompound nbttagcompound1 = p_70037_1_.getCompoundTag("Item");
 -        this.setEntityItemStack(ItemStack.loadItemStackFromNBT(nbttagcompound1));
  
 +        // CraftBukkit start
@@ -250,19 +245,19 @@
          ItemStack item = getDataWatcher().getWatchableObjectItemStack(10);
  
          if (item == null || item.stackSize <= 0)
-@@ -350,6 +394,31 @@
+@@ -350,6 +395,31 @@
              ItemStack itemstack = this.getEntityItem();
              int i = itemstack.stackSize;
  
 +            // CraftBukkit start
-+            int canHold = par1EntityPlayer.inventory.canHold(itemstack);
++            int canHold = p_70100_1_.inventory.canHold(itemstack);
 +            int remaining = itemstack.stackSize - canHold;
 +
 +            if (this.delayBeforeCanPickup <= 0 && canHold > 0)
 +            {
 +                itemstack.stackSize = canHold;
 +                // Cauldron start - rename to cbEvent to fix naming collision
-+                PlayerPickupItemEvent cbEvent = new PlayerPickupItemEvent((org.bukkit.entity.Player) par1EntityPlayer.getBukkitEntity(), (org.bukkit.entity.Item) this.getBukkitEntity(), remaining);
++                PlayerPickupItemEvent cbEvent = new PlayerPickupItemEvent((org.bukkit.entity.Player) p_70100_1_.getBukkitEntity(), (org.bukkit.entity.Item) this.getBukkitEntity(), remaining);
 +                //cbEvent.setCancelled(!par1EntityPlayer.canPickUpLoot); TODO
 +                this.worldObj.getServer().getPluginManager().callEvent(cbEvent);
 +                itemstack.stackSize = canHold + remaining;
@@ -279,6 +274,6 @@
 +
 +            // CraftBukkit end
 +
-             if (this.delayBeforeCanPickup <= 0 && (this.field_145802_g == null || lifespan - this.age <= 200 || this.field_145802_g.equals(par1EntityPlayer.getCommandSenderName())) && (event.getResult() == Result.ALLOW || i <= 0 || par1EntityPlayer.inventory.addItemStackToInventory(itemstack)))
+             if (this.delayBeforeCanPickup <= 0 && (this.field_145802_g == null || lifespan - this.age <= 200 || this.field_145802_g.equals(p_70100_1_.getCommandSenderName())) && (event.getResult() == Result.ALLOW || i <= 0 || p_70100_1_.inventory.addItemStackToInventory(itemstack)))
              {
                  if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log))

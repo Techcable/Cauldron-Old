@@ -10,15 +10,15 @@
  import net.minecraft.util.ChunkCoordinates;
 @@ -51,6 +52,13 @@
  
-     public static EntityPlayerMP[] matchPlayers(ICommandSender par0ICommandSender, String par1Str)
+     public static EntityPlayerMP[] matchPlayers(ICommandSender p_82380_0_, String p_82380_1_)
      {
 +        // CraftBukkit start
-+        if (!(par0ICommandSender instanceof CommandBlockLogic))
++        if (!(p_82380_0_ instanceof CommandBlockLogic))
 +        {
 +            return null;
 +        }
 +
 +        // CraftBukkit end
-         Matcher matcher = tokenPattern.matcher(par1Str);
+         Matcher matcher = tokenPattern.matcher(p_82380_1_);
  
-         if (!matcher.matches())
+         if (matcher.matches())

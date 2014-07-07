@@ -69,7 +69,7 @@
 +    // CraftBukkit end
      private static final String __OBFID = "CL_00001743";
  
-     public InventoryCrafting(Container par1Container, int par2, int par3)
+     public InventoryCrafting(Container p_i1807_1_, int p_i1807_2_, int p_i1807_3_)
 @@ -105,7 +163,7 @@
  
      public int getInventoryStackLimit()

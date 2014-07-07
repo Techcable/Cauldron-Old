@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/common/util/FakePlayerFactory.java
 +++ ../src-work/minecraft/net/minecraftforge/common/util/FakePlayerFactory.java
-@@ -34,12 +34,23 @@
+@@ -35,12 +35,23 @@
       */
      public static FakePlayer get(WorldServer world, GameProfile username)
      {
@@ -10,19 +10,18 @@
 +
 +        for (GameProfile gameprofile : fakePlayers.keySet())
          {
--            FakePlayer fakePlayer = new FakePlayer(world, username);
--            fakePlayers.put(username, fakePlayer);
 +            if (gameprofile.getName().equals(username.getName()))
-+            {
++        {
 +                return fakePlayers.get(username);
 +            }
-         }
--
-+        FakePlayer fakePlayer = new FakePlayer(world, username);
++        }
+             FakePlayer fakePlayer = new FakePlayer(world, username);
+-            fakePlayers.put(username, fakePlayer);
 +        if (username.getId() == null) // GameProfile hashCode check will fail with a null ID
 +        {
-+            username = new GameProfile("", username.getName()); // Create new GameProfile with empty ID
-+        }
++            username = new GameProfile(UUID.fromString(""), username.getName()); // Create new GameProfile with empty ID
+         }
+-
 +        // Cauldron end
 +        fakePlayers.put(username, fakePlayer);
          return fakePlayers.get(username);

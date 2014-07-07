@@ -60,23 +60,23 @@
              this.saveProperties();
          }
  
--        return this.serverProperties.getProperty(par1Str, par2Str);
-+        return this.getOverride(par1Str, this.serverProperties.getProperty(par1Str, par2Str)); // CraftBukkit
+-        return this.serverProperties.getProperty(p_73671_1_, p_73671_2_);
++        return this.getOverride(p_73671_1_, this.serverProperties.getProperty(p_73671_1_, p_73671_2_)); // CraftBukkit
      }
  
-     public int getIntProperty(String par1Str, int par2)
+     public int getIntProperty(String p_73669_1_, int p_73669_2_)
      {
          try
          {
--            return Integer.parseInt(this.getStringProperty(par1Str, "" + par2));
-+            return this.getOverride(par1Str, Integer.parseInt(this.getStringProperty(par1Str, "" + par2))); // CraftBukkit
+-            return Integer.parseInt(this.getStringProperty(p_73669_1_, "" + p_73669_2_));
++            return this.getOverride(p_73669_1_, Integer.parseInt(this.getStringProperty(p_73669_1_, "" + p_73669_2_))); // CraftBukkit
          }
          catch (Exception exception)
          {
-             this.serverProperties.setProperty(par1Str, "" + par2);
+             this.serverProperties.setProperty(p_73669_1_, "" + p_73669_2_);
              this.saveProperties();
--            return par2;
-+            return this.getOverride(par1Str, par2); // CraftBukkit
+-            return p_73669_2_;
++            return this.getOverride(p_73669_1_, p_73669_2_); // CraftBukkit
          }
      }
  
@@ -84,15 +84,15 @@
      {
          try
          {
--            return Boolean.parseBoolean(this.getStringProperty(par1Str, "" + par2));
-+            return this.getOverride(par1Str, Boolean.parseBoolean(this.getStringProperty(par1Str, "" + par2))); // CraftBukkit
+-            return Boolean.parseBoolean(this.getStringProperty(p_73670_1_, "" + p_73670_2_));
++            return this.getOverride(p_73670_1_, Boolean.parseBoolean(this.getStringProperty(p_73670_1_, "" + p_73670_2_))); // CraftBukkit
          }
          catch (Exception exception)
          {
-             this.serverProperties.setProperty(par1Str, "" + par2);
+             this.serverProperties.setProperty(p_73670_1_, "" + p_73670_2_);
              this.saveProperties();
--            return par2;
-+            return this.getOverride(par1Str, par2); // CraftBukkit
+-            return p_73670_2_;
++            return this.getOverride(p_73670_1_, p_73670_2_); // CraftBukkit
          }
      }
  

@@ -24,7 +24,7 @@
 +                Player player = (Player) thePlayer.getBukkitEntity();
 +                TileEntityFurnace furnace = ((TileEntityFurnace) this.inventory);
 +                org.bukkit.block.Block block = thePlayer.worldObj.getWorld().getBlockAt(furnace.xCoord, furnace.yCoord, furnace.zCoord);
-+                FurnaceExtractEvent event = new FurnaceExtractEvent(player, block, org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(par1ItemStack.getItem()), par1ItemStack.stackSize, i);
++                FurnaceExtractEvent event = new FurnaceExtractEvent(player, block, org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(p_75208_1_.getItem()), p_75208_1_.stackSize, i);
 +                thePlayer.worldObj.getServer().getPluginManager().callEvent(event);
 +                i = event.getExpToDrop();
 +                // CraftBukkit end

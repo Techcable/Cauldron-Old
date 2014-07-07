@@ -1,5 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
+import net.minecraft.entity.item.EntityFireworkRocket;
+import net.minecraft.item.ItemStack;
+import net.minecraft.init.Items;
 
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftServer;
@@ -16,13 +19,13 @@ public class CraftFirework extends CraftEntity implements Firework {
     private final Random random = new Random();
     private final CraftItemStack item;
 
-    public CraftFirework(CraftServer server, net.minecraft.entity.item.EntityFireworkRocket entity) {
+    public CraftFirework(CraftServer server, EntityFireworkRocket entity) {
         super(server, entity);
 
-        net.minecraft.item.ItemStack item = getHandle().getDataWatcher().getWatchableObjectItemStack(FIREWORK_ITEM_INDEX);
+        ItemStack item = getHandle().getDataWatcher().getWatchableObjectItemStack(FIREWORK_ITEM_INDEX);
 
         if (item == null) {
-            item = new net.minecraft.item.ItemStack(net.minecraft.init.Items.fireworks);
+            item = new ItemStack(Items.fireworks);
             getHandle().getDataWatcher().updateObject(FIREWORK_ITEM_INDEX, item);
         }
 
@@ -35,8 +38,8 @@ public class CraftFirework extends CraftEntity implements Firework {
     }
 
     @Override
-    public net.minecraft.entity.item.EntityFireworkRocket getHandle() {
-        return (net.minecraft.entity.item.EntityFireworkRocket) entity;
+    public EntityFireworkRocket getHandle() {
+        return (EntityFireworkRocket) entity;
     }
 
     @Override

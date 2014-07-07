@@ -16,19 +16,22 @@
                  throw new CommandNotFoundException();
              }
  
--            if (icommand.canCommandSenderUseCommand(par1ICommandSender))
-+            if (true || icommand.canCommandSenderUseCommand(par1ICommandSender)) // Cauldron start - disable check for permissions since we handle it on Bukkit side
+-            if (icommand.canCommandSenderUseCommand(p_71556_1_))
++            if (true || icommand.canCommandSenderUseCommand(p_71556_1_)) // Cauldron start - disable check for permissions since we handle it on Bukkit side
              {
-                 CommandEvent event = new CommandEvent(icommand, par1ICommandSender, astring);
+                 CommandEvent event = new CommandEvent(icommand, p_71556_1_, astring);
                  if (MinecraftForge.EVENT_BUS.post(event))
-@@ -125,9 +130,30 @@
+@@ -134,11 +139,30 @@
  
-     public ICommand registerCommand(ICommand par1ICommand)
+     public ICommand registerCommand(ICommand p_71560_1_)
      {
-+        // Cauldron start - register commands with permission nodes, defaulting to class name
-+        return registerCommand(par1ICommand, par1ICommand.getClass().getName());
+-        List list = p_71560_1_.getCommandAliases();
+-        this.commandMap.put(p_71560_1_.getCommandName(), p_71560_1_);
+-        this.commandSet.add(p_71560_1_);
++    // Cauldron start - register commands with permission nodes, defaulting to class name
++        return registerCommand(p_71560_1_, p_71560_1_.getClass().getName());
 +    }
-+
+ 
 +    public ICommand registerCommand(String permissionGroup, ICommand par1ICommand)
 +    {
 +        return registerCommand(par1ICommand, permissionGroup + "." + par1ICommand.getCommandName());
@@ -36,19 +39,36 @@
 +
 +    public ICommand registerCommand(ICommand par1ICommand, String permissionNode)
 +    {
-+        // Cauldron end    
-         List list = par1ICommand.getCommandAliases();
-         this.commandMap.put(par1ICommand.getCommandName(), par1ICommand);
-         this.commandSet.add(par1ICommand);
-+        // Cauldron start - register vanilla commands with Bukkit to support permissions.
++        List list = par1ICommand.getCommandAliases();
++        this.commandMap.put(par1ICommand.getCommandName(), par1ICommand);
++        this.commandSet.add(par1ICommand);
++        // register vanilla commands with Bukkit to support permissions.
 +        CraftSimpleCommandMap commandMap = FMLCommonHandler.instance().getMinecraftServerInstance().server.getCraftCommandMap();
 +        ModCustomCommand customCommand = new ModCustomCommand(par1ICommand.getCommandName());
 +        customCommand.setPermission(permissionNode);
-+        if (list != null)
+         if (list != null)
 +            customCommand.setAliases(list);
 +        commandMap.register(par1ICommand.getCommandName(), customCommand);
 +        LogManager.getLogger().info("Registered command " + par1ICommand.getCommandName() + " with permission node " + permissionNode);
-+        // Cauldron end
- 
-         if (list != null)
++
++        if (list != null)
          {
+             Iterator iterator = list.iterator();
+ 
+@@ -149,13 +173,14 @@
+ 
+                 if (icommand1 == null || !icommand1.getCommandName().equals(s))
+                 {
+-                    this.commandMap.put(s, p_71560_1_);
++                    this.commandMap.put(s, par1ICommand);
+                 }
+             }
+         }
+ 
+-        return p_71560_1_;
++        return par1ICommand;
+     }
++    // Cauldron end
+ 
+     private static String[] dropFirstString(String[] p_71559_0_)
+     {

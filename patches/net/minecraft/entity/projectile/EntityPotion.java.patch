@@ -17,7 +17,7 @@
 +    public ItemStack potionDamage; // CraftBukkit private --> public
      private static final String __OBFID = "CL_00001727";
  
-     public EntityPotion(World par1World)
+     public EntityPotion(World p_i1788_1_)
 @@ -88,14 +95,16 @@
          {
              List list = Items.potionitem.getEffects(this.potionDamage);

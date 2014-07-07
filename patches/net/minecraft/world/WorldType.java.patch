@@ -10,12 +10,12 @@
  {
 @@ -49,6 +50,12 @@
          this.canBeCreated = true;
-         this.worldTypeId = par1;
-         worldTypes[par1] = this;
+         this.worldTypeId = p_i1960_1_;
+         worldTypes[p_i1960_1_] = this;
 +        // Cauldron start - add worldtype for bukkit if it does not already exist
-+        if (org.bukkit.WorldType.getByName(par2Str) == null)
++        if (org.bukkit.WorldType.getByName(p_i1960_2_) == null)
 +        {
-+            EnumHelper.addBukkitWorldType(par2Str);
++            EnumHelper.addBukkitWorldType(p_i1960_2_);
 +        }
 +        // Cauldron end
      }

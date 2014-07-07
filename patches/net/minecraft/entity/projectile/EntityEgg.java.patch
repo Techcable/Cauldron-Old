@@ -17,7 +17,7 @@
  {
      private static final String __OBFID = "CL_00001724";
 @@ -32,24 +41,43 @@
-             par1MovingObjectPosition.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), 0.0F);
+             p_70184_1_.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), 0.0F);
          }
  
 -        if (!this.worldObj.isRemote && this.rand.nextInt(8) == 0)

@@ -17,43 +17,27 @@
 +    public boolean isIncendiary = true; // CraftBukkit
      private static final String __OBFID = "CL_00001717";
  
-     public EntityFireball(World par1World)
-@@ -62,20 +66,28 @@
+     public EntityFireball(World p_i1759_1_)
+@@ -62,11 +66,19 @@
      {
-         super(par1World);
-         this.shootingEntity = par2EntityLivingBase;
-+        this.projectileSource = (org.bukkit.entity.LivingEntity) par2EntityLivingBase.getBukkitEntity(); // CraftBukkit
+         super(p_i1761_1_);
+         this.shootingEntity = p_i1761_2_;
++        this.projectileSource = (org.bukkit.entity.LivingEntity) p_i1761_2_.getBukkitEntity(); // CraftBukkit
          this.setSize(1.0F, 1.0F);
-         this.setLocationAndAngles(par2EntityLivingBase.posX, par2EntityLivingBase.posY, par2EntityLivingBase.posZ, par2EntityLivingBase.rotationYaw, par2EntityLivingBase.rotationPitch);
+         this.setLocationAndAngles(p_i1761_2_.posX, p_i1761_2_.posY, p_i1761_2_.posZ, p_i1761_2_.rotationYaw, p_i1761_2_.rotationPitch);
          this.setPosition(this.posX, this.posY, this.posZ);
          this.yOffset = 0.0F;
          this.motionX = this.motionY = this.motionZ = 0.0D;
--        par3 += this.rand.nextGaussian() * 0.4D;
--        par5 += this.rand.nextGaussian() * 0.4D;
--        par7 += this.rand.nextGaussian() * 0.4D;
--        double d3 = (double)MathHelper.sqrt_double(par3 * par3 + par5 * par5 + par7 * par7);
--        this.accelerationX = par3 / d3 * 0.1D;
--        this.accelerationY = par5 / d3 * 0.1D;
--        this.accelerationZ = par7 / d3 * 0.1D;
 +        // CraftBukkit start - Added setDirection method
-+        this.setDirection(par3, par5, par7);
-     }
- 
-+    public void setDirection(double d0, double d1, double d2)
-+    {
-+        // CraftBukkit end
-+        d0 += this.rand.nextGaussian() * 0.4D;
-+        d1 += this.rand.nextGaussian() * 0.4D;
-+        d2 += this.rand.nextGaussian() * 0.4D;
-+        double d3 = (double) MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
-+        this.accelerationX = d0 / d3 * 0.1D;
-+        this.accelerationY = d1 / d3 * 0.1D;
-+        this.accelerationZ = d2 / d3 * 0.1D;
++        this.setDirection(p_i1761_3_, p_i1761_5_, p_i1761_7_);
 +    }
 +
-     public void onUpdate()
-     {
-         if (!this.worldObj.isRemote && (this.shootingEntity != null && this.shootingEntity.isDead || !this.worldObj.blockExists((int)this.posX, (int)this.posY, (int)this.posZ)))
++    public void setDirection(double p_i1761_3_, double p_i1761_5_, double p_i1761_7_)
++    {
++        // CraftBukkit end
+         p_i1761_3_ += this.rand.nextGaussian() * 0.4D;
+         p_i1761_5_ += this.rand.nextGaussian() * 0.4D;
+         p_i1761_7_ += this.rand.nextGaussian() * 0.4D;
 @@ -140,7 +152,7 @@
  
                      if (movingobjectposition1 != null)
@@ -78,43 +62,40 @@
              }
  
              this.posX += this.motionX;
-@@ -227,7 +247,10 @@
-         par1NBTTagCompound.setShort("zTile", (short)this.field_145794_g);
-         par1NBTTagCompound.setByte("inTile", (byte)Block.getIdFromBlock(this.field_145796_h));
-         par1NBTTagCompound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
--        par1NBTTagCompound.setTag("direction", this.newDoubleNBTList(new double[] {this.motionX, this.motionY, this.motionZ}));
+@@ -227,6 +247,8 @@
+         p_70014_1_.setShort("zTile", (short)this.field_145794_g);
+         p_70014_1_.setByte("inTile", (byte)Block.getIdFromBlock(this.field_145796_h));
+         p_70014_1_.setByte("inGround", (byte)(this.inGround ? 1 : 0));
 +        // CraftBukkit - Fix direction being mismapped to invalid variables
-+        par1NBTTagCompound.setTag("power", this.newDoubleNBTList(new double[] { this.accelerationX, this.accelerationY, this.accelerationZ}));
-+        // Spigot - Support vanilla's direction tag
-+        par1NBTTagCompound.setTag("direction", this.newDoubleNBTList(new double[] { this.motionX, this.motionY, this.motionZ}));
++        p_70014_1_.setTag("power", this.newDoubleNBTList(new double[] { this.accelerationX, this.accelerationY, this.accelerationZ}));
+         p_70014_1_.setTag("direction", this.newDoubleNBTList(new double[] {this.motionX, this.motionY, this.motionZ}));
      }
  
-     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
-@@ -238,8 +261,17 @@
-         this.field_145796_h = Block.getBlockById(par1NBTTagCompound.getByte("inTile") & 255);
-         this.inGround = par1NBTTagCompound.getByte("inGround") == 1;
+@@ -238,8 +260,17 @@
+         this.field_145796_h = Block.getBlockById(p_70037_1_.getByte("inTile") & 255);
+         this.inGround = p_70037_1_.getByte("inGround") == 1;
  
--        if (par1NBTTagCompound.hasKey("direction", 9))
+-        if (p_70037_1_.hasKey("direction", 9))
 +        // CraftBukkit start - direction -> power
-+        if (par1NBTTagCompound.hasKey("power", 9))
++        if (p_70037_1_.hasKey("power", 9))
          {
-+            NBTTagList nbttaglist = par1NBTTagCompound.getTagList("power", 6);
++            NBTTagList nbttaglist = p_70037_1_.getTagList("power", 6);
 +            this.accelerationX = nbttaglist.func_150309_d(0);
 +            this.accelerationY = nbttaglist.func_150309_d(1);
 +            this.accelerationZ = nbttaglist.func_150309_d(2);
 +            // CraftBukkit end
 +        }
-+        else if (par1NBTTagCompound.hasKey("direction", 9))     // Spigot - Support vanilla's direction tag
++        else if (p_70037_1_.hasKey("direction", 9))
 +        {
-             NBTTagList nbttaglist = par1NBTTagCompound.getTagList("direction", 6);
+             NBTTagList nbttaglist = p_70037_1_.getTagList("direction", 6);
              this.motionX = nbttaglist.func_150309_d(0);
              this.motionY = nbttaglist.func_150309_d(1);
-@@ -273,6 +305,16 @@
+@@ -273,6 +304,16 @@
  
-             if (par1DamageSource.getEntity() != null)
+             if (p_70097_1_.getEntity() != null)
              {
 +                // CraftBukkit start
-+                EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(par1DamageSource.getEntity().getBukkitEntity(), this.getBukkitEntity(), org.bukkit.event.entity.EntityDamageEvent.DamageCause.ENTITY_ATTACK, par2);
++                EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(p_70097_1_.getEntity().getBukkitEntity(), this.getBukkitEntity(), org.bukkit.event.entity.EntityDamageEvent.DamageCause.ENTITY_ATTACK, p_70097_2_);
 +                worldObj.getServer().getPluginManager().callEvent(event);
 +
 +                if (event.isCancelled())
@@ -123,6 +104,6 @@
 +                }
 +
 +                // CraftBukkit end
-                 Vec3 vec3 = par1DamageSource.getEntity().getLookVec();
+                 Vec3 vec3 = p_70097_1_.getEntity().getLookVec();
  
                  if (vec3 != null)

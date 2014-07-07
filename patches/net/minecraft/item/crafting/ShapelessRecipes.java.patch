@@ -13,7 +13,7 @@
  {
      private final ItemStack recipeOutput;
 @@ -19,6 +24,25 @@
-         this.recipeItems = par2List;
+         this.recipeItems = p_i1918_2_;
      }
  
 +    // CraftBukkit start

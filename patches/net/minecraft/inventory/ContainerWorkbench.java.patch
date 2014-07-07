@@ -27,20 +27,20 @@
 +    // CraftBukkit end
      private static final String __OBFID = "CL_00001744";
  
-     public ContainerWorkbench(InventoryPlayer par1InventoryPlayer, World par2World, int par3, int par4, int par5)
+     public ContainerWorkbench(InventoryPlayer p_i1808_1_, World p_i1808_2_, int p_i1808_3_, int p_i1808_4_, int p_i1808_5_)
      {
 +        // CraftBukkit start - Switched order of IInventory construction and stored player
 +        this.craftResult = new InventoryCraftResult();
-+        this.craftMatrix = new InventoryCrafting(this, 3, 3, par1InventoryPlayer.player); // CraftBukkit - pass player
++        this.craftMatrix = new InventoryCrafting(this, 3, 3, p_i1808_1_.player); // CraftBukkit - pass player
 +        this.craftMatrix.resultInventory = this.craftResult;
-+        this.player = par1InventoryPlayer;
++        this.player = p_i1808_1_;
 +        // CraftBukkit end
-         this.worldObj = par2World;
-         this.posX = par3;
-         this.posY = par4;
+         this.worldObj = p_i1808_2_;
+         this.posX = p_i1808_3_;
+         this.posY = p_i1808_4_;
 @@ -53,7 +70,19 @@
  
-     public void onCraftMatrixChanged(IInventory par1IInventory)
+     public void onCraftMatrixChanged(IInventory p_75130_1_)
      {
 -        this.craftResult.setInventorySlotContents(0, CraftingManager.getInstance().findMatchingRecipe(this.craftMatrix, this.worldObj));
 +        // CraftBukkit start
@@ -58,22 +58,22 @@
 +        // CraftBukkit end
      }
  
-     public void onContainerClosed(EntityPlayer par1EntityPlayer)
+     public void onContainerClosed(EntityPlayer p_75134_1_)
 @@ -76,6 +105,11 @@
  
-     public boolean canInteractWith(EntityPlayer par1EntityPlayer)
+     public boolean canInteractWith(EntityPlayer p_75145_1_)
      {
 +        if (!this.checkReachable)
 +        {
 +            return true;    // CraftBukkit
 +        }
 +
-         return this.worldObj.getBlock(this.posX, this.posY, this.posZ) != Blocks.crafting_table ? false : par1EntityPlayer.getDistanceSq((double)this.posX + 0.5D, (double)this.posY + 0.5D, (double)this.posZ + 0.5D) <= 64.0D;
+         return this.worldObj.getBlock(this.posX, this.posY, this.posZ) != Blocks.crafting_table ? false : p_75145_1_.getDistanceSq((double)this.posX + 0.5D, (double)this.posY + 0.5D, (double)this.posZ + 0.5D) <= 64.0D;
      }
  
 @@ -141,4 +175,18 @@
      {
-         return par2Slot.inventory != this.craftResult && super.func_94530_a(par1ItemStack, par2Slot);
+         return p_94530_2_.inventory != this.craftResult && super.func_94530_a(p_94530_1_, p_94530_2_);
      }
 +
 +    // CraftBukkit start

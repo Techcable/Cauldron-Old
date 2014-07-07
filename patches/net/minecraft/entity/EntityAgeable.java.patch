@@ -36,7 +36,7 @@
 +    // Spigot end
      private static final String __OBFID = "CL_00001530";
  
-     public EntityAgeable(World par1World)
+     public EntityAgeable(World p_i1578_1_)
 @@ -37,7 +67,7 @@
                      {
                          entityageable.setGrowingAge(-24000);
@@ -53,20 +53,20 @@
 -                            if (itemstack.stackSize <= 0)
 +                            if (itemstack.stackSize == 0)    // CraftBukkit - allow less than 0 stacks as "infinite"
                              {
-                                 par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack)null);
+                                 p_70085_1_.inventory.setInventorySlotContents(p_70085_1_.inventory.currentItem, (ItemStack)null);
                              }
 @@ -99,19 +129,21 @@
      {
-         super.writeEntityToNBT(par1NBTTagCompound);
-         par1NBTTagCompound.setInteger("Age", this.getGrowingAge());
-+        par1NBTTagCompound.setBoolean("AgeLocked", this.ageLocked); // CraftBukkit
+         super.writeEntityToNBT(p_70014_1_);
+         p_70014_1_.setInteger("Age", this.getGrowingAge());
++        p_70014_1_.setBoolean("AgeLocked", this.ageLocked); // CraftBukkit
      }
  
-     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
+     public void readEntityFromNBT(NBTTagCompound p_70037_1_)
      {
-         super.readEntityFromNBT(par1NBTTagCompound);
-         this.setGrowingAge(par1NBTTagCompound.getInteger("Age"));
-+        this.ageLocked = par1NBTTagCompound.getBoolean("AgeLocked"); // CraftBukkit
+         super.readEntityFromNBT(p_70037_1_);
+         this.setGrowingAge(p_70037_1_.getInteger("Age"));
++        this.ageLocked = p_70037_1_.getBoolean("AgeLocked"); // CraftBukkit
      }
  
      public void onLivingUpdate()

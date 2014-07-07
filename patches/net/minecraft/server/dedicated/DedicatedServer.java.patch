@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/server/dedicated/DedicatedServer.java
 +++ ../src-work/minecraft/net/minecraft/server/dedicated/DedicatedServer.java
-@@ -32,9 +32,19 @@
+@@ -34,9 +34,19 @@
  import net.minecraft.world.World;
  import net.minecraft.world.WorldSettings;
  import net.minecraft.world.WorldType;
@@ -20,30 +20,31 @@
  @SideOnly(Side.SERVER)
  public class DedicatedServer extends MinecraftServer implements IServer
  {
-@@ -42,16 +52,19 @@
+@@ -44,7 +54,7 @@
      public final List pendingCommandList = Collections.synchronizedList(new ArrayList());
      private RConThreadQuery theRConThreadQuery;
      private RConThreadMain theRConThreadMain;
 -    private PropertyManager settings;
 +    public PropertyManager settings; // CraftBukkit - private -> public
+     private ServerEula field_154332_n;
      private boolean canSpawnStructures;
      private WorldSettings.GameType gameType;
-     private boolean guiIsEnabled;
+@@ -52,9 +62,12 @@
      public static boolean allowPlayerLogins = false;
      private static final String __OBFID = "CL_00001784";
  
--    public DedicatedServer(File par1File)
+-    public DedicatedServer(File p_i1508_1_)
 +    // CraftBukkit start - Signature changed
 +    public DedicatedServer(joptsimple.OptionSet options)
      {
--        super(par1File, Proxy.NO_PROXY);
+-        super(p_i1508_1_, Proxy.NO_PROXY);
 +        super(options, Proxy.NO_PROXY);
-+        // super(par1File, Proxy.NO_PROXY);
++        // super(p_i1508_1_, Proxy.NO_PROXY);
 +        // CraftBukkit end
          Thread thread = new Thread("Server Infinisleeper")
          {
              private static final String __OBFID = "CL_00001787";
-@@ -79,31 +92,70 @@
+@@ -82,31 +95,70 @@
          };
      }
  
@@ -123,122 +124,90 @@
 +        System.setErr(new PrintStream(new LoggerOutputStream(logger, Level.WARN), true));
 +        // CraftBukkit end 
 +
-         field_155771_h.info("Starting minecraft server version 1.7.2");
+         field_155771_h.info("Starting minecraft server version 1.7.10");
  
          if (Runtime.getRuntime().maxMemory() / 1024L / 1024L < 512L)
-@@ -114,7 +166,7 @@
+@@ -117,7 +169,7 @@
          FMLCommonHandler.instance().onServerStart(this);
  
          field_155771_h.info("Loading properties");
 -        this.settings = new PropertyManager(new File("server.properties"));
 +        this.settings = new PropertyManager(this.options); // CraftBukkit - CLI argument support
+         this.field_154332_n = new ServerEula(new File("eula.txt"));
  
-         if (this.isSinglePlayer())
-         {
-@@ -160,22 +212,42 @@
-             this.setServerPort(this.settings.getIntProperty("server-port", 25565));
-         }
+         if (!this.field_154332_n.func_154346_a())
+@@ -172,6 +224,13 @@
+                 this.setServerPort(this.settings.getIntProperty("server-port", 25565));
+             }
  
-+        // Spigot start
-+        this.setConfigurationManager((ServerConfigurationManager)(new DedicatedPlayerList(this)));
-+        org.spigotmc.SpigotConfig.init();
-+        org.spigotmc.SpigotConfig.registerCommands();
-+        // Spigot end
-+        // Cauldron start
-+        net.minecraftforge.cauldron.configuration.CauldronConfig.init();
-+        net.minecraftforge.cauldron.configuration.CauldronConfig.registerCommands();
-+        // Cauldron end
-         field_155771_h.info("Generating keypair");
-         this.setKeyPair(CryptManager.createNewKeyPair());
-         field_155771_h.info("Starting Minecraft server on " + (this.getServerHostname().length() == 0 ? "*" : this.getServerHostname()) + ":" + this.getServerPort());
- 
--        try
-+        if (!org.spigotmc.SpigotConfig.lateBind)
-         {
--            this.func_147137_ag().addLanEndpoint(inetaddress, this.getServerPort());
-+            try
-+            {
-+                this.func_147137_ag().addLanEndpoint(inetaddress, this.getServerPort());
-+            }
++            // Spigot start
++            this.func_152361_a((ServerConfigurationManager)(new DedicatedPlayerList(this)));
++            org.spigotmc.SpigotConfig.init();
++            org.spigotmc.SpigotConfig.registerCommands();
++            // Spigot end
++            net.minecraftforge.cauldron.configuration.CauldronConfig.registerCommands(); // Cauldron
++
+             field_155771_h.info("Generating keypair");
+             this.setKeyPair(CryptManager.createNewKeyPair());
+             field_155771_h.info("Starting Minecraft server on " + (this.getServerHostname().length() == 0 ? "*" : this.getServerHostname()) + ":" + this.getServerPort());
+@@ -180,7 +239,7 @@
+             {
+                 this.func_147137_ag().addLanEndpoint(inetaddress, this.getServerPort());
+             }
+-            catch (IOException ioexception)
 +            catch (Throwable ioexception)     // CraftBukkit - IOException -> Throwable
-+            {
-+                field_155771_h.warn("**** FAILED TO BIND TO PORT!");
-+                field_155771_h.warn("The exception was: {}", new Object[] { ioexception.toString()});
-+                field_155771_h.warn("Perhaps a server is already running on that port?");
-+                return false;
-+            }
-         }
--        catch (IOException ioexception)
--        {
--            field_155771_h.warn("**** FAILED TO BIND TO PORT!");
--            field_155771_h.warn("The exception was: {}", new Object[] {ioexception.toString()});
--            field_155771_h.warn("Perhaps a server is already running on that port?");
--            return false;
--        }
+             {
+                 field_155771_h.warn("**** FAILED TO BIND TO PORT!");
+                 field_155771_h.warn("The exception was: {}", new Object[] {ioexception.toString()});
+@@ -196,10 +255,17 @@
+                 field_155771_h.warn("To change this, set \"online-mode\" to \"true\" in the server.properties file.");
+             }
  
-+        // Spigot Start - Move DedicatedPlayerList up and bring plugin loading from CraftServer to here
-+        // this.setConfigurationManager((ServerConfigurationManager)(new DedicatedPlayerList(this)));  // CraftBukkit
-+        // Cauldron start - moved to FMLServerAboutToStart
-+        // server.loadPlugins();
-+        // server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.STARTUP);
-+        // Cauldron End
-+        // Spigot End
-+
-         if (!this.isServerInOnlineMode())
-         {
-             field_155771_h.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
-@@ -186,7 +258,8 @@
- 
-         FMLCommonHandler.instance().onServerStarted();
- 
--        this.setConfigurationManager(new DedicatedPlayerList(this));
-+        // this.setConfigurationManager(new DedicatedPlayerList(this)); // CraftBukkit - moved up
-+        this.anvilConverterForAnvilFile = new AnvilSaveConverter(server.getWorldContainer()); // CraftBukkit - moved from MinecraftServer constructor
-         long j = System.nanoTime();
- 
-         if (this.getFolderName() == null)
-@@ -238,6 +311,21 @@
-         String s3 = String.format("%.3fs", new Object[] {Double.valueOf((double)i1 / 1.0E9D)});
-         field_155771_h.info("Done (" + s3 + ")! For help, type \"help\" or \"?\"");
- 
-+        if (org.spigotmc.SpigotConfig.lateBind)
-+        {
+-            if (this.func_152368_aE())
 +            try
+             {
+-                this.func_152358_ax().func_152658_c();
++                if (this.func_152368_aE())
++                {
++                    this.func_152358_ax().func_152658_c();
++                }
+             }
++            catch (IOException e)
 +            {
-+                this.func_147137_ag().addLanEndpoint(inetaddress, this.getServerPort());
++                e.printStackTrace();
 +            }
-+            catch (Throwable ioexception)     // CraftBukkit - IOException -> Throwable
-+            {
-+                field_155771_h.warn("**** FAILED TO BIND TO PORT!");
-+                field_155771_h.warn("The exception was: {}", new Object[] { ioexception.toString()});
-+                field_155771_h.warn("Perhaps a server is already running on that port?");
-+                return false;
-+            }
-+        }
-+
-         if (this.settings.getBooleanProperty("enable-query", false))
-         {
-             field_155771_h.info("Starting GS4 status listener");
-@@ -250,12 +338,30 @@
-             field_155771_h.info("Starting remote control listener");
-             this.theRConThreadMain = new RConThreadMain(this);
-             this.theRConThreadMain.startThread();
-+            this.remoteConsole = new org.bukkit.craftbukkit.command.CraftRemoteConsoleCommandSender(); // CraftBukkit
-         }
  
--        allowPlayerLogins = true;
-+        // CraftBukkit start
-+        if (this.server.getBukkitSpawnRadius() > -1)
-+        {
-+            field_155771_h.info("'settings.spawn-radius' in bukkit.yml has been moved to 'spawn-protection' in server.properties. I will move your config for you.");
-+            this.settings.serverProperties.remove("spawn-protection");
-+            this.settings.getIntProperty("spawn-protection", this.server.getBukkitSpawnRadius());
-+            this.server.removeBukkitSpawnRadius();
-+            this.settings.saveProperties();
-+        }
-+        // CraftBukkit end
+             if (!PreYggdrasilConverter.func_152714_a(this.settings))
+             {
+@@ -208,7 +274,8 @@
+             else
+             {
+                 FMLCommonHandler.instance().onServerStarted();
+-                this.func_152361_a(new DedicatedPlayerList(this));
++                // this.func_152361_a(new DedicatedPlayerList(this)); // CraftBukkit - moved up
++                this.anvilConverterForAnvilFile = new AnvilSaveConverter(server.getWorldContainer()); // CraftBukkit - moved from MinecraftServer constructor
+                 long j = System.nanoTime();
+ 
+                 if (this.getFolderName() == null)
+@@ -274,12 +341,29 @@
+                     this.theRConThreadMain.startThread();
+                 }
+ 
+-                allowPlayerLogins = true;
++                // CraftBukkit start
++                if (this.server.getBukkitSpawnRadius() > -1)
++                {
++                    field_155771_h.info("'settings.spawn-radius' in bukkit.yml has been moved to 'spawn-protection' in server.properties. I will move your config for you.");
++                    this.settings.serverProperties.remove("spawn-protection");
++                    this.settings.getIntProperty("spawn-protection", this.server.getBukkitSpawnRadius());
++                    this.server.removeBukkitSpawnRadius();
++                    this.settings.saveProperties();
++                }
++                // CraftBukkit end
 +
-         return FMLCommonHandler.instance().handleServerStarting(this);
+                 return FMLCommonHandler.instance().handleServerStarting(this);
+             }
+         }
      }
  
 +    // CraftBukkit start
@@ -251,7 +220,7 @@
      public boolean canStructuresSpawn()
      {
          return this.canSpawnStructures;
-@@ -358,8 +464,14 @@
+@@ -367,8 +451,14 @@
      {
          while (!this.pendingCommandList.isEmpty())
          {

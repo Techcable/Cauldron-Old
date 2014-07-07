@@ -4,7 +4,13 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+
+import com.mojang.authlib.GameProfile;
+
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
 
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -19,14 +25,18 @@ import org.bukkit.plugin.Plugin;
 
 @SerializableAs("Player")
 public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializable {
-    private final String name;
+    private final GameProfile profile;
     private final CraftServer server;
     private final net.minecraft.world.storage.SaveHandler storage;
 
-    protected CraftOfflinePlayer(CraftServer server, String name) {
+    protected CraftOfflinePlayer(CraftServer server, GameProfile profile) {
         this.server = server;
-        this.name = name;
+        this.profile = profile;
         this.storage = (net.minecraft.world.storage.SaveHandler) (server.console.worlds.get(0).getSaveHandler());
+    }
+
+    public GameProfile getProfile() {
+        return profile;
     }
 
     public boolean isOnline() {
@@ -34,7 +44,29 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     }
 
     public String getName() {
-        return name;
+        Player player = getPlayer();
+        if (player != null) {
+            return player.getName();
+        }
+
+        // This might not match lastKnownName but if not it should be more correct
+        if (profile.getName() != null) {
+            return profile.getName();
+        }
+
+        NBTTagCompound data = getBukkitData();
+
+        if (data != null) {
+            if (data.hasKey("lastKnownName")) {
+                return data.getString("lastKnownName");
+            }
+        }
+
+        return null;
+    }
+
+    public UUID getUniqueId() {
+        return profile.getId();
     }
 
     public Server getServer() {
@@ -42,24 +74,34 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     }
 
     public boolean isOp() {
-        return server.getHandle().isPlayerOpped(getName().toLowerCase());
+        return server.getHandle().func_152596_g(profile);
     }
 
     public void setOp(boolean value) {
-        if (value == isOp()) return;
+        if (value == isOp()) {
+            return;
+        }
 
         if (value) {
-            server.getHandle().addOp(getName().toLowerCase());
+            server.getHandle().func_152605_a(profile);
         } else {
-            server.getHandle().removeOp(getName().toLowerCase());
+            server.getHandle().func_152610_b(profile);
         }
     }
 
     public boolean isBanned() {
+        if (getName() == null) {
+            return false;
+        }
+
         return server.getBanList(BanList.Type.NAME).isBanned(getName());
     }
 
     public void setBanned(boolean value) {
+        if (getName() == null) {
+            return;
+        }
+
         if (value) {
             server.getBanList(BanList.Type.NAME).addBan(getName(), null, null, null);
         } else {
@@ -68,38 +110,43 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     }
 
     public boolean isWhitelisted() {
-        return server.getHandle().getWhiteListedPlayers().contains(name.toLowerCase());
+        return server.getHandle().func_152607_e(profile); // Cauldron
     }
 
     public void setWhitelisted(boolean value) {
         if (value) {
-            server.getHandle().addToWhiteList(name.toLowerCase());
+            server.getHandle().func_152601_d(profile);
         } else {
-            server.getHandle().removeFromWhitelist(name.toLowerCase());
+            server.getHandle().func_152597_c(profile);
         }
     }
 
     public Map<String, Object> serialize() {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
 
-        result.put("name", name);
+        result.put("UUID", profile.getId().toString());
 
         return result;
     }
 
     public static OfflinePlayer deserialize(Map<String, Object> args) {
+        // Backwards comparability
+        if (args.get("name") != null) {
         return Bukkit.getServer().getOfflinePlayer((String) args.get("name"));
+    }
+
+        return Bukkit.getServer().getOfflinePlayer(UUID.fromString((String) args.get("UUID")));
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[name=" + name + "]";
+        return getClass().getSimpleName() + "[UUID=" + profile.getId() + "]";
     }
 
     public Player getPlayer() {
         for (Object obj : server.getHandle().playerEntityList) {
-            net.minecraft.entity.player.EntityPlayerMP player = (net.minecraft.entity.player.EntityPlayerMP) obj;
-            if (player.getCommandSenderName().equalsIgnoreCase(getName())) {
+            EntityPlayerMP player = (EntityPlayerMP) obj;
+            if (player.getUniqueID().equals(getUniqueId())) {
                 return (player.playerNetServerHandler != null) ? player.playerNetServerHandler.getPlayerB() : null; // Cauldron
             }
         }
@@ -109,32 +156,31 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (obj == null || !(obj instanceof OfflinePlayer)) {
             return false;
         }
-        if (!(obj instanceof OfflinePlayer)) {
-            return false;
-        }
+
         OfflinePlayer other = (OfflinePlayer) obj;
-        if ((this.getName() == null) || (other.getName() == null)) {
+        if ((this.getUniqueId() == null) || (other.getUniqueId() == null)) {
             return false;
         }
-        return this.getName().equalsIgnoreCase(other.getName());
+
+        return this.getUniqueId().equals(other.getUniqueId());
     }
 
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 97 * hash + (this.getName() != null ? this.getName().toLowerCase().hashCode() : 0);
+        hash = 97 * hash + (this.getUniqueId() != null ? this.getUniqueId().hashCode() : 0);
         return hash;
     }
 
-    private net.minecraft.nbt.NBTTagCompound getData() {
-        return storage.getPlayerData(getName());
+    private NBTTagCompound getData() {
+        return storage.getPlayerData(getUniqueId().toString());
     }
 
-    private net.minecraft.nbt.NBTTagCompound getBukkitData() {
-        net.minecraft.nbt.NBTTagCompound result = getData();
+    private NBTTagCompound getBukkitData() {
+        NBTTagCompound result = getData();
 
         if (result != null) {
             if (!result.hasKey("bukkit")) {
@@ -147,7 +193,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     }
 
     private File getDataFile() {
-        return new File(storage.getPlayerDir(), name + ".dat");
+        return new File(storage.getPlayerDir(), getUniqueId() + ".dat");
     }
 
     public long getFirstPlayed() {

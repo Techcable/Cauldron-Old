@@ -1,5 +1,9 @@
 package org.bukkit.craftbukkit.block;
 
+import net.minecraft.block.BlockJukebox;
+import net.minecraft.block.BlockJukebox.TileEntityJukebox;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -9,18 +13,18 @@ import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 
 public class CraftJukebox extends CraftBlockState implements Jukebox {
     private final CraftWorld world;
-    private final net.minecraft.block.BlockJukebox.TileEntityJukebox jukebox;
+    private final TileEntityJukebox jukebox;
 
     public CraftJukebox(final Block block) {
         super(block);
 
         world = (CraftWorld) block.getWorld();
-        jukebox = (net.minecraft.block.BlockJukebox.TileEntityJukebox) world.getTileEntityAt(getX(), getY(), getZ());
+        jukebox = (TileEntityJukebox) world.getTileEntityAt(getX(), getY(), getZ());
     }
 
     @Override
     public Material getPlaying() {
-        net.minecraft.item.ItemStack record = jukebox.func_145856_a();
+        ItemStack record = jukebox.func_145856_a();
         if (record == null) {
             return Material.AIR;
         }
@@ -33,7 +37,7 @@ public class CraftJukebox extends CraftBlockState implements Jukebox {
             record = Material.AIR;
             jukebox.func_145857_a(null);
         } else {
-            jukebox.func_145857_a(new net.minecraft.item.ItemStack(CraftMagicNumbers.getItem(record), 1));
+            jukebox.func_145857_a(new ItemStack(CraftMagicNumbers.getItem(record), 1));
         }
         jukebox.markDirty();
         if (record == Material.AIR) {
@@ -50,7 +54,7 @@ public class CraftJukebox extends CraftBlockState implements Jukebox {
 
     public boolean eject() {
         boolean result = isPlaying();
-        ((net.minecraft.block.BlockJukebox) net.minecraft.init.Blocks.jukebox).func_149925_e(world.getHandle(), getX(), getY(), getZ());
+        ((BlockJukebox) Blocks.jukebox).func_149925_e(world.getHandle(), getX(), getY(), getZ());
         return result;
     }
 }

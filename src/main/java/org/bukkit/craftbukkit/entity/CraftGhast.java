@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
+import net.minecraft.entity.monster.EntityGhast;
 
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
@@ -12,8 +13,8 @@ public class CraftGhast extends CraftFlying implements Ghast {
     }
 
     @Override
-    public net.minecraft.entity.monster.EntityGhast getHandle() {
-        return (net.minecraft.entity.monster.EntityGhast) entity;
+    public EntityGhast getHandle() {
+        return (EntityGhast) entity;
     }
 
     @Override

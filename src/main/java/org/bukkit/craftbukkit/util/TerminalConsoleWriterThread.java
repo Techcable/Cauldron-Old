@@ -28,7 +28,7 @@ public class TerminalConsoleWriterThread implements Runnable {
             }
 
             try {
-                if (MinecraftServer.useJline) {
+                if (MinecraftServer.useJline) { // Cauldron
                     reader.print(ConsoleReader.RESET_LINE + "");
                     reader.flush();
                     output.write(message.getBytes());

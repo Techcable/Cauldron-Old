@@ -21,18 +21,17 @@
 +    private Entity lastTarget; // CraftBukkit
      private static final String __OBFID = "CL_00001698";
  
-     public EntitySlime(World par1World)
-@@ -37,7 +46,8 @@
+     public EntitySlime(World p_i1742_1_)
+@@ -37,7 +46,7 @@
          this.dataWatcher.addObject(16, new Byte((byte)1));
      }
  
--    protected void setSlimeSize(int par1)
-+    // CraftBukkit - protected -> public
-+    public void setSlimeSize(int par1)
+-    protected void setSlimeSize(int p_70799_1_)
++    public void setSlimeSize(int p_70799_1_) // CraftBukkit - protected -> public
      {
-         this.dataWatcher.updateObject(16, new Byte((byte)par1));
-         this.setSize(0.6F * (float)par1, 0.6F * (float)par1);
-@@ -124,8 +134,27 @@
+         this.dataWatcher.updateObject(16, new Byte((byte)p_70799_1_));
+         this.setSize(0.6F * (float)p_70799_1_, 0.6F * (float)p_70799_1_);
+@@ -131,8 +140,27 @@
      protected void updateEntityActionState()
      {
          this.despawnEntity();
@@ -61,7 +60,7 @@
          if (entityplayer != null)
          {
              this.faceEntity(entityplayer, 10.0F, 20.0F);
-@@ -183,7 +212,22 @@
+@@ -190,7 +218,22 @@
          if (!this.worldObj.isRemote && i > 1 && this.getHealth() <= 0.0F)
          {
              int j = 2 + this.rand.nextInt(3);
@@ -84,7 +83,7 @@
              for (int k = 0; k < j; ++k)
              {
                  float f = ((float)(k % 2) - 0.5F) * (float)i / 4.0F;
-@@ -191,7 +235,7 @@
+@@ -198,7 +241,7 @@
                  EntitySlime entityslime = this.createInstance();
                  entityslime.setSlimeSize(i / 2);
                  entityslime.setLocationAndAngles(this.posX + (double)f, this.posY + 0.5D, this.posZ + (double)f1, this.rand.nextFloat() * 360.0F, 0.0F);

@@ -1,9 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
-// Cauldron start - guava10
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
-// Cauldron end
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,23 +13,30 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
+import com.mojang.authlib.GameProfile;
+
+import net.minecraft.entity.EntityTracker;
+import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S23PacketBlockChange;
+import net.minecraft.network.play.server.S33PacketUpdateSign;
+import net.minecraft.network.play.server.S38PacketPlayerListItem;
+import net.minecraft.world.WorldServer;
+
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.*;
-import org.bukkit.Achievement;
-import org.bukkit.BanList;
-import org.bukkit.Statistic;
-import org.bukkit.Material;
 import org.bukkit.Statistic.Type;
-import org.bukkit.World;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationAbandonedEvent;
 import org.bukkit.conversations.ManuallyAbandonedConversationCanceller;
+import org.bukkit.craftbukkit.block.CraftSign;
 import org.bukkit.craftbukkit.conversations.ConversationTracker;
 import org.bukkit.craftbukkit.CraftEffect;
 import org.bukkit.craftbukkit.CraftOfflinePlayer;
@@ -64,7 +69,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     private boolean hasPlayedBefore = false;
     private final ConversationTracker conversationTracker = new ConversationTracker();
     private final Set<String> channels = new HashSet<String>();
-    private final Map<String, Player> hiddenPlayers = new MapMaker().weakValues().makeMap(); // Spigot - soft -> weak
+    private final Set<UUID> hiddenPlayers = new HashSet<UUID>();
     private int hash = 0;
     private double health = 20;
     private boolean scaledHealth = false;
@@ -76,9 +81,13 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         firstPlayed = System.currentTimeMillis();
     }
 
+    public GameProfile getProfile() {
+        return getHandle().getGameProfile();
+    }
+
     @Override
     public boolean isOp() {
-        return server.getHandle().isPlayerOpped(getName());
+        return server.getHandle().func_152596_g(getProfile());
     }
 
     @Override
@@ -86,9 +95,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         if (value == isOp()) return;
 
         if (value) {
-            server.getHandle().addOp(getName());
+            server.getHandle().func_152605_a(getProfile());
         } else {
-            server.getHandle().removeOp(getName());
+            server.getHandle().func_152610_b(getProfile());
         }
 
         perm.recalculatePermissions();
@@ -163,7 +172,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void setDisplayName(final String name) {
-        getHandle().displayName = name;
+        getHandle().displayName = name == null ? getName() : name;
     }
 
     @Override
@@ -363,11 +372,32 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void sendBlockChange(Location loc, int material, byte data) {
         if (getHandle().playerNetServerHandler == null) return;
 
-        net.minecraft.network.play.server.S23PacketBlockChange packet = new net.minecraft.network.play.server.S23PacketBlockChange(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), ((CraftWorld) loc.getWorld()).getHandle());
+        S23PacketBlockChange packet = new S23PacketBlockChange(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), ((CraftWorld) loc.getWorld()).getHandle());
 
         packet.field_148883_d = CraftMagicNumbers.getBlock(material);
         packet.field_148884_e = data;
         getHandle().playerNetServerHandler.sendPacket(packet);
+    }
+
+    @Override
+    public void sendSignChange(Location loc, String[] lines) {
+        if (getHandle().playerNetServerHandler == null) {
+            return;
+        }
+
+        if (lines == null) {
+            lines = new String[4];
+        }
+
+        Validate.notNull(loc, "Location can not be null");
+        if (lines.length < 4) {
+            throw new IllegalArgumentException("Must have at least 4 lines");
+        }
+
+        // Limit to 15 chars per line and set null lines to blank
+        String[] astring = CraftSign.sanitizeLines(lines);
+
+        getHandle().playerNetServerHandler.sendPacket(new S33PacketUpdateSign(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), astring));
     }
 
     @Override
@@ -733,15 +763,15 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public boolean isWhitelisted() {
-        return server.getHandle().getWhiteListedPlayers().contains(getName().toLowerCase());
+        return server.getHandle().func_152607_e(getProfile());
     }
 
     @Override
     public void setWhitelisted(boolean value) {
         if (value) {
-            server.getHandle().addToWhiteList(getName().toLowerCase());
+            server.getHandle().func_152601_d(getProfile());
         } else {
-            server.getHandle().removeFromWhitelist(getName().toLowerCase());
+            server.getHandle().func_152597_c(getProfile());
         }
     }
 
@@ -859,8 +889,8 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         Validate.notNull(player, "hidden player cannot be null");
         if (getHandle().playerNetServerHandler == null) return;
         if (equals(player)) return;
-        if (hiddenPlayers.containsKey(player.getName())) return;
-        hiddenPlayers.put(player.getName(), player);
+        if (hiddenPlayers.contains(player.getUniqueId())) return;
+        hiddenPlayers.add(player.getUniqueId());
 
         //remove this player from the hidden player's EntityTrackerEntry
         net.minecraft.entity.EntityTracker tracker = ((net.minecraft.world.WorldServer) entity.worldObj).theEntityTracker;
@@ -878,21 +908,25 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         Validate.notNull(player, "shown player cannot be null");
         if (getHandle().playerNetServerHandler == null) return;
         if (equals(player)) return;
-        if (!hiddenPlayers.containsKey(player.getName())) return;
-        hiddenPlayers.remove(player.getName());
+        if (!hiddenPlayers.contains(player.getUniqueId())) return;
+        hiddenPlayers.remove(player.getUniqueId());
 
-        net.minecraft.entity.EntityTracker tracker = ((net.minecraft.world.WorldServer) entity.worldObj).theEntityTracker;
-        net.minecraft.entity.player.EntityPlayerMP other = ((CraftPlayer) player).getHandle();
-        net.minecraft.entity.EntityTrackerEntry entry = (net.minecraft.entity.EntityTrackerEntry) tracker.trackedEntityIDs.lookup(other.getEntityId());
-        if (entry != null && !entry.trackingPlayers.contains(getHandle())) {
-            entry.tryStartWachingThis(getHandle());
+        EntityTracker tracker = ((WorldServer) entity.worldObj).theEntityTracker;
+        EntityPlayerMP other = ((CraftPlayer) player).getHandle();
+        EntityTrackerEntry entry = (EntityTrackerEntry) tracker.trackedEntityIDs.lookup(other.getEntityId());
+        if (entry != null) {
+            entry.removePlayerFromTracker(getHandle());
         }
 
-        getHandle().playerNetServerHandler.sendPacket(new net.minecraft.network.play.server.S38PacketPlayerListItem(player.getPlayerListName(), true, getHandle().ping));
+        getHandle().playerNetServerHandler.sendPacket(new S38PacketPlayerListItem(player.getPlayerListName(), false, 9999));
+    }
+
+    public void removeDisconnectingPlayer(Player player) {
+        hiddenPlayers.remove(player.getUniqueId());
     }
 
     public boolean canSee(Player player) {
-        return !hiddenPlayers.containsKey(player.getName());
+        return !hiddenPlayers.contains(player.getUniqueId());
     }
 
     public Map<String, Object> serialize() {
@@ -980,6 +1014,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         data.setBoolean("keepLevel", handle.keepLevel);
         data.setLong("firstPlayed", getFirstPlayed());
         data.setLong("lastPlayed", System.currentTimeMillis());
+        data.setString("lastKnownName", handle.getCommandSenderName());
     }
 
     public boolean beginConversation(Conversation conversation) {
@@ -1265,6 +1300,12 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     // Spigot start
     private final Player.Spigot spigot = new Player.Spigot()
     {
+        @Override
+        public InetSocketAddress getRawAddress()
+        {
+            return (InetSocketAddress) getHandle().playerNetServerHandler.netManager.getRawAddress();
+        }
+
         @Override
         public boolean getCollidesWithEntities()
         {

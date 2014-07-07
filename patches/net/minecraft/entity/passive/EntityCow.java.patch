@@ -14,11 +14,11 @@
      private static final String __OBFID = "CL_00001640";
 @@ -109,15 +114,25 @@
  
-         if (itemstack != null && itemstack.getItem() == Items.bucket && !par1EntityPlayer.capabilities.isCreativeMode)
+         if (itemstack != null && itemstack.getItem() == Items.bucket && !p_70085_1_.capabilities.isCreativeMode)
          {
 +            // CraftBukkit start - Got milk?
 +            org.bukkit.Location loc = this.getBukkitEntity().getLocation();
-+            org.bukkit.event.player.PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(par1EntityPlayer, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), -1, itemstack, Items.milk_bucket);
++            org.bukkit.event.player.PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(p_70085_1_, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), -1, itemstack, Items.milk_bucket);
 +
 +            if (event.isCancelled())
 +            {
@@ -27,13 +27,13 @@
 +
              if (itemstack.stackSize-- == 1)
              {
--                par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, new ItemStack(Items.milk_bucket));
-+                par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, CraftItemStack.asNMSCopy(event.getItemStack()));
+-                p_70085_1_.inventory.setInventorySlotContents(p_70085_1_.inventory.currentItem, new ItemStack(Items.milk_bucket));
++                p_70085_1_.inventory.setInventorySlotContents(p_70085_1_.inventory.currentItem, CraftItemStack.asNMSCopy(event.getItemStack()));
              }
-             else if (!par1EntityPlayer.inventory.addItemStackToInventory(new ItemStack(Items.milk_bucket)))
+             else if (!p_70085_1_.inventory.addItemStackToInventory(new ItemStack(Items.milk_bucket)))
              {
--                par1EntityPlayer.dropPlayerItemWithRandomChoice(new ItemStack(Items.milk_bucket, 1, 0), false);
-+                par1EntityPlayer.dropPlayerItemWithRandomChoice(CraftItemStack.asNMSCopy(event.getItemStack()), false);
+-                p_70085_1_.dropPlayerItemWithRandomChoice(new ItemStack(Items.milk_bucket, 1, 0), false);
++                p_70085_1_.dropPlayerItemWithRandomChoice(CraftItemStack.asNMSCopy(event.getItemStack()), false);
              }
  
 +            // CraftBukkit end

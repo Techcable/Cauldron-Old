@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
+import net.minecraft.tileentity.TileEntityFurnace;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -7,12 +8,12 @@ import org.bukkit.craftbukkit.inventory.CraftInventoryFurnace;
 import org.bukkit.inventory.FurnaceInventory;
 
 public class CraftFurnace extends CraftBlockState implements Furnace {
-    private final net.minecraft.tileentity.TileEntityFurnace furnace;
+    private final TileEntityFurnace furnace;
 
     public CraftFurnace(final Block block) {
         super(block);
 
-        furnace = (net.minecraft.tileentity.TileEntityFurnace) ((CraftWorld) block.getWorld()).getTileEntityAt(getX(), getY(), getZ());
+        furnace = (TileEntityFurnace) ((CraftWorld) block.getWorld()).getTileEntityAt(getX(), getY(), getZ());
     }
 
     public FurnaceInventory getInventory() {

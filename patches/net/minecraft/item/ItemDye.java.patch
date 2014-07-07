@@ -26,5 +26,5 @@
 +                i = (byte) event.getColor().getWoolData();
 +                // CraftBukkit end
                  entitysheep.setFleeceColor(i);
-                 --par1ItemStack.stackSize;
+                 --p_111207_1_.stackSize;
              }

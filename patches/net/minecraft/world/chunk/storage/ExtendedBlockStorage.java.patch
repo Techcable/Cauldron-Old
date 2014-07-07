@@ -139,20 +139,20 @@
  
 @@ -197,29 +320,72 @@
  
-     public void setBlockLSBArray(byte[] par1ArrayOfByte)
+     public void setBlockLSBArray(byte[] p_76664_1_)
      {
--        this.blockLSBArray = par1ArrayOfByte;
-+        this.blockLSBArray = this.validateByteArray(par1ArrayOfByte); // CraftBukkit - Validate data
+-        this.blockLSBArray = p_76664_1_;
++        this.blockLSBArray = this.validateByteArray(p_76664_1_); // CraftBukkit - Validate data
      }
  
-     public void setBlockMSBArray(NibbleArray par1NibbleArray)
+     public void setBlockMSBArray(NibbleArray p_76673_1_)
      {
--        this.blockMSBArray = par1NibbleArray;
+-        this.blockMSBArray = p_76673_1_;
 +        // CraftBukkit start - Don't hang on to an empty nibble array
 +        boolean empty = true;
 +
 +        // Spigot start
-+        if ((!par1NibbleArray.isTrivialArray()) || (par1NibbleArray.getTrivialArrayValue() != 0))
++        if ((!p_76673_1_.isTrivialArray()) || (p_76673_1_.getTrivialArrayValue() != 0))
 +        {
 +            empty = false;
 +        }
@@ -165,25 +165,25 @@
 +        }
 +
 +        // CraftBukkit end
-+        this.blockMSBArray = this.validateNibbleArray(par1NibbleArray); // CraftBukkit - Validate data
++        this.blockMSBArray = this.validateNibbleArray(p_76673_1_); // CraftBukkit - Validate data
      }
  
-     public void setBlockMetadataArray(NibbleArray par1NibbleArray)
+     public void setBlockMetadataArray(NibbleArray p_76668_1_)
      {
--        this.blockMetadataArray = par1NibbleArray;
-+        this.blockMetadataArray = this.validateNibbleArray(par1NibbleArray); // CraftBukkit - Validate data
+-        this.blockMetadataArray = p_76668_1_;
++        this.blockMetadataArray = this.validateNibbleArray(p_76668_1_); // CraftBukkit - Validate data
      }
  
-     public void setBlocklightArray(NibbleArray par1NibbleArray)
+     public void setBlocklightArray(NibbleArray p_76659_1_)
      {
--        this.blocklightArray = par1NibbleArray;
-+        this.blocklightArray = this.validateNibbleArray(par1NibbleArray); // CraftBukkit - Validate data
+-        this.blocklightArray = p_76659_1_;
++        this.blocklightArray = this.validateNibbleArray(p_76659_1_); // CraftBukkit - Validate data
      }
  
-     public void setSkylightArray(NibbleArray par1NibbleArray)
+     public void setSkylightArray(NibbleArray p_76666_1_)
      {
--        this.skylightArray = par1NibbleArray;
-+        this.skylightArray = this.validateNibbleArray(par1NibbleArray); // CraftBukkit - Validate data
+-        this.skylightArray = p_76666_1_;
++        this.skylightArray = this.validateNibbleArray(p_76666_1_); // CraftBukkit - Validate data
      }
  
 +    // CraftBukkit start - Validate array lengths

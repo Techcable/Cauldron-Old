@@ -12,36 +12,33 @@
  public class BehaviorDefaultDispenseItem implements IBehaviorDispenseItem
  {
      private static final String __OBFID = "CL_00001195";
-@@ -23,10 +28,18 @@
-         EnumFacing enumfacing = BlockDispenser.func_149937_b(par1IBlockSource.getBlockMetadata());
-         IPosition iposition = BlockDispenser.func_149939_a(par1IBlockSource);
-         ItemStack itemstack1 = par2ItemStack.splitStack(1);
--        doDispense(par1IBlockSource.getWorld(), itemstack1, 6, enumfacing, iposition);
-+
+@@ -23,10 +28,17 @@
+         EnumFacing enumfacing = BlockDispenser.func_149937_b(p_82487_1_.getBlockMetadata());
+         IPosition iposition = BlockDispenser.func_149939_a(p_82487_1_);
+         ItemStack itemstack1 = p_82487_2_.splitStack(1);
+-        doDispense(p_82487_1_.getWorld(), itemstack1, 6, enumfacing, iposition);
 +        // CraftBukkit start
-+        if (!a(par1IBlockSource.getWorld(), itemstack1, 6, enumfacing, par1IBlockSource))
++        if (!doDispense(p_82487_1_.getWorld(), itemstack1, 6, enumfacing, p_82487_1_));
 +        {
-+            par2ItemStack.stackSize++;
++           p_82487_2_.stackSize++;
 +        }
 +
 +        // CraftBukkit end
-         return par2ItemStack;
+         return p_82487_2_;
      }
  
 +    // Cauldron start - vanilla compatibility
-     public static void doDispense(World par0World, ItemStack par1ItemStack, int par2, EnumFacing par3EnumFacing, IPosition par4IPosition)
+     public static void doDispense(World p_82486_0_, ItemStack p_82486_1_, int p_82486_2_, EnumFacing p_82486_3_, IPosition p_82486_4_)
      {
-         double d0 = par4IPosition.getX();
-@@ -41,8 +54,69 @@
-         entityitem.motionY += par0World.rand.nextGaussian() * 0.007499999832361937D * (double)par2;
-         entityitem.motionZ += par0World.rand.nextGaussian() * 0.007499999832361937D * (double)par2;
-         par0World.spawnEntityInWorld(entityitem);
-+        // TODO: add CB event?
+         double d0 = p_82486_4_.getX();
+@@ -42,7 +54,67 @@
+         entityitem.motionZ += p_82486_0_.rand.nextGaussian() * 0.007499999832361937D * (double)p_82486_2_;
+         p_82486_0_.spawnEntityInWorld(entityitem);
      }
 +    // Cauldron end
  
 +    // CraftBukkit start - void -> boolean return, IPosition -> ISourceBlock last argument
-+    public static boolean a(World world, ItemStack itemstack, int i, EnumFacing enumfacing, IBlockSource iblocksource)
++    public static boolean doDispense(World world, ItemStack itemstack, int i, EnumFacing enumfacing, IBlockSource iblocksource)
 +    {
 +        IPosition iposition = BlockDispenser.func_149939_a(iblocksource);
 +        // CraftBukkit end
@@ -99,6 +96,6 @@
 +        // CraftBukkit end
 +    }
 +
-     protected void playDispenseSound(IBlockSource par1IBlockSource)
+     protected void playDispenseSound(IBlockSource p_82485_1_)
      {
-         par1IBlockSource.getWorld().playAuxSFX(1000, par1IBlockSource.getXInt(), par1IBlockSource.getYInt(), par1IBlockSource.getZInt(), 0);
+         p_82485_1_.getWorld().playAuxSFX(1000, p_82485_1_.getXInt(), p_82485_1_.getYInt(), p_82485_1_.getZInt(), 0);

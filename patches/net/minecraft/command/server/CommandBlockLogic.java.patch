@@ -104,7 +104,7 @@
 +                }
 +                else
 +                {
-+                    EntityPlayerMP player = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(args[1]);
++                    EntityPlayerMP player = MinecraftServer.getServer().getConfigurationManager().func_152612_a(args[1]);
 +
 +                    if (player == null)
 +                    {

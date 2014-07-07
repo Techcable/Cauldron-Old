@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
+import net.minecraft.entity.passive.EntityHorse;
 import org.apache.commons.lang.Validate;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftInventoryHorse;
@@ -8,15 +9,17 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.inventory.HorseInventory;
 
+import java.util.UUID;
+
 public class CraftHorse extends CraftAnimals implements Horse {
 
-    public CraftHorse(CraftServer server, net.minecraft.entity.passive.EntityHorse entity) {
+    public CraftHorse(CraftServer server, EntityHorse entity) {
         super(server, entity);
     }
 
     @Override
-    public net.minecraft.entity.passive.EntityHorse getHandle() {
-        return (net.minecraft.entity.passive.EntityHorse) entity;
+    public EntityHorse getHandle() {
+        return (EntityHorse) entity;
     }
 
     public Variant getVariant() {
@@ -81,7 +84,7 @@ public class CraftHorse extends CraftAnimals implements Horse {
 
     public void setJumpStrength(double strength) {
         Validate.isTrue(strength >= 0, "Jump strength cannot be less than zero");
-        getHandle().getEntityAttribute(net.minecraft.entity.passive.EntityHorse.horseJumpStrength).setBaseValue(strength);
+        getHandle().getEntityAttribute(EntityHorse.horseJumpStrength).setBaseValue(strength);
     }
 
     @Override
@@ -96,28 +99,36 @@ public class CraftHorse extends CraftAnimals implements Horse {
 
     @Override
     public AnimalTamer getOwner() {
-        if (getOwnerName() == null || "".equals(getOwnerName())) return null;
-        return getServer().getOfflinePlayer(getOwnerName());
+        if (getOwnerUUID() == null) return null;
+        return getServer().getOfflinePlayer(getOwnerUUID());
     }
 
     @Override
     public void setOwner(AnimalTamer owner) {
-        if (owner != null && !"".equals(owner.getName())) {
+        if (owner != null) {
             setTamed(true);
             getHandle().setPathToEntity(null);
-            setOwnerName(owner.getName());
+            setOwnerUUID(owner.getUniqueId());
         } else {
             setTamed(false);
-            setOwnerName("");
+            setOwnerUUID(null);
         }
     }
 
-    public String getOwnerName() {
-        return getHandle().getOwnerName();
+    public UUID getOwnerUUID() {
+        try {
+            return UUID.fromString(getHandle().func_152119_ch());
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 
-    public void setOwnerName(String name) {
-        getHandle().setOwnerName(name);
+    public void setOwnerUUID(UUID uuid) {
+        if (uuid == null) {
+            getHandle().func_152120_b("");
+        } else {
+            getHandle().func_152120_b(uuid.toString());
+        }
     }
 
     public HorseInventory getInventory() {

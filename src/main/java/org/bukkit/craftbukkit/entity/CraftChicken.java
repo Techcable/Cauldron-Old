@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
+import net.minecraft.entity.passive.EntityChicken;
 
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Chicken;
@@ -7,13 +8,13 @@ import org.bukkit.entity.EntityType;
 
 public class CraftChicken extends CraftAnimals implements Chicken {
 
-    public CraftChicken(CraftServer server, net.minecraft.entity.passive.EntityChicken entity) {
+    public CraftChicken(CraftServer server, EntityChicken entity) {
         super(server, entity);
     }
 
     @Override
-    public net.minecraft.entity.passive.EntityChicken getHandle() {
-        return (net.minecraft.entity.passive.EntityChicken) entity;
+    public EntityChicken getHandle() {
+        return (EntityChicken) entity;
     }
 
     @Override

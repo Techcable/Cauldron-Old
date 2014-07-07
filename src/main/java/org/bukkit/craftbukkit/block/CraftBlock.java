@@ -5,6 +5,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.block.BlockCocoa;
+import net.minecraft.block.BlockRedstoneWire;
+import net.minecraft.init.Blocks;
+
+import net.minecraft.item.Item;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
+import net.minecraft.tileentity.TileEntitySkull;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -27,6 +37,7 @@ import cpw.mods.fml.common.FMLLog;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraftforge.cauldron.block.CraftCustomContainer;
+// Cauldron end
 
 import org.bukkit.craftbukkit.CraftWorld;
 
@@ -36,8 +47,8 @@ public class CraftBlock implements Block {
     private final int y;
     private final int z;
     // Cauldron start - add support for custom biomes
-    private static final Biome[] BIOME_MAPPING = new Biome[net.minecraft.world.biome.BiomeGenBase.getBiomeGenArray().length];
-    private static final net.minecraft.world.biome.BiomeGenBase[] BIOMEBASE_MAPPING = new net.minecraft.world.biome.BiomeGenBase[net.minecraft.world.biome.BiomeGenBase.getBiomeGenArray().length];
+    private static final Biome[] BIOME_MAPPING = new Biome[BiomeGenBase.getBiomeGenArray().length];
+    private static final BiomeGenBase[] BIOMEBASE_MAPPING = new BiomeGenBase[BiomeGenBase.getBiomeGenArray().length];
     // Cauldron end
     
     public CraftBlock(CraftChunk chunk, int x, int y, int z) {
@@ -151,11 +162,11 @@ public class CraftBlock implements Block {
     }
 
     public byte getLightFromSky() {
-        return (byte) chunk.getHandle().getSavedLightValue(net.minecraft.world.EnumSkyBlock.Sky, this.x & 0xF, this.y & 0xFF, this.z & 0xF);
+        return (byte) chunk.getHandle().getSavedLightValue(EnumSkyBlock.Sky, this.x & 0xF, this.y & 0xFF, this.z & 0xF);
     }
 
     public byte getLightFromBlocks() {
-        return (byte) chunk.getHandle().getSavedLightValue(net.minecraft.world.EnumSkyBlock.Block, this.x & 0xF, this.y & 0xFF, this.z & 0xF);
+        return (byte) chunk.getHandle().getSavedLightValue(EnumSkyBlock.Block, this.x & 0xF, this.y & 0xFF, this.z & 0xF);
     }
 
 
@@ -313,7 +324,7 @@ public class CraftBlock implements Block {
         getWorld().setBiome(x, z, bio);
     }
 
-    public static Biome biomeBaseToBiome(net.minecraft.world.biome.BiomeGenBase base) {
+    public static Biome biomeBaseToBiome(BiomeGenBase base) {
         if (base == null) {
             return null;
         }
@@ -321,7 +332,7 @@ public class CraftBlock implements Block {
         return BIOME_MAPPING[base.biomeID];
     }
 
-    public static net.minecraft.world.biome.BiomeGenBase biomeToBiomeBase(Biome bio) {
+    public static BiomeGenBase biomeToBiomeBase(Biome bio) {
         if (bio == null) {
             return null;
         }
@@ -375,7 +386,7 @@ public class CraftBlock implements Block {
 
     public int getBlockPower(BlockFace face) {
         int power = 0;
-        net.minecraft.block.BlockRedstoneWire wire = net.minecraft.init.Blocks.redstone_wire;
+        BlockRedstoneWire wire = Blocks.redstone_wire;
         net.minecraft.world.World world = chunk.getHandle().worldObj;
         if ((face == BlockFace.DOWN || face == BlockFace.SELF) && world.getIndirectPowerOutput(x, y - 1, z, 0)) power = wire.func_150178_a(world, x, y - 1, z, power);
         if ((face == BlockFace.UP || face == BlockFace.SELF) && world.getIndirectPowerOutput(x, y + 1, z, 1)) power = wire.func_150178_a(world, x, y + 1, z, power);
@@ -419,7 +430,7 @@ public class CraftBlock implements Block {
         byte data = getData();
         boolean result = false;
 
-        if (block != null && block != net.minecraft.init.Blocks.air) {
+        if (block != null && block != Blocks.air) {
             block.dropBlockAsItemWithChance(chunk.getHandle().worldObj, x, y, z, data, 1.0F, 0);
             result = true;
         }
@@ -440,27 +451,30 @@ public class CraftBlock implements Block {
         List<ItemStack> drops = new ArrayList<ItemStack>();
 
         net.minecraft.block.Block block = this.getNMSBlock();
-        if (block != net.minecraft.init.Blocks.air) {
+        if (block != Blocks.air) {
             byte data = getData();
             // based on nms.Block.dropNaturally
             int count = block.quantityDroppedWithBonus(0, chunk.getHandle().worldObj.rand);
             for (int i = 0; i < count; ++i) {
-                net.minecraft.item.Item item = block.getItemDropped(data, chunk.getHandle().worldObj.rand, 0);
+                Item item = block.getItemDropped(data, chunk.getHandle().worldObj.rand, 0);
                 if (item != null) {
                     // Skulls are special, their data is based on the tile entity
-                    if (net.minecraft.init.Blocks.skull == block) {
+                    if (Blocks.skull == block) {
                         net.minecraft.item.ItemStack nmsStack = new net.minecraft.item.ItemStack(item, 1, block.getDamageValue(chunk.getHandle().worldObj, x, y, z));
-                        net.minecraft.tileentity.TileEntitySkull tileentityskull = (net.minecraft.tileentity.TileEntitySkull) chunk.getHandle().worldObj.getTileEntity(x, y, z);
+                        TileEntitySkull tileentityskull = (TileEntitySkull) chunk.getHandle().worldObj.getTileEntity(x, y, z);
 
-                        if (tileentityskull.func_145904_a() == 3 && tileentityskull.func_145907_c() != null && tileentityskull.func_145907_c().length() > 0) {
-                            nmsStack.setTagCompound(new net.minecraft.nbt.NBTTagCompound());
-                            nmsStack.getTagCompound().setString("SkullOwner", tileentityskull.func_145907_c());
+                        if (tileentityskull.func_145904_a() == 3 && tileentityskull.func_152108_a() != null) {
+                            nmsStack.setTagCompound(new NBTTagCompound());
+                            NBTTagCompound nbttagcompound = new NBTTagCompound();
+
+                            NBTUtil.func_152460_a(nbttagcompound, tileentityskull.func_152108_a());
+                            nmsStack.getTagCompound().setTag("SkullOwner", nbttagcompound);
                         }
 
                         drops.add(CraftItemStack.asBukkitCopy(nmsStack));
                         // We don't want to drop cocoa blocks, we want to drop cocoa beans.
-                    } else if (net.minecraft.init.Blocks.cocoa == block) {
-                        int dropAmount = (net.minecraft.block.BlockCocoa.func_149987_c(data) >= 2 ? 3 : 1);
+                    } else if (Blocks.cocoa == block) {
+                        int dropAmount = (BlockCocoa.func_149987_c(data) >= 2 ? 3 : 1);
                         for (int j = 0; j < dropAmount; ++j) {
                             drops.add(new ItemStack(Material.INK_SACK, 1, (short) 3));
                         }
@@ -483,88 +497,88 @@ public class CraftBlock implements Block {
 
     /* Build biome index based lookup table for BiomeBase to Biome mapping */
     public static void initMappings() { // Cauldron - initializer to initMappings() method; called in CraftServer
-        //BIOME_MAPPING = new Biome[net.minecraft.world.biome.BiomeGenBase.biomeList.length]; // Cauldron - move up
-        //BIOMEBASE_MAPPING = new net.minecraft.world.biome.BiomeGenBase[Biome.values().length]; // Cauldron - move up
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.swampland.biomeID] = Biome.SWAMPLAND;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.forest.biomeID] = Biome.FOREST;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.taiga.biomeID] = Biome.TAIGA;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.desert.biomeID] = Biome.DESERT;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.plains.biomeID] = Biome.PLAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.hell.biomeID] = Biome.HELL;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.sky.biomeID] = Biome.SKY;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.river.biomeID] = Biome.RIVER;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.extremeHills.biomeID] = Biome.EXTREME_HILLS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.ocean.biomeID] = Biome.OCEAN;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.frozenOcean.biomeID] = Biome.FROZEN_OCEAN;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.frozenRiver.biomeID] = Biome.FROZEN_RIVER;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.icePlains.biomeID] = Biome.ICE_PLAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.iceMountains.biomeID] = Biome.ICE_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mushroomIsland.biomeID] = Biome.MUSHROOM_ISLAND;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mushroomIslandShore.biomeID] = Biome.MUSHROOM_SHORE;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.beach.biomeID] = Biome.BEACH;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.desertHills.biomeID] = Biome.DESERT_HILLS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.forestHills.biomeID] = Biome.FOREST_HILLS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.taigaHills.biomeID] = Biome.TAIGA_HILLS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.extremeHillsEdge.biomeID] = Biome.SMALL_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.jungle.biomeID] = Biome.JUNGLE;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.jungleHills.biomeID] = Biome.JUNGLE_HILLS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.jungleEdge.biomeID] = Biome.JUNGLE_EDGE;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.deepOcean.biomeID] = Biome.DEEP_OCEAN;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.stoneBeach.biomeID] = Biome.STONE_BEACH;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.coldBeach.biomeID] = Biome.COLD_BEACH;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.birchForest.biomeID] = Biome.BIRCH_FOREST;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.birchForestHills.biomeID] = Biome.BIRCH_FOREST_HILLS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.roofedForest.biomeID] = Biome.ROOFED_FOREST;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.coldTaiga.biomeID] = Biome.COLD_TAIGA;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.coldTaigaHills.biomeID] = Biome.COLD_TAIGA_HILLS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.megaTaiga.biomeID] = Biome.MEGA_TAIGA;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.megaTaigaHills.biomeID] = Biome.MEGA_TAIGA_HILLS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.extremeHillsPlus.biomeID] = Biome.EXTREME_HILLS_PLUS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.savanna.biomeID] = Biome.SAVANNA;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.savannaPlateau.biomeID] = Biome.SAVANNA_PLATEAU;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mesa.biomeID] = Biome.MESA;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mesaPlateau_F.biomeID] = Biome.MESA_PLATEAU_FOREST;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mesaPlateau.biomeID] = Biome.MESA_PLATEAU;
+        //BIOME_MAPPING = new Biome[BiomeGenBase.biomeList.length]; // Cauldron - move up
+        //BIOMEBASE_MAPPING = new BiomeGenBase[Biome.values().length]; // Cauldron - move up
+        BIOME_MAPPING[BiomeGenBase.swampland.biomeID] = Biome.SWAMPLAND;
+        BIOME_MAPPING[BiomeGenBase.forest.biomeID] = Biome.FOREST;
+        BIOME_MAPPING[BiomeGenBase.taiga.biomeID] = Biome.TAIGA;
+        BIOME_MAPPING[BiomeGenBase.desert.biomeID] = Biome.DESERT;
+        BIOME_MAPPING[BiomeGenBase.plains.biomeID] = Biome.PLAINS;
+        BIOME_MAPPING[BiomeGenBase.hell.biomeID] = Biome.HELL;
+        BIOME_MAPPING[BiomeGenBase.sky.biomeID] = Biome.SKY;
+        BIOME_MAPPING[BiomeGenBase.river.biomeID] = Biome.RIVER;
+        BIOME_MAPPING[BiomeGenBase.extremeHills.biomeID] = Biome.EXTREME_HILLS;
+        BIOME_MAPPING[BiomeGenBase.ocean.biomeID] = Biome.OCEAN;
+        BIOME_MAPPING[BiomeGenBase.frozenOcean.biomeID] = Biome.FROZEN_OCEAN;
+        BIOME_MAPPING[BiomeGenBase.frozenRiver.biomeID] = Biome.FROZEN_RIVER;
+        BIOME_MAPPING[BiomeGenBase.icePlains.biomeID] = Biome.ICE_PLAINS;
+        BIOME_MAPPING[BiomeGenBase.iceMountains.biomeID] = Biome.ICE_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.mushroomIsland.biomeID] = Biome.MUSHROOM_ISLAND;
+        BIOME_MAPPING[BiomeGenBase.mushroomIslandShore.biomeID] = Biome.MUSHROOM_SHORE;
+        BIOME_MAPPING[BiomeGenBase.beach.biomeID] = Biome.BEACH;
+        BIOME_MAPPING[BiomeGenBase.desertHills.biomeID] = Biome.DESERT_HILLS;
+        BIOME_MAPPING[BiomeGenBase.forestHills.biomeID] = Biome.FOREST_HILLS;
+        BIOME_MAPPING[BiomeGenBase.taigaHills.biomeID] = Biome.TAIGA_HILLS;
+        BIOME_MAPPING[BiomeGenBase.extremeHillsEdge.biomeID] = Biome.SMALL_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.jungle.biomeID] = Biome.JUNGLE;
+        BIOME_MAPPING[BiomeGenBase.jungleHills.biomeID] = Biome.JUNGLE_HILLS;
+        BIOME_MAPPING[BiomeGenBase.jungleEdge.biomeID] = Biome.JUNGLE_EDGE;
+        BIOME_MAPPING[BiomeGenBase.deepOcean.biomeID] = Biome.DEEP_OCEAN;
+        BIOME_MAPPING[BiomeGenBase.stoneBeach.biomeID] = Biome.STONE_BEACH;
+        BIOME_MAPPING[BiomeGenBase.coldBeach.biomeID] = Biome.COLD_BEACH;
+        BIOME_MAPPING[BiomeGenBase.birchForest.biomeID] = Biome.BIRCH_FOREST;
+        BIOME_MAPPING[BiomeGenBase.birchForestHills.biomeID] = Biome.BIRCH_FOREST_HILLS;
+        BIOME_MAPPING[BiomeGenBase.roofedForest.biomeID] = Biome.ROOFED_FOREST;
+        BIOME_MAPPING[BiomeGenBase.coldTaiga.biomeID] = Biome.COLD_TAIGA;
+        BIOME_MAPPING[BiomeGenBase.coldTaigaHills.biomeID] = Biome.COLD_TAIGA_HILLS;
+        BIOME_MAPPING[BiomeGenBase.megaTaiga.biomeID] = Biome.MEGA_TAIGA;
+        BIOME_MAPPING[BiomeGenBase.megaTaigaHills.biomeID] = Biome.MEGA_TAIGA_HILLS;
+        BIOME_MAPPING[BiomeGenBase.extremeHillsPlus.biomeID] = Biome.EXTREME_HILLS_PLUS;
+        BIOME_MAPPING[BiomeGenBase.savanna.biomeID] = Biome.SAVANNA;
+        BIOME_MAPPING[BiomeGenBase.savannaPlateau.biomeID] = Biome.SAVANNA_PLATEAU;
+        BIOME_MAPPING[BiomeGenBase.mesa.biomeID] = Biome.MESA;
+        BIOME_MAPPING[BiomeGenBase.mesaPlateau_F.biomeID] = Biome.MESA_PLATEAU_FOREST;
+        BIOME_MAPPING[BiomeGenBase.mesaPlateau.biomeID] = Biome.MESA_PLATEAU;
 
         // Extended Biomes
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.plains.biomeID + 128] = Biome.SUNFLOWER_PLAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.desert.biomeID + 128] = Biome.DESERT_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.forest.biomeID + 128] = Biome.FLOWER_FOREST;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.taiga.biomeID + 128] = Biome.TAIGA_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.swampland.biomeID + 128] = Biome.SWAMPLAND_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.icePlains.biomeID + 128] = Biome.ICE_PLAINS_SPIKES;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.jungle.biomeID + 128] = Biome.JUNGLE_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.jungleEdge.biomeID + 128] = Biome.JUNGLE_EDGE_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.coldTaiga.biomeID + 128] = Biome.COLD_TAIGA_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.savanna.biomeID + 128] = Biome.SAVANNA_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.savannaPlateau.biomeID + 128] = Biome.SAVANNA_PLATEAU_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mesa.biomeID + 128] = Biome.MESA_BRYCE;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mesaPlateau_F.biomeID + 128] = Biome.MESA_PLATEAU_FOREST_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.mesaPlateau.biomeID + 128] = Biome.MESA_PLATEAU_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.birchForest.biomeID + 128] = Biome.BIRCH_FOREST_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.birchForestHills.biomeID + 128] = Biome.BIRCH_FOREST_HILLS_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.roofedForest.biomeID + 128] = Biome.ROOFED_FOREST_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.megaTaiga.biomeID + 128] = Biome.MEGA_SPRUCE_TAIGA;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.extremeHills.biomeID + 128] = Biome.EXTREME_HILLS_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.extremeHillsPlus.biomeID + 128] = Biome.EXTREME_HILLS_PLUS_MOUNTAINS;
-        BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.megaTaigaHills.biomeID + 128] = Biome.MEGA_SPRUCE_TAIGA_HILLS;
+        BIOME_MAPPING[BiomeGenBase.plains.biomeID + 128] = Biome.SUNFLOWER_PLAINS;
+        BIOME_MAPPING[BiomeGenBase.desert.biomeID + 128] = Biome.DESERT_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.forest.biomeID + 128] = Biome.FLOWER_FOREST;
+        BIOME_MAPPING[BiomeGenBase.taiga.biomeID + 128] = Biome.TAIGA_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.swampland.biomeID + 128] = Biome.SWAMPLAND_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.icePlains.biomeID + 128] = Biome.ICE_PLAINS_SPIKES;
+        BIOME_MAPPING[BiomeGenBase.jungle.biomeID + 128] = Biome.JUNGLE_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.jungleEdge.biomeID + 128] = Biome.JUNGLE_EDGE_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.coldTaiga.biomeID + 128] = Biome.COLD_TAIGA_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.savanna.biomeID + 128] = Biome.SAVANNA_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.savannaPlateau.biomeID + 128] = Biome.SAVANNA_PLATEAU_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.mesa.biomeID + 128] = Biome.MESA_BRYCE;
+        BIOME_MAPPING[BiomeGenBase.mesaPlateau_F.biomeID + 128] = Biome.MESA_PLATEAU_FOREST_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.mesaPlateau.biomeID + 128] = Biome.MESA_PLATEAU_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.birchForest.biomeID + 128] = Biome.BIRCH_FOREST_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.birchForestHills.biomeID + 128] = Biome.BIRCH_FOREST_HILLS_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.roofedForest.biomeID + 128] = Biome.ROOFED_FOREST_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.megaTaiga.biomeID + 128] = Biome.MEGA_SPRUCE_TAIGA;
+        BIOME_MAPPING[BiomeGenBase.extremeHills.biomeID + 128] = Biome.EXTREME_HILLS_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.extremeHillsPlus.biomeID + 128] = Biome.EXTREME_HILLS_PLUS_MOUNTAINS;
+        BIOME_MAPPING[BiomeGenBase.megaTaigaHills.biomeID + 128] = Biome.MEGA_SPRUCE_TAIGA_HILLS;
 
         /* Sanity check - we should have a record for each record in the BiomeBase.a table */
         /* Helps avoid missed biomes when we upgrade bukkit to new code with new biomes */
         for (int i = 0; i < BIOME_MAPPING.length; i++) {
-            if ((net.minecraft.world.biome.BiomeGenBase.getBiome(i) != null) && (BIOME_MAPPING[i] == null)) {
+            if ((BiomeGenBase.getBiome(i) != null) && (BIOME_MAPPING[i] == null)) {
                 // Cauldron start - add support for mod biomes
                 //throw new IllegalArgumentException("Missing Biome mapping for BiomeBase[" + i + "]");
-                String name = net.minecraft.world.biome.BiomeGenBase.getBiome(i).biomeName;
-                int id = net.minecraft.world.biome.BiomeGenBase.getBiome(i).biomeID;
+                String name = BiomeGenBase.getBiome(i).biomeName;
+                int id = BiomeGenBase.getBiome(i).biomeID;
 
-                System.out.println("Adding biome mapping " + net.minecraft.world.biome.BiomeGenBase.getBiome(i).biomeID + " " + name + " at BiomeBase[" + i + "]");
+                System.out.println("Adding biome mapping " + BiomeGenBase.getBiome(i).biomeID + " " + name + " at BiomeBase[" + i + "]");
                 net.minecraftforge.common.util.EnumHelper.addBukkitBiome(name); // Forge
-                BIOME_MAPPING[net.minecraft.world.biome.BiomeGenBase.getBiome(i).biomeID] = ((Biome) Enum.valueOf(Biome.class, name));
+                BIOME_MAPPING[BiomeGenBase.getBiome(i).biomeID] = ((Biome) Enum.valueOf(Biome.class, name));
                 // Cauldron end           
             }
             if (BIOME_MAPPING[i] != null) {  /* Build reverse mapping for setBiome */
-                BIOMEBASE_MAPPING[BIOME_MAPPING[i].ordinal()] = net.minecraft.world.biome.BiomeGenBase.getBiome(i);
+                BIOMEBASE_MAPPING[BIOME_MAPPING[i].ordinal()] = BiomeGenBase.getBiome(i);
             }
         }
     }

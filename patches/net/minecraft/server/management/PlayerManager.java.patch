@@ -1,16 +1,17 @@
 --- ../src-base/minecraft/net/minecraft/server/management/PlayerManager.java
 +++ ../src-work/minecraft/net/minecraft/server/management/PlayerManager.java
-@@ -23,16 +23,22 @@
- import net.minecraftforge.common.util.ChunkCoordComparator;
- import net.minecraftforge.event.world.ChunkWatchEvent;
- 
+@@ -17,6 +17,10 @@
+ import net.minecraft.world.chunk.Chunk;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
 +// CraftBukkit start
 +import java.util.Collections;
 +import java.util.Queue;
 +// CraftBukkit end
-+
+ 
  public class PlayerManager
  {
+@@ -24,19 +28,28 @@
      private final WorldServer theWorldServer;
      private final List players = new ArrayList();
      private final LongHashMap playerInstances = new LongHashMap();
@@ -18,23 +19,30 @@
 -    private final List playerInstanceList = new ArrayList();
 +    private final Queue chunkWatcherWithPlayers = new java.util.concurrent.ConcurrentLinkedQueue(); // CraftBukkit ArrayList -> ConcurrentLinkedQueue
 +    private final Queue playerInstanceList = new java.util.concurrent.ConcurrentLinkedQueue(); // CraftBukkit ArrayList -> ConcurrentLinkedQueue
-     private final int playerViewRadius;
+     private int playerViewRadius;
      private long previousTotalWorldTime;
      private final int[][] xzDirectionsConst = new int[][] {{1, 0}, {0, 1}, { -1, 0}, {0, -1}};
 +    private boolean wasNotEmpty; // CraftBukkit
      private static final String __OBFID = "CL_00001434";
  
-     public PlayerManager(WorldServer par1WorldServer, int par2)
-@@ -41,7 +47,7 @@
-         {
-             throw new IllegalArgumentException("Too big view radius!");
-         }
--        else if (par2 < 3)
-+        else if (par2 < 1) // Spigot
-         {
-             throw new IllegalArgumentException("Too small view radius!");
-         }
-@@ -66,34 +72,54 @@
++    // Cauldron start - vanilla compatibility
+     public PlayerManager(WorldServer p_i1176_1_)
+     {
+         this.theWorldServer = p_i1176_1_;
+         this.func_152622_a(p_i1176_1_.func_73046_m().getConfigurationManager().getViewDistance());
+     }
++    // Cauldron end
+ 
++    public PlayerManager(WorldServer p_i1176_1_, int viewDistance /* Spigot */)
++    {
++        this.theWorldServer = p_i1176_1_;
++        this.func_152622_a(viewDistance); // Spigot
++    }
++
+     public WorldServer getWorldServer()
+     {
+         return this.theWorldServer;
+@@ -51,34 +64,54 @@
          if (i - this.previousTotalWorldTime > 8000L)
          {
              this.previousTotalWorldTime = i;
@@ -93,8 +101,8 @@
 +        // CraftBukkit end
      }
  
-     private PlayerManager.PlayerInstance getOrCreateChunkWatcher(int par1, int par2, boolean par3)
-@@ -110,7 +136,20 @@
+     public boolean func_152621_a(int p_152621_1_, int p_152621_2_)
+@@ -101,7 +134,20 @@
  
          return playerinstance;
      }
@@ -115,7 +123,7 @@
      public void markBlockForUpdate(int p_151250_1_, int p_151250_2_, int p_151250_3_)
      {
          int l = p_151250_1_ >> 4;
-@@ -498,7 +537,7 @@
+@@ -541,7 +587,7 @@
                      {
                          i = this.chunkLocation.chunkXPos * 16;
                          j = this.chunkLocation.chunkZPos * 16;

@@ -30,10 +30,24 @@
          return new S33PacketUpdateSign(this.xCoord, this.yCoord, this.zCoord, astring);
      }
  
-@@ -72,4 +84,12 @@
+@@ -72,4 +84,26 @@
      {
          return this.field_145917_k;
      }
++
++    // CraftBukkit start - central method to limit sign text to 15 chars per line
++    public static String[] sanitizeLines(String[] lines) {
++        String[] astring = new String[4];
++        for (int i = 0; i < 4; ++i) {
++            astring[i] = lines[i];
++
++            if (lines[i].length() > 15) {
++                astring[i] = lines[i].substring(0, 15);
++            }
++        }
++        return astring;
++    }
++    // CraftBukkit end
 +
 +    // Cauldron start
 +    @Override

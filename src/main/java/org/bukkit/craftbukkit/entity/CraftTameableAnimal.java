@@ -5,6 +5,8 @@ import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Tameable;
 
+import java.util.UUID;
+
 public class CraftTameableAnimal extends CraftAnimals implements Tameable, Creature {
     public CraftTameableAnimal(CraftServer server, net.minecraft.entity.passive.EntityTameable entity) {
         super(server, entity);
@@ -15,19 +17,33 @@ public class CraftTameableAnimal extends CraftAnimals implements Tameable, Creat
         return (net.minecraft.entity.passive.EntityTameable)super.getHandle();
     }
 
-    public AnimalTamer getOwner() {
-        if (("").equals(getOwnerName())) return null;
+    public UUID getOwnerUUID() {
+        try {
+            return UUID.fromString(getHandle().func_152113_b());
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
 
-        AnimalTamer owner = getServer().getPlayerExact(getOwnerName());
+    public void setOwnerUUID(UUID uuid) {
+        if (uuid == null) {
+            getHandle().func_152115_b("");
+        } else {
+            getHandle().func_152115_b(uuid.toString());
+        }
+    }
+
+    public AnimalTamer getOwner() {
+        if (getOwnerUUID() == null) {
+            return null;
+        }
+
+        AnimalTamer owner = getServer().getPlayer(getOwnerUUID());
         if (owner == null) {
-            owner = getServer().getOfflinePlayer(getOwnerName());
+            owner = getServer().getOfflinePlayer(getOwnerUUID());
         }
 
         return owner;
-    }
-
-    public String getOwnerName() {
-        return getHandle().getOwnerName();
     }
 
     public boolean isTamed() {
@@ -38,21 +54,17 @@ public class CraftTameableAnimal extends CraftAnimals implements Tameable, Creat
         if (tamer != null) {
             setTamed(true);
             getHandle().setPathToEntity(null);
-            setOwnerName(tamer.getName());
+            setOwnerUUID(tamer.getUniqueId());
         } else {
             setTamed(false);
-            setOwnerName("");
-        }
+            setOwnerUUID(null);
     }
-
-    public void setOwnerName(String ownerName) {
-        getHandle().setOwner(ownerName == null ? "" : ownerName);
     }
 
     public void setTamed(boolean tame) {
         getHandle().setTamed(tame);
         if (!tame) {
-            setOwnerName("");
+            setOwnerUUID(null);
         }
     }
 

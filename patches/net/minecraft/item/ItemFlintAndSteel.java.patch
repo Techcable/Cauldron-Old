@@ -14,30 +14,30 @@
      private static final String __OBFID = "CL_00000035";
 @@ -19,6 +24,8 @@
  
-     public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
+     public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
      {
-+        int clickedX = par4, clickedY = par5, clickedZ = par6; // CraftBukkit
++        int clickedX = p_77648_4_, clickedY = p_77648_5_, clickedZ = p_77648_6_; // CraftBukkit
 +
-         if (par7 == 0)
+         if (p_77648_7_ == 0)
          {
-             --par5;
+             --p_77648_5_;
 @@ -57,8 +64,27 @@
          {
-             if (par3World.isAirBlock(par4, par5, par6))
+             if (p_77648_3_.isAirBlock(p_77648_4_, p_77648_5_, p_77648_6_))
              {
 +                // CraftBukkit start - Store the clicked block
-+                if (CraftEventFactory.callBlockIgniteEvent(par3World, par4, par5, par6, org.bukkit.event.block.BlockIgniteEvent.IgniteCause.FLINT_AND_STEEL, par2EntityPlayer).isCancelled())
++                if (CraftEventFactory.callBlockIgniteEvent(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_, org.bukkit.event.block.BlockIgniteEvent.IgniteCause.FLINT_AND_STEEL, p_77648_2_).isCancelled())
 +                {
-+                    par1ItemStack.damageItem(1, par2EntityPlayer);
++                    p_77648_1_.damageItem(1, p_77648_2_);
 +                    return false;
 +                }
 +
-+                CraftBlockState blockState = CraftBlockState.getBlockState(par3World, par4, par5, par6);
++                CraftBlockState blockState = CraftBlockState.getBlockState(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_);
 +                // CraftBukkit end
-                 par3World.playSoundEffect((double)par4 + 0.5D, (double)par5 + 0.5D, (double)par6 + 0.5D, "fire.ignite", 1.0F, itemRand.nextFloat() * 0.4F + 0.8F);
-                 par3World.setBlock(par4, par5, par6, Blocks.fire);
+                 p_77648_3_.playSoundEffect((double)p_77648_4_ + 0.5D, (double)p_77648_5_ + 0.5D, (double)p_77648_6_ + 0.5D, "fire.ignite", 1.0F, itemRand.nextFloat() * 0.4F + 0.8F);
+                 p_77648_3_.setBlock(p_77648_4_, p_77648_5_, p_77648_6_, Blocks.fire);
 +                // CraftBukkit start
-+                org.bukkit.event.block.BlockPlaceEvent placeEvent = CraftEventFactory.callBlockPlaceEvent(par3World, par2EntityPlayer, blockState, clickedX, clickedY, clickedZ);
++                org.bukkit.event.block.BlockPlaceEvent placeEvent = CraftEventFactory.callBlockPlaceEvent(p_77648_3_, p_77648_2_, blockState, clickedX, clickedY, clickedZ);
 +
 +                if (placeEvent.isCancelled() || !placeEvent.canBuild())
 +                {
@@ -48,4 +48,4 @@
 +                // CraftBukkit end
              }
  
-             par1ItemStack.damageItem(1, par2EntityPlayer);
+             p_77648_1_.damageItem(1, p_77648_2_);

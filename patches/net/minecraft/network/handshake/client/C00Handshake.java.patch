@@ -11,3 +11,12 @@
      private EnumConnectionState field_149597_d;
      private static final String __OBFID = "CL_00001372";
  
+@@ -31,7 +31,7 @@
+     public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+     {
+         this.field_149600_a = p_148837_1_.readVarIntFromBuffer();
+-        this.field_149598_b = p_148837_1_.readStringFromBuffer(255);
++        this.field_149598_b = p_148837_1_.readStringFromBuffer(Short.MAX_VALUE); // Spigot
+         this.field_149599_c = p_148837_1_.readUnsignedShort();
+         this.field_149597_d = EnumConnectionState.func_150760_a(p_148837_1_.readVarIntFromBuffer());
+     }

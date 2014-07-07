@@ -227,7 +227,7 @@ public class CauldronConfig
     {
         if (useDefault)
         {
-            config.addDefault(path, def);
+        config.addDefault(path, def);
         }
         return config.getBoolean(path, def);
     }
@@ -253,7 +253,7 @@ public class CauldronConfig
     {
         if (useDefault)
         {
-            config.addDefault(path, def);
+        config.addDefault(path, def);
         }
         return config.getString(path, def);
     }

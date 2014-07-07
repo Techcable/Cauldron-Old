@@ -64,7 +64,7 @@
 +    // CraftBukkit end
      private static final String __OBFID = "CL_00001507";
  
-     public InventoryLargeChest(String par1Str, IInventory par2IInventory, IInventory par3IInventory)
+     public InventoryLargeChest(String p_i1559_1_, IInventory p_i1559_2_, IInventory p_i1559_3_)
 @@ -77,7 +128,7 @@
  
      public int getInventoryStackLimit()

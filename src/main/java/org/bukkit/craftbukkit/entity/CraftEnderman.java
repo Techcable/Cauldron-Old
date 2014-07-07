@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
+import net.minecraft.entity.monster.EntityEnderman;
 
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
@@ -8,7 +9,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.material.MaterialData;
 
 public class CraftEnderman extends CraftMonster implements Enderman {
-    public CraftEnderman(CraftServer server, net.minecraft.entity.monster.EntityEnderman entity) {
+    public CraftEnderman(CraftServer server, EntityEnderman entity) {
         super(server, entity);
     }
 
@@ -22,8 +23,8 @@ public class CraftEnderman extends CraftMonster implements Enderman {
     }
 
     @Override
-    public net.minecraft.entity.monster.EntityEnderman getHandle() {
-        return (net.minecraft.entity.monster.EntityEnderman) entity;
+    public EntityEnderman getHandle() {
+        return (EntityEnderman) entity;
     }
 
     @Override
