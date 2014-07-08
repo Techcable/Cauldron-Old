@@ -14,7 +14,7 @@
  public class ItemBucket extends Item
  {
      private Block isFull;
-@@ -83,12 +90,30 @@
+@@ -83,23 +90,52 @@
  
                      if (material == Material.water && l == 0)
                      {
@@ -28,7 +28,8 @@
 +
 +                        // CraftBukkit end
                          p_77659_2_.setBlockToAir(i, j, k);
-                         return this.func_150910_a(p_77659_1_, p_77659_3_, Items.water_bucket);
+-                        return this.func_150910_a(p_77659_1_, p_77659_3_, Items.water_bucket);
++                        return this.func_150910_a(p_77659_1_, p_77659_3_, Items.water_bucket, cbEvent.getItemStack()); // CraftBukkit - added Event stack
                      }
  
                      if (material == Material.lava && l == 0)
@@ -43,9 +44,11 @@
 +
 +                        // CraftBukkit end
                          p_77659_2_.setBlockToAir(i, j, k);
-                         return this.func_150910_a(p_77659_1_, p_77659_3_, Items.lava_bucket);
+-                        return this.func_150910_a(p_77659_1_, p_77659_3_, Items.lava_bucket);
++                        return this.func_150910_a(p_77659_1_, p_77659_3_, Items.lava_bucket, cbEvent.getItemStack()); // CraftBukkit - added Event stack
                      }
-@@ -97,9 +122,20 @@
+                 }
+                 else
                  {
                      if (this.isFull == Blocks.air)
                      {
