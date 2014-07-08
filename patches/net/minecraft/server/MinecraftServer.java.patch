@@ -770,7 +770,7 @@
  
              if (list != null)
              {
-@@ -798,40 +1128,19 @@
+@@ -798,40 +1128,25 @@
  
                  while (iterator.hasNext())
                  {
@@ -782,10 +782,11 @@
 -                        arraylist.add("/" + s3);
 +                        arraylist.add("/" + command);
                      }
--                    else
--                    {
+                     else
+                     {
 -                        arraylist.add(s3);
--                    }
++                        arraylist.add(command);
+                     }
                  }
              }
 -
@@ -811,12 +812,14 @@
 -            return arraylist;
 -        }
 +        arraylist.addAll(this.server.tabComplete(p_71248_1_, p_71248_2_));  // add craftbukkit commands
-+        return new ArrayList(arraylist);
++        ArrayList completions = new ArrayList(arraylist);
++        Collections.sort(completions); // sort the final list
++        return completions;
 +        // Cauldron end
      }
  
      public static MinecraftServer getServer()
-@@ -1034,7 +1343,7 @@
+@@ -1034,7 +1349,7 @@
  
      public boolean isServerInOnlineMode()
      {
@@ -825,7 +828,7 @@
      }
  
      public void setOnlineMode(boolean p_71229_1_)
-@@ -1124,7 +1433,7 @@
+@@ -1124,7 +1439,7 @@
  
      public NetworkSystem func_147137_ag()
      {
@@ -834,7 +837,7 @@
      }
  
      @SideOnly(Side.CLIENT)
-@@ -1259,8 +1568,11 @@
+@@ -1259,8 +1574,11 @@
      {
          Bootstrap.func_151354_b();
  
@@ -846,7 +849,7 @@
              boolean flag = true;
              String s = null;
              String s1 = ".";
-@@ -1356,16 +1668,34 @@
+@@ -1356,16 +1674,34 @@
              {
                  dedicatedserver.setGuiEnabled();
              }
@@ -887,7 +890,7 @@
          }
          catch (Exception exception)
          {
-@@ -1400,15 +1730,70 @@
+@@ -1400,15 +1736,70 @@
      @SideOnly(Side.SERVER)
      public String getPlugins()
      {
@@ -963,7 +966,7 @@
      }
  
      @SideOnly(Side.SERVER)
-@@ -1455,9 +1840,213 @@
+@@ -1455,9 +1846,213 @@
          return this.serverStopped;
      }
  
