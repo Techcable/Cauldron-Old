@@ -73,16 +73,14 @@
              return false;
          }
          else
-@@ -284,19 +331,71 @@
-                 {
+@@ -285,18 +332,70 @@
                      if (this.getStackInSlot(j) != null)
                      {
--                        ItemStack itemstack = this.getStackInSlot(j).copy();
+                         ItemStack itemstack = this.getStackInSlot(j).copy();
 -                        ItemStack itemstack1 = func_145889_a(iinventory, this.decrStackSize(j, 1), i);
 -
-+                        ItemStack itemstack = this.getStackInSlot(i).copy();
 +                        // CraftBukkit start - Call event when pushing items into other inventories
-+                        CraftItemStack oitemstack = CraftItemStack.asCraftMirror(this.decrStackSize(i, 1));
++                        CraftItemStack oitemstack = CraftItemStack.asCraftMirror(this.decrStackSize(j, 1));
 +                        Inventory destinationInventory;
 +    
 +                        // Have to special case large chests as they work oddly
@@ -125,7 +123,7 @@
 +                            return false;
 +                        }
 +    
-+                        ItemStack itemstack1 = func_145889_a(iinventory, CraftItemStack.asNMSCopy(event.getItem()), Facing.oppositeSide[BlockHopper.getDirectionFromMetadata(this.getBlockMetadata())]);
++                        ItemStack itemstack1 = func_145889_a(iinventory, CraftItemStack.asNMSCopy(event.getItem()), i);
 +    
                          if (itemstack1 == null || itemstack1.stackSize == 0)
                          {
@@ -136,16 +134,15 @@
 +                            }
 +                            else
 +                            {
-+                                this.setInventorySlotContents(i, itemstack);
++                                this.setInventorySlotContents(j, itemstack);
 +                            }
 +    
 +                            // CraftBukkit end
                              return true;
                          }
 -
--                        this.setInventorySlotContents(j, itemstack);
 +    
-+                        this.setInventorySlotContents(i, itemstack);
+                         this.setInventorySlotContents(j, itemstack);
                      }
                  }
 -
