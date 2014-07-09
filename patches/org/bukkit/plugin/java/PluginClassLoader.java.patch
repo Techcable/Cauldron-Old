@@ -192,7 +192,7 @@
          try {
              Class<?> jarClass;
              try {
-@@ -62,30 +221,272 @@
+@@ -62,30 +221,273 @@
          return findClass(name, true);
      }
  
@@ -202,6 +202,7 @@
 +     */
 +    public static String getNativeVersion() {
 +        // see https://github.com/mbax/VanishNoPacket/blob/master/src/main/java/org/kitteh/vanish/compat/NMSManager.java
++        if (CauldronUtils.deobfuscatedEnvironment()) return "v1_7_R3"; // support plugins in deobf environment
 +        final String packageName = org.bukkit.craftbukkit.CraftServer.class.getPackage().getName();
 +        return packageName.substring(packageName.lastIndexOf('.')  + 1);
 +    }

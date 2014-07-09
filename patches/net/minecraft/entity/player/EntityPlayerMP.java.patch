@@ -716,15 +716,27 @@
          this.playerNetServerHandler.sendPacket(new S2EPacketCloseWindow(this.openContainer.windowId));
          this.closeContainer();
      }
-@@ -852,6 +1185,7 @@
+@@ -852,8 +1185,19 @@
      public void setPlayerHealthUpdated()
      {
          this.lastHealth = -1.0E8F;
 +        this.lastExperience = -1; // CraftBukkit - Added to reset
      }
  
++    // CraftBukkit start - Support multi-line messages
++    public void sendMessage(IChatComponent[] ichatcomponent) 
++    {
++        for (IChatComponent component : ichatcomponent)
++        {
++            this.addChatComponentMessage(component);
++        }
++    }
++    // CraftBukkit end
++
      public void addChatComponentMessage(IChatComponent p_146105_1_)
-@@ -1036,6 +1370,114 @@
+     {
+         this.playerNetServerHandler.sendPacket(new S02PacketChat(p_146105_1_));
+@@ -1036,6 +1380,114 @@
          return this.field_143005_bX;
      }
  

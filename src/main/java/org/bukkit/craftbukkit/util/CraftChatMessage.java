@@ -24,7 +24,7 @@ public final class CraftChatMessage {
         }
 
         private final List<net.minecraft.util.IChatComponent> list = new ArrayList<net.minecraft.util.IChatComponent>();
-        private net.minecraft.util.IChatComponent currentChatComponent = new net.minecraft.util.ChatComponentText("");
+        private net.minecraft.util.IChatComponent currentChatComponent = new net.minecraft.util.ChatComponentTranslation(""); // Cauldron - ChatComponentText -> ChatComponentTranslation. fixes forge compatibility
         private net.minecraft.util.ChatStyle modifier = new net.minecraft.util.ChatStyle();
         private final net.minecraft.util.IChatComponent[] output;
         private int currentIndex;
