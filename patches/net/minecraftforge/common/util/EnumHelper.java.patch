@@ -34,7 +34,7 @@
      @SuppressWarnings("rawtypes")
 @@ -51,6 +68,67 @@
          {EnumRarity.class, EnumChatFormatting.class, String.class}
-     }; 
+     };
  
 +    // Cauldron start
 +    public static Biome addBukkitBiome(String name) 

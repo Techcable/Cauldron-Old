@@ -716,7 +716,7 @@
          this.playerNetServerHandler.sendPacket(new S2EPacketCloseWindow(this.openContainer.windowId));
          this.closeContainer();
      }
-@@ -852,8 +1185,19 @@
+@@ -853,8 +1186,19 @@
      public void setPlayerHealthUpdated()
      {
          this.lastHealth = -1.0E8F;
@@ -736,7 +736,7 @@
      public void addChatComponentMessage(IChatComponent p_146105_1_)
      {
          this.playerNetServerHandler.sendPacket(new S02PacketChat(p_146105_1_));
-@@ -1036,6 +1380,114 @@
+@@ -1037,6 +1381,114 @@
          return this.field_143005_bX;
      }
  
