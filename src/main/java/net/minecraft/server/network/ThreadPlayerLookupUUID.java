@@ -19,11 +19,13 @@ import org.bukkit.event.player.PlayerPreLoginEvent;
 class ThreadPlayerLookupUUID extends Thread
 {
     final NetHandlerLoginServer field_151292_a;
+    private MinecraftServer mcServer; // Cauldron
 
     ThreadPlayerLookupUUID(NetHandlerLoginServer p_i45296_1_, String p_i45296_2_)
     {
         super(p_i45296_2_);
         this.field_151292_a = p_i45296_1_;
+        this.mcServer = NetHandlerLoginServer.getMinecraftServer(this.field_151292_a); // Cauldron
     }
 
     public void run()
@@ -32,24 +34,24 @@ class ThreadPlayerLookupUUID extends Thread
         try
         {
             // Spigot Start
-            if (!MinecraftServer.getServer().isServerInOnlineMode())
+            if (!this.mcServer.isServerInOnlineMode())
             {
                 this.field_151292_a.initUUID();
                 fireLoginEvents();
                 return;
             }
             // Spigot End
-            String s = (new BigInteger(CryptManager.getServerIdHash(NetHandlerLoginServer.getLoginServerId(this.field_151292_a), NetHandlerLoginServer.getMinecraftServer(this.field_151292_a).getKeyPair().getPublic(), NetHandlerLoginServer.getSecretKey(this.field_151292_a)))).toString(16);
+            String s = (new BigInteger(CryptManager.getServerIdHash(NetHandlerLoginServer.getLoginServerId(this.field_151292_a), this.mcServer.getKeyPair().getPublic(), NetHandlerLoginServer.getSecretKey(this.field_151292_a)))).toString(16);
+            NetHandlerLoginServer.processPlayerLoginGameProfile(this.field_151292_a, this.mcServer.func_147130_as().hasJoinedServer(new GameProfile((UUID)null, gameprofile.getName()), s));
 
-            NetHandlerLoginServer.doGameProfilesMatch(this.field_151292_a, NetHandlerLoginServer.getMinecraftServer(this.field_151292_a).func_147130_as().hasJoinedServer(new GameProfile((UUID) null, gameprofile.getName()), s));
             if (NetHandlerLoginServer.getGameProfile(this.field_151292_a) != null)
             {
                 fireLoginEvents(); // Spigot
             }
-            else if (NetHandlerLoginServer.getMinecraftServer(this.field_151292_a).isSinglePlayer())
+            else if (this.mcServer.isSinglePlayer())
             {
                 NetHandlerLoginServer.getLogger().warn("Failed to verify username but will let them in anyway!");
-                NetHandlerLoginServer.doGameProfilesMatch(this.field_151292_a, this.field_151292_a.func_152506_a(gameprofile));
+                NetHandlerLoginServer.processPlayerLoginGameProfile(this.field_151292_a, this.field_151292_a.func_152506_a(gameprofile));
                 NetHandlerLoginServer.setLoginState(this.field_151292_a, LoginState.READY_TO_ACCEPT);
             }
             else
@@ -60,10 +62,10 @@ class ThreadPlayerLookupUUID extends Thread
         }
         catch (AuthenticationUnavailableException authenticationunavailableexception)
         {
-            if (NetHandlerLoginServer.getMinecraftServer(this.field_151292_a).isSinglePlayer())
+            if (this.mcServer.isSinglePlayer())
             {
                 NetHandlerLoginServer.getLogger().warn("Authentication servers are down but will let them in anyway!");
-                NetHandlerLoginServer.doGameProfilesMatch(this.field_151292_a, this.field_151292_a.func_152506_a(gameprofile));
+                NetHandlerLoginServer.processPlayerLoginGameProfile(this.field_151292_a, this.field_151292_a.func_152506_a(gameprofile));
                 NetHandlerLoginServer.setLoginState(this.field_151292_a, LoginState.READY_TO_ACCEPT);
             }
             else
@@ -76,7 +78,7 @@ class ThreadPlayerLookupUUID extends Thread
         catch (Exception exception)
         {
             this.field_151292_a.func_147322_a("Failed to verify username!");
-            NetHandlerLoginServer.getMinecraftServer(this.field_151292_a).server.getLogger().log(java.util.logging.Level.WARNING, "Exception verifying " + NetHandlerLoginServer.getGameProfile(this.field_151292_a).getName(), exception);
+            this.mcServer.server.getLogger().log(java.util.logging.Level.WARNING, "Exception verifying " + NetHandlerLoginServer.getGameProfile(this.field_151292_a).getName(), exception);
             // CraftBukkit end
         }
     }
@@ -90,9 +92,9 @@ class ThreadPlayerLookupUUID extends Thread
         }
 
         String playerName = NetHandlerLoginServer.getGameProfile(this.field_151292_a).getName();
-        java.net.InetAddress address = ((java.net.InetSocketAddress) field_151292_a.field_147333_a.getSocketAddress()).getAddress();
-        java.util.UUID uniqueId = this.field_151292_a.getGameProfile(this.field_151292_a).getId();
-        final org.bukkit.craftbukkit.CraftServer server = NetHandlerLoginServer.getMinecraftServer(this.field_151292_a).server;
+        java.net.InetAddress address = ((java.net.InetSocketAddress) this.field_151292_a.field_147333_a.getSocketAddress()).getAddress();
+        java.util.UUID uniqueId = NetHandlerLoginServer.getGameProfile(this.field_151292_a).getId();
+        final org.bukkit.craftbukkit.CraftServer server = this.mcServer.server;
 
         AsyncPlayerPreLoginEvent asyncEvent = new AsyncPlayerPreLoginEvent(playerName, address);
         server.getPluginManager().callEvent(asyncEvent);
@@ -134,7 +136,7 @@ class ThreadPlayerLookupUUID extends Thread
         }
         // CraftBukkit end
 
-        NetHandlerLoginServer.getLogger().info("UUID of player " + this.field_151292_a.getGameProfile(this.field_151292_a).getName() + " is " + this.field_151292_a.getGameProfile(this.field_151292_a).getId());
+        NetHandlerLoginServer.getLogger().info("UUID of player " + NetHandlerLoginServer.getGameProfile(this.field_151292_a).getName() + " is " + NetHandlerLoginServer.getGameProfile(this.field_151292_a).getId());;
         NetHandlerLoginServer.setLoginState(this.field_151292_a, LoginState.READY_TO_ACCEPT);
     }
 }

@@ -216,7 +216,7 @@
 +        return loginServer.field_147335_k;
 +    }
 +
-+    static GameProfile doGameProfilesMatch(NetHandlerLoginServer loginServer, GameProfile gameprofile) {
++    static GameProfile processPlayerLoginGameProfile(NetHandlerLoginServer loginServer, GameProfile gameprofile) {
 +        return loginServer.field_147337_i = gameprofile;
 +    }
 +

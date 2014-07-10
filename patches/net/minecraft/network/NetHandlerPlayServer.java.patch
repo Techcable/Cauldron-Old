@@ -786,16 +786,16 @@
 +            // Cauldron start - handle Forge event
 +            ChatComponentTranslation chatcomponenttranslation1 = new ChatComponentTranslation("chat.type.text", new Object[] {this.playerEntity.func_145748_c_(), s});
 +            chatcomponenttranslation1 = ForgeHooks.onServerChatEvent(this, s, chatcomponenttranslation1);
-+            String message = s;
++
 +            if (chatcomponenttranslation1 != null && chatcomponenttranslation1.getFormatArgs()[chatcomponenttranslation1.getFormatArgs().length - 1] instanceof String)
              {
 -                this.kickPlayerFromServer("disconnect.spam");
 +                // use event message from Forge
-+                message = (String)chatcomponenttranslation1.getFormatArgs()[chatcomponenttranslation1.getFormatArgs().length - 1];
++                s = (String)chatcomponenttranslation1.getFormatArgs()[chatcomponenttranslation1.getFormatArgs().length - 1];
              }
 +            // Cauldron end
 +            Player player = this.getPlayerB();
-+            AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(async, player, message, new LazyPlayerSet()); // Cauldron - pass changed message if any from Forge
++            AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(async, player, s, new LazyPlayerSet()); // Cauldron - pass changed message if any from Forge
 +            event.setCancelled(chatcomponenttranslation1 == null); // Cauldron - pre-cancel event if forge event was cancelled
 +            this.server.getPluginManager().callEvent(event);
 +            if (PlayerChatEvent.getHandlerList().getRegisteredListeners().length != 0)
@@ -819,9 +819,9 @@
 +                        NetHandlerPlayServer.this.serverController.console.sendMessage(message);
 +                        if (((LazyPlayerSet) queueEvent.getRecipients()).isLazy())
 +                        {
-+                            for (Object player : serverController.getConfigurationManager().playerEntityList)
++                            for (Object recipient : serverController.getConfigurationManager().playerEntityList)
 +                            {
-+                                ((EntityPlayerMP) player).sendMessage(CraftChatMessage.fromString(message));
++                                ((EntityPlayerMP) recipient).sendMessage(CraftChatMessage.fromString(message));
 +                            }
 +                        }
 +                        else
@@ -870,10 +870,10 @@
 +                if (((LazyPlayerSet) event.getRecipients()).isLazy())
 +                {
 +                    for (Object recipient : serverController.getConfigurationManager().playerEntityList)
-+                    {;
++                    {
 +                        for (IChatComponent component : CraftChatMessage.fromString(s))
 +                        {
-+                            ((EntityPlayerMP) player).sendMessage(CraftChatMessage.fromString(message));
++                            ((EntityPlayerMP) recipient).sendMessage(CraftChatMessage.fromString(s));
 +                        }
 +                    }
 +                }
@@ -1816,7 +1816,7 @@
              finally
              {
 @@ -1130,19 +2459,18 @@
- 
+                 {
                      if (itemstack.getItem() == Items.written_book && itemstack1.getItem() == Items.writable_book)
                      {
 -                        itemstack1.setTagInfo("author", new NBTTagString(this.playerEntity.getCommandSenderName()));
