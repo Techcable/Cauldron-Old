@@ -22,7 +22,7 @@
 +        FakePlayer fakePlayer = new FakePlayer(world, username);
 +        if (username.getId() == null) // GameProfile hashCode check will fail with a null ID
 +        {
-+            username = new GameProfile(UUID.fromString(""), username.getName()); // Create new GameProfile with empty ID
++            username = new GameProfile(UUID.randomUUID(), username.getName()); // Create new GameProfile with random UUID
 +        }
 +        // Cauldron end
 +        fakePlayers.put(username, fakePlayer);
