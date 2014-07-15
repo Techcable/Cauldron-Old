@@ -192,7 +192,7 @@
          try {
              Class<?> jarClass;
              try {
-@@ -62,30 +221,273 @@
+@@ -62,30 +221,293 @@
          return findClass(name, true);
      }
  
@@ -224,21 +224,39 @@
 +        if (obfVersion.contains("v1_7_R2")) { // Use R3 mappings
 +            obfVersion = "v1_7_R3";
 +        }
-+        jarMapping.loadMappings(
-+                new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/"+obfVersion+"/cb2numpkg.srg"))),
-+                new MavenShade(relocations),
-+                null, false);
 +
-+        // support for plugins that build in Cauldron 1.7 dev
-+        if (obfVersion.equals("v1_7_R3")) {
++        // support for running 1.7.9+ plugins in Cauldron dev
++        if (CauldronUtils.deobfuscatedEnvironment() && obfVersion.equals("v1_7_R3"))
++        {
 +            jarMapping.loadMappings(
-+                    new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/"+obfVersion+"/obf2numpkg.srg"))),
++                    new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/"+obfVersion+"/cb2pkgmcp.srg"))),
 +                    new MavenShade(relocations),
 +                    null, false);
-+        }
-+        // resolve naming conflict in FML/CB
-+        jarMapping.methods.put("net/minecraft/server/"+obfVersion+"/PlayerConnection/getPlayer ()Lorg/bukkit/craftbukkit/"+getNativeVersion()+"/entity/CraftPlayer;", "getPlayerB");
 +
++            jarMapping.loadMappings(
++                    new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/"+obfVersion+"/obf2pkgmcp.srg"))),
++                    new MavenShade(relocations),
++                        null, false);
++            // resolve naming conflict in FML/CB
++            jarMapping.methods.put("net/minecraft/server/"+obfVersion+"/PlayerConnection/getPlayer ()Lorg/bukkit/craftbukkit/entity/CraftPlayer;", "getPlayerB");
++        }
++        else
++        {
++            jarMapping.loadMappings(
++                    new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/"+obfVersion+"/cb2numpkg.srg"))),
++                    new MavenShade(relocations),
++                    null, false);
++    
++            // support for plugins that build in Cauldron 1.7 dev
++            if (obfVersion.equals("v1_7_R3")) {
++                jarMapping.loadMappings(
++                        new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/"+obfVersion+"/obf2numpkg.srg"))),
++                        new MavenShade(relocations),
++                        null, false);
++            }
++            // resolve naming conflict in FML/CB
++            jarMapping.methods.put("net/minecraft/server/"+obfVersion+"/PlayerConnection/getPlayer ()Lorg/bukkit/craftbukkit/"+getNativeVersion()+"/entity/CraftPlayer;", "getPlayerB");
++        }
 +        // remap bouncycastle to Forge's included copy, not the vanilla obfuscated copy (not in Cauldron), see #133
 +        //jarMapping.packages.put("net/minecraft/"+obfVersion+"/org/bouncycastle", "org/bouncycastle"); No longer needed
 +    }
@@ -295,7 +313,9 @@
 +            }
 +
 +            if ((flags & F_REMAP_OBC1710) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R3", org_bukkit_craftbukkit+"/"+getNativeVersion());
++                if (CauldronUtils.deobfuscatedEnvironment())
++                    jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R3", org_bukkit_craftbukkit);
++                else jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R3", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
 +
 +            if ((flags & F_REMAP_OBC172) != 0) {

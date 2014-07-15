@@ -13,6 +13,10 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 
 import java.util.List;
+// Cauldron start
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+// Cauldron end
 
 public class CraftBlockState implements BlockState {
     private final CraftWorld world;
@@ -20,6 +24,7 @@ public class CraftBlockState implements BlockState {
     private final int x;
     private final int y;
     private final int z;
+    private final NBTTagCompound nbt; // Cauldron
     protected int type;
     protected MaterialData data;
     protected int flag;
@@ -34,6 +39,15 @@ public class CraftBlockState implements BlockState {
         this.light = block.getLightLevel();
         this.chunk = (CraftChunk) block.getChunk();
         this.flag = 3;
+        // Cauldron start - save TE data
+        TileEntity te = world.getHandle().getTileEntity(x, y, z);
+        if (te != null)
+        {
+            nbt = new NBTTagCompound();
+            te.writeToNBT(nbt);
+        }
+        else nbt = null;
+        // Cauldron end
 
         createData(block.getData());
     }
@@ -148,6 +162,16 @@ public class CraftBlockState implements BlockState {
 
         block.setData(getRawData(), applyPhysics);
         world.getHandle().markBlockForUpdate(x, y, z);
+        // Cauldron start - restore TE data from snapshot
+        if (nbt != null)
+        {
+            TileEntity te = world.getHandle().getTileEntity(x, y, z);
+            if (te != null)
+            {
+                te.readFromNBT(nbt);
+            }
+        }
+        // Cauldron end
 
         return true;
     }
@@ -213,6 +237,11 @@ public class CraftBlockState implements BlockState {
         if (this.data != other.data && (this.data == null || !this.data.equals(other.data))) {
             return false;
         }
+        // Cauldron start
+        if (this.nbt != other.nbt && (this.nbt == null || !this.nbt.equals(other.nbt))) {
+            return false;
+        }
+        // Cauldron end
         return true;
     }
 
@@ -225,6 +254,7 @@ public class CraftBlockState implements BlockState {
         hash = 73 * hash + this.z;
         hash = 73 * hash + this.type;
         hash = 73 * hash + (this.data != null ? this.data.hashCode() : 0);
+        hash = 73 * hash + (this.nbt != null ? this.nbt.hashCode() : 0); // Cauldron
         return hash;
     }
 
@@ -243,4 +273,12 @@ public class CraftBlockState implements BlockState {
     public void removeMetadata(String metadataKey, Plugin owningPlugin) {
         chunk.getCraftWorld().getBlockMetadata().removeMetadata(getBlock(), metadataKey, owningPlugin);
     }
+
+    // Cauldron start
+    public TileEntity getTileEntity() {
+        if (nbt != null)
+            return TileEntity.createAndLoadEntity(nbt);
+        else return null;
+    }
+    // Cauldron end
 }
