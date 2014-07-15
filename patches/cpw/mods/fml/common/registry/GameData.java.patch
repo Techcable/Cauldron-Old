@@ -10,7 +10,7 @@
  import java.util.HashMap;
  import java.util.HashSet;
  import java.util.Iterator;
-@@ -930,4 +932,56 @@
+@@ -948,4 +950,56 @@
  
          FMLLog.fine("Registry consistency check successful");
      }

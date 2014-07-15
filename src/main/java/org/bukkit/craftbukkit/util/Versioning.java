@@ -26,7 +26,7 @@ public final class Versioning {
         }
 
         return result;*/
-        return "1.7.2-R0.4-SNAPSHOT"; // return current Bukkit API version used
+        return "1.7.10-R0.3-SNAPSHOT"; // return current Bukkit API version used
         // Cauldron end
     }
 }

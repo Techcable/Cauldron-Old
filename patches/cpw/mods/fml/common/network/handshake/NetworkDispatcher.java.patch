@@ -25,7 +25,7 @@
              proxy.setDispatcher(this);
              context.fireChannelRead(proxy);
              return true;
-@@ -464,7 +466,7 @@
+@@ -465,7 +467,7 @@
          // Stop the epic channel closed spam at close
          if (!(cause instanceof ClosedChannelException))
          {
