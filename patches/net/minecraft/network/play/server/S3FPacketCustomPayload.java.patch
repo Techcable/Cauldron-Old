@@ -1,6 +1,13 @@
 --- ../src-base/minecraft/net/minecraft/network/play/server/S3FPacketCustomPayload.java
 +++ ../src-work/minecraft/net/minecraft/network/play/server/S3FPacketCustomPayload.java
-@@ -27,10 +27,12 @@
+@@ -1,5 +1,6 @@
+ package net.minecraft.network.play.server;
+ 
++import cpw.mods.fml.common.network.ByteBufUtils;
+ import cpw.mods.fml.relauncher.Side;
+ import cpw.mods.fml.relauncher.SideOnly;
+ import io.netty.buffer.ByteBuf;
+@@ -27,23 +28,25 @@
          this.field_149172_a = p_i45190_1_;
          this.field_149171_b = p_i45190_2_;
  
@@ -15,3 +22,18 @@
      }
  
      public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+     {
+         this.field_149172_a = p_148837_1_.readStringFromBuffer(20);
+-        this.field_149171_b = new byte[p_148837_1_.readUnsignedShort()];
++        this.field_149171_b = new byte[ByteBufUtils.readVarShort(p_148837_1_)];
+         p_148837_1_.readBytes(this.field_149171_b);
+     }
+ 
+     public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+     {
+         p_148840_1_.writeStringToBuffer(this.field_149172_a);
+-        p_148840_1_.writeShort(this.field_149171_b.length);
++        ByteBufUtils.writeVarShort(p_148840_1_, this.field_149171_b.length);
+         p_148840_1_.writeBytes(this.field_149171_b);
+     }
+ 
