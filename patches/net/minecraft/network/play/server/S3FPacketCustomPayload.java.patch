@@ -1,0 +1,17 @@
+--- ../src-base/minecraft/net/minecraft/network/play/server/S3FPacketCustomPayload.java
++++ ../src-work/minecraft/net/minecraft/network/play/server/S3FPacketCustomPayload.java
+@@ -27,10 +27,12 @@
+         this.field_149172_a = p_i45190_1_;
+         this.field_149171_b = p_i45190_2_;
+ 
+-        if (p_i45190_2_.length >= 1048576)
++        // Cauldron start - FML expands S3F to support payloads up to 2 megs in size
++        if (p_i45190_2_.length > 0x1ffff0)
+         {
+-            throw new IllegalArgumentException("Payload may not be larger than 1048576 bytes");
++            throw new IllegalArgumentException("Payload may not be larger than 2097136 (0x1ffff0) bytes");
+         }
++        // Cauldron end
+     }
+ 
+     public void readPacketData(PacketBuffer p_148837_1_) throws IOException
