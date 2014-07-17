@@ -1,0 +1,16 @@
+--- ../src-base/minecraft/cpw/mods/fml/common/Loader.java
++++ ../src-work/minecraft/cpw/mods/fml/common/Loader.java
+@@ -504,12 +504,12 @@
+ 
+     public void preinitializeMods()
+     {
+-        ObjectHolderRegistry.INSTANCE.findObjectHolders(discoverer.getASMTable());
+         if (!modController.isInState(LoaderState.PREINITIALIZATION))
+         {
+             FMLLog.warning("There were errors previously. Not beginning mod initialization phase");
+             return;
+         }
++        ObjectHolderRegistry.INSTANCE.findObjectHolders(discoverer.getASMTable());
+         modController.distributeStateMessage(LoaderState.PREINITIALIZATION, discoverer.getASMTable(), canonicalConfigDir);
+         ObjectHolderRegistry.INSTANCE.applyObjectHolders();
+         modController.transition(LoaderState.INITIALIZATION, false);

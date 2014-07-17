@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/EntityLivingBase.java
 +++ ../src-work/minecraft/net/minecraft/entity/EntityLivingBase.java
-@@ -50,14 +50,25 @@
+@@ -50,14 +50,27 @@
  import net.minecraft.world.World;
  import net.minecraft.world.WorldServer;
  import net.minecraftforge.common.ForgeHooks;
@@ -16,6 +16,8 @@
 +// CraftBukkit end
 +import org.bukkit.craftbukkit.inventory.CraftItemStack; // Cauldron
 +
++import com.google.common.base.Function;
++
  public abstract class EntityLivingBase extends Entity
  {
      private static final UUID sprintingSpeedBoostModifierUUID = UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
@@ -28,7 +30,7 @@
      private final ItemStack[] previousEquipment = new ItemStack[5];
      public boolean isSwingInProgress;
      public int swingProgressInt;
-@@ -83,7 +94,7 @@
+@@ -83,7 +96,7 @@
      public float rotationYawHead;
      public float prevRotationYawHead;
      public float jumpMovementFactor = 0.02F;
@@ -37,7 +39,7 @@
      protected int recentlyHit;
      protected boolean dead;
      protected int entityAge;
-@@ -93,7 +104,7 @@
+@@ -93,7 +106,7 @@
      protected float field_70763_ax;
      protected float field_70741_aB;
      protected int scoreValue;
@@ -46,7 +48,7 @@
      protected boolean isJumping;
      public float moveStrafing;
      public float moveForward;
-@@ -104,21 +115,26 @@
+@@ -104,21 +117,26 @@
      protected double newPosZ;
      protected double newRotationYaw;
      protected double newRotationPitch;
@@ -76,7 +78,7 @@
          this.preventEntitySpawning = true;
          this.field_70770_ap = (float)(Math.random() + 1.0D) * 0.01F;
          this.setPosition(this.posX, this.posY, this.posZ);
-@@ -173,7 +189,18 @@
+@@ -173,7 +191,18 @@
              }
              else if (!this.worldObj.isRemote && this.fallDistance > 3.0F)
              {
@@ -96,7 +98,7 @@
              }
  
              block.onFallenUpon(this.worldObj, i, j, k, this, this.fallDistance);
-@@ -234,7 +261,13 @@
+@@ -234,7 +263,13 @@
          }
          else
          {
@@ -111,7 +113,7 @@
          }
  
          if (this.isEntityAlive() && this.isWet())
-@@ -299,6 +332,22 @@
+@@ -299,6 +334,22 @@
          this.worldObj.theProfiler.endSection();
      }
  
@@ -134,7 +136,7 @@
      public boolean isChild()
      {
          return false;
-@@ -308,22 +357,21 @@
+@@ -308,22 +359,21 @@
      {
          ++this.deathTime;
  
@@ -166,7 +168,7 @@
              this.setDead();
  
              for (i = 0; i < 20; ++i)
-@@ -485,6 +533,23 @@
+@@ -485,6 +535,23 @@
              }
          }
  
@@ -190,7 +192,7 @@
          if (p_70037_1_.hasKey("HealF", 99))
          {
              this.setHealth(p_70037_1_.getFloat("HealF"));
-@@ -614,12 +679,14 @@
+@@ -614,12 +681,14 @@
  
      public boolean isPotionActive(int p_82165_1_)
      {
@@ -207,7 +209,7 @@
      }
  
      public PotionEffect getActivePotionEffect(Potion p_70660_1_)
-@@ -710,23 +777,66 @@
+@@ -710,23 +779,66 @@
          }
      }
  
@@ -275,7 +277,7 @@
          this.dataWatcher.updateObject(6, Float.valueOf(MathHelper.clamp_float(p_70606_1_, 0.0F, this.getMaxHealth())));
      }
  
-@@ -755,7 +865,8 @@
+@@ -755,7 +867,8 @@
              }
              else
              {
@@ -285,7 +287,7 @@
                  {
                      this.getEquipmentInSlot(4).damageItem((int)(p_70097_2_ * 4.0F + this.rand.nextFloat() * p_70097_2_ * 2.0F), this);
                      p_70097_2_ *= 0.75F;
-@@ -771,16 +882,27 @@
+@@ -771,16 +884,27 @@
                          return false;
                      }
  
@@ -315,7 +317,7 @@
                      this.hurtTime = this.maxHurtTime = 10;
                  }
  
-@@ -936,6 +1058,21 @@
+@@ -936,6 +1060,21 @@
  
              if (!ForgeHooks.onLivingDrops(this, p_70645_1_, capturedDrops, i, recentlyHit > 0, j))
              {
@@ -337,7 +339,7 @@
                  for (EntityItem item : capturedDrops)
                  {
                      worldObj.spawnEntityInWorld(item);
-@@ -1008,8 +1145,17 @@
+@@ -1008,8 +1147,17 @@
  
          if (i > 0)
          {
@@ -356,7 +358,7 @@
              int j = MathHelper.floor_double(this.posX);
              int k = MathHelper.floor_double(this.posY - 0.20000000298023224D - (double)this.yOffset);
              int l = MathHelper.floor_double(this.posZ);
-@@ -1063,7 +1209,7 @@
+@@ -1063,7 +1211,7 @@
          {
              int i = 25 - this.getTotalArmorValue();
              float f1 = p_70655_2_ * (float)i;
@@ -365,7 +367,7 @@
              p_70655_2_ = f1 / 25.0F;
          }
  
-@@ -1087,7 +1233,8 @@
+@@ -1087,7 +1235,8 @@
              int j;
              float f1;
  
@@ -375,7 +377,7 @@
              {
                  i = (this.getActivePotionEffect(Potion.resistance).getAmplifier() + 1) * 5;
                  j = 25 - i;
-@@ -1120,26 +1267,106 @@
+@@ -1120,28 +1269,145 @@
          }
      }
  
@@ -397,60 +399,97 @@
  
 -            if (p_70665_2_ != 0.0F)
 +    // CraftBukkit start
-+    protected boolean damageEntity_CB(DamageSource damagesource, float f) { // void -> boolean
++    protected boolean damageEntity_CB(final DamageSource damagesource, float f) { // void -> boolean, add final
 +        if (!this.isEntityInvulnerable()) {
-+            boolean human = this instanceof EntityPlayer;
++            final boolean human = this instanceof EntityPlayer;
 +            float originalDamage = f;
-+            float preDamage = f;
-+            float hardHatModifier = 0;
-+            if ((damagesource == DamageSource.anvil || damagesource == DamageSource.fallingBlock) && this.getEquipmentInSlot(4) != null) {
-+                f *= 0.75F;
-+                hardHatModifier = preDamage - f;
-+                preDamage = f;
-+            }
-+            float blockingModifier = 0;
-+            if (human) {
-+                // Cauldron start - apply forge damage hook
-+                f = ForgeHooks.onLivingHurt(this, damagesource, f);
-+                if (f <= 0) return false;
-+                // Cauldron end
-+                if (!damagesource.isUnblockable() && ((EntityPlayer) this).isBlocking() && f > 0.0F) {
-+                    f = (1.0F + f) * 0.5F;
-+                    blockingModifier = preDamage - f;
-+                    preDamage = f;
-+                }
-+            }
-+            // Armor modifier
-+            f = this.applyArmorCalculations(damagesource, f);
-+            float armorModifier = preDamage - f;
-+            preDamage = f;
-+            // Resistance Potion Effect
-+            if (!damagesource.isDamageAbsolute() && this.isPotionActive(Potion.resistance) && damagesource != DamageSource.outOfWorld) {
-+                int i = (this.getActivePotionEffect(Potion.resistance).getAmplifier() + 1) * 5;
-+                int j = 25 - i;
-+                float f1 = f * (float) j;
-+                f = f1 / 25.0F;
-+            }
-+            float resistanceModifier = preDamage - f;
-+            preDamage = f;
-+            // Magic modifier
-+            // Cauldron start - apply forge armor hook
++            // Cauldron start - apply forge damage hook
 +            if (human)
              {
-+                f = ArmorProperties.ApplyArmor(this, ((EntityPlayer)this).inventory.armorInventory, damagesource, f);
++                f = ForgeHooks.onLivingHurt(this, damagesource, f);
 +                if (f <= 0) return false;
 +            }
 +            // Cauldron end
-+            f = this.applyPotionDamageCalculations(damagesource, f);
-+            float magicModifier = preDamage - f;
-+            float f1 = f;
++            Function<Double, Double> hardHat = new Function<Double, Double>() {
++                @Override
++                public Double apply(Double f) {
++                    if ((damagesource == DamageSource.anvil || damagesource == DamageSource.fallingBlock) && EntityLivingBase.this.getEquipmentInSlot(4) != null) {
++                        return -(f - (f * 0.75F));
++                    }
++                    return -0.0;
++                }
++            };
++            float hardHatModifier = hardHat.apply((double) f).floatValue();
++            f += hardHatModifier;
 +
-+            // Absorption modifier
-+            f = Math.max(f - this.getAbsorptionAmount(), 0.0F);
-+            float absorptionModifier = Math.max(f1 - f, 0.0F);
++            Function<Double, Double> blocking = new Function<Double, Double>() {
++                @Override
++                public Double apply(Double f) {
++                    if (human) {
++                        if (!damagesource.isUnblockable() && ((EntityPlayer) EntityLivingBase.this).isBlocking() && f > 0.0F) {
++                            return -(f - ((1.0F + f) * 0.5F));
++                        }
++                    }
++                    return -0.0;
++                }
++            };
++            float blockingModifier = blocking.apply((double) f).floatValue();
++            f += blockingModifier;
 +
-+            EntityDamageEvent event = CraftEventFactory.handleLivingEntityDamageEvent(this, damagesource, originalDamage, -hardHatModifier, -blockingModifier, -armorModifier, -resistanceModifier, -magicModifier, -absorptionModifier);
++            Function<Double, Double> armor = new Function<Double, Double>() {
++                @Override
++                public Double apply(Double f) {
++                    return -(f - EntityLivingBase.this.applyArmorCalculations(damagesource, f.floatValue()));
++                }
++            };
 +
++            // Cauldron start - apply forge armor hook
++            float armorModifier = 0.0F;
++            if (human)
++            {
++                armorModifier = ArmorProperties.ApplyArmor(this, ((EntityPlayer)this).inventory.armorInventory, damagesource, f);
++                if (armorModifier <= 0) return false;
++            }
++            else
++            {
++                armorModifier = armor.apply((double) f).floatValue();
++            }
++            // Cauldron end
++            f += armorModifier;
++
++            Function<Double, Double> resistance = new Function<Double, Double>() {
++                @Override
++                public Double apply(Double f) {
++                    if (!damagesource.isDamageAbsolute() && EntityLivingBase.this.isPotionActive(Potion.resistance) && damagesource != DamageSource.outOfWorld) {
++                        int i = (EntityLivingBase.this.getActivePotionEffect(Potion.resistance).getAmplifier() + 1) * 5;
++                        int j = 25 - i;
++                        float f1 = f.floatValue() * (float) j;
++                        return -(f - (f1 / 25.0F));
++                    }
++                    return -0.0;
++                }
++            };
++            float resistanceModifier = resistance.apply((double) f).floatValue();
++            f += resistanceModifier;
++
++            Function<Double, Double> magic = new Function<Double, Double>() {
++                @Override
++                public Double apply(Double f) {
++                    return -(f - EntityLivingBase.this.applyPotionDamageCalculations(damagesource, f.floatValue()));
++                }
++            };
++            float magicModifier = magic.apply((double) f).floatValue();
++            f += magicModifier;
++
++            Function<Double, Double> absorption = new Function<Double, Double>() {
++                @Override
++                public Double apply(Double f) {
++                    return -(Math.max(f - Math.max(f - EntityLivingBase.this.getAbsorptionAmount(), 0.0F), 0.0F));
++                }
++            };
++            float absorptionModifier = absorption.apply((double) f).floatValue();
++
++            EntityDamageEvent event = CraftEventFactory.handleLivingEntityDamageEvent(this, damagesource, originalDamage, hardHatModifier, blockingModifier, armorModifier, resistanceModifier, magicModifier, absorptionModifier, hardHat, blocking, armor, resistance, magic, absorption);
 +            if (event.isCancelled()) {
 +                return false;
 +            }
@@ -493,9 +532,12 @@
          }
 +        return false; // CraftBukkit
      }
- 
+-
++    
      public CombatTracker func_110142_aN()
-@@ -1619,7 +1846,8 @@
+     {
+         return this._combatTracker;
+@@ -1619,7 +1885,8 @@
          {
              f3 = 1.0F;
              f2 = (float)Math.sqrt((double)f) * 3.0F;
@@ -505,7 +547,7 @@
          }
  
          if (this.swingProgress > 0.0F)
-@@ -1827,17 +2055,37 @@
+@@ -1827,17 +2094,37 @@
      {
          List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
  
