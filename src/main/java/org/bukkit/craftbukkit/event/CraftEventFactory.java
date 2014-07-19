@@ -608,7 +608,14 @@ public class CraftEventFactory {
         if (entity instanceof EntityEnderCrystal && !(source instanceof EntityDamageSource)) {
             return false;
         }
-        EntityDamageEvent event = handleEntityDamageEvent(entity, source, new EnumMap<DamageModifier, Double>(ImmutableMap.of(DamageModifier.BASE, (double) damage)), null);
+
+        final EnumMap<DamageModifier, Double> modifiers = new EnumMap<DamageModifier, Double>(DamageModifier.class);
+        final EnumMap<DamageModifier, Function<? super Double, Double>> functions = new EnumMap(DamageModifier.class);
+
+        modifiers.put(DamageModifier.BASE, damage);
+        functions.put(DamageModifier.BASE, ZERO);
+
+        final EntityDamageEvent event = handleEntityDamageEvent(entity, source, modifiers, functions);
         if (event == null) {
             return false;
         }
