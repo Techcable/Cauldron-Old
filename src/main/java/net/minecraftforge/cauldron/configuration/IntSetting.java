@@ -1,15 +1,18 @@
 package net.minecraftforge.cauldron.configuration;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.cauldron.configuration.Setting;
 
 public class IntSetting extends Setting<Integer>
 {
     private Integer value;
+    private ConfigBase config;
     
-    public IntSetting(String path, Integer def, String description)
+    public IntSetting(ConfigBase config, String path, Integer def, String description)
     {
         super(path, def, description);
         this.value = def;
+        this.config = config;
     }
 
     @Override
@@ -22,7 +25,7 @@ public class IntSetting extends Setting<Integer>
     public void setValue(String value)
     {
         this.value = org.apache.commons.lang.math.NumberUtils.toInt(value, def);
-        CauldronConfig.config.set(path, this.value);
+        config.set(path, this.value);
     }
 }
 

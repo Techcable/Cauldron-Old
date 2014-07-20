@@ -5,82 +5,84 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
+
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.cauldron.configuration.BoolSetting;
 
 public class CauldronWorldConfig
 {
     private final String worldName;
-    public YamlConfiguration config;
+    public ConfigBase configFile;
     private boolean verbose;
     public boolean entitiesDespawnImmediate = true;
 
-    public CauldronWorldConfig(String worldName)
+    public CauldronWorldConfig(String worldName, ConfigBase configFile)
     {
         this.worldName = worldName.toLowerCase();
-        this.config = CauldronConfig.config;
+        this.configFile = configFile;
         if (worldName.toLowerCase().contains("dummy")) return;
     }
 
     public void save()
     {
-        CauldronConfig.save();
+        configFile.save();
     }
 
     private void log(String s)
     {
         if ( verbose )
         {
-            Bukkit.getLogger().info( s );
+            MinecraftServer.getServer().logInfo( s );
         }
     }
 
     public void set(String path, Object val)
     {
-        config.set( path, val );
+        configFile.set( path, val );
     }
 
     public boolean isBoolean(String path)
     {
-        return config.isBoolean(path);
+        return configFile.isBoolean(path);
     }
 
     public boolean getBoolean(String path, boolean def)
     {
-        if (CauldronConfig.settings.get("world-settings.default." + path) == null)
+        if (configFile.settings.get("world-settings.default." + path) == null)
         {
-            CauldronConfig.settings.put("world-settings.default." + path, new BoolSetting("world-settings.default." + path, def, ""));
+            configFile.settings.put("world-settings.default." + path, new BoolSetting(configFile, "world-settings.default." + path, def, ""));
         }
 
-        config.addDefault( "world-settings.default." + path, def );
-        return config.getBoolean( "world-settings." + worldName + "." + path, config.getBoolean( "world-settings.default." + path ) );
+        configFile.config.addDefault( "world-settings.default." + path, def );
+        return configFile.getBoolean( "world-settings." + worldName + "." + path, configFile.config.getBoolean( "world-settings.default." + path ) );
     }
 
     private double getDouble(String path, double def)
     {
-        config.addDefault( "world-settings.default." + path, def );
-        return config.getDouble( "world-settings." + worldName + "." + path, config.getDouble( "world-settings.default." + path ) );
+        configFile.config.addDefault( "world-settings.default." + path, def );
+        return configFile.config.getDouble( "world-settings." + worldName + "." + path, configFile.config.getDouble( "world-settings.default." + path ) );
     }
 
     public int getInt(String path, int def)
     {
-        if (CauldronConfig.settings.get("world-settings.default." + path) == null)
+        if (configFile.settings.get("world-settings.default." + path) == null)
         {
-            CauldronConfig.settings.put("world-settings.default." + path, new IntSetting("world-settings.default." + path, def, ""));
+            configFile.settings.put("world-settings.default." + path, new IntSetting(configFile, "world-settings.default." + path, def, ""));
         }
 
-        config.addDefault( "world-settings.default." + path, def );
-        return config.getInt( "world-settings." + worldName + "." + path, config.getInt( "world-settings.default." + path ) );
+        configFile.config.addDefault( "world-settings.default." + path, def );
+        return configFile.getInt( "world-settings." + worldName + "." + path, configFile.config.getInt( "world-settings.default." + path ) );
     }
 
     private <T> List getList(String path, T def)
     {
-        config.addDefault( "world-settings.default." + path, def );
-        return (List<T>) config.getList( "world-settings." + worldName + "." + path, config.getList( "world-settings.default." + path ) );
+        configFile.config.addDefault( "world-settings.default." + path, def );
+        return (List<T>) configFile.config.getList( "world-settings." + worldName + "." + path, configFile.config.getList( "world-settings.default." + path ) );
     }
 
     private String getString(String path, String def)
     {
-        config.addDefault( "world-settings.default." + path, def );
-        return config.getString( "world-settings." + worldName + "." + path, config.getString( "world-settings.default." + path ) );
+        configFile.config.addDefault( "world-settings.default." + path, def );
+        return configFile.getString( "world-settings." + worldName + "." + path, configFile.config.getString( "world-settings.default." + path ) );
     }
 }

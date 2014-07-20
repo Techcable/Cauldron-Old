@@ -1,4 +1,4 @@
-package net.minecraftforge.cauldron;
+package net.minecraftforge.cauldron.command;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.cauldron.CauldronHooks;
 import net.minecraftforge.cauldron.configuration.BoolSetting;
 import net.minecraftforge.cauldron.configuration.CauldronConfig;
 import net.minecraftforge.cauldron.configuration.IntSetting;
@@ -57,13 +58,13 @@ public class CauldronCommand extends Command
         }
         if ((args.length == 1) && "save".equalsIgnoreCase(args[0]))
         {
-            CauldronConfig.save();
+            MinecraftServer.getServer().cauldronConfig.save();
             sender.sendMessage(ChatColor.GREEN + "Config file saved");
             return true;
         }
         if ((args.length == 1) && "reload".equalsIgnoreCase(args[0]))
         {
-            CauldronConfig.load(true);
+            MinecraftServer.getServer().cauldronConfig.load();
             sender.sendMessage(ChatColor.GREEN + "Config file reloaded");
             return true;
         }
@@ -135,22 +136,22 @@ public class CauldronCommand extends Command
     {
         try
         {
-            Setting toggle = CauldronConfig.settings.get(args[1]);
+            Setting toggle = MinecraftServer.getServer().cauldronConfig.getSettings().get(args[1]);
             // check config directly
-            if (toggle == null && CauldronConfig.isSet(args[1]))
+            if (toggle == null && MinecraftServer.getServer().cauldronConfig.isSet(args[1]))
             {
-                if (CauldronConfig.isBoolean(args[1]))
+                if (MinecraftServer.getServer().cauldronConfig.isBoolean(args[1]))
                 {
-                    toggle = new BoolSetting(args[1], CauldronConfig.getBoolean(args[1], false), "");
+                    toggle = new BoolSetting(MinecraftServer.getServer().cauldronConfig, args[1], MinecraftServer.getServer().cauldronConfig.getBoolean(args[1], false), "");
                 }
-                else if (CauldronConfig.isInt(args[1]))
+                else if (MinecraftServer.getServer().cauldronConfig.isInt(args[1]))
                 {
-                    toggle = new IntSetting(args[1], CauldronConfig.getInt(args[1], 1), "");
+                    toggle = new IntSetting(MinecraftServer.getServer().cauldronConfig, args[1], MinecraftServer.getServer().cauldronConfig.getInt(args[1], 1), "");
                 }
                 if (toggle != null)
                 {
-                    CauldronConfig.settings.put(toggle.path, toggle);
-                    CauldronConfig.load(false);
+                    MinecraftServer.getServer().cauldronConfig.getSettings().put(toggle.path, toggle);
+                    MinecraftServer.getServer().cauldronConfig.load();
                 }
             }
             if (toggle == null)
@@ -175,7 +176,7 @@ public class CauldronCommand extends Command
         try
         {
             int setting = NumberUtils.toInt(args[2], 1);
-            CauldronConfig.set(args[1], setting);
+            MinecraftServer.getServer().cauldronConfig.set(args[1], setting);
         }
         catch (Exception ex)
         {
@@ -189,13 +190,13 @@ public class CauldronCommand extends Command
     {
         try
         {
-            Setting toggle = CauldronConfig.settings.get(args[1]);
+            Setting toggle = MinecraftServer.getServer().cauldronConfig.getSettings().get(args[1]);
             // check config directly
-            if (toggle == null && CauldronConfig.isSet(args[1]))
+            if (toggle == null && MinecraftServer.getServer().cauldronConfig.isSet(args[1]))
             {
-                toggle = new BoolSetting(args[1], CauldronConfig.getBoolean(args[1], false), "");
-                CauldronConfig.settings.put(toggle.path, toggle);
-                CauldronConfig.load(true);
+                toggle = new BoolSetting(MinecraftServer.getServer().cauldronConfig, args[1], MinecraftServer.getServer().cauldronConfig.getBoolean(args[1], false), "");
+                MinecraftServer.getServer().cauldronConfig.getSettings().put(toggle.path, toggle);
+                MinecraftServer.getServer().cauldronConfig.load();
             }
             if (toggle == null)
             {
@@ -212,14 +213,14 @@ public class CauldronCommand extends Command
             String option = (Boolean.TRUE.equals(value) ? ChatColor.GREEN : ChatColor.RED) + " " + value;
             sender.sendMessage(ChatColor.GOLD + args[1] + " " + option);
             // Special case for load-on-request
-            if (toggle == CauldronConfig.loadChunkOnRequest)
+            if (toggle == MinecraftServer.getServer().cauldronConfig.loadChunkOnRequest)
             {
                 for (net.minecraft.world.WorldServer world : MinecraftServer.getServer().worlds)
                 {
-                    world.theChunkProviderServer.loadChunkOnProvideRequest = CauldronConfig.loadChunkOnRequest.getValue();
+                    world.theChunkProviderServer.loadChunkOnProvideRequest = MinecraftServer.getServer().cauldronConfig.loadChunkOnRequest.getValue();
                 }
             }
-            CauldronConfig.save();
+            MinecraftServer.getServer().cauldronConfig.save();
         }
         catch (Exception ex)
         {
@@ -242,7 +243,7 @@ public class CauldronCommand extends Command
         }
         if (((args.length == 2) && "get".equalsIgnoreCase(args[0])) || "set".equalsIgnoreCase(args[0]))
         {
-            return StringUtil.copyPartialMatches(args[1], CauldronConfig.settings.keySet(), new ArrayList<String>(CauldronConfig.settings.size()));
+            return StringUtil.copyPartialMatches(args[1], MinecraftServer.getServer().cauldronConfig.getSettings().keySet(), new ArrayList<String>(MinecraftServer.getServer().cauldronConfig.getSettings().size()));
         }
         else if ((args.length == 2) && "chunks".equalsIgnoreCase(args[0]))
         {

@@ -31,7 +31,7 @@
  
 -            if (this.field_149815_a >= 2 && this.blockMaterial == Material.water)
 +            // Cauldron start - allow disabling infinite water sources
-+            if(net.minecraftforge.cauldron.configuration.CauldronConfig.infiniteWaterSource.getValue())
++            if(net.minecraft.server.MinecraftServer.getServer().cauldronConfig.infiniteWaterSource.getValue())
              {
 -                if (p_149674_1_.getBlock(p_149674_2_, p_149674_3_ - 1, p_149674_4_).getMaterial().isSolid())
 +                if (this.field_149815_a >= 2 && this.blockMaterial == Material.water)
@@ -60,7 +60,7 @@
                      this.func_149811_n(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_);
                  }
 +                // Cauldron start - allow lava decaying at a 'natural' rate - see https://mojang.atlassian.net/browse/MC-4631 Lava decay fails to schedule block update
-+                else if (net.minecraftforge.cauldron.configuration.CauldronConfig.flowingLavaDecay.getValue())
++                else if (net.minecraft.server.MinecraftServer.getServer().cauldronConfig.flowingLavaDecay.getValue())
 +                {
 +                    // Ensure that even if the flow decay was skipped, it will retry at the material's natural flow period.
 +                    p_149674_1_.scheduleBlockUpdate(p_149674_2_, p_149674_3_, p_149674_4_, this, this.tickRate(p_149674_1_));

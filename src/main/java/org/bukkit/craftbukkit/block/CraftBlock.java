@@ -34,6 +34,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BlockVector;
 // Cauldron start
 import cpw.mods.fml.common.FMLLog;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraftforge.cauldron.block.CraftCustomContainer;
@@ -585,7 +586,7 @@ public class CraftBlock implements Block {
 
     // Cauldron start - if cauldron.dump-materials is true, dump all materials with their corresponding id's
     public static void dumpMaterials() {
-        if (net.minecraftforge.cauldron.configuration.CauldronConfig.dumpMaterials.getValue())
+        if (MinecraftServer.getServer().cauldronConfig.dumpMaterials.getValue())
         {
             FMLLog.info("Cauldron Dump Materials is ENABLED. Starting dump...");
             for (int i = 0; i < 32000; i++)

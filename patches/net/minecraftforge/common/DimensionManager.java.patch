@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/common/DimensionManager.java
 +++ ../src-work/minecraft/net/minecraftforge/common/DimensionManager.java
-@@ -34,6 +34,14 @@
+@@ -34,6 +34,15 @@
  import net.minecraft.world.storage.ISaveHandler;
  import net.minecraft.world.storage.SaveHandler;
  import net.minecraftforge.event.world.WorldEvent;
@@ -12,10 +12,11 @@
 +import org.bukkit.World.Environment;
 +import org.bukkit.WorldCreator;
 +import org.bukkit.generator.ChunkGenerator;
++// Cauldron end
  
  public class DimensionManager
  {
-@@ -46,6 +54,11 @@
+@@ -46,6 +55,11 @@
      private static BitSet dimensionMap = new BitSet(Long.SIZE << 4);
      private static ConcurrentMap<World, World> weakWorldMap = new MapMaker().weakKeys().weakValues().<World,World>makeMap();
      private static Multiset<Integer> leakedWorlds = HashMultiset.create();
@@ -27,7 +28,7 @@
  
      public static boolean registerProviderType(int id, Class<? extends WorldProvider> provider, boolean keepLoaded)
      {
-@@ -53,7 +66,25 @@
+@@ -53,7 +67,23 @@
          {
              return false;
          }
@@ -44,22 +45,20 @@
 +        {
 +            worldType = Environment.getEnvironment(id).name().toLowerCase();
 +        }
-+        net.minecraftforge.cauldron.configuration.CauldronConfig.init();
-+        keepLoaded = net.minecraftforge.cauldron.configuration.CauldronConfig.getBoolean("world-environment-settings." + worldType + ".keep-world-loaded", keepLoaded);
-+        net.minecraftforge.cauldron.configuration.CauldronConfig.save();
++        keepLoaded = MinecraftServer.getServer().cauldronConfig.getBoolean("world-environment-settings." + worldType + ".keep-world-loaded", keepLoaded);
 +        // Cauldron end
          providers.put(id, provider);
 +        classToProviders.put(provider, id);
          spawnSettings.put(id, keepLoaded);
          return true;
      }
-@@ -157,28 +188,33 @@
+@@ -157,28 +187,33 @@
  
      public static Integer[] getIDs(boolean check)
      {
 -        if (check)
 +        // Cauldron start - check config option and only log world leak messages if enabled
-+        if (net.minecraftforge.cauldron.configuration.CauldronConfig.worldLeakDebug.getValue())
++        if (MinecraftServer.getServer().cauldronConfig.worldLeakDebug.getValue())
          {
 -            List<World> allWorlds = Lists.newArrayList(weakWorldMap.keySet());
 -            allWorlds.removeAll(worlds.values());
@@ -101,13 +100,13 @@
          return getIDs();
      }
      public static Integer[] getIDs()
-@@ -191,12 +227,23 @@
+@@ -191,12 +226,23 @@
          if (world != null)
          {
              worlds.put(id, world);
 -            weakWorldMap.put(world, world);
 +            // Cauldron start - check config option and only log world leak messages if enabled
-+            if (net.minecraftforge.cauldron.configuration.CauldronConfig.worldLeakDebug.getValue())
++            if (MinecraftServer.getServer().cauldronConfig.worldLeakDebug.getValue())
 +            {
 +                weakWorldMap.put(world, world);
 +            }
@@ -126,7 +125,7 @@
              worlds.remove(id);
              MinecraftServer.getServer().worldTickTimes.remove(id);
              FMLLog.info("Unloading dimension %d", id);
-@@ -224,6 +271,7 @@
+@@ -224,6 +270,7 @@
      }
  
      public static void initDimension(int dim) {
@@ -134,7 +133,7 @@
          WorldServer overworld = getWorld(0);
          if (overworld == null)
          {
-@@ -231,6 +279,12 @@
+@@ -231,6 +278,12 @@
          }
          try
          {
@@ -147,7 +146,7 @@
              DimensionManager.getProviderType(dim);
          }
          catch (Exception e)
-@@ -242,9 +296,55 @@
+@@ -242,9 +295,52 @@
          ISaveHandler savehandler = overworld.getSaveHandler();
          WorldSettings worldSettings = new WorldSettings(overworld.getWorldInfo());
  
@@ -178,12 +177,9 @@
 +            name = provider.getSaveFolder();
 +            if (name == null) name = "DIM0";
 +        }
-+        // Cauldron start - add ability to disable dimensions
-+        boolean enabled = net.minecraftforge.cauldron.configuration.CauldronConfig.getBoolean("world-environment-settings." + worldType + ".enabled", true);
-+        net.minecraftforge.cauldron.configuration.CauldronConfig.save();
-+        if (!enabled)
++        // add ability to disable dimensions
++        if (!MinecraftServer.getServer().cauldronConfig.getBoolean("world-environment-settings." + worldType + ".enabled", true))
 +            return;
-+        // Cauldron end
 +
 +        CauldronUtils.migrateWorlds(worldType, oldName, overworld.getWorldInfo().getWorldName(), name); // Cauldron
 +        ChunkGenerator gen = mcServer.server.getGenerator(name);
@@ -204,7 +200,7 @@
          if (!mcServer.isSinglePlayer())
          {
              world.getWorldInfo().setGameType(mcServer.getGameType());
-@@ -253,6 +353,76 @@
+@@ -253,6 +349,76 @@
          mcServer.func_147139_a(mcServer.func_147135_j());
      }
  
@@ -281,7 +277,7 @@
      public static WorldServer getWorld(int id)
      {
          return worlds.get(id);
-@@ -266,7 +436,7 @@
+@@ -266,7 +432,7 @@
      public static boolean shouldLoadSpawn(int dim)
      {
          int id = getProviderType(dim);
@@ -290,7 +286,7 @@
      }
  
      static
-@@ -306,7 +476,8 @@
+@@ -306,7 +472,8 @@
      }
  
      public static void unloadWorld(int id) {
@@ -300,7 +296,7 @@
      }
  
      /*
-@@ -315,26 +486,9 @@
+@@ -315,26 +482,9 @@
      public static void unloadWorlds(Hashtable<Integer, long[]> worldTickTimes) {
          for (int id : unloadQueue) {
              WorldServer w = worlds.get(id);
@@ -329,7 +325,7 @@
              }
          }
          unloadQueue.clear();
-@@ -425,4 +579,45 @@
+@@ -425,4 +575,45 @@
              return null;
          }
      }

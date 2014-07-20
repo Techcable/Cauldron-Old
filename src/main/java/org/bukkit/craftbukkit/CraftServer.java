@@ -267,7 +267,6 @@ public final class CraftServer implements Server {
         chunkGCPeriod = configuration.getInt("chunk-gc.period-in-ticks");
         chunkGCLoadThresh = configuration.getInt("chunk-gc.load-threshold");
         loadIcon();
-        net.minecraftforge.cauldron.configuration.CauldronConfig.init();
 
         updater = new AutoUpdater(new BukkitDLUpdaterService(configuration.getString("auto-updater.host")), getLogger(), configuration.getString("auto-updater.preferred-channel"));
         updater.setEnabled(false); // Spigot
@@ -737,12 +736,6 @@ public final class CraftServer implements Server {
 
         return false;
     }
-
-    public String getBukkitToForgeMapping(String name)
-    {
-        String result = CauldronConfig.getString("bukkit-to-forge-mappings." + name, name, false);
-        return result;
-    }
     // Cauldron end    
 
     @Override
@@ -785,7 +778,7 @@ public final class CraftServer implements Server {
         }
 
         org.spigotmc.SpigotConfig.init(); // Spigot
-        net.minecraftforge.cauldron.configuration.CauldronConfig.init(); // Cauldron
+
         for (net.minecraft.world.WorldServer world : console.worlds) {
             world.difficultySetting = difficulty;
             world.setAllowedSpawnTypes(monsters, animals);

@@ -32,7 +32,7 @@
 -    public boolean loadChunkOnProvideRequest = true;
 -    public LongHashMap loadedChunkHashMap = new LongHashMap();
 -    public List loadedChunks = new ArrayList();
-+    public boolean loadChunkOnProvideRequest = net.minecraftforge.cauldron.configuration.CauldronConfig.loadChunkOnRequest.getValue(); // Cauldron - if true, allows mods to force load chunks. to disable, set load-chunk-on-request in cauldron.yml to false
++    public boolean loadChunkOnProvideRequest = MinecraftServer.getServer().cauldronConfig.loadChunkOnRequest.getValue(); // Cauldron - if true, allows mods to force load chunks. to disable, set load-chunk-on-request in cauldron.yml to false
 +    public int initialTick; // Cauldron counter to keep track of when this loader was created
 +    public LongObjectHashMap<Chunk> loadedChunkHashMap = new LongObjectHashMap<Chunk>();
 +    public List loadedChunks = new ArrayList(); // Cauldron - vanilla compatibility
@@ -441,7 +441,7 @@
 +    {
 +        return this.worldObj.findingSpawnPoint ||
 +                this.loadChunkOnProvideRequest ||
-+                (MinecraftServer.callingForgeTick && CauldronConfig.loadChunkOnForgeTick.getValue()) ||
++                (MinecraftServer.callingForgeTick && MinecraftServer.getServer().cauldronConfig.loadChunkOnForgeTick.getValue()) ||
 +                (MinecraftServer.currentTick - initialTick <= 100);
 +    }
 +

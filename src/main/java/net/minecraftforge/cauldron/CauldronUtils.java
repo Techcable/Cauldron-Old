@@ -59,9 +59,12 @@ public class CauldronUtils {
             sortedClassList.add(clazz.getName());
         }
         Collections.sort(sortedClassList);
-        for (int i = 0; i < sortedClassList.size(); i++)
+        if (MinecraftServer.getServer().tileEntityConfig.enableTECanUpdateWarning.getValue())
         {
-            MinecraftServer.getServer().logInfo("Detected TE " + sortedClassList.get(i) + " with canUpdate set to true and no updateEntity override!. This is NOT good, please report to mod author as this can hurt performance.");
+            for (int i = 0; i < sortedClassList.size(); i++)
+            {
+                MinecraftServer.getServer().logInfo("Detected TE " + sortedClassList.get(i) + " with canUpdate set to true and no updateEntity override!. This is NOT good, please report to mod author as this can hurt performance.");
+            }
         }
     }
 
