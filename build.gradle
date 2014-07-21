@@ -42,14 +42,14 @@ minecraft {
             }
         }
     }
-    srgExtra "PK: org/bukkit/craftbukkit org/bukkit/craftbukkit/v1_7_R3"
+    srgExtra "PK: org/bukkit/craftbukkit org/bukkit/craftbukkit/v1_7_R4"
 }
 
 group = 'net.minecraftforge'
 ext.mcVersion = "1.7.10"
 ext.cauldronVersion = "1"
 ext.forgeVersion = "1187"
-ext.bukkitVersion = "03"
+ext.bukkitVersion = "01"
 version = "${mcVersion}-${cauldronVersion}.${forgeVersion}.${bukkitVersion}.${getBuild()}"
 
 jenkins {
@@ -82,7 +82,7 @@ tasks.packageUniversal.manifest {
     'Forge-Version': '10.13.0.1187',
     'Specification-Vendor': 'Bukkit Team',
     'Specification-Title': 'Bukkit',
-    'Specification-Version': '1.7.10-R0.3-SNAPSHOT'
+    'Specification-Version': '1.7.10-R0.1-SNAPSHOT'
     ])
 }
 
