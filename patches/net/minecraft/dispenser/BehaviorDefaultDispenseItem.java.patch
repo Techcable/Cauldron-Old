@@ -18,7 +18,7 @@
          ItemStack itemstack1 = p_82487_2_.splitStack(1);
 -        doDispense(p_82487_1_.getWorld(), itemstack1, 6, enumfacing, iposition);
 +        // CraftBukkit start
-+        if (!doDispense(p_82487_1_.getWorld(), itemstack1, 6, enumfacing, p_82487_1_));
++        if (!doDispense(p_82487_1_.getWorld(), itemstack1, 6, enumfacing, p_82487_1_))
 +        {
 +           p_82487_2_.stackSize++;
 +        }
