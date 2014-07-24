@@ -282,7 +282,7 @@ public class CauldronHooks
             if (teCache == null)
             {
                 String teConfigPath = tileEntity.getClass().getName().replace(".", "-");
-                teCache = new TileEntityCache(tileEntity.getClass(), world.getWorldInfo().getWorldName(), teConfigPath, world.tileentityConfig.getBoolean(teConfigPath + ".tick-no-players", false), world.tileentityConfig.getInt(teConfigPath + ".tick-interval", 1));
+                teCache = new TileEntityCache(tileEntity.getClass(), world.getWorldInfo().getWorldName().toLowerCase(), teConfigPath, world.tileentityConfig.getBoolean(teConfigPath + ".tick-no-players", false), world.tileentityConfig.getInt(teConfigPath + ".tick-interval", 1));
                 tileEntityCache.put(tileEntity.getClass(), teCache);
                 for (TileEntityCache cache : tileEntityCache.values())
                 {

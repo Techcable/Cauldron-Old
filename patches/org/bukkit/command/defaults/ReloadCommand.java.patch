@@ -12,7 +12,7 @@
          Bukkit.reload();
          Command.broadcastCommandMessage(sender, ChatColor.GREEN + "Reload complete.");
 +        */
-+        sender.sendMessage(ChatColor.RED + "Reload not allowed on an Cauldron server.");
++        sender.sendMessage(ChatColor.RED + "Reload not allowed on a Cauldron server.");
 +        // Cauldron end
  
          return true;
