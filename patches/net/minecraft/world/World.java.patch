@@ -1260,12 +1260,22 @@
          {
              dest.add(entity);
          }
-@@ -3977,4 +4679,43 @@
+@@ -3977,4 +4679,53 @@
          }
          return count;
      }
 +
 +    // Cauldron start
++    public boolean isEmpty(int x, int y, int z) // Required until SS inheritance bug is fixed
++    {
++        return isAirBlock(x, y, z);
++    }
++
++    public Block getType(int x, int y, int z) // Required until SS inheritance bug is fixed
++    {
++        return getBlock(x, y, z);
++    }
++
 +    public boolean isActiveChunk(int x, int z)
 +    {
 +        return getPersistentChunks().containsKey(new ChunkCoordIntPair(x, z)) || activeChunkSet_CB.containsKey(chunkToKey(x, z));
