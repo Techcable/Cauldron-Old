@@ -295,7 +295,7 @@
              world.addWorldAccess(new WorldManager(this, world));
  
              if (!this.isSinglePlayer())
-@@ -227,12 +430,31 @@
+@@ -227,12 +430,14 @@
                  world.getWorldInfo().setGameType(this.getGameType());
              }
  
@@ -308,29 +308,12 @@
 -        this.serverConfigManager.setPlayerManager(new WorldServer[]{ overWorld });
          this.func_147139_a(this.func_147135_j());
          this.initialWorldChunkLoad();
-+        CraftBlock.dumpMaterials(); // Cauldron
-+        // Cauldron start
-+        SideTransformer.allowInvalidSide = true;
-+        for (Object obj : TileEntity.classToNameMap.entrySet())
-+        {
-+            Map.Entry<Class<? extends TileEntity>, String> tileEntry = (Map.Entry<Class<? extends TileEntity>, String>)obj;
-+            if (tileEntry.getKey() == null)
-+                continue;
-+            // verify if TE's should tick
-+            if (!CauldronUtils.isOverridingUpdateEntity(tileEntry.getKey()) && CauldronUtils.canTileEntityUpdate(tileEntry.getKey()))
-+            {
-+                bannedTileEntityUpdates.add(tileEntry.getKey());
-+            }
-+            //  register TE's for inventory events
-+            EnumHelper.addInventoryType(tileEntry.getKey(), tileEntry.getValue());
-+        }
-+        CauldronUtils.dumpAndSortClassList(bannedTileEntityUpdates);
-+        SideTransformer.allowInvalidSide = false;
++        CraftBlock.dumpMaterials();
 +        // Cauldron end
      }
  
      protected void initialWorldChunkLoad()
-@@ -244,9 +466,12 @@
+@@ -244,9 +449,12 @@
          int i = 0;
          this.setUserMessage("menu.generatingTerrain");
          byte b0 = 0;
@@ -343,7 +326,7 @@
          long j = getSystemTimeMillis();
  
          for (int k = -192; k <= 192 && this.isServerRunning(); k += 16)
-@@ -265,7 +490,8 @@
+@@ -265,7 +473,8 @@
                  worldserver.theChunkProviderServer.loadChunk(chunkcoordinates.posX + k >> 4, chunkcoordinates.posZ + l >> 4);
              }
          }
@@ -353,7 +336,7 @@
          this.clearCurrentTask();
      }
  
-@@ -292,19 +518,17 @@
+@@ -292,19 +501,17 @@
      {
          this.currentTask = null;
          this.percentDone = 0;
@@ -378,7 +361,7 @@
  
                  if (worldserver != null)
                  {
-@@ -313,25 +537,41 @@
+@@ -313,25 +520,41 @@
                          logger.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/" + worldserver.provider.getDimensionName());
                      }
  
@@ -425,7 +408,7 @@
              if (this.func_147137_ag() != null)
              {
                  this.func_147137_ag().terminateEndpoints();
-@@ -347,7 +587,14 @@
+@@ -347,7 +570,14 @@
              if (this.worldServers != null)
              {
                  logger.info("Saving worlds");
@@ -441,7 +424,7 @@
  
                  for (int i = 0; i < this.worldServers.length; ++i)
                  {
-@@ -380,6 +627,13 @@
+@@ -380,6 +610,13 @@
          this.serverRunning = false;
      }
  
@@ -455,7 +438,7 @@
      public void run()
      {
          try
-@@ -392,45 +646,43 @@
+@@ -392,45 +629,43 @@
                  this.field_147147_p.func_151315_a(new ChatComponentText(this.motd));
                  this.field_147147_p.func_151321_a(new ServerStatusResponse.MinecraftProtocolVersionIdentifier("1.7.10", 5));
                  this.func_147138_a(this.field_147147_p);
@@ -524,7 +507,7 @@
                  FMLCommonHandler.instance().handleServerStopping();
                  FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
              }
-@@ -448,6 +700,14 @@
+@@ -448,6 +683,14 @@
          catch (Throwable throwable1)
          {
              logger.error("Encountered an unexpected exception", throwable1);
@@ -539,7 +522,7 @@
              CrashReport crashreport = null;
  
              if (throwable1 instanceof ReportedException)
-@@ -477,6 +737,7 @@
+@@ -477,6 +720,7 @@
          {
              try
              {
@@ -547,7 +530,7 @@
                  this.stopServer();
                  this.serverStopped = true;
              }
-@@ -486,6 +747,16 @@
+@@ -486,6 +730,16 @@
              }
              finally
              {
@@ -564,7 +547,7 @@
                  FMLCommonHandler.instance().handleServerStopped();
                  this.serverStopped = true;
                  this.systemExitNow();
-@@ -533,7 +804,9 @@
+@@ -533,7 +787,9 @@
      public void tick()
      {
          long i = System.nanoTime();
@@ -574,7 +557,7 @@
          ++this.tickCounter;
  
          if (this.startProfiling)
-@@ -562,11 +835,18 @@
+@@ -562,11 +818,18 @@
              this.field_147147_p.func_151318_b().func_151330_a(agameprofile);
          }
  
@@ -595,7 +578,7 @@
              this.theProfiler.endSection();
          }
  
-@@ -575,25 +855,51 @@
+@@ -575,25 +838,51 @@
          this.theProfiler.endSection();
          this.theProfiler.startSection("snooper");
  
@@ -649,7 +632,7 @@
          int i;
  
          Integer[] ids = DimensionManager.getIDs(this.tickCounter % 200 == 0);
-@@ -602,19 +908,21 @@
+@@ -602,19 +891,21 @@
              int id = ids[x];
              long j = System.nanoTime();
  
@@ -674,7 +657,7 @@
  
                  this.theProfiler.startSection("tick");
                  FMLCommonHandler.instance().onPreWorldTick(worldserver);
-@@ -626,7 +934,17 @@
+@@ -626,7 +917,17 @@
                  }
                  catch (Throwable throwable1)
                  {
@@ -693,7 +676,7 @@
                      worldserver.addWorldInfoToCrashReport(crashreport);
                      throw new ReportedException(crashreport);
                  }
-@@ -637,7 +955,17 @@
+@@ -637,7 +938,17 @@
                  }
                  catch (Throwable throwable)
                  {
@@ -712,7 +695,7 @@
                      worldserver.addWorldInfoToCrashReport(crashreport);
                      throw new ReportedException(crashreport);
                  }
-@@ -645,10 +973,12 @@
+@@ -645,10 +956,12 @@
                  FMLCommonHandler.instance().onPostWorldTick(worldserver);
                  this.theProfiler.endSection();
                  this.theProfiler.startSection("tracker");
@@ -726,7 +709,7 @@
  
              worldTickTimes.get(id)[this.tickCounter % 100] = System.nanoTime() - j;
          }
-@@ -656,16 +986,22 @@
+@@ -656,16 +969,22 @@
          this.theProfiler.endStartSection("dim_unloading");
          DimensionManager.unloadWorlds(worldTickTimes);
          this.theProfiler.endStartSection("connection");
@@ -749,7 +732,7 @@
          this.theProfiler.endSection();
      }
  
-@@ -699,6 +1035,13 @@
+@@ -699,6 +1018,13 @@
  
      public WorldServer worldServerForDimension(int p_71218_1_)
      {
@@ -763,7 +746,7 @@
          WorldServer ret = DimensionManager.getWorld(p_71218_1_);
          if (ret == null)
          {
-@@ -784,13 +1127,14 @@
+@@ -784,13 +1110,14 @@
  
      public List getPossibleCompletions(ICommandSender p_71248_1_, String p_71248_2_)
      {
@@ -782,7 +765,7 @@
  
              if (list != null)
              {
-@@ -798,40 +1142,25 @@
+@@ -798,40 +1125,25 @@
  
                  while (iterator.hasNext())
                  {
@@ -831,7 +814,7 @@
      }
  
      public static MinecraftServer getServer()
-@@ -1034,7 +1363,7 @@
+@@ -1034,7 +1346,7 @@
  
      public boolean isServerInOnlineMode()
      {
@@ -840,7 +823,7 @@
      }
  
      public void setOnlineMode(boolean p_71229_1_)
-@@ -1124,7 +1453,7 @@
+@@ -1124,7 +1436,7 @@
  
      public NetworkSystem func_147137_ag()
      {
@@ -849,7 +832,7 @@
      }
  
      @SideOnly(Side.CLIENT)
-@@ -1259,8 +1588,11 @@
+@@ -1259,8 +1571,11 @@
      {
          Bootstrap.func_151354_b();
  
@@ -861,7 +844,7 @@
              boolean flag = true;
              String s = null;
              String s1 = ".";
-@@ -1356,16 +1688,34 @@
+@@ -1356,16 +1671,34 @@
              {
                  dedicatedserver.setGuiEnabled();
              }
@@ -902,7 +885,7 @@
          }
          catch (Exception exception)
          {
-@@ -1400,15 +1750,70 @@
+@@ -1400,15 +1733,70 @@
      @SideOnly(Side.SERVER)
      public String getPlugins()
      {
@@ -978,7 +961,7 @@
      }
  
      @SideOnly(Side.SERVER)
-@@ -1455,9 +1860,213 @@
+@@ -1455,9 +1843,213 @@
          return this.serverStopped;
      }
  

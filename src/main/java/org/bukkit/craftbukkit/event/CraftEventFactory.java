@@ -509,9 +509,7 @@ public class CraftEventFactory {
                 cause = DamageCause.CUSTOM;
             } else {
                 //throw new RuntimeException("Unhandled entity damage");
-                // pass custom and log it to fix for future builds
                 cause = DamageCause.CUSTOM;
-                System.out.println("Cauldron detected unhandled EntityDamageByEntityEvent cause for " + damager + " with cause " + source + ". Report to Cauldron dev to fix.");
             }
             // Cauldron end
             EntityDamageEvent event = callEvent(new EntityDamageByEntityEvent(damager, entity.getBukkitEntity(), cause, modifiers, modifierFunctions));

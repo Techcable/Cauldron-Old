@@ -32,7 +32,7 @@
  
      //Some enums are decompiled with extra arguments, so lets check for that
      @SuppressWarnings("rawtypes")
-@@ -51,6 +68,70 @@
+@@ -51,6 +68,72 @@
          {EnumRarity.class, EnumChatFormatting.class, String.class}
      };
  
@@ -79,21 +79,23 @@
 +        return bukkitType;
 +    }
 +
-+    public static InventoryType addInventoryType(Class<? extends TileEntity> tileEntityClass, String id)
++    public static InventoryType addInventoryType(TileEntity tileentity)
 +    {
-+        if (!IInventory.class.isAssignableFrom(tileEntityClass)) return null;
++        if (!IInventory.class.isAssignableFrom(tileentity.getClass())) return null;
++        String id = (String)TileEntity.classToNameMap.get(tileentity.getClass());
 +
-+        try {
-+            Constructor<? extends TileEntity> ctor = tileEntityClass.getConstructor(); // Use a constructor here so instantiation throws a checked exception
-+            TileEntity te = ctor.newInstance();
-+            IInventory teInv = (IInventory)te;
++        try
++        {
++            IInventory teInv = (IInventory)tileentity;
 +            int size = teInv.getSizeInventory();
 +            return addEnum(org.bukkit.event.inventory.InventoryType.class, id, new Class[]{Integer.TYPE, String.class}, new Object[]{size, id});
-+        } catch (Throwable e) {
++        } 
++        catch (Throwable e) 
++        {
 +            if (MinecraftServer.getServer().tileEntityConfig.enableTEInventoryWarning.getValue())
 +            {
-+                logger.log(Level.WARN, "Could not create inventory type " + tileEntityClass.getName() + " Exception: " + e.toString());
-+                logger.log(Level.WARN, "Could not determine default inventory size for type " + tileEntityClass.getName() + " using size of 9");
++                logger.log(Level.WARN, "Could not create inventory type " + tileentity.getClass().getName() + " Exception: " + e.toString());
++                logger.log(Level.WARN, "Could not determine default inventory size for type " + tileentity.getClass().getName() + " using size of 9");
 +            }
 +            return addEnum(org.bukkit.event.inventory.InventoryType.class, id, new Class[]{Integer.TYPE, String.class}, new Object[]{9, id});
 +        }
@@ -103,7 +105,7 @@
      public static EnumAction addAction(String name)
      {
          return addEnum(EnumAction.class, name);
-@@ -280,6 +361,86 @@
+@@ -280,6 +363,86 @@
          }
      }
  

@@ -39,7 +39,8 @@ public class TileEntityConfig extends ConfigBase
     public final BoolSetting skipTileEntityTicks = new BoolSetting(this, "settings.skip-tileentity-ticks", true, "If enabled, turns on tileentity tick skip feature when no players are near.");
     public final BoolSetting enableTECanUpdateWarning = new BoolSetting(this, "debug.enable-te-can-update-warning", false, "Set true to detect which tileentities should not be ticking.");
     public final BoolSetting enableTEInventoryWarning = new BoolSetting(this, "debug.enable-te-inventory-warning", false, "Set true to detect which tileentities with inventory failed to detect size for Bukkit's InventoryType enum. Note: This may detect a false-positive.");
-    public final BoolSetting tileEntityPlaceLogging = new BoolSetting(this, "debug.warn-place-no-tileentity", false, "Warn when a mod requests tile entity from a block that doesn't support one");
+    public final BoolSetting enableTEPlaceWarning = new BoolSetting(this, "debug.enable-te-place-warning", false, "Warn when a mod requests tile entity from a block that doesn't support one");
+    public final BoolSetting preventInvalidTileEntityUpdates = new BoolSetting(this, "settings.prevent-invalid-tileentity-updates", true, "Used to determine if a tileentity should tick and if not the TE is added to a ban list. Note: This should help improve performance.");
     /* ======================================================================== */
 
     public TileEntityConfig(String fileName, String commandName)
@@ -58,7 +59,8 @@ public class TileEntityConfig extends ConfigBase
         settings.put(skipTileEntityTicks.path, skipTileEntityTicks);
         settings.put(enableTECanUpdateWarning.path, enableTECanUpdateWarning);
         settings.put(enableTEInventoryWarning.path, enableTEInventoryWarning);
-        settings.put(tileEntityPlaceLogging.path, tileEntityPlaceLogging);
+        settings.put(enableTEPlaceWarning.path, enableTEPlaceWarning);
+        settings.put(preventInvalidTileEntityUpdates.path, preventInvalidTileEntityUpdates);
         load();
     }
 
