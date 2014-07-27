@@ -477,12 +477,32 @@ public class CraftEventFactory {
             blockDamage = null;
             if (source == DamageSource.cactus) {
                 cause = DamageCause.CONTACT;
+            // Cauldron start - add more causes for mods
+            } else if (source == DamageSource.fall) {
+                cause = DamageCause.FALL;
+            } else if (source == DamageSource.anvil || source == DamageSource.fallingBlock) {
+                cause = DamageCause.FALLING_BLOCK;
+            } else if (source == DamageSource.inFire) {
+                cause = DamageCause.FIRE;
+            } else if (source == DamageSource.onFire) {
+                cause = DamageCause.FIRE_TICK;
+            } else if (source == DamageSource.lava) {
+                cause = DamageCause.LAVA;
+            } else if (damager instanceof LightningStrike) {
+                cause = DamageCause.LIGHTNING;
+            } else if (source == DamageSource.magic) {
+                cause = DamageCause.MAGIC;
+            } else if (source == MELTING) {
+                cause = DamageCause.MELTING;
+            } else if (source == POISON) {
+                cause = DamageCause.POISON;
+            } else if (source == DamageSource.generic) {
+                cause = DamageCause.CUSTOM;
             } else {
                 //throw new RuntimeException("Unhandled entity damage");
-                // pass custom and log it to fix for future builds
                 cause = DamageCause.CUSTOM;
-                System.out.println("Cauldron detected unhandled EntityDamagByBlockEvent cause for " + damager + " with cause " + source + ". Report to Cauldron dev to fix.");
             }
+            // Cauldron end
             EntityDamageEvent event = callEvent(new EntityDamageByBlockEvent(damager, entity.getBukkitEntity(), cause, modifiers, modifierFunctions));
             if (!event.isCancelled()) {
                 event.getEntity().setLastDamageCause(event);
@@ -503,8 +523,16 @@ public class CraftEventFactory {
                 cause = DamageCause.CONTACT;
             } else if (source == DamageSource.inFire) {
                 cause = DamageCause.FIRE;
+            } else if (source == DamageSource.onFire) {
+                cause = DamageCause.FIRE_TICK;
+            } else if (source == DamageSource.lava) {
+                cause = DamageCause.LAVA;
             } else if (source == DamageSource.magic) {
                 cause = DamageCause.MAGIC;
+            } else if (source == MELTING) {
+                cause = DamageCause.MELTING;
+            } else if (source == POISON) {
+                cause = DamageCause.POISON;
             } else if (source == DamageSource.generic) {
                 cause = DamageCause.CUSTOM;
             } else {
@@ -520,39 +548,35 @@ public class CraftEventFactory {
         }
 
         DamageCause cause = null;
-        if (source == net.minecraft.util.DamageSource.inFire) {
+        if (source == DamageSource.inFire) {
             cause = DamageCause.FIRE;
-        } else if (source == net.minecraft.util.DamageSource.starve) {
+        } else if (source == DamageSource.starve) {
             cause = DamageCause.STARVATION;
-        } else if (source == net.minecraft.util.DamageSource.wither) {
+        } else if (source == DamageSource.wither) {
             cause = DamageCause.WITHER;
-        } else if (source == net.minecraft.util.DamageSource.inWall) {
+        } else if (source == DamageSource.inWall) {
             cause = DamageCause.SUFFOCATION;
-        } else if (source == net.minecraft.util.DamageSource.drown) {
+        } else if (source == DamageSource.drown) {
             cause = DamageCause.DROWNING;
-        } else if (source == net.minecraft.util.DamageSource.onFire) {
+        } else if (source == DamageSource.onFire) {
             cause = DamageCause.FIRE_TICK;
         } else if (source == MELTING) {
             cause = DamageCause.MELTING;
         } else if (source == POISON) {
             cause = DamageCause.POISON;
-        } else if (source == net.minecraft.util.DamageSource.magic) {
+        } else if (source == DamageSource.magic) {
             cause = DamageCause.MAGIC;
         } else if (source == DamageSource.fall) {
             cause = DamageCause.FALL;
-        // Cauldron start - add cactus
+        // Cauldron start - add more causes for mods
         } else if (source == DamageSource.cactus) {
             cause = DamageCause.CONTACT;
-        // Cauldron end
-        } else if (source == DamageSource.generic) {
-            return new EntityDamageEvent(entity.getBukkitEntity(), null, modifiers, modifierFunctions);
+        } else if (source == DamageSource.lava) {
+            cause = DamageCause.LAVA;
+        } else if (source == DamageSource.generic || cause == null) {
+            return new EntityDamageEvent(entity.getBukkitEntity(), DamageCause.CUSTOM, modifiers, modifierFunctions); // use custom
         }
 
-        // Cauldron start - pass custom cause instead of crashing server
-        if (cause == null) {
-            cause = DamageCause.CUSTOM;
-            System.out.println("Cauldron detected unhandled entity damage cause " + source + ". Report to Cauldron dev to fix.");
-        }
         return callEntityDamageEvent(null, entity, cause, modifiers, modifierFunctions);
         //throw new RuntimeException("Unhandled entity damage");
         // Cauldron end
