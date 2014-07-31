@@ -118,7 +118,7 @@
 +    
 +                        if (event.isCancelled())
 +                        {
-+                            this.setInventorySlotContents(i, itemstack);
++                            this.setInventorySlotContents(j, itemstack);
 +                            this.func_145896_c(worldObj.spigotConfig.hopperTransfer); // Spigot
 +                            return false;
 +                        }
