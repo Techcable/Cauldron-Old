@@ -68,6 +68,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemSword;
+import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraftforge.common.util.FakePlayer;
@@ -641,7 +642,7 @@ public class CraftEventFactory {
         if (event == null) {
             return false;
         }
-        return event.isCancelled() || event.getDamage() == 0;
+        return event.isCancelled() || (event.getDamage() == 0 && !(entity instanceof EntityItemFrame)); // Cauldron - fix frame removal
     }
 
     public static PlayerLevelChangeEvent callPlayerLevelChangeEvent(Player player, int oldLevel, int newLevel) {
