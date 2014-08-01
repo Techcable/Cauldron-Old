@@ -20,6 +20,16 @@ Supporting Cauldron
 Click here to [Donate to bloodmc](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YNCKCALNQKFAS)
 Click here to [Become a Patreon] (http://www.patreon.com/bloodmc)
 
+Top Patron Supporters
+-----------
+
+* isiliden
+* eonic
+* trab
+* James
+* SFTMedia
+* Shmeeb
+
 
 Profiling
 ---------
