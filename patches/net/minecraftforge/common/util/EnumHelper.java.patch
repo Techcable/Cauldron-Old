@@ -32,7 +32,7 @@
  
      //Some enums are decompiled with extra arguments, so lets check for that
      @SuppressWarnings("rawtypes")
-@@ -51,6 +68,72 @@
+@@ -51,6 +68,73 @@
          {EnumRarity.class, EnumChatFormatting.class, String.class}
      };
  
@@ -67,7 +67,8 @@
 +    }
 +
 +    public static EntityType addBukkitEntityType(String name, Class <? extends org.bukkit.entity.Entity> clazz, int typeId, boolean independent) {
-+        EntityType bukkitType = addEnum(EntityType.class, name, new Class[] { String.class, Class.class, Integer.TYPE, Boolean.TYPE }, new Object[] { name, clazz, typeId, independent });
++        String entityType = name.replace("-", "_").toUpperCase();
++        EntityType bukkitType = addEnum(EntityType.class, entityType, new Class[] { String.class, Class.class, Integer.TYPE, Boolean.TYPE }, new Object[] { name, clazz, typeId, independent });
 +
 +        Map<String, EntityType> NAME_MAP = ReflectionHelper.getPrivateValue(EntityType.class, null, "NAME_MAP");
 +        Map<Short, EntityType> ID_MAP = ReflectionHelper.getPrivateValue(EntityType.class, null, "ID_MAP");
@@ -105,7 +106,7 @@
      public static EnumAction addAction(String name)
      {
          return addEnum(EnumAction.class, name);
-@@ -280,6 +363,86 @@
+@@ -280,6 +364,86 @@
          }
      }
  
