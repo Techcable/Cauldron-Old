@@ -24,7 +24,7 @@
  import java.io.File;
  import java.net.MalformedURLException;
  import java.net.URL;
-@@ -15,16 +33,44 @@
+@@ -15,16 +33,40 @@
  /**
   * A ClassLoader for plugins, to allow shared classes across multiple plugins
   */
@@ -50,20 +50,16 @@
 +    private static final int F_GLOBAL_INHERIT   = 1 << 1;
 +    private static final int F_REMAP_OBCPRE     = 1 << 2;
 +    private static final int F_REMAP_NMS152     = 1 << 3;
-+    private static final int F_REMAP_NMS161     = 1 << 4;
-+    private static final int F_REMAP_NMS162     = 1 << 5;
-+    private static final int F_REMAP_NMS164     = 1 << 6;
-+    private static final int F_REMAP_NMS172     = 1 << 7;
-+    private static final int F_REMAP_NMS179     = 1 << 8;
-+    private static final int F_REMAP_NMS1710    = 1 << 9;
-+    private static final int F_REMAP_OBC152     = 1 << 10;
-+    private static final int F_REMAP_OBC161     = 1 << 11;
-+    private static final int F_REMAP_OBC162     = 1 << 12;
-+    private static final int F_REMAP_OBC164     = 1 << 13;
-+    private static final int F_REMAP_OBC172     = 1 << 14;
-+    private static final int F_REMAP_OBC179     = 1 << 15;
-+    private static final int F_REMAP_OBC1710    = 1 << 16;
-+    private static final int F_REMAP_NMSPRE_MASK= 0xfff00000;  // "unversioned" NMS plugin version
++    private static final int F_REMAP_NMS164     = 1 << 4;
++    private static final int F_REMAP_NMS172     = 1 << 5;
++    private static final int F_REMAP_NMS179     = 1 << 6;
++    private static final int F_REMAP_NMS1710    = 1 << 7;
++    private static final int F_REMAP_OBC152     = 1 << 8;
++    private static final int F_REMAP_OBC164     = 1 << 9;
++    private static final int F_REMAP_OBC172     = 1 << 10;
++    private static final int F_REMAP_OBC179     = 1 << 11;
++    private static final int F_REMAP_OBC1710    = 1 << 12;
++    private static final int F_REMAP_NMSPRE_MASK= 0xffff0000;  // "unversioned" NMS plugin version
 +
 +    // This trick bypasses Maven Shade's package rewriting when using String literals [same trick in jline]
 +    private static final String org_bukkit_craftbukkit = new String(new char[] {'o','r','g','/','b','u','k','k','i','t','/','c','r','a','f','t','b','u','k','k','i','t'});
@@ -72,7 +68,7 @@
      PluginClassLoader(final JavaPluginLoader loader, final ClassLoader parent, final PluginDescriptionFile description, final File dataFolder, final File file) throws InvalidPluginException, MalformedURLException {
          super(new URL[] {file.toURI().toURL()}, parent);
          Validate.notNull(loader, "Loader cannot be null");
-@@ -34,6 +80,128 @@
+@@ -34,6 +76,113 @@
          this.dataFolder = dataFolder;
          this.file = file;
  
@@ -87,16 +83,12 @@
 +        boolean remapNMS179 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-nms-v1_7_R3", true);
 +        boolean remapNMS172 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-nms-v1_7_R1", true);
 +        boolean remapNMS164 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-nms-v1_6_R3", true);
-+        boolean remapNMS162 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-nms-v1_6_R2", true);
-+        boolean remapNMS161 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-nms-v1_6_R1", true);
 +        boolean remapNMS152 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-nms-v1_5_R3", true);
 +        String remapNMSPre = MinecraftServer.getServer().cauldronConfig.getString("plugin-settings.default.remap-nms-pre", "false");
 +        boolean remapOBC1710 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-obc-v1_7_R4", true);
 +        boolean remapOBC179 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-obc-v1_7_R3", true);
 +        boolean remapOBC172 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-obc-v1_7_R1", true);
 +        boolean remapOBC164 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R3", true);
-+        boolean remapOBC162 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R2", true);
-+        boolean remapOBC161 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-obc-v1_6_R1", true);
 +        boolean remapOBC152 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-obc-v1_5_R3", true);
 +        boolean remapOBCPre = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.remap-obc-pre", false);
 +        boolean globalInherit = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings.default.global-inheritance", true);
@@ -112,16 +104,12 @@
 +        remapNMS179 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_7_R3", remapNMS179, false);
 +        remapNMS172 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_7_R1", remapNMS172, false);
 +        remapNMS164 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_6_R3", remapNMS164, false);
-+        remapNMS162 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_6_R2", remapNMS162, false);
-+        remapNMS161 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_6_R1", remapNMS161, false);
 +        remapNMS152 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-nms-v1_5_R3", remapNMS152, false);
 +        remapNMSPre = MinecraftServer.getServer().cauldronConfig.getString("plugin-settings."+pluginName+".remap-nms-pre", remapNMSPre, false);
 +        remapOBC1710 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_7_R4", remapOBC1710, false);
 +        remapOBC179 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_7_R3", remapOBC179, false);
 +        remapOBC172 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_7_R1", remapOBC172, false);
 +        remapOBC164 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_6_R3", remapOBC164, false);
-+        remapOBC162 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_6_R2", remapOBC162, false);
-+        remapOBC161 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_6_R1", remapOBC161, false);
 +        remapOBC152 = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-v1_5_R3", remapOBC152, false);
 +        remapOBCPre = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".remap-obc-pre", remapOBCPre, false);
 +        globalInherit = MinecraftServer.getServer().cauldronConfig.getBoolean("plugin-settings."+pluginName+".global-inheritance", globalInherit, false);
@@ -144,18 +132,13 @@
 +        if (remapNMS179) flags |= F_REMAP_NMS179;
 +        if (remapNMS172) flags |= F_REMAP_NMS172;
 +        if (remapNMS164) flags |= F_REMAP_NMS164;
-+        if (remapNMS162) flags |= F_REMAP_NMS162;
-+        if (remapNMS161) flags |= F_REMAP_NMS161;
 +        if (remapNMS152) flags |= F_REMAP_NMS152;
-+        //if (remapNMS146) flags |= F_REMAP_NMS146;
 +        if (!remapNMSPre.equals("false")) {
 +            if      (remapNMSPre.equals("1.7.10")) flags |= 0x17100000;
-+            else if (remapNMSPre.equals("1.7.9")) flags |= 0x17900000;
-+            else if (remapNMSPre.equals("1.7.2")) flags |= 0x17200000;
-+            else if (remapNMSPre.equals("1.6.4")) flags |= 0x16400000;
-+            else if (remapNMSPre.equals("1.6.2")) flags |= 0x16200000;
-+            else if (remapNMSPre.equals("1.6.1")) flags |= 0x16100000;
-+            else if (remapNMSPre.equals("1.5.2")) flags |= 0x15200000;
++            else if (remapNMSPre.equals("1.7.9")) flags |= 0x01790000;
++            else if (remapNMSPre.equals("1.7.2")) flags |= 0x01720000;
++            else if (remapNMSPre.equals("1.6.4")) flags |= 0x01640000;
++            else if (remapNMSPre.equals("1.5.2")) flags |= 0x01520000;
 +            else {
 +                System.out.println("Unsupported nms-remap-pre version '"+remapNMSPre+"', disabling");
 +            }
@@ -164,8 +147,6 @@
 +        if (remapOBC179) flags |= F_REMAP_OBC179;
 +        if (remapOBC172) flags |= F_REMAP_OBC172;
 +        if (remapOBC164) flags |= F_REMAP_OBC164;
-+        if (remapOBC162) flags |= F_REMAP_OBC162;
-+        if (remapOBC161) flags |= F_REMAP_OBC161;
 +        if (remapOBC152) flags |= F_REMAP_OBC152;
 +        if (remapOBCPre) flags |= F_REMAP_OBCPRE;
 +        if (globalInherit) flags |= F_GLOBAL_INHERIT;
@@ -201,7 +182,7 @@
          try {
              Class<?> jarClass;
              try {
-@@ -58,34 +226,321 @@
+@@ -58,34 +207,290 @@
      }
  
      @Override
@@ -238,15 +219,7 @@
 +        // mc-dev jar to CB, apply version shading (aka plugin safeguard)
 +        relocations.put("net.minecraft.server", "net.minecraft.server." + obfVersion);
 +
-+        if (obfVersion.contains("v1_7_R2")) { // Use R4 mappings
-+            obfVersion = "v1_7_R4";
-         }
--        Class<?> result = classes.get(name);
- 
--        if (result == null) {
--            if (checkGlobal) {
--                result = loader.getClassByName(name);
-+        // support for running 1.7.9+ plugins in Cauldron dev
++        // support for running 1.7.10 plugins in Cauldron dev
 +        if (CauldronUtils.deobfuscatedEnvironment() && obfVersion.equals("v1_7_R4"))
 +        {
 +            jarMapping.loadMappings(
@@ -256,31 +229,36 @@
 +
 +            jarMapping.loadMappings(
 +                    new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/"+obfVersion+"/obf2pkgmcp.srg"))),
-+                    new MavenShade(relocations),
-+                        null, false);
++                    null, // no version relocation for obf
++                    null, false);
 +            // resolve naming conflict in FML/CB
 +            jarMapping.methods.put("net/minecraft/server/"+obfVersion+"/PlayerConnection/getPlayer ()Lorg/bukkit/craftbukkit/entity/CraftPlayer;", "getPlayerB");
-+        }
+         }
+-        Class<?> result = classes.get(name);
 +        else
 +        {
 +            jarMapping.loadMappings(
 +                    new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/"+obfVersion+"/cb2numpkg.srg"))),
 +                    new MavenShade(relocations),
 +                    null, false);
-+
+ 
+-        if (result == null) {
+-            if (checkGlobal) {
+-                result = loader.getClassByName(name);
 +            if (obfVersion.equals("v1_7_R4")) {
 +                jarMapping.loadMappings(
 +                        new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/"+obfVersion+"/obf2numpkg.srg"))),
-+                        new MavenShade(relocations),
++                        null, // no version relocation for obf
 +                        null, false);
              }
+ 
 +            // resolve naming conflict in FML/CB
 +            jarMapping.methods.put("net/minecraft/server/"+obfVersion+"/PlayerConnection/getPlayer ()Lorg/bukkit/craftbukkit/"+getNativeVersion()+"/entity/CraftPlayer;", "getPlayerB");
 +        }
 +        // remap bouncycastle to Forge's included copy, not the vanilla obfuscated copy (not in Cauldron), see #133
 +        //jarMapping.packages.put("net/minecraft/"+obfVersion+"/org/bouncycastle", "org/bouncycastle"); No longer needed
 +    }
- 
++
 +    private JarMapping getJarMapping(int flags) {
 +        JarMapping jarMapping = jarMappings.get(flags);
 +
@@ -313,23 +291,12 @@
 +                loadNmsMappings(jarMapping, "v1_7_R3");
 +            }
 +
-+            // handle version that never had a MCP release
-+            loadNmsMappings(jarMapping, "v1_7_R2");
-+
 +            if ((flags & F_REMAP_NMS172) != 0) {
 +                loadNmsMappings(jarMapping, "v1_7_R1");
 +            }
 +
 +            if ((flags & F_REMAP_NMS164) != 0) {
 +                loadNmsMappings(jarMapping, "v1_6_R3");
-+            }
-+
-+            if ((flags & F_REMAP_NMS162) != 0) {
-+                loadNmsMappings(jarMapping, "v1_6_R2");
-+            }
-+
-+            if ((flags & F_REMAP_NMS161) != 0) {
-+                loadNmsMappings(jarMapping, "v1_6_R1");
 +            }
 +
 +            if ((flags & F_REMAP_NMS152) != 0) {
@@ -348,11 +315,6 @@
 +                else jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R3", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
 +
-+            // handle version that never had a MCP release
-+            if (CauldronUtils.deobfuscatedEnvironment())
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R2", org_bukkit_craftbukkit);
-+            else jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R2", org_bukkit_craftbukkit+"/"+getNativeVersion());
-+
 +            if ((flags & F_REMAP_OBC172) != 0) {
 +                if (CauldronUtils.deobfuscatedEnvironment())
 +                    jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_7_R1", org_bukkit_craftbukkit+"/"+getNativeVersion());
@@ -363,14 +325,6 @@
 +                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R3", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
 +
-+            if ((flags & F_REMAP_OBC162) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R2", org_bukkit_craftbukkit+"/"+getNativeVersion());
-+            }
-+
-+            if ((flags & F_REMAP_OBC161) != 0) {
-+                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_6_R1", org_bukkit_craftbukkit+"/"+getNativeVersion());
-+            }
-+
 +            if ((flags & F_REMAP_OBC152) != 0) {
 +                jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_5_R3", org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
@@ -378,29 +332,25 @@
 +            if ((flags & F_REMAP_OBCPRE) != 0) {
 +                // enabling unversioned obc not currently compatible with versioned obc plugins (overmapped) -
 +                // admins should enable remap-obc-pre on a per-plugin basis, as needed
-+                //jarMapping.packages.put(org_bukkit_craftbukkit+"/v1_4_R1", org_bukkit_craftbukkit+"/v1_4_R1");
-+
 +                // then map unversioned to current version
 +                jarMapping.packages.put(org_bukkit_craftbukkit+"/libs/org/objectweb/asm", "org/objectweb/asm"); // ?
 +                jarMapping.packages.put(org_bukkit_craftbukkit, org_bukkit_craftbukkit+"/"+getNativeVersion());
 +            }
 +
 +            if ((flags & F_REMAP_NMSPRE_MASK) != 0) {
-+                String filename;
++                String obfVersion;
 +                switch (flags & F_REMAP_NMSPRE_MASK)
 +                {
-+                    case 0x01710000: filename = "mappings/v1_7_R4/cb2numpkg.srg"; break;
-+                    case 0x01790000: filename = "mappings/v1_7_R3/cb2numpkg.srg"; break;
-+                    case 0x01720000: filename = "mappings/v1_7_R1/cb2numpkg.srg"; break;
-+                    case 0x01640000: filename = "mappings/v1_6_R3/cb2numpkg.srg"; break;
-+                    case 0x01620000: filename = "mappings/v1_6_R2/cb2numpkg.srg"; break;
-+                    case 0x01610000: filename = "mappings/v1_6_R1/cb2numpkg.srg"; break;
-+                    case 0x01510000: filename = "mappings/v1_5_R2/cb2numpkg.srg"; break;
++                    case 0x17100000: obfVersion = "v1_7_R4"; break;
++                    case 0x01790000: obfVersion = "v1_7_R3"; break;
++                    case 0x01720000: obfVersion = "v1_7_R1"; break;
++                    case 0x01640000: obfVersion = "v1_6_R3"; break;
++                    case 0x01510000: obfVersion = "v1_5_R2"; break;
 +                    default: throw new IllegalArgumentException("Invalid unversioned mapping flags: "+Integer.toHexString(flags & F_REMAP_NMSPRE_MASK)+" in "+Integer.toHexString(flags));
 +                }
 +
 +                jarMapping.loadMappings(
-+                        new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream(filename))),
++                        new BufferedReader(new InputStreamReader(loader.getClass().getClassLoader().getResourceAsStream("mappings/" + obfVersion + "/cb2numpkg.srg"))),
 +                        null, // no version relocation!
 +                        null, false);
 +            }

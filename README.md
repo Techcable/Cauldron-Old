@@ -26,7 +26,7 @@ Top Patron Supporters
 * isiliden
 * eonic
 * trab
-* James
+* jamescowens
 * SFTMedia
 * Shmeeb
 
