@@ -137,7 +137,32 @@
      }
  
      public boolean canBlockSeeTheSky(int p_76619_1_, int p_76619_2_, int p_76619_3_)
-@@ -877,7 +950,16 @@
+@@ -867,9 +940,23 @@
+         p_150812_4_.yCoord = p_150812_2_;
+         p_150812_4_.zCoord = this.zPosition * 16 + p_150812_3_;
+ 
++        // Cauldron start - validate TE for corrupted data
++        Block block = null;
++        try
++        {
++            block = this.getBlock(p_150812_1_, p_150812_2_, p_150812_3_);
++        }
++        catch (ArrayIndexOutOfBoundsException e)
++        {
++            System.out.println("ERROR: Detected corrupted TileEntity " + p_150812_4_ + " with bad extended block ID of " + ((p_150812_2_ & 15) << 8 | p_150812_3_ << 4 | p_150812_1_) + " @  " + p_150812_4_.xCoord + ", " + p_150812_4_.yCoord + ", " + p_150812_4_.zCoord + ". Removing TE to avoid crash...");
++            p_150812_4_.invalidate();
++            return;
++        }
++
+         int metadata = getBlockMetadata(p_150812_1_, p_150812_2_, p_150812_3_);
+-        if (this.getBlock(p_150812_1_, p_150812_2_, p_150812_3_).hasTileEntity(metadata))
++        if (block != null && block.hasTileEntity(metadata))
+         {
++        // Cauldron end
+             if (this.chunkTileEntityMap.containsKey(chunkposition))
+             {
+                 ((TileEntity)this.chunkTileEntityMap.get(chunkposition)).invalidate();
+@@ -877,7 +964,16 @@
  
              p_150812_4_.validate();
              this.chunkTileEntityMap.put(chunkposition, p_150812_4_);
@@ -154,7 +179,7 @@
      }
  
      public void removeTileEntity(int p_150805_1_, int p_150805_2_, int p_150805_3_)
-@@ -922,12 +1004,28 @@
+@@ -922,12 +1018,28 @@
  
          while (iterator.hasNext())
          {
@@ -184,7 +209,7 @@
              this.worldObj.unloadEntities(this.entityLists[i]);
          }
          MinecraftForge.EVENT_BUS.post(new ChunkEvent.Unload(this));
-@@ -1176,8 +1274,10 @@
+@@ -1176,8 +1288,10 @@
              if ((p_76607_2_ & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getMetadataArray();
@@ -197,7 +222,7 @@
              }
          }
  
-@@ -1186,8 +1286,10 @@
+@@ -1186,8 +1300,10 @@
              if ((p_76607_2_ & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getBlocklightArray();
@@ -210,7 +235,7 @@
              }
          }
  
-@@ -1198,8 +1300,10 @@
+@@ -1198,8 +1314,10 @@
                  if ((p_76607_2_ & 1 << l) != 0 && this.storageArrays[l] != null)
                  {
                      nibblearray = this.storageArrays[l].getSkylightArray();
@@ -223,7 +248,7 @@
                  }
              }
          }
-@@ -1221,8 +1325,8 @@
+@@ -1221,8 +1339,8 @@
                          nibblearray = this.storageArrays[l].createBlockMSBArray();
                      }
  
