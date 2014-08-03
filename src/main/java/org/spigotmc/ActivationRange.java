@@ -32,6 +32,7 @@ import net.minecraft.world.World;
 import org.bukkit.craftbukkit.SpigotTimings;
 // Cauldron start
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.util.FakePlayer;
 // Cauldron end
 
@@ -77,6 +78,17 @@ public class ActivationRange
      */
     public static boolean initializeEntityActivationState(Entity entity, SpigotWorldConfig config)
     {
+        // Cauldron start - another fix for Proxy Worlds
+        if (config == null && DimensionManager.getWorld(0) != null)
+        {
+            config = DimensionManager.getWorld(0).spigotConfig;
+        }
+        else
+        {
+            return true;
+        }
+        // Cauldron end
+
         if ( ( entity.activationType == 3 && config.miscActivationRange == 0 )
                 || ( entity.activationType == 2 && config.animalActivationRange == 0 )
                 || ( entity.activationType == 1 && config.monsterActivationRange == 0 )
