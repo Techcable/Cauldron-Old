@@ -8,7 +8,7 @@
  public class NibbleArray
  {
 -    public final byte[] data;
-+    private byte[] data; // Spigot - remove final, make private (anyone directly accessing this is broken already)
++    public byte[] data; // Spigot - remove final // Cauldron - make public
      private final int depthBits;
      private final int depthBitsPlusFour;
      private static final String __OBFID = "CL_00000371";
