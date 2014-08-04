@@ -287,17 +287,17 @@
                  {
                      this.getEquipmentInSlot(4).damageItem((int)(p_70097_2_ * 4.0F + this.rand.nextFloat() * p_70097_2_ * 2.0F), this);
                      p_70097_2_ *= 0.75F;
-@@ -771,16 +884,27 @@
+@@ -771,16 +884,26 @@
                          return false;
                      }
  
+-                    this.damageEntity(p_70097_1_, p_70097_2_ - this.lastDamage);
 +                    // CraftBukkit start
 +                    if (!this.damageEntity_CB(p_70097_1_, p_70097_2_ - this.lastDamage)) {
 +                        return false;
 +                    }
 +                    // CraftBukkit end
 +
-                     this.damageEntity(p_70097_1_, p_70097_2_ - this.lastDamage);
                      this.lastDamage = p_70097_2_;
                      flag = false;
                  }
@@ -317,7 +317,7 @@
                      this.hurtTime = this.maxHurtTime = 10;
                  }
  
-@@ -936,6 +1060,21 @@
+@@ -936,6 +1059,21 @@
  
              if (!ForgeHooks.onLivingDrops(this, p_70645_1_, capturedDrops, i, recentlyHit > 0, j))
              {
@@ -339,7 +339,7 @@
                  for (EntityItem item : capturedDrops)
                  {
                      worldObj.spawnEntityInWorld(item);
-@@ -1008,8 +1147,17 @@
+@@ -1008,8 +1146,17 @@
  
          if (i > 0)
          {
@@ -358,7 +358,7 @@
              int j = MathHelper.floor_double(this.posX);
              int k = MathHelper.floor_double(this.posY - 0.20000000298023224D - (double)this.yOffset);
              int l = MathHelper.floor_double(this.posZ);
-@@ -1063,7 +1211,7 @@
+@@ -1063,7 +1210,7 @@
          {
              int i = 25 - this.getTotalArmorValue();
              float f1 = p_70655_2_ * (float)i;
@@ -367,7 +367,7 @@
              p_70655_2_ = f1 / 25.0F;
          }
  
-@@ -1087,7 +1235,8 @@
+@@ -1087,7 +1234,8 @@
              int j;
              float f1;
  
@@ -377,7 +377,7 @@
              {
                  i = (this.getActivePotionEffect(Potion.resistance).getAmplifier() + 1) * 5;
                  j = 25 - i;
-@@ -1120,28 +1269,145 @@
+@@ -1120,26 +1268,137 @@
          }
      }
  
@@ -419,6 +419,7 @@
 +                    return -0.0;
 +                }
 +            };
++
 +            float hardHatModifier = hardHat.apply((double) f).floatValue();
 +            f += hardHatModifier;
 +
@@ -439,22 +440,15 @@
 +            Function<Double, Double> armor = new Function<Double, Double>() {
 +                @Override
 +                public Double apply(Double f) {
++                    // Cauldron start - apply forge armor hook
++                    if (human) {
++                        return -(f - ArmorProperties.ApplyArmor(EntityLivingBase.this, ((EntityPlayer)EntityLivingBase.this).inventory.armorInventory, damagesource, f.floatValue()));
++                    }
++                    // Cauldron end
 +                    return -(f - EntityLivingBase.this.applyArmorCalculations(damagesource, f.floatValue()));
 +                }
 +            };
-+
-+            // Cauldron start - apply forge armor hook
-+            float armorModifier = 0.0F;
-+            if (human)
-+            {
-+                armorModifier = ArmorProperties.ApplyArmor(this, ((EntityPlayer)this).inventory.armorInventory, damagesource, f);
-+                if (armorModifier <= 0) return false;
-+            }
-+            else
-+            {
-+                armorModifier = armor.apply((double) f).floatValue();
-+            }
-+            // Cauldron end
++            float armorModifier = armor.apply((double) f).floatValue();
 +            f += armorModifier;
 +
 +            Function<Double, Double> resistance = new Function<Double, Double>() {
@@ -532,12 +526,9 @@
          }
 +        return false; // CraftBukkit
      }
--
-+    
+ 
      public CombatTracker func_110142_aN()
-     {
-         return this._combatTracker;
-@@ -1619,7 +1885,8 @@
+@@ -1619,7 +1878,8 @@
          {
              f3 = 1.0F;
              f2 = (float)Math.sqrt((double)f) * 3.0F;
@@ -547,7 +538,7 @@
          }
  
          if (this.swingProgress > 0.0F)
-@@ -1827,17 +2094,37 @@
+@@ -1827,17 +2087,37 @@
      {
          List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
  
