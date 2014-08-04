@@ -105,7 +105,7 @@
          {
              this.dimension = p_i1582_1_.provider.dimensionId;
 +            // Spigot start
-+            this.defaultActivationState = org.spigotmc.ActivationRange.initializeEntityActivationState(this, p_i1582_1_.spigotConfig);
++            this.defaultActivationState = org.spigotmc.ActivationRange.initializeEntityActivationState(this, p_i1582_1_.getSpigotConfig()); // Cauldron
          }
 +        else
 +        {

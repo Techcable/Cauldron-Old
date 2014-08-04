@@ -545,12 +545,12 @@
 -        if (list != null && !list.isEmpty())
 +        if (this.canBeCollidedWith() && list != null && !list.isEmpty())   // Spigot: Add this.canBeCollidedWith() condition
          {
-+            numCollisions -= worldObj.spigotConfig.maxCollisionsPerEntity; // Spigot
++            numCollisions -= worldObj.getSpigotConfig().maxCollisionsPerEntity; // Spigot // Cauldron
 +
              for (int i = 0; i < list.size(); ++i)
              {
 -                Entity entity = (Entity)list.get(i);
-+                if (numCollisions > worldObj.spigotConfig.maxCollisionsPerEntity)
++                if (numCollisions > worldObj.getSpigotConfig().maxCollisionsPerEntity) // Cauldron
 +                {
 +                    break;    // Spigot
 +                }

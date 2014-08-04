@@ -22,8 +22,8 @@
                  k = MathHelper.floor_double(entityplayer.posZ / 16.0D);
                  byte b0 = 8;
 +                // Spigot Start
-+                b0 = p_77192_1_.spigotConfig.mobSpawnRange;
-+                b0 = (b0 > p_77192_1_.spigotConfig.viewDistance) ? (byte) p_77192_1_.spigotConfig.viewDistance : b0;
++                b0 = p_77192_1_.getSpigotConfig().mobSpawnRange; // Cauldron
++                b0 = (b0 > p_77192_1_.getSpigotConfig().viewDistance) ? (byte) p_77192_1_.spigotConfig.viewDistance : b0; // Cauldron
 +                b0 = (b0 > 8) ? 8 : b0;
 +                // Spigot End
  

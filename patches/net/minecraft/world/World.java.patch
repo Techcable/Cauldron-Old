@@ -676,7 +676,7 @@
 +        else if (p_72838_1_ instanceof EntityXPOrb)
 +        {
 +            EntityXPOrb xp = (EntityXPOrb) p_72838_1_;
-+            double radius = spigotConfig.expMerge;
++            double radius = this.getSpigotConfig().expMerge; // Cauldron
 +
 +            if (radius > 0)
 +            {
@@ -1092,7 +1092,7 @@
          int k;
          int l;
 +        // Spigot start
-+        int optimalChunks = spigotConfig.chunksPerTick;
++        int optimalChunks = this.getSpigotConfig().chunksPerTick; // Cauldron
  
 +        // Quick conditions to allow us to exist early
 +        if (optimalChunks <= 0) // Cauldron tick chunks even if no players are logged in
@@ -1154,7 +1154,7 @@
          this.theProfiler.startSection("playerCheckLight");
  
 -        if (!this.playerEntities.isEmpty())
-+        if (spigotConfig.randomLightUpdates && !this.playerEntities.isEmpty()) // Spigot
++        if (this.getSpigotConfig().randomLightUpdates && !this.playerEntities.isEmpty()) // Spigot // Cauldron
          {
              i = this.rand.nextInt(this.playerEntities.size());
              entityplayer = (EntityPlayer)this.playerEntities.get(i);
@@ -1260,7 +1260,7 @@
          {
              dest.add(entity);
          }
-@@ -3977,4 +4679,53 @@
+@@ -3977,4 +4679,61 @@
          }
          return count;
      }
@@ -1311,6 +1311,14 @@
 +        }
 +
 +        return true;
++    }
++
++    public org.spigotmc.SpigotWorldConfig getSpigotConfig()
++    {
++        if (this.spigotConfig == null)
++            if (DimensionManager.getWorld(0) != null)
++                return DimensionManager.getWorld(0).spigotConfig;
++        return this.spigotConfig;
 +    }
 +    // Cauldron end
  }

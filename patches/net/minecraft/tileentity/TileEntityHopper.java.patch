@@ -58,7 +58,7 @@
                  if (flag)
                  {
 -                    this.func_145896_c(8);
-+                    this.func_145896_c(this.worldObj.spigotConfig.hopperTransfer); // Spigot
++                    this.func_145896_c(this.worldObj.getSpigotConfig().hopperTransfer); // Spigot // Cauldron
                      this.markDirty();
                      return true;
                  }
@@ -67,7 +67,7 @@
 +            // Spigot start
 +            if (!this.func_145888_j())
 +            {
-+                this.func_145896_c(this.worldObj.spigotConfig.hopperCheck);
++                this.func_145896_c(this.worldObj.getSpigotConfig().hopperCheck); // Cauldron
 +            }
 +            // Spigot end
              return false;

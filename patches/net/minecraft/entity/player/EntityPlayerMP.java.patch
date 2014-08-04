@@ -176,7 +176,7 @@
              Chunk chunk;
  
 -            while (iterator1.hasNext() && arraylist.size() < S26PacketMapChunkBulk.func_149258_c())
-+            while (iterator1.hasNext() && arraylist.size() < this.worldObj.spigotConfig.maxBulkChunk)   // Spigot
++            while (iterator1.hasNext() && arraylist.size() < this.worldObj.getSpigotConfig().maxBulkChunk)   // Spigot // Cauldron
              {
                  ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair)iterator1.next();
  

@@ -164,7 +164,7 @@
 +            // CraftBukkit end
 +            if (item != null)
 +            {   
-+                ItemExpireEvent event = new ItemExpireEvent(this, (item.getItem() == null ? this.worldObj.spigotConfig.itemDespawnRate : item.getItem().getEntityLifespan(item, worldObj))); // Spigot
++                ItemExpireEvent event = new ItemExpireEvent(this, (item.getItem() == null ? this.worldObj.getSpigotConfig().itemDespawnRate : item.getItem().getEntityLifespan(item, worldObj))); // Spigot // Cauldron
 +                if (MinecraftForge.EVENT_BUS.post(event))
 +                {
 +                    lifespan += event.extraLife;
@@ -192,7 +192,7 @@
      {
 -        Iterator iterator = this.worldObj.getEntitiesWithinAABB(EntityItem.class, this.boundingBox.expand(0.5D, 0.0D, 0.5D)).iterator();
 +        // Spigot start
-+        double radius = worldObj.spigotConfig.itemMerge;
++        double radius = worldObj.getSpigotConfig().itemMerge; // Cauldron
 +        Iterator iterator = this.worldObj.getEntitiesWithinAABB(EntityItem.class, this.boundingBox.expand(radius, radius, radius)).iterator();
 +        // Spigot end
  

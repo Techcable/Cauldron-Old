@@ -44,7 +44,7 @@ public class AntiXray
      */
     public void updateNearbyBlocks(net.minecraft.world.World world, int x, int y, int z)
     {
-        if ( world.spigotConfig.antiXray )
+        if ( world.getSpigotConfig().antiXray ) // Cauldron
         {
             update.startTiming();
             updateNearbyBlocks( world, x, y, z, 2, false ); // 2 is the radius, we shouldn't change it as that would make it exponentially slower
@@ -58,7 +58,7 @@ public class AntiXray
     public void obfuscate(int chunkX, int chunkZ, int bitmask, byte[] buffer, net.minecraft.world.World world)
     {
         // If the world is marked as obfuscated
-        if ( world.spigotConfig.antiXray )
+        if ( world.getSpigotConfig().antiXray ) // Cauldron
         {
             obfuscate.startTiming();
             // Initial radius to search around for air

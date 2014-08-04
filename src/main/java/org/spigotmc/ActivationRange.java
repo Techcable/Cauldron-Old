@@ -143,13 +143,15 @@ public class ActivationRange
     public static void activateEntities(World world)
     {
         SpigotTimings.entityActivationCheckTimer.startTiming();
-        final int miscActivationRange = world.spigotConfig.miscActivationRange;
-        final int animalActivationRange = world.spigotConfig.animalActivationRange;
-        final int monsterActivationRange = world.spigotConfig.monsterActivationRange;
+        // Cauldron start - proxy world support
+        final int miscActivationRange = world.getSpigotConfig().miscActivationRange;
+        final int animalActivationRange = world.getSpigotConfig().animalActivationRange;
+        final int monsterActivationRange = world.getSpigotConfig().monsterActivationRange;
+        // Cauldron end
 
         int maxRange = Math.max( monsterActivationRange, animalActivationRange );
         maxRange = Math.max( maxRange, miscActivationRange );
-        maxRange = Math.min( ( world.spigotConfig.viewDistance << 4 ) - 8, maxRange );
+        maxRange = Math.min( ( world.getSpigotConfig().viewDistance << 4 ) - 8, maxRange ); // Cauldron
 
         for ( Entity player : new ArrayList<Entity>( world.playerEntities ) )
         {

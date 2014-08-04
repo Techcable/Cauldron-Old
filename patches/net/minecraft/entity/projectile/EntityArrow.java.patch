@@ -52,7 +52,7 @@
                  ++this.ticksInGround;
  
 -                if (this.ticksInGround == 1200)
-+                if (this.ticksInGround == worldObj.spigotConfig.arrowDespawnRate)   // Spigot
++                if (this.ticksInGround == worldObj.getSpigotConfig().arrowDespawnRate)   // Spigot // Cauldron
                  {
                      this.setDead();
                  }

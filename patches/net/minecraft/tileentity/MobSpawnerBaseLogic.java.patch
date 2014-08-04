@@ -17,7 +17,7 @@
 +                p_98265_1_.worldObj.addEntity(p_98265_1_, CreatureSpawnEvent.SpawnReason.SPAWNER); // CraftBukkit
 +
 +                // Spigot Start
-+                if (p_98265_1_.worldObj.spigotConfig.nerfSpawnerMobs)
++                if (p_98265_1_.worldObj.getSpigotConfig().nerfSpawnerMobs) // Cauldron
 +                {
 +                    p_98265_1_.fromMobSpawner = true;
 +                }

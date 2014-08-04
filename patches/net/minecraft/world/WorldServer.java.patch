@@ -359,7 +359,7 @@
          }
 +
 +        // Spigot Start
-+        if (spigotConfig.clearChunksOnTick)
++        if (this.getSpigotConfig().clearChunksOnTick) // Cauldron
 +        {
 +            activeChunkSet_CB.clear();
 +            activeChunkSet.clear(); // Cauldron

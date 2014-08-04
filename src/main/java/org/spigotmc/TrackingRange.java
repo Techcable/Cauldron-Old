@@ -21,7 +21,7 @@ public class TrackingRange
      */
     public static int getEntityTrackingRange(Entity entity, int defaultRange)
     {
-        SpigotWorldConfig config = entity.worldObj.spigotConfig;
+        SpigotWorldConfig config = entity.worldObj.getSpigotConfig(); // Cauldron
         int range = defaultRange;
         if ( entity instanceof EntityPlayerMP )
         {

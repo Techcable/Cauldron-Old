@@ -37,7 +37,6 @@ import net.minecraftforge.cauldron.configuration.CauldronConfig;
 import net.minecraftforge.cauldron.configuration.TileEntityConfig;
 
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.spigotmc.SpigotConfig;
 
 import com.google.gson.stream.JsonWriter;
 
