@@ -32,7 +32,7 @@
      private static final String __OBFID = "CL_00000128";
  
      public int func_145760_g()
-@@ -94,8 +106,140 @@
+@@ -94,8 +106,143 @@
  
          if (minecraftserver != null && minecraftserver.isCommandBlockEnabled())
          {
@@ -82,8 +82,11 @@
 +            // Make sure this is a valid command
 +            if (commandMap.getCommand(args[0]) == null)
 +            {
-+                this.field_145764_b = 0;
++                // Cauldron start - execute command using the vanilla command manager if it isn't in the bukkit command map
++                net.minecraft.command.ICommandManager icommandmanager = minecraftserver.getCommandManager();
++                icommandmanager.executeCommand(this, this.field_145763_e);
 +                return;
++                // Cauldron end
 +            }
 +
 +            // testfor command requires special handling
@@ -175,7 +178,7 @@
          }
          else
          {
-@@ -103,6 +247,31 @@
+@@ -103,6 +250,31 @@
          }
      }
  
