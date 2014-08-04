@@ -251,20 +251,20 @@
              return false;
          }
          else
-@@ -302,30 +432,32 @@
+@@ -302,15 +432,29 @@
          super.func_147456_g();
          int i = 0;
          int j = 0;
 -        Iterator iterator = this.activeChunkSet.iterator();
 +        // Iterator iterator = this.activeChunkSet.iterator();
  
--        doneChunks.retainAll(activeChunkSet);
--        if (doneChunks.size() == activeChunkSet.size())
+-        while (iterator.hasNext())
 +        // Spigot start
 +        for (gnu.trove.iterator.TLongShortIterator iter = activeChunkSet_CB.iterator(); iter.hasNext();)
          {
--            doneChunks.clear();
--        }
+-            ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair)iterator.next();
+-            int k = chunkcoordintpair.chunkXPos * 16;
+-            int l = chunkcoordintpair.chunkZPos * 16;
 +            iter.advance();
 +            long chunkCoord = iter.key();
 +            int chunkX = World.keyToX(chunkCoord);
@@ -280,29 +280,14 @@
 +            // ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) iterator.next();
 +            int k = chunkX * 16;
 +            int l = chunkZ * 16;
- 
--        final long startTime = System.nanoTime();
--
--        while (iterator.hasNext())
--        {
--            ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair)iterator.next();
--            int k = chunkcoordintpair.chunkXPos * 16;
--            int l = chunkcoordintpair.chunkZPos * 16;
++
              this.theProfiler.startSection("getChunk");
 -            Chunk chunk = this.getChunkFromChunkCoords(chunkcoordintpair.chunkXPos, chunkcoordintpair.chunkZPos);
 +            Chunk chunk = this.getChunkFromChunkCoords(chunkX, chunkZ);
              this.func_147467_a(k, l, chunk);
              this.theProfiler.endStartSection("tickChunk");
--            //Limits and evenly distributes the lighting update time
--            if (System.nanoTime() - startTime <= 4000000 && doneChunks.add(chunkcoordintpair))
--            {
--                chunk.func_150804_b(false);
--            }
-+            chunk.func_150804_b(false);
-             this.theProfiler.endStartSection("thunder");
-             int i1;
-             int j1;
-@@ -358,12 +490,34 @@
+             chunk.func_150804_b(false);
+@@ -346,12 +490,34 @@
  
                  if (this.isBlockFreezableNaturally(j1 + k, l1 - 1, k1 + l))
                  {
@@ -339,7 +324,7 @@
                  }
  
                  if (this.isRaining())
-@@ -387,20 +541,21 @@
+@@ -375,20 +541,21 @@
  
                  if (extendedblockstorage != null && extendedblockstorage.getNeedsRandomTick())
                  {
@@ -368,7 +353,7 @@
                          }
                      }
                  }
-@@ -408,6 +563,15 @@
+@@ -396,6 +563,15 @@
  
              this.theProfiler.endSection();
          }
@@ -384,7 +369,7 @@
      }
  
      public boolean isBlockTickScheduledThisTick(int p_147477_1_, int p_147477_2_, int p_147477_3_, Block p_147477_4_)
-@@ -486,7 +650,7 @@
+@@ -474,7 +650,7 @@
  
      public void updateEntities()
      {
@@ -393,7 +378,7 @@
          {
              if (this.updateEntityTick++ >= 1200)
              {
-@@ -518,7 +682,17 @@
+@@ -506,7 +682,17 @@
          {
              if (i > 1000)
              {
@@ -412,7 +397,7 @@
              }
  
              this.theProfiler.startSection("cleaning");
-@@ -663,7 +837,36 @@
+@@ -651,7 +837,36 @@
      protected IChunkProvider createChunkProvider()
      {
          IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
@@ -450,7 +435,7 @@
          return this.theChunkProviderServer;
      }
  
-@@ -671,29 +874,31 @@
+@@ -659,29 +874,31 @@
      {
          ArrayList arraylist = new ArrayList();
  
@@ -496,7 +481,7 @@
          return arraylist;
      }
  
-@@ -745,6 +950,29 @@
+@@ -733,6 +950,29 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 0;
  
@@ -526,7 +511,7 @@
              if (chunkposition != null)
              {
                  i = chunkposition.chunkPosX;
-@@ -887,6 +1115,20 @@
+@@ -875,6 +1115,20 @@
  
      public boolean addWeatherEffect(Entity p_72942_1_)
      {
@@ -547,7 +532,7 @@
          if (super.addWeatherEffect(p_72942_1_))
          {
              this.mcServer.getConfigurationManager().sendToAllNear(p_72942_1_.posX, p_72942_1_.posY, p_72942_1_.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(p_72942_1_));
-@@ -905,11 +1147,22 @@
+@@ -893,11 +1147,22 @@
  
      public Explosion newExplosion(Entity p_72885_1_, double p_72885_2_, double p_72885_4_, double p_72885_6_, float p_72885_8_, boolean p_72885_9_, boolean p_72885_10_)
      {
@@ -570,7 +555,7 @@
  
          if (!p_72885_10_)
          {
-@@ -988,6 +1241,7 @@
+@@ -976,6 +1241,7 @@
          boolean flag = this.isRaining();
          super.updateWeather();
  
@@ -578,7 +563,7 @@
          if (this.prevRainingStrength != this.rainingStrength)
          {
              this.mcServer.getConfigurationManager().sendPacketToAllPlayersInDimension(new S2BPacketChangeGameState(7, this.rainingStrength), this.provider.dimensionId);
-@@ -1012,6 +1266,20 @@
+@@ -1000,6 +1266,20 @@
              this.mcServer.getConfigurationManager().sendPacketToAllPlayers(new S2BPacketChangeGameState(7, this.rainingStrength));
              this.mcServer.getConfigurationManager().sendPacketToAllPlayers(new S2BPacketChangeGameState(8, this.thunderingStrength));
          }
@@ -599,7 +584,7 @@
      }
  
      protected int func_152379_p()
-@@ -1065,14 +1333,41 @@
+@@ -1053,14 +1333,41 @@
      }
  
      static class ServerBlockEventList extends ArrayList
