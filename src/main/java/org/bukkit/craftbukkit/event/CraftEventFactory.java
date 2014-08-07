@@ -386,6 +386,7 @@ public class CraftEventFactory {
         victim.newTotalExp = event.getNewTotalExp();
         victim.expToDrop = event.getDroppedExp();
         victim.newExp = event.getNewExp();
+        victim.capturedDrops.clear(); // Cauldron - we must clear pre-capture to avoid duplicates
 
         for (org.bukkit.inventory.ItemStack stack : event.getDrops()) {
             if (stack == null || stack.getType() == Material.AIR) continue;

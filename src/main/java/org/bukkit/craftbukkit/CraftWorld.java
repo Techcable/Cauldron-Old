@@ -165,10 +165,17 @@ public class CraftWorld implements World {
     }
 
     public boolean unloadChunkRequest(int x, int z, boolean safe) {
-        if (Thread.currentThread() != net.minecraft.server.MinecraftServer.getServer().primaryThread) throw new IllegalStateException("Asynchronous chunk unload!"); // Spigot
-        if (safe && isChunkInUse(x, z)) {
+        // Cauldron start - use same logic as processChunkGC
+        // If in use, skip it
+        if (isChunkInUse(x, z)) {
             return false;
         }
+
+        // Already unloading?
+        if (world.theChunkProviderServer.chunksToUnload.contains(x, z)) {
+            return true;
+        }
+        // Cauldron end
 
         world.theChunkProviderServer.unloadChunksIfNotNearSpawn(x, z);
 
@@ -176,26 +183,19 @@ public class CraftWorld implements World {
     }
 
     public boolean unloadChunk(int x, int z, boolean save, boolean safe) {
-        if (Thread.currentThread() != net.minecraft.server.MinecraftServer.getServer().primaryThread) throw new IllegalStateException("Asynchronous chunk unload!"); // Spigot
-        if (safe && isChunkInUse(x, z)) {
+        // Cauldron start - queue chunk for unload, fixes startup issues with IC2
+        // If in use, skip it
+        if (isChunkInUse(x, z)) {
             return false;
         }
 
-        net.minecraft.world.chunk.Chunk chunk = world.theChunkProviderServer.provideChunk(x, z);
-        if (chunk.mustSave) {   // If chunk had previously been queued to save, must do save to avoid loss of that data
-            save = true;
+        // Already unloading?
+        if (world.theChunkProviderServer.chunksToUnload.contains(x, z)) {
+            return true;
         }
 
-        chunk.onChunkUnload(); // Always remove entities - even if discarding, need to get them out of world table
-
-        if (save && !(chunk instanceof net.minecraft.world.chunk.EmptyChunk)) {
-            world.theChunkProviderServer.safeSaveChunk(chunk);
-            world.theChunkProviderServer.safeSaveExtraChunkData(chunk);
-        }
-
-        world.theChunkProviderServer.chunksToUnload.remove(x, z);
-        world.theChunkProviderServer.loadedChunkHashMap.remove(LongHash.toLong(x, z));
-        world.theChunkProviderServer.loadedChunks.remove(chunk); // Cauldron  vanilla compatibility
+        world.theChunkProviderServer.unloadChunksIfNotNearSpawn(x, z);
+        // Cauldron end
 
         return true;
     }
@@ -203,7 +203,7 @@ public class CraftWorld implements World {
     public boolean regenerateChunk(int x, int z) {
         unloadChunk(x, z, false, false);
 
-        world.theChunkProviderServer.chunksToUnload.remove(x, z);
+        //world.theChunkProviderServer.chunksToUnload.remove(x, z); // Cauldron - this is handled in unloadChunksIfNotNearSpawn
 
         net.minecraft.world.chunk.Chunk chunk = null;
 

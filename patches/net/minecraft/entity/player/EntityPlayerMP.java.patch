@@ -249,7 +249,7 @@
          }
          catch (Throwable throwable)
          {
-@@ -402,34 +517,88 @@
+@@ -402,34 +517,74 @@
  
      public void onDeath(DamageSource p_70645_1_)
      {
@@ -267,31 +267,26 @@
 +
 +        if (!keepInventory)
          {
-+            for (int i = 0; i < this.inventory.mainInventory.length; ++i)
-+            {
-+                if (this.inventory.mainInventory[i] != null)
-+                {
-+                    loot.add(CraftItemStack.asCraftMirror(this.inventory.mainInventory[i]));
-+                }
-+            }
-+
-+            for (int i = 0; i < this.inventory.armorInventory.length; ++i)
-+            {
-+                if (this.inventory.armorInventory[i] != null)
-+                {
-+                    loot.add(CraftItemStack.asCraftMirror(this.inventory.armorInventory[i]));
-+                }
-+            }
++            // Cauldron start - rework CraftBukkit logic to support Forge better
              captureDrops = true;
              capturedDrops.clear();
+-
+             this.inventory.dropAllItems();
++            for (int i = 0; i < capturedDrops.size(); ++i)
++            {
++                if (capturedDrops.get(i) != null)
++                {
++                    loot.add(CraftItemStack.asCraftMirror(capturedDrops.get(i).getEntityItem()));
++                }
++            }
++            // Cauldron end
 +        }
  
--            this.inventory.dropAllItems();
 +        IChatComponent chatmessage = this.func_110142_aN().func_151521_b();
 +        String deathmessage = chatmessage.getUnformattedText();
 +        org.bukkit.event.entity.PlayerDeathEvent event = CraftEventFactory.callPlayerDeathEvent(this, loot, deathmessage);
 +        String deathMessage = event.getDeathMessage();
- 
++
 +        if (deathMessage != null && deathMessage.length() > 0)
 +        {
 +            if (deathMessage.equals(deathmessage))
@@ -304,19 +299,10 @@
 +            }
 +        }
 +
-+        // CraftBukkit - we clean the player's inventory after the EntityDeathEvent is called so plugins can get the exact state of the inventory.
 +        if (!keepInventory)
 +        {
-+            for (int i = 0; i < this.inventory.mainInventory.length; ++i)
-+            {
-+                this.inventory.mainInventory[i] = null;
-+            }
-+
-+            for (int i = 0; i < this.inventory.armorInventory.length; ++i)
-+            {
-+                this.inventory.armorInventory[i] = null;
-+            }
-+            // Cauldron start
++            // Cauldron start - rework CraftBukkit logic to support Forge better
++            this.inventory.clearInventory(null, -1); // CraftBukkit - we clean the player's inventory after the EntityDeathEvent is called so plugins can get the exact state of the inventory.
              captureDrops = false;
 -            PlayerDropsEvent event = new PlayerDropsEvent(this, p_70645_1_, capturedDrops, recentlyHit > 0);
 -            if (!MinecraftForge.EVENT_BUS.post(event))
@@ -347,7 +333,7 @@
              score.func_96648_a();
          }
  
-@@ -495,7 +664,8 @@
+@@ -495,7 +650,8 @@
  
      public boolean canAttackPlayer(EntityPlayer p_96122_1_)
      {
@@ -357,7 +343,7 @@
      }
  
      public void travelToDimension(int p_71027_1_)
-@@ -512,6 +682,8 @@
+@@ -512,6 +668,8 @@
              if (this.dimension == 0 && p_71027_1_ == 1)
              {
                  this.triggerAchievement(AchievementList.theEnd);
@@ -366,7 +352,7 @@
                  ChunkCoordinates chunkcoordinates = this.mcServer.worldServerForDimension(p_71027_1_).getEntrancePortalLocation();
  
                  if (chunkcoordinates != null)
-@@ -520,13 +692,18 @@
+@@ -520,13 +678,18 @@
                  }
  
                  p_71027_1_ = 1;
@@ -386,7 +372,7 @@
              this.lastExperience = -1;
              this.lastHealth = -1.0F;
              this.lastFoodLevel = -1;
-@@ -569,6 +746,11 @@
+@@ -569,6 +732,11 @@
  
      public void wakeUpPlayer(boolean p_70999_1_, boolean p_70999_2_, boolean p_70999_3_)
      {
@@ -398,7 +384,7 @@
          if (this.isPlayerSleeping())
          {
              this.getServerForPlayer().getEntityTracker().func_151248_b(this, new S0BPacketAnimation(this, 2));
-@@ -584,11 +766,27 @@
+@@ -584,11 +752,27 @@
  
      public void mountEntity(Entity p_70078_1_)
      {
@@ -429,7 +415,7 @@
      protected void updateFallState(double p_70064_1_, boolean p_70064_3_) {}
  
      public void handleFalling(double p_71122_1_, boolean p_71122_3_)
-@@ -610,29 +808,64 @@
+@@ -610,29 +794,64 @@
          this.currentWindowId = this.currentWindowId % 100 + 1;
      }
  
@@ -497,7 +483,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -644,71 +877,150 @@
+@@ -644,71 +863,150 @@
              this.closeScreen();
          }
  
@@ -656,7 +642,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
          InventoryMerchant inventorymerchant = ((ContainerMerchant)this.openContainer).getMerchantInventory();
-@@ -725,7 +1037,7 @@
+@@ -725,7 +1023,7 @@
                  merchantrecipelist.func_151391_a(packetbuffer);
                  this.playerNetServerHandler.sendPacket(new S3FPacketCustomPayload("MC|TrList", packetbuffer));
              }
@@ -665,7 +651,7 @@
              {
                  logger.error("Couldn\'t send trade list", ioexception);
              }
-@@ -738,6 +1050,17 @@
+@@ -738,6 +1036,17 @@
  
      public void displayGUIHorse(EntityHorse p_110298_1_, IInventory p_110298_2_)
      {
@@ -683,7 +669,7 @@
          if (this.openContainer != this.inventoryContainer)
          {
              this.closeScreen();
-@@ -745,7 +1068,7 @@
+@@ -745,7 +1054,7 @@
  
          this.getNextWindowId();
          this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 11, p_110298_2_.getInventoryName(), p_110298_2_.getSizeInventory(), p_110298_2_.hasCustomInventoryName(), p_110298_1_.getEntityId()));
@@ -692,7 +678,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -770,6 +1093,15 @@
+@@ -770,6 +1079,15 @@
      {
          this.playerNetServerHandler.sendPacket(new S30PacketWindowItems(p_71110_1_.windowId, p_71110_2_));
          this.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, this.inventory.getItemStack()));
@@ -708,7 +694,7 @@
      }
  
      public void sendProgressBarUpdate(Container p_71112_1_, int p_71112_2_, int p_71112_3_)
-@@ -779,6 +1111,7 @@
+@@ -779,6 +1097,7 @@
  
      public void closeScreen()
      {
@@ -716,7 +702,7 @@
          this.playerNetServerHandler.sendPacket(new S2EPacketCloseWindow(this.openContainer.windowId));
          this.closeContainer();
      }
-@@ -853,8 +1186,19 @@
+@@ -853,8 +1172,19 @@
      public void setPlayerHealthUpdated()
      {
          this.lastHealth = -1.0E8F;
@@ -736,7 +722,7 @@
      public void addChatComponentMessage(IChatComponent p_146105_1_)
      {
          this.playerNetServerHandler.sendPacket(new S02PacketChat(p_146105_1_));
-@@ -1037,6 +1381,114 @@
+@@ -1037,6 +1367,114 @@
          return this.field_143005_bX;
      }
  

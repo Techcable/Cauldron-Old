@@ -25,7 +25,20 @@
      private static final String __OBFID = "CL_00000340";
  
      public static void addMapping(Class p_145826_0_, String p_145826_1_)
-@@ -282,6 +286,20 @@
+@@ -106,7 +110,11 @@
+         }
+         catch (Exception exception)
+         {
+-            exception.printStackTrace();
++            // Cauldron start - better debug
++            FMLLog.log(Level.ERROR, exception,
++                    "A TileEntity %s(%s) located @ %s,%s,%s has thrown an exception during creation, it cannot be created. Report this to the mod author",
++                    p_145827_0_.getString("id"), oclass.getName(), p_145827_0_.getInteger("x"), p_145827_0_.getInteger("y"), p_145827_0_.getInteger("z"));
++            // Cauldron end
+         }
+ 
+         if (tileentity != null)
+@@ -282,6 +290,20 @@
          addMapping(TileEntityFlowerPot.class, "FlowerPot");
      }
  
