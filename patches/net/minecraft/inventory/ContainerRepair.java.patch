@@ -38,7 +38,7 @@
          this.theWorld = p_i1800_2_;
          this.field_82861_i = p_i1800_3_;
          this.field_82858_j = p_i1800_4_;
-@@ -458,6 +457,11 @@
+@@ -460,6 +459,11 @@
  
      public boolean canInteractWith(EntityPlayer p_75145_1_)
      {
@@ -50,7 +50,7 @@
          return this.theWorld.getBlock(this.field_82861_i, this.field_82858_j, this.field_82859_k) != Blocks.anvil ? false : p_75145_1_.getDistanceSq((double)this.field_82861_i + 0.5D, (double)this.field_82858_j + 0.5D, (double)this.field_82859_k + 0.5D) <= 64.0D;
      }
  
-@@ -532,4 +536,18 @@
+@@ -534,4 +538,18 @@
  
          this.updateRepairOutput();
      }
