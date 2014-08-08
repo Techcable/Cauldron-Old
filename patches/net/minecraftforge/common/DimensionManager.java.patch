@@ -200,7 +200,7 @@
          if (!mcServer.isSinglePlayer())
          {
              world.getWorldInfo().setGameType(mcServer.getGameType());
-@@ -253,6 +349,76 @@
+@@ -253,6 +349,79 @@
          mcServer.func_147139_a(mcServer.func_147135_j());
      }
  
@@ -246,8 +246,11 @@
 +            dim = getNextFreeDimId();
 +        }
 +
-+        registerDimension(dim, providerId);
-+        addBukkitDimension(dim);
++        if (!isDimensionRegistered(dim)) // handle reloads properly
++        {
++            registerDimension(dim, providerId);
++            addBukkitDimension(dim);
++        }
 +        ChunkGenerator gen = creator.generator();
 +        if (mcServer instanceof DedicatedServer) {
 +            worldSettings.func_82750_a(((DedicatedServer) mcServer).getStringProperty("generator-settings", ""));
@@ -259,7 +262,7 @@
 +        {
 +            world.getWorld().getPopulators().addAll(gen.getDefaultPopulators(world.getWorld()));
 +        }
-+        world.provider.dimensionId = dim; // Cauldron - Fix for TerrainControl injecting their own WorldProvider
++        world.provider.dimensionId = dim; // Fix for TerrainControl injecting their own WorldProvider
 +        mcServer.getConfigurationManager().setPlayerManager(mcServer.worlds.toArray(new WorldServer[mcServer.worlds.size()]));
 +
 +        world.addWorldAccess(new WorldManager(mcServer, world));
@@ -277,7 +280,7 @@
      public static WorldServer getWorld(int id)
      {
          return worlds.get(id);
-@@ -266,7 +432,7 @@
+@@ -266,7 +435,7 @@
      public static boolean shouldLoadSpawn(int dim)
      {
          int id = getProviderType(dim);
@@ -286,7 +289,7 @@
      }
  
      static
-@@ -306,7 +472,8 @@
+@@ -306,7 +475,8 @@
      }
  
      public static void unloadWorld(int id) {
@@ -296,7 +299,7 @@
      }
  
      /*
-@@ -315,26 +482,9 @@
+@@ -315,26 +485,9 @@
      public static void unloadWorlds(Hashtable<Integer, long[]> worldTickTimes) {
          for (int id : unloadQueue) {
              WorldServer w = worlds.get(id);
@@ -325,7 +328,7 @@
              }
          }
          unloadQueue.clear();
-@@ -425,4 +575,45 @@
+@@ -425,4 +578,45 @@
              return null;
          }
      }
