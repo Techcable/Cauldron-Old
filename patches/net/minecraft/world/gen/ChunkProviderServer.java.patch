@@ -322,15 +322,15 @@
      {
          int i = 0;
 -        ArrayList arraylist = Lists.newArrayList(this.loadedChunks);
-+        // CraftBukkit start
-+        Iterator iterator = this.loadedChunkHashMap.values().iterator();
++        // Cauldron start - use thread-safe method for iterating loaded chunks
++        Object[] chunks = this.loadedChunks.toArray();
  
 -        for (int j = 0; j < arraylist.size(); ++j)
-+        while (iterator.hasNext())
++        for (int j = 0; j < chunks.length; ++j)
          {
 -            Chunk chunk = (Chunk)arraylist.get(j);
-+            Chunk chunk = (Chunk) iterator.next();
-+            // CraftBukkit end
++            Chunk chunk = (Chunk)chunks[j];
++            //Cauldron end
  
              if (p_73151_1_)
              {
