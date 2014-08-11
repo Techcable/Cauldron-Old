@@ -72,7 +72,20 @@
      protected Slot addSlotToContainer(Slot p_75146_1_)
      {
          p_75146_1_.slotNumber = this.inventorySlots.size();
-@@ -109,6 +160,10 @@
+@@ -39,7 +90,11 @@
+     {
+         if (this.crafters.contains(p_75132_1_))
+         {
+-            throw new IllegalArgumentException("Listener already listening");
++            // Cauldron start - As we do not create a new player object on respawn, we need to update the client with changes if listener already exists
++            //throw new IllegalArgumentException("Listener already listening");
++            p_75132_1_.sendContainerAndContentsToPlayer(this, this.getInventory());
++            this.detectAndSendChanges();
++            // Cauldron end
+         }
+         else
+         {
+@@ -109,6 +164,10 @@
  
      public Slot getSlot(int p_75139_1_)
      {
@@ -83,7 +96,7 @@
          return (Slot)this.inventorySlots.get(p_75139_1_);
      }
  
-@@ -168,6 +223,7 @@
+@@ -168,6 +227,7 @@
                      itemstack3 = inventoryplayer.getItemStack().copy();
                      i1 = inventoryplayer.getItemStack().stackSize;
                      Iterator iterator = this.field_94537_h.iterator();
@@ -91,7 +104,7 @@
  
                      while (iterator.hasNext())
                      {
-@@ -190,18 +246,55 @@
+@@ -190,18 +250,55 @@
                              }
  
                              i1 -= itemstack1.stackSize - j1;
@@ -152,7 +165,7 @@
                  }
  
                  this.func_94533_d();
-@@ -235,10 +328,17 @@
+@@ -235,10 +332,17 @@
  
                          if (p_75144_2_ == 1)
                          {

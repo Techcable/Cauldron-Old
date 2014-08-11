@@ -503,7 +503,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         if (fromWorld == toWorld) {
             entity.playerNetServerHandler.teleport(to);
         } else {
-            server.getHandle().respawnPlayer(entity, toWorld.dimension, true, to, true);
+            server.getHandle().respawnPlayer(entity, toWorld.dimension, false); // Cauldron - bed aware teleport
         }
         return true;
     }

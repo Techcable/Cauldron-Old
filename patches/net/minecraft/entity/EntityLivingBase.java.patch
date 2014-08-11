@@ -377,7 +377,7 @@
              {
                  i = (this.getActivePotionEffect(Potion.resistance).getAmplifier() + 1) * 5;
                  j = 25 - i;
-@@ -1120,26 +1268,137 @@
+@@ -1120,26 +1268,134 @@
          }
      }
  
@@ -398,17 +398,15 @@
 +    // Cauldron end
  
 -            if (p_70665_2_ != 0.0F)
+-            {
 +    // CraftBukkit start
 +    protected boolean damageEntity_CB(final DamageSource damagesource, float f) { // void -> boolean, add final
 +        if (!this.isEntityInvulnerable()) {
 +            final boolean human = this instanceof EntityPlayer;
 +            float originalDamage = f;
 +            // Cauldron start - apply forge damage hook
-+            if (human)
-             {
-+                f = ForgeHooks.onLivingHurt(this, damagesource, f);
-+                if (f <= 0) return false;
-+            }
++            f = ForgeHooks.onLivingHurt(this, damagesource, f);
++            if (f <= 0) return false;
 +            // Cauldron end
 +            Function<Double, Double> hardHat = new Function<Double, Double>() {
 +                @Override
@@ -528,7 +526,7 @@
      }
  
      public CombatTracker func_110142_aN()
-@@ -1619,7 +1878,8 @@
+@@ -1619,7 +1875,8 @@
          {
              f3 = 1.0F;
              f2 = (float)Math.sqrt((double)f) * 3.0F;
@@ -538,7 +536,7 @@
          }
  
          if (this.swingProgress > 0.0F)
-@@ -1827,17 +2087,37 @@
+@@ -1827,17 +2084,37 @@
      {
          List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
  

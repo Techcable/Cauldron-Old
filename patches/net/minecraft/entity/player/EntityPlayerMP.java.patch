@@ -343,36 +343,19 @@
      }
  
      public void travelToDimension(int p_71027_1_)
-@@ -512,6 +668,8 @@
-             if (this.dimension == 0 && p_71027_1_ == 1)
-             {
-                 this.triggerAchievement(AchievementList.theEnd);
-+                // CraftBukkit start - Rely on custom portal management
-+                /*
-                 ChunkCoordinates chunkcoordinates = this.mcServer.worldServerForDimension(p_71027_1_).getEntrancePortalLocation();
- 
-                 if (chunkcoordinates != null)
-@@ -520,13 +678,18 @@
-                 }
- 
-                 p_71027_1_ = 1;
-+                */
-+                // CraftBukkit end
-             }
-             else
-             {
+@@ -526,7 +682,10 @@
                  this.triggerAchievement(AchievementList.portal);
              }
  
 -            this.mcServer.getConfigurationManager().transferPlayerToDimension(this, p_71027_1_);
 +            // CraftBukkit start
 +            TeleportCause cause = (this.dimension == 1 || p_71027_1_ == 1) ? TeleportCause.END_PORTAL : TeleportCause.NETHER_PORTAL;
-+            this.mcServer.getConfigurationManager().changeDimension(this, p_71027_1_, cause);
++            this.mcServer.getConfigurationManager().transferPlayerToDimension(this, p_71027_1_, cause); // Cauldron
 +            // CraftBukkit end
              this.lastExperience = -1;
              this.lastHealth = -1.0F;
              this.lastFoodLevel = -1;
-@@ -569,6 +732,11 @@
+@@ -569,6 +728,11 @@
  
      public void wakeUpPlayer(boolean p_70999_1_, boolean p_70999_2_, boolean p_70999_3_)
      {
@@ -384,7 +367,7 @@
          if (this.isPlayerSleeping())
          {
              this.getServerForPlayer().getEntityTracker().func_151248_b(this, new S0BPacketAnimation(this, 2));
-@@ -584,11 +752,27 @@
+@@ -584,11 +748,27 @@
  
      public void mountEntity(Entity p_70078_1_)
      {
@@ -415,7 +398,7 @@
      protected void updateFallState(double p_70064_1_, boolean p_70064_3_) {}
  
      public void handleFalling(double p_71122_1_, boolean p_71122_3_)
-@@ -610,29 +794,64 @@
+@@ -610,29 +790,64 @@
          this.currentWindowId = this.currentWindowId % 100 + 1;
      }
  
@@ -483,7 +466,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -644,71 +863,150 @@
+@@ -644,71 +859,150 @@
              this.closeScreen();
          }
  
@@ -642,7 +625,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
          InventoryMerchant inventorymerchant = ((ContainerMerchant)this.openContainer).getMerchantInventory();
-@@ -725,7 +1023,7 @@
+@@ -725,7 +1019,7 @@
                  merchantrecipelist.func_151391_a(packetbuffer);
                  this.playerNetServerHandler.sendPacket(new S3FPacketCustomPayload("MC|TrList", packetbuffer));
              }
@@ -651,7 +634,7 @@
              {
                  logger.error("Couldn\'t send trade list", ioexception);
              }
-@@ -738,6 +1036,17 @@
+@@ -738,6 +1032,17 @@
  
      public void displayGUIHorse(EntityHorse p_110298_1_, IInventory p_110298_2_)
      {
@@ -669,7 +652,7 @@
          if (this.openContainer != this.inventoryContainer)
          {
              this.closeScreen();
-@@ -745,7 +1054,7 @@
+@@ -745,7 +1050,7 @@
  
          this.getNextWindowId();
          this.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.currentWindowId, 11, p_110298_2_.getInventoryName(), p_110298_2_.getSizeInventory(), p_110298_2_.hasCustomInventoryName(), p_110298_1_.getEntityId()));
@@ -678,7 +661,7 @@
          this.openContainer.windowId = this.currentWindowId;
          this.openContainer.addCraftingToCrafters(this);
      }
-@@ -770,6 +1079,15 @@
+@@ -770,6 +1075,15 @@
      {
          this.playerNetServerHandler.sendPacket(new S30PacketWindowItems(p_71110_1_.windowId, p_71110_2_));
          this.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, this.inventory.getItemStack()));
@@ -694,7 +677,7 @@
      }
  
      public void sendProgressBarUpdate(Container p_71112_1_, int p_71112_2_, int p_71112_3_)
-@@ -779,6 +1097,7 @@
+@@ -779,6 +1093,7 @@
  
      public void closeScreen()
      {
@@ -702,7 +685,7 @@
          this.playerNetServerHandler.sendPacket(new S2EPacketCloseWindow(this.openContainer.windowId));
          this.closeContainer();
      }
-@@ -853,8 +1172,19 @@
+@@ -853,8 +1168,19 @@
      public void setPlayerHealthUpdated()
      {
          this.lastHealth = -1.0E8F;
@@ -722,7 +705,7 @@
      public void addChatComponentMessage(IChatComponent p_146105_1_)
      {
          this.playerNetServerHandler.sendPacket(new S02PacketChat(p_146105_1_));
-@@ -1037,6 +1367,114 @@
+@@ -1037,6 +1363,114 @@
          return this.field_143005_bX;
      }
  

@@ -1,6 +1,17 @@
 --- ../src-base/minecraft/cpw/mods/fml/common/FMLCommonHandler.java
 +++ ../src-work/minecraft/cpw/mods/fml/common/FMLCommonHandler.java
-@@ -384,10 +384,11 @@
+@@ -37,6 +37,10 @@
+ 
+ import org.apache.logging.log4j.Level;
+ import org.apache.logging.log4j.Logger;
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.CraftWorld;
++import org.bukkit.entity.Player;
++import org.bukkit.event.player.PlayerChangedWorldEvent;
+ 
+ import com.google.common.base.Joiner;
+ import com.google.common.base.Strings;
+@@ -384,10 +388,11 @@
          {
              return;
          }
@@ -13,7 +24,7 @@
          handlerSet.add(handler);
          handlerToCheck = new WeakReference<SaveHandler>(handler); // for confirmBackupLevelDatUse
          Map<String,NBTBase> additionalProperties = Maps.newHashMap();
-@@ -495,7 +496,12 @@
+@@ -495,7 +500,12 @@
  
      public String getModName()
      {
@@ -27,3 +38,21 @@
          modNames.add("fml");
          if (!noForge)
          {
+@@ -539,8 +549,17 @@
+         bus().post(new InputEvent.KeyInputEvent());
+     }
+ 
++    // Cauldron start - wrapper to notify plugins for mods that bypass ServerConfigurationManager
+     public void firePlayerChangedDimensionEvent(EntityPlayer player, int fromDim, int toDim)
+     {
++        this.firePlayerChangedDimensionEvent(player, fromDim, toDim, player.worldObj.getWorld());
++    }
++
++    public void firePlayerChangedDimensionEvent(EntityPlayer player, int fromDim, int toDim, CraftWorld fromWorld)
++    {
++        PlayerChangedWorldEvent event = new PlayerChangedWorldEvent((Player) player.getBukkitEntity(), fromWorld);
++        Bukkit.getServer().getPluginManager().callEvent(event);
++        // Cauldron end
+         bus().post(new PlayerEvent.PlayerChangedDimensionEvent(player, fromDim, toDim));
+     }
+ 
