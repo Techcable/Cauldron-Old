@@ -380,7 +380,7 @@
      public EntityPlayerMP createPlayerForUser(GameProfile p_148545_1_)
      {
          UUID uuid = EntityPlayer.func_146094_a(p_148545_1_);
-@@ -397,116 +612,295 @@
+@@ -397,116 +612,305 @@
          return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
      }
  
@@ -442,111 +442,125 @@
 -        entityplayermp1.setEntityId(p_72368_1_.getEntityId());
 -        WorldServer worldserver = this.mcServer.worldServerForDimension(p_72368_1_.dimension);
 -        this.func_72381_a(entityplayermp1, p_72368_1_, worldserver);
+-        ChunkCoordinates chunkcoordinates1;
 +        return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
 +        // */
 +        return player;
 +        // CraftBukkit end
 +    }
-+
+ 
+-        if (chunkcoordinates != null)
 +    // Cauldron start - refactor entire method for sanity.
-+    public EntityPlayerMP respawnPlayer(EntityPlayerMP par1EntityPlayerMP, int par2, boolean returnFromEnd)
++    public EntityPlayerMP respawnPlayer(EntityPlayerMP par1EntityPlayerMP, int par2, boolean par3)
++    {
++        return this.respawnPlayer(par1EntityPlayerMP, par2, par3, null);
++    }
++
++    public EntityPlayerMP respawnPlayer(EntityPlayerMP par1EntityPlayerMP, int targetDimension, boolean returnFromEnd, Location location)
 +    {
 +        // Phase 1 - check if the player is allowed to respawn in same dimension
-+        World world = mcServer.worldServerForDimension(par2);
++        World world = mcServer.worldServerForDimension(targetDimension);
 +
 +        if (world == null)
-+        {
-+            par2 = 0;
+         {
+-            chunkcoordinates1 = EntityPlayer.verifyRespawnCoordinates(this.mcServer.worldServerForDimension(p_72368_1_.dimension), chunkcoordinates, flag1);
++            targetDimension = 0;
 +        }
-+        else if (!world.provider.canRespawnHere())
++        else if (location == null && !world.provider.canRespawnHere()) // ignore plugins
 +        {
-+            par2 = world.provider.getRespawnDimension(par1EntityPlayerMP);
++            targetDimension = world.provider.getRespawnDimension(par1EntityPlayerMP);
 +        }
-+
+ 
+-            if (chunkcoordinates1 != null)
 +        // Phase 2 - handle return from End
 +        if (returnFromEnd)
 +        {
-+            WorldServer exitWorld = this.mcServer.worldServerForDimension(par2);
++            WorldServer exitWorld = this.mcServer.worldServerForDimension(targetDimension);
 +            Location enter = par1EntityPlayerMP.getBukkitEntity().getLocation();
 +            Location exit = null;
 +            // THE_END -> NORMAL; use bed if available, otherwise default spawn
 +            exit = ((org.bukkit.craftbukkit.entity.CraftPlayer) par1EntityPlayerMP.getBukkitEntity()).getBedSpawnLocation();
 +
 +            if (exit == null || ((CraftWorld) exit.getWorld()).getHandle().dimension != 0)
-+            {
+             {
+-                entityplayermp1.setLocationAndAngles((double)((float)chunkcoordinates1.posX + 0.5F), (double)((float)chunkcoordinates1.posY + 0.1F), (double)((float)chunkcoordinates1.posZ + 0.5F), 0.0F, 0.0F);
+-                entityplayermp1.setSpawnChunk(chunkcoordinates, flag1);
 +                exit = exitWorld.getWorld().getSpawnLocation();
-+            }
+             }
+-            else
 +            PlayerPortalEvent event = new PlayerPortalEvent(par1EntityPlayerMP.getBukkitEntity(), enter, exit, org.bukkit.craftbukkit.CraftTravelAgent.DEFAULT, TeleportCause.END_PORTAL);
 +            event.useTravelAgent(false);
 +            Bukkit.getServer().getPluginManager().callEvent(event);
 +            if (event.isCancelled() || event.getTo() == null)
-+            {
+             {
+-                entityplayermp1.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(0, 0.0F));
 +                return null;
-+            }
-+        }
-+
+             }
+         }
+ 
+-        worldserver.theChunkProviderServer.loadChunk((int)entityplayermp1.posX >> 4, (int)entityplayermp1.posZ >> 4);
 +        // Phase 3 - remove current player from current dimension
 +        par1EntityPlayerMP.getServerForPlayer().getEntityTracker().removePlayerFromTrackers(par1EntityPlayerMP);
 +        // par1EntityPlayerMP.getServerForPlayer().getEntityTracker().removeEntityFromAllTrackingPlayers(par1EntityPlayerMP); // CraftBukkit
 +        par1EntityPlayerMP.getServerForPlayer().getPlayerManager().removePlayer(par1EntityPlayerMP);
 +        this.playerEntityList.remove(par1EntityPlayerMP);
 +        this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension).removePlayerEntityDangerously(par1EntityPlayerMP);
-+
+ 
+-        while (!worldserver.getCollidingBoundingBoxes(entityplayermp1, entityplayermp1.boundingBox).isEmpty())
 +        // Phase 4 - handle bed spawn
-+        ChunkCoordinates bedSpawnChunkCoords = par1EntityPlayerMP.getBedLocation(par2);
-+        boolean spawnForced = par1EntityPlayerMP.isSpawnForced(par2);
-+        par1EntityPlayerMP.dimension = par2;
++        ChunkCoordinates bedSpawnChunkCoords = par1EntityPlayerMP.getBedLocation(targetDimension);
++        boolean spawnForced = par1EntityPlayerMP.isSpawnForced(targetDimension);
++        par1EntityPlayerMP.dimension = targetDimension;
 +        // CraftBukkit start
 +        EntityPlayerMP entityplayermp1 = par1EntityPlayerMP;
 +        entityplayermp1.setWorld(this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension)); // make sure to update reference for bed spawn logic
 +        org.bukkit.World fromWorld = entityplayermp1.getBukkitEntity().getWorld();
 +        entityplayermp1.playerConqueredTheEnd = false;
-         ChunkCoordinates chunkcoordinates1;
++        ChunkCoordinates chunkcoordinates1;
 +        boolean isBedSpawn = false;
-+        Location location = null;
 +        org.bukkit.World toWorld = entityplayermp1.getBukkitEntity().getWorld();
- 
--        if (chunkcoordinates != null)
-+        if (bedSpawnChunkCoords != null) // if player has a bed
++
++        if (location == null) // use bed logic only if player respawns (player death)
          {
--            chunkcoordinates1 = EntityPlayer.verifyRespawnCoordinates(this.mcServer.worldServerForDimension(p_72368_1_.dimension), chunkcoordinates, flag1);
-+            chunkcoordinates1 = EntityPlayer.verifyRespawnCoordinates(this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension), bedSpawnChunkCoords, spawnForced);
- 
-             if (chunkcoordinates1 != null)
-             {
-+                isBedSpawn = true;
-                 entityplayermp1.setLocationAndAngles((double)((float)chunkcoordinates1.posX + 0.5F), (double)((float)chunkcoordinates1.posY + 0.1F), (double)((float)chunkcoordinates1.posZ + 0.5F), 0.0F, 0.0F);
--                entityplayermp1.setSpawnChunk(chunkcoordinates, flag1);
-+                entityplayermp1.setSpawnChunk(bedSpawnChunkCoords, spawnForced);
-+                location = new Location(toWorld, bedSpawnChunkCoords.posX + 0.5, bedSpawnChunkCoords.posY, bedSpawnChunkCoords.posZ + 0.5);
-             }
--            else
-+            else // bed was not found (broken)
-             {
--                entityplayermp1.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(0, 0.0F));
-+                //entityplayermp1.setSpawnChunk(null, true); // CraftBukkit
-+                entityplayermp1.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(0, 0));
-+                location = new Location(toWorld, toWorld.getSpawnLocation().getX(), toWorld.getSpawnLocation().getY(), toWorld.getSpawnLocation().getZ()); // use the spawnpoint as location
-             }
-         }
- 
--        worldserver.theChunkProviderServer.loadChunk((int)entityplayermp1.posX >> 4, (int)entityplayermp1.posZ >> 4);
-+        if (location == null)
++            if (bedSpawnChunkCoords != null) // if player has a bed
++            {
++                chunkcoordinates1 = EntityPlayer.verifyRespawnCoordinates(this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension), bedSpawnChunkCoords, spawnForced);
++    
++                if (chunkcoordinates1 != null)
++                {
++                    isBedSpawn = true;
++                    entityplayermp1.setLocationAndAngles((double)((float)chunkcoordinates1.posX + 0.5F), (double)((float)chunkcoordinates1.posY + 0.1F), (double)((float)chunkcoordinates1.posZ + 0.5F), 0.0F, 0.0F);
++                    entityplayermp1.setSpawnChunk(bedSpawnChunkCoords, spawnForced);
++                    location = new Location(toWorld, bedSpawnChunkCoords.posX + 0.5, bedSpawnChunkCoords.posY, bedSpawnChunkCoords.posZ + 0.5);
++                }
++                else // bed was not found (broken)
++                {
++                    //entityplayermp1.setSpawnChunk(null, true); // CraftBukkit
++                    entityplayermp1.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(0, 0));
++                    location = new Location(toWorld, toWorld.getSpawnLocation().getX(), toWorld.getSpawnLocation().getY(), toWorld.getSpawnLocation().getZ()); // use the spawnpoint as location
++                }
++            }
++    
++            if (location == null)
++            {
++                location = new Location(toWorld, toWorld.getSpawnLocation().getX(), toWorld.getSpawnLocation().getY(), toWorld.getSpawnLocation().getZ()); // use the world spawnpoint as default location
++            }
++    
++            Player respawnPlayer = this.cserver.getPlayer(entityplayermp1);
++            PlayerRespawnEvent respawnEvent = new PlayerRespawnEvent(respawnPlayer, location, isBedSpawn);
++            this.cserver.getPluginManager().callEvent(respawnEvent);
++    
++            if (!spawnForced) // mods override plugins
++            {
++                location = respawnEvent.getRespawnLocation();
++            }
++    
++            par1EntityPlayerMP.reset();
++        }
++        else // plugin
 +        {
-+            location = new Location(toWorld, toWorld.getSpawnLocation().getX(), toWorld.getSpawnLocation().getY(), toWorld.getSpawnLocation().getZ()); // use the world spawnpoint as default location
++            location.setWorld(this.mcServer.worldServerForDimension(targetDimension).getWorld());
 +        }
- 
--        while (!worldserver.getCollidingBoundingBoxes(entityplayermp1, entityplayermp1.boundingBox).isEmpty())
-+        Player respawnPlayer = this.cserver.getPlayer(entityplayermp1);
-+        PlayerRespawnEvent respawnEvent = new PlayerRespawnEvent(respawnPlayer, location, isBedSpawn);
-+        this.cserver.getPluginManager().callEvent(respawnEvent);
-+
-+        if (!spawnForced) // mods override plugins
-         {
-+            location = respawnEvent.getRespawnLocation();
-+        }
-+
-+        par1EntityPlayerMP.reset();
 +
 +        WorldServer targetWorld = ((CraftWorld) location.getWorld()).getHandle();
 +        entityplayermp1.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
@@ -591,15 +605,15 @@
          this.playerEntityList.add(entityplayermp1);
          entityplayermp1.addSelfToInternalCraftingInventory();
          entityplayermp1.setHealth(entityplayermp1.getHealth());
+-        FMLCommonHandler.instance().firePlayerRespawnEvent(entityplayermp1);
 +
-+        // CraftBukkit start - Don't fire on respawn
++        // If world changed then fire the appropriate change world event else respawn
 +        if (fromWorld != location.getWorld())
 +        {
 +            FMLCommonHandler.instance().firePlayerChangedDimensionEvent(entityplayermp1, ((CraftWorld)fromWorld).getHandle().provider.dimensionId, ((CraftWorld)location.getWorld()).getHandle().provider.dimensionId); // Cauldron - fire forge changed dimension event
 +        }
-+        // CraftBukkit end
++        else FMLCommonHandler.instance().firePlayerRespawnEvent(entityplayermp1);
 +
-         FMLCommonHandler.instance().firePlayerRespawnEvent(entityplayermp1);
          return entityplayermp1;
      }
  
@@ -731,7 +745,7 @@
      }
  
      public void transferEntityToWorld(Entity p_82448_1_, int p_82448_2_, WorldServer p_82448_3_, WorldServer p_82448_4_, Teleporter teleporter)
-@@ -592,6 +986,197 @@
+@@ -592,6 +996,197 @@
          p_82448_1_.setWorld(p_82448_4_);
      }
  
@@ -929,7 +943,7 @@
      public void sendPlayerInfoToAllPlayers()
      {
          if (++this.playerPingIndex > 600)
-@@ -599,11 +1184,13 @@
+@@ -599,11 +1194,13 @@
              this.playerPingIndex = 0;
          }
  
@@ -943,7 +957,7 @@
      }
  
      public void sendPacketToAllPlayers(Packet p_148540_1_)
-@@ -863,14 +1450,29 @@
+@@ -863,14 +1460,29 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -974,7 +988,7 @@
                  if (d4 * d4 + d5 * d5 + d6 * d6 < p_148543_8_ * p_148543_8_)
                  {
                      entityplayermp.playerNetServerHandler.sendPacket(p_148543_11_);
-@@ -925,16 +1527,19 @@
+@@ -925,16 +1537,19 @@
  
          if (p_72354_2_.isRaining())
          {
@@ -995,7 +1009,7 @@
          p_72385_1_.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(p_72385_1_.inventory.currentItem));
      }
  
-@@ -950,7 +1555,10 @@
+@@ -950,7 +1565,10 @@
  
      public String[] getAvailablePlayerDat()
      {
@@ -1007,7 +1021,7 @@
      }
  
      public void setWhiteListEnabled(boolean p_72371_1_)
-@@ -1019,12 +1627,31 @@
+@@ -1019,12 +1637,31 @@
  
      public void removeAllPlayers()
      {
