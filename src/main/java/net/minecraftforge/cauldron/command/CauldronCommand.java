@@ -65,6 +65,10 @@ public class CauldronCommand extends Command
         if ((args.length == 1) && "reload".equalsIgnoreCase(args[0]))
         {
             MinecraftServer.getServer().cauldronConfig.load();
+            for (int i = 0; i < MinecraftServer.getServer().worlds.size(); i++)
+            {
+                MinecraftServer.getServer().worlds.get(i).cauldronConfig.init(); // reload world configs
+            }
             sender.sendMessage(ChatColor.GREEN + "Config file reloaded");
             return true;
         }

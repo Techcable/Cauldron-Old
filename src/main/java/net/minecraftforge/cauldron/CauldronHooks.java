@@ -281,14 +281,9 @@ public class CauldronHooks
             if (teCache == null)
             {
                 String teConfigPath = tileEntity.getClass().getName().replace(".", "-");
-                teConfigPath = teConfigPath.replaceAll("[^A-Za-z0-9]", ""); // Fix up odd class names to prevent YAML errors
+                teConfigPath = teConfigPath.replaceAll("[^A-Za-z0-9\\-]", ""); // Fix up odd class names to prevent YAML errors
                 teCache = new TileEntityCache(tileEntity.getClass(), world.getWorldInfo().getWorldName().toLowerCase(), teConfigPath, world.tileentityConfig.getBoolean(teConfigPath + ".tick-no-players", false), world.tileentityConfig.getInt(teConfigPath + ".tick-interval", 1));
                 tileEntityCache.put(tileEntity.getClass(), teCache);
-                for (TileEntityCache cache : tileEntityCache.values())
-                {
-                    cache.tickNoPlayers = MinecraftServer.getServer().tileEntityConfig.getBoolean( "world-settings." + teCache.worldName + "." + teCache.configPath + ".tick-no-players", MinecraftServer.getServer().tileEntityConfig.getBoolean( "world-settings.default." + teCache.configPath + ".tick-no-players") );
-                    cache.tickInterval = MinecraftServer.getServer().tileEntityConfig.getInt( "world-settings." + teCache.worldName + "." + teCache.configPath + ".tick-interval", MinecraftServer.getServer().tileEntityConfig.getInt( "world-settings.default." + teCache.configPath + ".tick-interval") );
-                }
             }
 
             // Tick with no players near?
