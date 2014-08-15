@@ -64,7 +64,7 @@ public class CauldronHooks
 
     public static void logStack()
     {
-        if (MinecraftServer.getServer().cauldronConfig.logWithStackTraces.getValue())
+        if (MinecraftServer.cauldronConfig.logWithStackTraces.getValue())
         {
             Throwable ex = new Throwable();
             ex.fillInStackTrace();
@@ -74,7 +74,7 @@ public class CauldronHooks
 
     public static void logEntityDeath(Entity entity)
     {
-        if (MinecraftServer.getServer().cauldronConfig.entityDeathLogging.getValue())
+        if (MinecraftServer.cauldronConfig.entityDeathLogging.getValue())
         {
             logInfo("Dim: {0} setDead(): {1}", entity.worldObj.provider.dimensionId, entity);
             logStack();
@@ -83,7 +83,7 @@ public class CauldronHooks
 
     public static void logEntityDespawn(Entity entity, String reason)
     {
-        if (MinecraftServer.getServer().cauldronConfig.entityDespawnLogging.getValue())
+        if (MinecraftServer.cauldronConfig.entityDespawnLogging.getValue())
         {
             logInfo("Dim: {0} Despawning ({1}): {2}", entity.worldObj.provider.dimensionId, reason, entity);
             //logInfo("Chunk Is Active: {0}", entity.worldObj.inActiveChunk(entity));
@@ -93,7 +93,7 @@ public class CauldronHooks
 
     public static void logEntitySpawn(World world, Entity entity, SpawnReason spawnReason)
     {
-        if (MinecraftServer.getServer().cauldronConfig.entitySpawnLogging.getValue())
+        if (MinecraftServer.cauldronConfig.entitySpawnLogging.getValue())
         {
             logInfo("Dim: {0} Spawning ({1}): {2}", world.provider.dimensionId, spawnReason, entity);
             logInfo("Dim: {0} Entities Last Tick: {1}", world.provider.dimensionId, world.entitiesTicked);
@@ -105,7 +105,7 @@ public class CauldronHooks
 
     public static void logChunkLoad(ChunkProviderServer provider, String msg, int x, int z, boolean logLoadOnRequest)
     {
-        if (MinecraftServer.getServer().cauldronConfig.chunkLoadLogging.getValue())
+        if (MinecraftServer.cauldronConfig.chunkLoadLogging.getValue())
         {
             logInfo("{0} Chunk At [{1}] ({2}, {3})", msg, provider.worldObj.provider.dimensionId, x, z);
             if (logLoadOnRequest)
@@ -118,7 +118,7 @@ public class CauldronHooks
 
     public static void logChunkUnload(ChunkProviderServer provider, int x, int z, String msg)
     {
-        if (MinecraftServer.getServer().cauldronConfig.chunkUnloadLogging.getValue())
+        if (MinecraftServer.cauldronConfig.chunkUnloadLogging.getValue())
         {
             logInfo("{0} [{1}] ({2}, {3})", msg, provider.worldObj.provider.dimensionId, x, z);
             long currentTick = MinecraftServer.getServer().getTickCounter();
@@ -137,7 +137,7 @@ public class CauldronHooks
         logInfo(" Finding Spawn Point: {0}", provider.worldObj.findingSpawnPoint);
         logInfo(" Load chunk on request: {0}", provider.loadChunkOnProvideRequest);
         logInfo(" Calling Forge Tick: {0}", MinecraftServer.callingForgeTick);
-        logInfo(" Load chunk on forge tick: {0}", MinecraftServer.getServer().cauldronConfig.loadChunkOnForgeTick.getValue());
+        logInfo(" Load chunk on forge tick: {0}", MinecraftServer.cauldronConfig.loadChunkOnForgeTick.getValue());
         long providerTickDiff = currentTick - provider.initialTick;
         if (providerTickDiff <= 100)
         {
@@ -147,8 +147,8 @@ public class CauldronHooks
 
     public static boolean checkBoundingBoxSize(Entity entity, AxisAlignedBB aabb)
     {
-        int logSize = MinecraftServer.getServer().cauldronConfig.largeBoundingBoxLogSize.getValue();
-        if (logSize <= 0 || !MinecraftServer.getServer().cauldronConfig.checkEntityBoundingBoxes.getValue()) return false;
+        int logSize = MinecraftServer.cauldronConfig.largeBoundingBoxLogSize.getValue();
+        if (logSize <= 0 || !MinecraftServer.cauldronConfig.checkEntityBoundingBoxes.getValue()) return false;
         int x = MathHelper.floor_double(aabb.minX);
         int x1 = MathHelper.floor_double(aabb.maxX + 1.0D);
         int y = MathHelper.floor_double(aabb.minY);
@@ -157,7 +157,7 @@ public class CauldronHooks
         int z1 = MathHelper.floor_double(aabb.maxZ + 1.0D);
         
         int size = Math.abs(x1-x) * Math.abs(y1-y) * Math.abs(z1-z);
-        if (size > MinecraftServer.getServer().cauldronConfig.largeBoundingBoxLogSize.getValue())
+        if (size > MinecraftServer.cauldronConfig.largeBoundingBoxLogSize.getValue())
         {
             logWarning("Entity being removed for bounding box restrictions");
             logWarning("BB Size: {0} > {1} avg edge: {2}", size, logSize, aabb.getAverageEdgeLength());
@@ -177,13 +177,13 @@ public class CauldronHooks
     
     public static boolean checkEntitySpeed(Entity entity, double x, double y, double z)
     {
-        int maxSpeed = MinecraftServer.getServer().cauldronConfig.entityMaxSpeed.getValue();
-        if (maxSpeed > 0 && MinecraftServer.getServer().cauldronConfig.checkEntityMaxSpeeds.getValue())
+        int maxSpeed = MinecraftServer.cauldronConfig.entityMaxSpeed.getValue();
+        if (maxSpeed > 0 && MinecraftServer.cauldronConfig.checkEntityMaxSpeeds.getValue())
         {
             double distance = x * x + z * z;
             if (distance > maxSpeed)
             {
-                if (MinecraftServer.getServer().cauldronConfig.logEntitySpeedRemoval.getValue())
+                if (MinecraftServer.cauldronConfig.logEntitySpeedRemoval.getValue())
                 {
                     logInfo("Speed violation: {0} was over {1} - Removing Entity: {2}", distance, maxSpeed, entity);
                     if (entity instanceof EntityLivingBase)
@@ -192,7 +192,7 @@ public class CauldronHooks
                         logInfo("Entity Motion: ({0}, {1}, {2}) Move Strafing: {3} Move Forward: {4}", entity.motionX, entity.motionY, entity.motionZ, livingBase.moveStrafing, livingBase.moveForward);
                     }
 
-                    if (MinecraftServer.getServer().cauldronConfig.logWithStackTraces.getValue())
+                    if (MinecraftServer.cauldronConfig.logWithStackTraces.getValue())
                     {
                         logInfo("Move offset: ({0}, {1}, {2})", x, y, z);
                         logInfo("Motion: ({0}, {1}, {2})", entity.motionX, entity.motionY, entity.motionZ);
@@ -220,14 +220,14 @@ public class CauldronHooks
     
     public static void logEntitySize(World world, Entity entity, List list)
     {
-        if (!MinecraftServer.getServer().cauldronConfig.logEntityCollisionChecks.getValue()) return;
-        long largeCountLogSize = MinecraftServer.getServer().cauldronConfig.largeCollisionLogSize.getValue();
+        if (!MinecraftServer.cauldronConfig.logEntityCollisionChecks.getValue()) return;
+        long largeCountLogSize = MinecraftServer.cauldronConfig.largeCollisionLogSize.getValue();
         if (largeCountLogSize > 0 && world.entitiesTicked > largeCountLogSize)
         {
             logWarning("Entity size > {0, number} at: {1}", largeCountLogSize, entity);
         }
         if (list == null) return;
-        long largeCollisionLogSize = MinecraftServer.getServer().cauldronConfig.largeCollisionLogSize.getValue();
+        long largeCollisionLogSize = MinecraftServer.cauldronConfig.largeCollisionLogSize.getValue();
         if (largeCollisionLogSize > 0 &&
                 (MinecraftServer.getServer().getTickCounter() % 10) == 0 &&
                 list.size() >= largeCollisionLogSize)
@@ -272,7 +272,7 @@ public class CauldronHooks
     public static boolean canTileEntityTick(TileEntity tileEntity, World world)
     {
         if (tileEntity == null || world.tileentityConfig == null) return false;
-        if (MinecraftServer.getServer().tileEntityConfig.skipTileEntityTicks.getValue())
+        if (MinecraftServer.tileEntityConfig.skipTileEntityTicks.getValue())
         {
             TileEntityCache teCache = tileEntityCache.get(tileEntity.getClass());
             if (teCache == null)
@@ -461,7 +461,7 @@ public class CauldronHooks
 
     public static void enableThreadContentionMonitoring()
     {
-        if (!MinecraftServer.getServer().cauldronConfig.enableThreadContentionMonitoring.getValue()) return;
+        if (!MinecraftServer.cauldronConfig.enableThreadContentionMonitoring.getValue()) return;
         java.lang.management.ThreadMXBean mbean = java.lang.management.ManagementFactory.getThreadMXBean();
         mbean.setThreadContentionMonitoringEnabled(true);
     }

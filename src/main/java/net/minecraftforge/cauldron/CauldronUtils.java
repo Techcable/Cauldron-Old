@@ -51,17 +51,16 @@ public class CauldronUtils {
 
     public static <T> void dumpAndSortClassList(List<Class<? extends T>> classList)
     {
-        List<String> sortedClassList = new ArrayList();
+        List<String> sortedClassList = new ArrayList<String>();
         for (Class clazz : classList)
         {
             sortedClassList.add(clazz.getName());
         }
         Collections.sort(sortedClassList);
-        if (MinecraftServer.getServer().tileEntityConfig.enableTECanUpdateWarning.getValue())
+        if (MinecraftServer.tileEntityConfig.enableTECanUpdateWarning.getValue())
         {
-            for (int i = 0; i < sortedClassList.size(); i++)
-            {
-                MinecraftServer.getServer().logInfo("Detected TE " + sortedClassList.get(i) + " with canUpdate set to true and no updateEntity override!. This is NOT good, please report to mod author as this can hurt performance.");
+            for (String aSortedClassList : sortedClassList) {
+                MinecraftServer.getServer().logInfo("Detected TE " + aSortedClassList + " with canUpdate set to true and no updateEntity override!. This is NOT good, please report to mod author as this can hurt performance.");
             }
         }
     }
