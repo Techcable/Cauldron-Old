@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.inventory;
 
 import java.util.Iterator;
 
-import net.minecraftforge.cauldron.potion.CustomModRecipe;
+import net.minecraftforge.cauldron.inventory.CustomModRecipe;
 
 import org.bukkit.inventory.Recipe;
 
