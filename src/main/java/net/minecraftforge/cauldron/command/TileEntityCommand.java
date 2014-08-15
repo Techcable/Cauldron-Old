@@ -1,16 +1,10 @@
 package net.minecraftforge.cauldron.command;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.cauldron.CauldronHooks;
 import net.minecraftforge.cauldron.configuration.BoolSetting;
-import net.minecraftforge.cauldron.configuration.CauldronConfig;
 import net.minecraftforge.cauldron.configuration.IntSetting;
 import net.minecraftforge.cauldron.configuration.Setting;
 
@@ -21,7 +15,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.util.StringUtil;
-
 
 import com.google.common.collect.ImmutableList;
 

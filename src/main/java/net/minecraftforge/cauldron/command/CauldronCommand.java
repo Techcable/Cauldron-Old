@@ -5,12 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.cauldron.CauldronHooks;
 import net.minecraftforge.cauldron.configuration.BoolSetting;
-import net.minecraftforge.cauldron.configuration.CauldronConfig;
 import net.minecraftforge.cauldron.configuration.IntSetting;
 import net.minecraftforge.cauldron.configuration.Setting;
 

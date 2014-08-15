@@ -1,8 +1,5 @@
 package net.minecraftforge.cauldron.configuration;
 
-import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.cauldron.configuration.Setting;
-
 public class IntSetting extends Setting<Integer>
 {
     private Integer value;

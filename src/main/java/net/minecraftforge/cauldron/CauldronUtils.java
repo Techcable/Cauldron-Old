@@ -6,10 +6,8 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import cpw.mods.fml.relauncher.FMLRelaunchLog;
-import cpw.mods.fml.relauncher.Side;
 
 import org.bukkit.inventory.InventoryHolder;
 

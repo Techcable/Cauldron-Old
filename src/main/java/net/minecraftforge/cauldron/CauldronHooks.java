@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 
 import javax.management.MBeanServer;
 
@@ -33,8 +32,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraftforge.cauldron.configuration.CauldronConfig;
-import net.minecraftforge.cauldron.configuration.TileEntityConfig;
 
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
