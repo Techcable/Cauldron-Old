@@ -48,7 +48,7 @@ minecraft {
 group = 'net.minecraftforge'
 ext.mcVersion = "1.7.10"
 ext.cauldronVersion = "1"
-ext.forgeVersion = "1199"
+ext.forgeVersion = "1206"
 ext.bukkitVersion = "01"
 version = "${mcVersion}-${cauldronVersion}.${forgeVersion}.${bukkitVersion}.${getBuild()}"
 
@@ -79,7 +79,7 @@ tasks.packageUniversal.manifest {
     'Implementation-Vendor': 'Cauldron',
     'Implementation-Title': 'Cauldron',
     'Implementation-Version': 'git-Cauldron-MCPC-Plus-'+project.version,
-    'Forge-Version': '10.13.0.1199',
+    'Forge-Version': '10.13.0.1206',
     'Specification-Vendor': 'Bukkit Team',
     'Specification-Title': 'Bukkit',
     'Specification-Version': '1.7.10-R0.1-SNAPSHOT'

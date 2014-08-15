@@ -62,9 +62,9 @@
  
 +            // Cauldron - Removed CB patch that fixes BUKKIT-5238 to prevent stackoverflows. See issue #1165 and #1169
              extendedblockstorage.func_150818_a(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_4_);
+             extendedblockstorage.setExtBlockMetadata(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_5_); // This line duplicates the one below, so breakBlock fires with valid worldstate
  
-             if (!this.worldObj.isRemote)
-@@ -774,8 +799,12 @@
+@@ -777,8 +802,12 @@
  
          if (i != this.xPosition || j != this.zPosition)
          {
@@ -79,7 +79,7 @@
          }
  
          int k = MathHelper.floor_double(p_76612_1_.posY / 16.0D);
-@@ -796,6 +825,28 @@
+@@ -799,6 +828,28 @@
          p_76612_1_.chunkCoordY = k;
          p_76612_1_.chunkCoordZ = this.zPosition;
          this.entityLists[k].add(p_76612_1_);
@@ -108,7 +108,7 @@
      }
  
      public void removeEntity(Entity p_76622_1_)
-@@ -816,6 +867,28 @@
+@@ -819,6 +870,28 @@
          }
  
          this.entityLists[p_76608_2_].remove(p_76608_1_);
@@ -137,7 +137,7 @@
      }
  
      public boolean canBlockSeeTheSky(int p_76619_1_, int p_76619_2_, int p_76619_3_)
-@@ -872,9 +945,23 @@
+@@ -875,9 +948,23 @@
          p_150812_4_.yCoord = p_150812_2_;
          p_150812_4_.zCoord = this.zPosition * 16 + p_150812_3_;
  
@@ -162,7 +162,7 @@
              if (this.chunkTileEntityMap.containsKey(chunkposition))
              {
                  ((TileEntity)this.chunkTileEntityMap.get(chunkposition)).invalidate();
-@@ -882,7 +969,16 @@
+@@ -885,7 +972,16 @@
  
              p_150812_4_.validate();
              this.chunkTileEntityMap.put(chunkposition, p_150812_4_);
@@ -179,7 +179,7 @@
      }
  
      public void removeTileEntity(int p_150805_1_, int p_150805_2_, int p_150805_3_)
-@@ -927,12 +1023,28 @@
+@@ -930,12 +1026,28 @@
  
          while (iterator.hasNext())
          {
@@ -209,7 +209,7 @@
              this.worldObj.unloadEntities(this.entityLists[i]);
          }
          MinecraftForge.EVENT_BUS.post(new ChunkEvent.Unload(this));
-@@ -1181,8 +1293,10 @@
+@@ -1184,8 +1296,10 @@
              if ((p_76607_2_ & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getMetadataArray();
@@ -222,7 +222,7 @@
              }
          }
  
-@@ -1191,8 +1305,10 @@
+@@ -1194,8 +1308,10 @@
              if ((p_76607_2_ & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getBlocklightArray();
@@ -235,7 +235,7 @@
              }
          }
  
-@@ -1203,8 +1319,10 @@
+@@ -1206,8 +1322,10 @@
                  if ((p_76607_2_ & 1 << l) != 0 && this.storageArrays[l] != null)
                  {
                      nibblearray = this.storageArrays[l].getSkylightArray();
@@ -248,7 +248,7 @@
                  }
              }
          }
-@@ -1226,8 +1344,8 @@
+@@ -1229,8 +1347,8 @@
                          nibblearray = this.storageArrays[l].createBlockMSBArray();
                      }
  
