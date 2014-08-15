@@ -1,8 +1,5 @@
 package net.minecraftforge.cauldron.configuration;
 
-import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.cauldron.configuration.Setting;
-
 import org.apache.commons.lang.BooleanUtils;
 
 public class BoolSetting extends Setting<Boolean>

@@ -1,7 +1,6 @@
 package net.minecraftforge.cauldron.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EnumCreatureType;
 
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftEntity;
