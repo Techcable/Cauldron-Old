@@ -30,6 +30,7 @@ import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
 
+import net.minecraftforge.cauldron.apiimpl.CauldronPluginInterface;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -202,6 +203,7 @@ public final class CraftServer implements Server {
         online.value = console.getPropertyManager().getBooleanProperty("online-mode", true);
 
         Bukkit.setServer(this);
+        new CauldronPluginInterface().install(); // Cauldron
 
         // Register all the Enchantments and PotionTypes now so we can stop new registration immediately after
         net.minecraft.enchantment.Enchantment.sharpness.getClass();
