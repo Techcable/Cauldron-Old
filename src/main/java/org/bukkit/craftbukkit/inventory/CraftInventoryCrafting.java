@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.inventory;
 
 
-import net.minecraftforge.cauldron.potion.CustomModRecipe;
+import net.minecraftforge.cauldron.inventory.CustomModRecipe;
 
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;

@@ -15,7 +15,7 @@
  import net.minecraft.item.ItemStack;
  import net.minecraft.item.crafting.ShapedRecipes;
  import net.minecraft.world.World;
-+import net.minecraftforge.cauldron.potion.CustomModRecipe;
++import net.minecraftforge.cauldron.inventory.CustomModRecipe;
  
  public class ShapedOreRecipe implements IRecipe
  {
