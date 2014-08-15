@@ -12,4 +12,11 @@ public interface CauldronApi {
      * @return ore dictionary interface
      */
     public BukkitOreDictionary getOreDictionary();
+
+    /**
+     * Get the fishing interface.
+     *
+     * @return the fishing interface
+     */
+    public Fishing getFishingInterface();
 }
