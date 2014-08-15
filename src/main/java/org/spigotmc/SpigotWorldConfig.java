@@ -21,7 +21,7 @@ public class SpigotWorldConfig
 
     public void init()
     {
-        this.verbose = getBoolean( "verbose", false );
+        this.verbose = getBoolean( "verbose", false ); // Cauldron - default false
 
         log( "-------- World Settings For [" + worldName + "] --------" );
         SpigotConfig.readConfig( SpigotWorldConfig.class, this );

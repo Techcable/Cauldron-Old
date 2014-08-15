@@ -13,13 +13,9 @@ import java.util.List;
 
 public class OreDictionaryInterface implements BukkitOreDictionary {
 
-    private static OreDictionaryEntry wrap(int id) {
-        return new OreDictionaryEntry(id);
-    }
-
     @Override
     public OreDictionaryEntry getOreEntry(String name) {
-        return wrap(OreDictionary.getOreID(name));
+        return OreDictionaryEntry.valueOf(OreDictionary.getOreID(name));
     }
 
     @Override
@@ -28,7 +24,7 @@ public class OreDictionaryInterface implements BukkitOreDictionary {
 
         ImmutableList.Builder<OreDictionaryEntry> builder = ImmutableList.builder();
         for (int id : ids) {
-            builder.add(wrap(id));
+            builder.add(OreDictionaryEntry.valueOf(id));
         }
 
         return builder.build();
