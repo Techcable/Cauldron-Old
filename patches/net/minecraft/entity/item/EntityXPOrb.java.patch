@@ -58,6 +58,15 @@
              }
          }
  
+@@ -210,7 +224,7 @@
+                 p_70100_1_.xpCooldown = 2;
+                 this.worldObj.playSoundAtEntity(p_70100_1_, "random.orb", 0.1F, 0.5F * ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.8F));
+                 p_70100_1_.onItemPickup(this, 1);
+-                p_70100_1_.addExperience(this.xpValue);
++                p_70100_1_.addExperience(CraftEventFactory.callPlayerExpChangeEvent(p_70100_1_, this.xpValue).getAmount());
+                 this.setDead();
+             }
+         }
 @@ -229,6 +243,88 @@
  
      public static int getXPSplit(int p_70527_0_)
