@@ -9,13 +9,36 @@ import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OreDictionaryInterface implements BukkitOreDictionary {
+    private Map<String, String> normalizedToCanonicalMap = null;
+
+    private void initializeMap() {
+        normalizedToCanonicalMap = new HashMap<String, String>();
+
+        for (String str : getAllOreNames()) {
+            if (str == null || str.isEmpty()) {
+                continue;
+            }
+            normalizedToCanonicalMap.put(Material.normalizeName(str), str);
+        }
+    }
 
     @Override
     public OreDictionaryEntry getOreEntry(String name) {
-        return OreDictionaryEntry.valueOf(OreDictionary.getOreID(name));
+        if (normalizedToCanonicalMap == null) {
+            initializeMap();
+        }
+
+        String canonical = normalizedToCanonicalMap.get(Material.normalizeName(name));
+        if (canonical == null) {
+            return null;
+        }
+
+        return OreDictionaryEntry.valueOf(OreDictionary.getOreID(canonical));
     }
 
     @Override
