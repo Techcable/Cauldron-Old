@@ -39,7 +39,7 @@ public class CauldronConfig extends ConfigBase
     // General settings
     public final BoolSetting loadChunkOnRequest = new BoolSetting(this, "settings.load-chunk-on-request", true, "Forces Chunk Loading on 'Provide' requests (speedup for mods that don't check if a chunk is loaded");
     public final BoolSetting loadChunkOnForgeTick = new BoolSetting(this, "settings.load-chunk-on-forge-tick", false, "Forces Chunk Loading during Forge Server Tick events");
-    public final BoolSetting checkEntityBoundingBoxes = new BoolSetting(this, "settings.check-entity-bounding-boxes", false, "Removes an entity that exceeds the max bounding box size.");
+    public final BoolSetting checkEntityBoundingBoxes = new BoolSetting(this, "settings.check-entity-bounding-boxes", true, "Removes a living entity that exceeds the max bounding box size.");
     public final BoolSetting checkEntityMaxSpeeds = new BoolSetting(this, "settings.check-entity-max-speeds", false, "Removes any entity that exceeds max speed.");
     public final IntSetting largeBoundingBoxLogSize = new IntSetting(this, "settings.entity-bounding-box-max-size", 1000, "Max size of an entity's bounding box before removing it (either being too large or bugged and 'moving' too fast)");
     public final IntSetting entityMaxSpeed = new IntSetting(this, "settings.entity-max-speed", 100, "Square of the max speed of an entity before removing it");

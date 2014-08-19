@@ -1,6 +1,12 @@
 --- ../src-base/minecraft/net/minecraft/entity/Entity.java
 +++ ../src-work/minecraft/net/minecraft/entity/Entity.java
-@@ -50,8 +50,45 @@
+@@ -45,13 +45,51 @@
+ import net.minecraft.world.Explosion;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldServer;
++import net.minecraftforge.cauldron.CauldronHooks;
+ import net.minecraftforge.common.IExtendedEntityProperties;
+ import net.minecraftforge.common.MinecraftForge;
  import net.minecraftforge.event.entity.EntityEvent;
  import net.minecraftforge.fluids.IFluidBlock;
  
@@ -46,7 +52,7 @@
      private static int nextEntityID;
      private int entityId;
      public double renderDistanceWeight;
-@@ -100,12 +137,12 @@
+@@ -100,12 +138,12 @@
      protected Random rand;
      public int ticksExisted;
      public int fireResistance;
@@ -62,7 +68,7 @@
      private double entityRiderPitchDelta;
      private double entityRiderYawDelta;
      public boolean addedToChunk;
-@@ -126,8 +163,10 @@
+@@ -126,8 +164,10 @@
      public int dimension;
      protected int teleportDirection;
      private boolean invulnerable;
@@ -74,7 +80,7 @@
      private static final String __OBFID = "CL_00001533";
      /** Forge: Used to store custom data for each entity. */
      private NBTTagCompound customEntityData;
-@@ -135,7 +174,16 @@
+@@ -135,7 +175,16 @@
      public ArrayList<EntityItem> capturedDrops = new ArrayList<EntityItem>();
      private UUID persistentID;
  
@@ -91,7 +97,7 @@
  
      public int getEntityId()
      {
-@@ -159,7 +207,7 @@
+@@ -159,7 +208,7 @@
          this.rand = new Random();
          this.fireResistance = 1;
          this.firstUpdate = true;
@@ -100,7 +106,7 @@
          this.myEntitySize = Entity.EnumEntitySize.SIZE_2;
          this.worldObj = p_i1582_1_;
          this.setPosition(0.0D, 0.0D, 0.0D);
-@@ -167,8 +215,15 @@
+@@ -167,8 +216,15 @@
          if (p_i1582_1_ != null)
          {
              this.dimension = p_i1582_1_.provider.dimensionId;
@@ -116,7 +122,7 @@
          this.dataWatcher = new DataWatcher(this);
          this.dataWatcher.addObject(0, Byte.valueOf((byte)0));
          this.dataWatcher.addObject(1, Short.valueOf((short)300));
-@@ -277,6 +332,41 @@
+@@ -277,6 +333,41 @@
  
      protected void setRotation(float p_70101_1_, float p_70101_2_)
      {
@@ -158,7 +164,7 @@
          this.rotationYaw = p_70101_1_ % 360.0F;
          this.rotationPitch = p_70101_2_ % 360.0F;
      }
-@@ -343,7 +433,7 @@
+@@ -343,7 +434,7 @@
  
              if (this.inPortal)
              {
@@ -167,7 +173,7 @@
                  {
                      if (this.ridingEntity == null && this.portalCounter++ >= i)
                      {
-@@ -457,7 +547,35 @@
+@@ -457,7 +548,35 @@
      {
          if (!this.isImmuneToFire)
          {
@@ -204,7 +210,7 @@
              this.setFire(15);
          }
      }
-@@ -492,6 +610,29 @@
+@@ -492,6 +611,30 @@
  
      public void moveEntity(double p_70091_1_, double p_70091_3_, double p_70091_5_)
      {
@@ -230,11 +236,12 @@
 +
 +        // CraftBukkit end
 +        org.bukkit.craftbukkit.SpigotTimings.entityMoveTimer.startTiming(); // Spigot
++        if (!CauldronHooks.checkEntitySpeed(this, p_70091_1_, p_70091_3_, p_70091_5_)) return; // Check for entities violating the speed limit
 +
          if (this.noClip)
          {
              this.boundingBox.offset(p_70091_1_, p_70091_3_, p_70091_5_);
-@@ -756,6 +897,35 @@
+@@ -756,6 +899,35 @@
              d10 = this.posY - d4;
              d11 = this.posZ - d5;
  
@@ -270,7 +277,7 @@
              if (this.canTriggerWalking() && !flag && this.ridingEntity == null)
              {
                  int j1 = MathHelper.floor_double(this.posX);
-@@ -798,6 +968,8 @@
+@@ -798,6 +970,8 @@
                  }
              }
  
@@ -279,7 +286,7 @@
              try
              {
                  this.func_145775_I();
-@@ -809,7 +981,8 @@
+@@ -809,7 +983,8 @@
                  this.addEntityCrashInfo(crashreportcategory);
                  throw new ReportedException(crashreport);
              }
@@ -289,7 +296,7 @@
              boolean flag2 = this.isWet();
  
              if (this.worldObj.func_147470_e(this.boundingBox.contract(0.001D, 0.001D, 0.001D)))
-@@ -820,8 +993,20 @@
+@@ -820,8 +995,20 @@
                  {
                      ++this.fire;
  
@@ -311,7 +318,7 @@
                          this.setFire(8);
                      }
                  }
-@@ -839,6 +1024,8 @@
+@@ -839,6 +1026,8 @@
  
              this.worldObj.theProfiler.endSection();
          }
@@ -320,7 +327,7 @@
      }
  
      protected String getSwimSound()
-@@ -867,7 +1054,11 @@
+@@ -867,7 +1056,11 @@
  
                          try
                          {
@@ -332,7 +339,7 @@
                          }
                          catch (Throwable throwable)
                          {
-@@ -928,6 +1119,7 @@
+@@ -928,6 +1121,7 @@
          return null;
      }
  
@@ -340,7 +347,7 @@
      protected void dealFireDamage(int p_70081_1_)
      {
          if (!this.isImmuneToFire)
-@@ -935,7 +1127,16 @@
+@@ -935,7 +1129,16 @@
              this.attackEntityFrom(DamageSource.inFire, (float)p_70081_1_);
          }
      }
@@ -357,7 +364,7 @@
      public final boolean isImmuneToFire()
      {
          return this.isImmuneToFire;
-@@ -1184,6 +1385,8 @@
+@@ -1184,6 +1387,8 @@
  
      public void onCollideWithPlayer(EntityPlayer p_70100_1_) {}
  
@@ -366,7 +373,7 @@
      public void applyEntityCollision(Entity p_70108_1_)
      {
          if (p_70108_1_.riddenByEntity != this && p_70108_1_.ridingEntity != this)
-@@ -1310,6 +1513,20 @@
+@@ -1310,6 +1515,20 @@
          {
              p_70109_1_.setTag("Pos", this.newDoubleNBTList(new double[] {this.posX, this.posY + (double)this.ySize, this.posZ}));
              p_70109_1_.setTag("Motion", this.newDoubleNBTList(new double[] {this.motionX, this.motionY, this.motionZ}));
@@ -387,7 +394,7 @@
              p_70109_1_.setTag("Rotation", this.newFloatNBTList(new float[] {this.rotationYaw, this.rotationPitch}));
              p_70109_1_.setFloat("FallDistance", this.fallDistance);
              p_70109_1_.setShort("Fire", (short)this.fire);
-@@ -1320,6 +1537,12 @@
+@@ -1320,6 +1539,12 @@
              p_70109_1_.setInteger("PortalCooldown", this.timeUntilPortal);
              p_70109_1_.setLong("UUIDMost", this.getUniqueID().getMostSignificantBits());
              p_70109_1_.setLong("UUIDLeast", this.getUniqueID().getLeastSignificantBits());
@@ -400,7 +407,7 @@
              if (customEntityData != null)
              {
                  p_70109_1_.setTag("ForgeData", customEntityData);
-@@ -1370,7 +1593,7 @@
+@@ -1370,7 +1595,7 @@
              this.motionX = nbttaglist1.func_150309_d(0);
              this.motionY = nbttaglist1.func_150309_d(1);
              this.motionZ = nbttaglist1.func_150309_d(2);
@@ -409,7 +416,7 @@
              if (Math.abs(this.motionX) > 10.0D)
              {
                  this.motionX = 0.0D;
-@@ -1385,7 +1608,7 @@
+@@ -1385,7 +1610,7 @@
              {
                  this.motionZ = 0.0D;
              }
@@ -418,7 +425,7 @@
              this.prevPosX = this.lastTickPosX = this.posX = nbttaglist.func_150309_d(0);
              this.prevPosY = this.lastTickPosY = this.posY = nbttaglist.func_150309_d(1);
              this.prevPosZ = this.lastTickPosZ = this.posZ = nbttaglist.func_150309_d(2);
-@@ -1436,6 +1659,76 @@
+@@ -1436,6 +1661,76 @@
              {
                  this.setPosition(this.posX, this.posY, this.posZ);
              }
@@ -495,7 +502,7 @@
          }
          catch (Throwable throwable)
          {
-@@ -1653,6 +1946,31 @@
+@@ -1653,6 +1948,31 @@
  
      public void mountEntity(Entity p_70078_1_)
      {
@@ -527,7 +534,7 @@
          this.entityRiderPitchDelta = 0.0D;
          this.entityRiderYawDelta = 0.0D;
  
-@@ -1660,6 +1978,20 @@
+@@ -1660,6 +1980,20 @@
          {
              if (this.ridingEntity != null)
              {
@@ -548,7 +555,7 @@
                  this.setLocationAndAngles(this.ridingEntity.posX, this.ridingEntity.boundingBox.minY + (double)this.ridingEntity.height, this.ridingEntity.posZ, this.rotationYaw, this.rotationPitch);
                  this.ridingEntity.riddenByEntity = null;
              }
-@@ -1668,22 +2000,61 @@
+@@ -1668,22 +2002,61 @@
          }
          else
          {
@@ -617,7 +624,7 @@
              this.ridingEntity = p_70078_1_;
              p_70078_1_.riddenByEntity = this;
          }
-@@ -1860,12 +2231,59 @@
+@@ -1860,12 +2233,59 @@
  
      public void onStruckByLightning(EntityLightningBolt p_70077_1_)
      {
@@ -679,7 +686,7 @@
          }
      }
  
-@@ -2038,36 +2456,62 @@
+@@ -2038,36 +2458,62 @@
          {
              this.worldObj.theProfiler.startSection("changeDimension");
              MinecraftServer minecraftserver = MinecraftServer.getServer();
@@ -758,7 +765,7 @@
              }
  
              this.isDead = true;
-@@ -2077,7 +2521,6 @@
+@@ -2077,7 +2523,6 @@
              this.worldObj.theProfiler.endSection();
          }
      }

@@ -61,7 +61,7 @@ public class CraftWorld implements World {
     private final net.minecraft.world.WorldServer world;
     private Environment environment;
     private final CraftServer server = (CraftServer) Bukkit.getServer();
-    private final ChunkGenerator generator;
+    private ChunkGenerator generator; // Cauldron - remove final to workaround TC bug
     private final List<BlockPopulator> populators = new ArrayList<BlockPopulator>();
     private final BlockMetadataStore blockMetadata = new BlockMetadataStore(this);
     private int monsterSpawn = -1;
@@ -628,6 +628,14 @@ public class CraftWorld implements World {
     public ChunkGenerator getGenerator() {
         return generator;
     }
+
+    // Cauldron start - allow generator to be set if null in order to fix TC issue with overworld
+    public void setGenerator(ChunkGenerator generator) {
+        if (this.generator == null) {
+            this.generator = generator;
+        }
+    }
+    // Cauldron end
 
     public List<BlockPopulator> getPopulators() {
         return populators;
