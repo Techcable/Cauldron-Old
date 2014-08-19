@@ -380,7 +380,7 @@
      public EntityPlayerMP createPlayerForUser(GameProfile p_148545_1_)
      {
          UUID uuid = EntityPlayer.func_146094_a(p_148545_1_);
-@@ -397,116 +612,305 @@
+@@ -397,116 +612,308 @@
          return new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(0), p_148545_1_, (ItemInWorldManager)object);
      }
  
@@ -641,7 +641,7 @@
 -        this.updateTimeAndWeatherForPlayer(p_72356_1_, worldserver1);
 -        this.syncPlayerInventory(p_72356_1_);
 -        Iterator iterator = p_72356_1_.getActivePotionEffects().iterator();
-+        this.transferPlayerToDimension(p_72356_1_, p_72356_2_, teleporter, TeleportCause.PLUGIN); // pass the cause as a plugin
++        this.transferPlayerToDimension(p_72356_1_, p_72356_2_, teleporter, TeleportCause.MOD); // use our mod cause
 +    }
  
 +    public void transferPlayerToDimension(EntityPlayerMP par1EntityPlayerMP, int par2, TeleportCause cause)
@@ -658,12 +658,15 @@
 +        // CraftBukkit start - Replaced the standard handling of portals with a more customised method.
 +        Location enter = par1EntityPlayerMP.getBukkitEntity().getLocation();
 +        Location exit = null;
-+        boolean useTravelAgent = false; // don't use agent for custom worlds or return from THE_END
++        boolean useTravelAgent = false;
 +
 +        if (exitWorld != null)
 +        {
 +            exit = this.calculateTarget(enter, exitWorld);
-+            useTravelAgent = true;
++            if (cause != cause.MOD) // don't use travel agent for custom dimensions
++            {
++                useTravelAgent = true;
++            }
 +        }
 +
 +        // allow forge mods to be the teleporter
@@ -697,7 +700,7 @@
 +            return;
 +        }
 +
-+        exit = event.useTravelAgent() ? event.getPortalTravelAgent().findOrCreate(event.getTo()) : event.getTo();
++        exit = event.useTravelAgent() && cause != cause.MOD ? event.getPortalTravelAgent().findOrCreate(event.getTo()) : event.getTo(); // make sure plugins don't override travelagent for mods
 +
 +        if (exit == null)
 +        {
@@ -745,7 +748,7 @@
      }
  
      public void transferEntityToWorld(Entity p_82448_1_, int p_82448_2_, WorldServer p_82448_3_, WorldServer p_82448_4_, Teleporter teleporter)
-@@ -592,6 +996,197 @@
+@@ -592,6 +999,197 @@
          p_82448_1_.setWorld(p_82448_4_);
      }
  
@@ -943,7 +946,7 @@
      public void sendPlayerInfoToAllPlayers()
      {
          if (++this.playerPingIndex > 600)
-@@ -599,11 +1194,13 @@
+@@ -599,11 +1197,13 @@
              this.playerPingIndex = 0;
          }
  
@@ -957,7 +960,7 @@
      }
  
      public void sendPacketToAllPlayers(Packet p_148540_1_)
-@@ -863,14 +1460,29 @@
+@@ -863,14 +1463,29 @@
      {
          for (int j = 0; j < this.playerEntityList.size(); ++j)
          {
@@ -988,7 +991,7 @@
                  if (d4 * d4 + d5 * d5 + d6 * d6 < p_148543_8_ * p_148543_8_)
                  {
                      entityplayermp.playerNetServerHandler.sendPacket(p_148543_11_);
-@@ -925,16 +1537,19 @@
+@@ -925,16 +1540,19 @@
  
          if (p_72354_2_.isRaining())
          {
@@ -1009,7 +1012,7 @@
          p_72385_1_.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(p_72385_1_.inventory.currentItem));
      }
  
-@@ -950,7 +1565,10 @@
+@@ -950,7 +1568,10 @@
  
      public String[] getAvailablePlayerDat()
      {
@@ -1021,7 +1024,7 @@
      }
  
      public void setWhiteListEnabled(boolean p_72371_1_)
-@@ -1019,12 +1637,31 @@
+@@ -1019,12 +1640,31 @@
  
      public void removeAllPlayers()
      {
