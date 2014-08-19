@@ -147,6 +147,7 @@ public class CauldronHooks
 
     public static boolean checkBoundingBoxSize(Entity entity, AxisAlignedBB aabb)
     {
+        if (!(entity instanceof EntityLivingBase) || entity instanceof EntityPlayer) return false; // only check living entities that are not players
         int logSize = MinecraftServer.cauldronConfig.largeBoundingBoxLogSize.getValue();
         if (logSize <= 0 || !MinecraftServer.cauldronConfig.checkEntityBoundingBoxes.getValue()) return false;
         int x = MathHelper.floor_double(aabb.minX);
