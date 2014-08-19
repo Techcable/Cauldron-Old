@@ -1,16 +1,17 @@
 --- ../src-base/minecraft/org/bukkit/event/player/PlayerTeleportEvent.java
 +++ ../src-work/minecraft/org/bukkit/event/player/PlayerTeleportEvent.java
-@@ -59,6 +59,13 @@
-          * Indicates the teleportation was caused by an event not covered by
-          * this enum
+@@ -55,7 +55,14 @@
+          * portal
           */
+         END_PORTAL,
 +        // Cauldron start - added cause for mods
-+        MOD,
-+        /**
+         /**
 +         * Indicates the teleportation was caused by a player entering a
 +         * Mod portal
 +         */
++        MOD,
 +        // Cauldron end
-         UNKNOWN;
-     }
- 
++        /**
+          * Indicates the teleportation was caused by an event not covered by
+          * this enum
+          */
