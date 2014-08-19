@@ -21,12 +21,12 @@ public interface BukkitOreDictionary {
     public static final int WILDCARD_VALUE = Short.MAX_VALUE;
 
     /**
-     * Get the OreDictionaryEntry for a given name. The name can be later
+     * Check the OreDictionaryEntry for a given name. The name can be later
      * retrieved using {@link #getOreName(OreDictionaryEntry)}, and having an
      * entry is required to call {@link #getDefinitions(OreDictionaryEntry)}.
      *
      * @param name name in the ore dictionary
-     * @return ore dictionary entry
+     * @return ore dictionary entry, or null if name is not present
      */
     public OreDictionaryEntry getOreEntry(String name);
 

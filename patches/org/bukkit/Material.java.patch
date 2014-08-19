@@ -1,9 +1,9 @@
 --- ../src-base/minecraft/org/bukkit/Material.java
 +++ ../src-work/minecraft/org/bukkit/Material.java
-@@ -2,6 +2,16 @@
- 
+@@ -3,6 +3,22 @@
  import java.lang.reflect.Constructor;
  import java.util.Map;
+ 
 +// Cauldron start
 +import java.lang.reflect.Array;
 +import java.lang.reflect.Constructor;
@@ -12,12 +12,18 @@
 +import java.util.ArrayList;
 +import java.util.Arrays;
 +import java.util.List;
++
++import org.bukkit.inventory.ItemStack;
++
 +import net.minecraftforge.common.util.EnumHelper;
++import net.minecraftforge.cauldron.api.inventory.BukkitOreDictionary;
++import net.minecraftforge.cauldron.api.inventory.OreDictionaryEntry;
 +// Cauldron end
- 
++
  import org.apache.commons.lang.Validate;
  import org.bukkit.map.MapView;
-@@ -418,14 +428,30 @@
+ import org.bukkit.material.Bed;
+@@ -418,14 +434,30 @@
      private final int id;
      private final Constructor<? extends MaterialData> ctor;
      private static Material[] byId = new Material[383];
@@ -49,7 +55,7 @@
      private Material(final int id, final int stack) {
          this(id, stack, MaterialData.class);
      }
-@@ -526,7 +552,7 @@
+@@ -526,7 +558,7 @@
       * @return true if this material is a block
       */
      public boolean isBlock() {
@@ -58,11 +64,48 @@
      }
  
      /**
-@@ -624,7 +650,169 @@
+@@ -615,16 +647,202 @@
+         } catch (NumberFormatException ex) {}
+ 
+         if (result == null) {
+-            String filtered = name.toUpperCase();
+-
+-            filtered = filtered.replaceAll("\\s+", "_").replaceAll("\\W", "");
++            // Cauldron start - extract to normalizeName()
++            String filtered = normalizeName(name);
+             result = BY_NAME.get(filtered);
++            // Cauldron end
+         }
+ 
++        // Cauldron start - Try the ore dictionary
++        if (result == null) {
++            BukkitOreDictionary dict = net.minecraftforge.cauldron.api.Cauldron.getOreDictionary();
++            OreDictionaryEntry entry = dict.getOreEntry(name);
++            if (entry != null) {
++                List<ItemStack> items = dict.getDefinitions(entry);
++                if (items.size() > 0) {
++                    // TODO check sanity on multiple item results
++                    ItemStack item = items.get(0);
++                    if (item.getDurability() == 0 || item.getDurability() == Short.MAX_VALUE) {
++                        result = item.getType();
++                    } else {
++                        // bad! we have an item with data!
++                    }
++                }
++            }
++        }
++        // Cauldron end
++
          return result;
      }
  
 +    /* ===============================  Cauldron START ============================= */
++
++    // use a normalize() function to ensure it is accessible after a round-trip
++    public static String normalizeName(String name) {
++        return name.toUpperCase().replaceAll("\\s+", "_").replaceAll("\\W", "");
++    }
++
 +    public static Material addMaterial(int id, boolean isBlock)
 +    {
 +        return addMaterial(id, "X" + String.valueOf(id), isBlock);
@@ -70,24 +113,23 @@
 +
 +    public static Material addMaterial(int id, String name, boolean isBlock) {
 +      if (byId[id] == null) {
-+        String material_name = name.toUpperCase().trim();
-+        material_name = material_name.replaceAll("[^A-Za-z0-9]", "_");
-+        Material material = (Material) EnumHelper.addEnum(Material.class, material_name, new Class[]{Integer.TYPE, Boolean.TYPE}, new Object[]{Integer.valueOf(id), isBlock});
++        String materialName = normalizeName(name);
++        Material material = (Material) EnumHelper.addEnum(Material.class, materialName, new Class[]{Integer.TYPE, Boolean.TYPE}, new Object[]{Integer.valueOf(id), isBlock});
 +        byId[id] = material;
-+        BY_NAME.put(material_name, material);
++        BY_NAME.put(materialName, material);
++        BY_NAME.put("X" + String.valueOf(id), material);
 +        return material;
 +      }
 +      return null;
 +    }
 +
 +    public static void setMaterialName(int id, String name, boolean flag) {
-+      String material_name = name.toUpperCase().trim();
-+      material_name = material_name.replaceAll("[^A-Za-z0-9]", "_");
++      String materialName = normalizeName(name);
 +
 +      if (byId[id] == null)
 +      {
-+        addMaterial(id, material_name, flag);
-+      } 
++        addMaterial(id, materialName, flag);
++      }
 +      else // replace existing enum
 +      {
 +          /* TODO: find out how to do this with Forge's EnumHelper (addEnum?) - used for enabling descriptive (vs numeric) Material names
@@ -169,7 +211,7 @@
 +      blankField(enumClass, "enumConstantDirectory");
 +      blankField(enumClass, "enumConstants");
 +    }
-+    
++
 +    public static <T extends Enum<?>> T replaceEnum(Class<T> enumType, String enumName, int ordinal,  Class<?>[] paramTypes, Object[] paramValues)
 +    {
 +      if (!isSetup) setup();

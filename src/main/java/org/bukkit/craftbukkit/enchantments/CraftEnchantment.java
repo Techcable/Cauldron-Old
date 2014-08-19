@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.enchantments;
 
+import org.apache.commons.lang.StringUtils; // Cauldron
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
@@ -57,6 +58,8 @@ public class CraftEnchantment extends Enchantment {
         return target.canApply(CraftItemStack.asNMSCopy(item));
     }
 
+    private String generatedName;
+
     @Override
     public String getName() {
         switch (target.effectId) {
@@ -109,9 +112,55 @@ public class CraftEnchantment extends Enchantment {
         case 62:
             return "LURE";
         default:
-            return "UNKNOWN_ENCHANT_" + target.effectId;
+            // Cauldron start - generate based on the class name
+            if (generatedName != null) {
+                return generatedName;
+            }
+
+            generatedName = generateName(target);
+            return generatedName;
+            // Cauldron end
         }
     }
+
+    // Cauldron start - generate based on the class name
+    private static String generateName(net.minecraft.enchantment.Enchantment target) {
+        String candidate;
+        Class<?> clz = target.getClass();
+        if (clz.getName().startsWith("net.minecraft")) {
+            // Keep pattern for vanilla
+            candidate = "UNKNOWN_ENCHANT_" + target.effectId;
+            return candidate;
+        }
+        candidate = clz.getSimpleName();
+        // Make a nice name when it starts with Enchantment (e.g. EnchantmentSlowFall)
+        if (StringUtils.containsIgnoreCase(candidate, "Enchantment")) {
+            candidate = candidate.replaceFirst("[E|e]nchantment", "");
+            // Add underscores at camelCase humps
+            candidate = candidate.replaceAll("([a-z])([A-Z])", "\1_\2").toUpperCase();
+            candidate = addSuffix(candidate.toUpperCase());
+            return candidate;
+        }
+        // fall back to the FQN if naming pattern is broken
+        candidate = clz.getName();
+        candidate = candidate.replaceAll("([a-z])([A-Z])", "\1_\2");
+        candidate = candidate.replaceAll("\\.", "_");
+        candidate = addSuffix(candidate.toUpperCase());
+        return candidate;
+    }
+
+    private static String addSuffix(String enchName) {
+        if (Enchantment.getByName(enchName) == null) {
+            return enchName;
+        }
+
+        int suffix = 2;
+        while (Enchantment.getByName(enchName + "_" + suffix) != null) {
+            suffix++;
+        }
+        return enchName + "_" + suffix;
+    }
+    // Cauldron end
 
     public static net.minecraft.enchantment.Enchantment getRaw(Enchantment enchantment) {
         if (enchantment instanceof EnchantmentWrapper) {
