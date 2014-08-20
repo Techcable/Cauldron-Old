@@ -24,8 +24,11 @@
  import java.util.Map;
  import java.util.Set;
  import java.util.jar.JarEntry;
-@@ -41,6 +52,8 @@
+@@ -39,8 +50,11 @@
+ import org.bukkit.plugin.RegisteredListener;
+ import org.bukkit.plugin.TimedRegisteredListener;
  import org.bukkit.plugin.UnknownDependencyException;
++import org.spigotmc.CustomTimingsHandler; // Spigot
  import org.yaml.snakeyaml.error.YAMLException;
  
 +import com.google.common.collect.ImmutableList;
@@ -33,7 +36,15 @@
  /**
   * Represents a Java plugin loader, allowing plugins in the form of .jar
   */
-@@ -59,43 +72,41 @@
+@@ -49,6 +63,7 @@
+     private final Pattern[] fileFilters = new Pattern[] { Pattern.compile("\\.jar$"), };
+     private final Map<String, Class<?>> classes = new HashMap<String, Class<?>>();
+     private final Map<String, PluginClassLoader> loaders = new LinkedHashMap<String, PluginClassLoader>();
++    public static final CustomTimingsHandler pluginParentTimer = new CustomTimingsHandler("** Plugins"); // Spigot
+ 
+     /**
+      * This class was not meant to be constructed explicitly
+@@ -59,43 +74,41 @@
          server = instance;
      }
  
@@ -87,7 +98,7 @@
                  file,
                  oldDataFolder,
                  dataFolder
-@@ -104,14 +115,19 @@
+@@ -104,14 +117,19 @@
  
          if (dataFolder.exists() && !dataFolder.isDirectory()) {
              throw new InvalidPluginException(String.format(
@@ -110,7 +121,7 @@
              if (loaders == null) {
                  throw new UnknownDependencyException(pluginName);
              }
-@@ -122,7 +138,7 @@
+@@ -122,7 +140,7 @@
              }
          }
  
@@ -119,7 +130,7 @@
          try {
              loader = new PluginClassLoader(this, getClass().getClassLoader(), description, dataFolder, file);
          } catch (InvalidPluginException ex) {
-@@ -136,6 +152,26 @@
+@@ -136,6 +154,26 @@
          return loader.plugin;
      }
  
@@ -146,16 +157,36 @@
      public PluginDescriptionFile getPluginDescription(File file) throws InvalidDescriptionException {
          Validate.notNull(file, "File cannot be null");
  
-@@ -297,7 +333,7 @@
+@@ -283,13 +321,19 @@
+                 }
+             }
+ 
++            final CustomTimingsHandler timings = new CustomTimingsHandler("Plugin: " + plugin.getDescription().getFullName() + " Event: " + listener.getClass().getName() + "::" + method.getName()+"("+eventClass.getSimpleName()+")", pluginParentTimer); // Spigot
+             EventExecutor executor = new EventExecutor() {
+                 public void execute(Listener listener, Event event) throws EventException {
+                     try {
+                         if (!eventClass.isAssignableFrom(event.getClass())) {
+                             return;
+                         }
++                        // Spigot start
++                        boolean isAsync = event.isAsynchronous();
++                        if (!isAsync) timings.startTiming();
+                         method.invoke(listener, event);
++                        if (!isAsync) timings.stopTiming();
++                        // Spigot end
+                     } catch (InvocationTargetException ex) {
+                         throw new EventException(ex.getCause());
+                     } catch (Throwable t) {
+@@ -297,7 +341,7 @@
                      }
                  }
              };
 -            if (useTimings) {
-+            if (true) { // Spigot - TRL handles useTimings check now
++            if (false) { // Spigot - RL handles useTimings check now
                  eventSet.add(new TimedRegisteredListener(listener, executor, eh.priority(), plugin, eh.ignoreCancelled()));
              } else {
                  eventSet.add(new RegisteredListener(listener, executor, eh.priority(), plugin, eh.ignoreCancelled()));
-@@ -362,4 +398,44 @@
+@@ -362,4 +406,44 @@
              }
          }
      }

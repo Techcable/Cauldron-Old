@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/EntityLivingBase.java
 +++ ../src-work/minecraft/net/minecraft/entity/EntityLivingBase.java
-@@ -50,14 +50,27 @@
+@@ -50,14 +50,28 @@
  import net.minecraft.world.World;
  import net.minecraft.world.WorldServer;
  import net.minecraftforge.common.ForgeHooks;
@@ -14,6 +14,7 @@
 +import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 +import org.bukkit.event.entity.EntityRegainHealthEvent;
 +// CraftBukkit end
++import org.bukkit.craftbukkit.SpigotTimings; // Spigot
 +import org.bukkit.craftbukkit.inventory.CraftItemStack; // Cauldron
 +
 +import com.google.common.base.Function;
@@ -30,7 +31,7 @@
      private final ItemStack[] previousEquipment = new ItemStack[5];
      public boolean isSwingInProgress;
      public int swingProgressInt;
-@@ -83,7 +96,7 @@
+@@ -83,7 +97,7 @@
      public float rotationYawHead;
      public float prevRotationYawHead;
      public float jumpMovementFactor = 0.02F;
@@ -39,7 +40,7 @@
      protected int recentlyHit;
      protected boolean dead;
      protected int entityAge;
-@@ -93,7 +106,7 @@
+@@ -93,7 +107,7 @@
      protected float field_70763_ax;
      protected float field_70741_aB;
      protected int scoreValue;
@@ -48,7 +49,7 @@
      protected boolean isJumping;
      public float moveStrafing;
      public float moveForward;
-@@ -104,21 +117,26 @@
+@@ -104,21 +118,26 @@
      protected double newPosZ;
      protected double newRotationYaw;
      protected double newRotationPitch;
@@ -78,7 +79,7 @@
          this.preventEntitySpawning = true;
          this.field_70770_ap = (float)(Math.random() + 1.0D) * 0.01F;
          this.setPosition(this.posX, this.posY, this.posZ);
-@@ -173,7 +191,18 @@
+@@ -173,7 +192,18 @@
              }
              else if (!this.worldObj.isRemote && this.fallDistance > 3.0F)
              {
@@ -98,7 +99,7 @@
              }
  
              block.onFallenUpon(this.worldObj, i, j, k, this, this.fallDistance);
-@@ -234,7 +263,13 @@
+@@ -234,7 +264,13 @@
          }
          else
          {
@@ -113,7 +114,7 @@
          }
  
          if (this.isEntityAlive() && this.isWet())
-@@ -299,6 +334,22 @@
+@@ -299,6 +335,22 @@
          this.worldObj.theProfiler.endSection();
      }
  
@@ -136,7 +137,7 @@
      public boolean isChild()
      {
          return false;
-@@ -308,22 +359,21 @@
+@@ -308,22 +360,21 @@
      {
          ++this.deathTime;
  
@@ -168,7 +169,7 @@
              this.setDead();
  
              for (i = 0; i < 20; ++i)
-@@ -485,6 +535,23 @@
+@@ -485,6 +536,23 @@
              }
          }
  
@@ -192,7 +193,7 @@
          if (p_70037_1_.hasKey("HealF", 99))
          {
              this.setHealth(p_70037_1_.getFloat("HealF"));
-@@ -614,12 +681,14 @@
+@@ -614,12 +682,14 @@
  
      public boolean isPotionActive(int p_82165_1_)
      {
@@ -209,7 +210,7 @@
      }
  
      public PotionEffect getActivePotionEffect(Potion p_70660_1_)
-@@ -710,23 +779,66 @@
+@@ -710,23 +780,66 @@
          }
      }
  
@@ -277,7 +278,7 @@
          this.dataWatcher.updateObject(6, Float.valueOf(MathHelper.clamp_float(p_70606_1_, 0.0F, this.getMaxHealth())));
      }
  
-@@ -755,7 +867,8 @@
+@@ -755,7 +868,8 @@
              }
              else
              {
@@ -287,7 +288,7 @@
                  {
                      this.getEquipmentInSlot(4).damageItem((int)(p_70097_2_ * 4.0F + this.rand.nextFloat() * p_70097_2_ * 2.0F), this);
                      p_70097_2_ *= 0.75F;
-@@ -771,16 +884,26 @@
+@@ -771,16 +885,26 @@
                          return false;
                      }
  
@@ -317,7 +318,7 @@
                      this.hurtTime = this.maxHurtTime = 10;
                  }
  
-@@ -936,6 +1059,21 @@
+@@ -936,6 +1060,21 @@
  
              if (!ForgeHooks.onLivingDrops(this, p_70645_1_, capturedDrops, i, recentlyHit > 0, j))
              {
@@ -339,7 +340,7 @@
                  for (EntityItem item : capturedDrops)
                  {
                      worldObj.spawnEntityInWorld(item);
-@@ -1008,8 +1146,17 @@
+@@ -1008,8 +1147,17 @@
  
          if (i > 0)
          {
@@ -358,7 +359,7 @@
              int j = MathHelper.floor_double(this.posX);
              int k = MathHelper.floor_double(this.posY - 0.20000000298023224D - (double)this.yOffset);
              int l = MathHelper.floor_double(this.posZ);
-@@ -1063,7 +1210,7 @@
+@@ -1063,7 +1211,7 @@
          {
              int i = 25 - this.getTotalArmorValue();
              float f1 = p_70655_2_ * (float)i;
@@ -367,7 +368,7 @@
              p_70655_2_ = f1 / 25.0F;
          }
  
-@@ -1087,7 +1234,8 @@
+@@ -1087,7 +1235,8 @@
              int j;
              float f1;
  
@@ -377,7 +378,7 @@
              {
                  i = (this.getActivePotionEffect(Potion.resistance).getAmplifier() + 1) * 5;
                  j = 25 - i;
-@@ -1120,26 +1268,134 @@
+@@ -1120,26 +1269,134 @@
          }
      }
  
@@ -526,7 +527,25 @@
      }
  
      public CombatTracker func_110142_aN()
-@@ -1619,7 +1875,8 @@
+@@ -1556,6 +1813,7 @@
+     public void onUpdate()
+     {
+         if (ForgeHooks.onLivingUpdate(this)) return;
++        SpigotTimings.timerEntityBaseTick.startTiming(); // Spigot
+         super.onUpdate();
+ 
+         if (!this.worldObj.isRemote)
+@@ -1606,7 +1864,9 @@
+             }
+         }
+ 
++        SpigotTimings.timerEntityBaseTick.stopTiming(); // Spigot
+         this.onLivingUpdate();
++        SpigotTimings.timerEntityTickRest.startTiming(); // Spigot
+         double d0 = this.posX - this.prevPosX;
+         double d1 = this.posZ - this.prevPosZ;
+         float f = (float)(d0 * d0 + d1 * d1);
+@@ -1619,7 +1879,8 @@
          {
              f3 = 1.0F;
              f2 = (float)Math.sqrt((double)f) * 3.0F;
@@ -536,7 +555,49 @@
          }
  
          if (this.swingProgress > 0.0F)
-@@ -1827,17 +2084,37 @@
+@@ -1680,6 +1941,7 @@
+ 
+         this.worldObj.theProfiler.endSection();
+         this.field_70764_aw += f2;
++        SpigotTimings.timerEntityTickRest.stopTiming(); // Spigot
+     }
+ 
+     protected float func_110146_f(float p_110146_1_, float p_110146_2_)
+@@ -1755,6 +2017,7 @@
+             this.motionZ = 0.0D;
+         }
+ 
++        SpigotTimings.timerEntityAI.startTiming(); // Spigot
+         this.worldObj.theProfiler.startSection("ai");
+ 
+         if (this.isMovementBlocked())
+@@ -1780,6 +2043,7 @@
+                 this.rotationYawHead = this.rotationYaw;
+             }
+         }
++        SpigotTimings.timerEntityAI.stopTiming(); // Spigot
+ 
+         this.worldObj.theProfiler.endSection();
+         this.worldObj.theProfiler.startSection("jump");
+@@ -1809,13 +2073,17 @@
+         this.moveStrafing *= 0.98F;
+         this.moveForward *= 0.98F;
+         this.randomYawVelocity *= 0.9F;
++        SpigotTimings.timerEntityAIMove.startTiming(); // Spigot
+         this.moveEntityWithHeading(this.moveStrafing, this.moveForward);
++        SpigotTimings.timerEntityAIMove.stopTiming(); // Spigot
+         this.worldObj.theProfiler.endSection();
+         this.worldObj.theProfiler.startSection("push");
+ 
+         if (!this.worldObj.isRemote)
+         {
++            SpigotTimings.timerEntityAICollision.startTiming(); // Spigot
+             this.collideWithNearbyEntities();
++            SpigotTimings.timerEntityAICollision.stopTiming(); // Spigot
+         }
+ 
+         this.worldObj.theProfiler.endSection();
+@@ -1827,17 +2095,37 @@
      {
          List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
  

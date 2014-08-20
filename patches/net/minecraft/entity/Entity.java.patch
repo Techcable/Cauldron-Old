@@ -235,8 +235,8 @@
 +        }
 +
 +        // CraftBukkit end
-+        org.bukkit.craftbukkit.SpigotTimings.entityMoveTimer.startTiming(); // Spigot
 +        if (!CauldronHooks.checkEntitySpeed(this, p_70091_1_, p_70091_3_, p_70091_5_)) return; // Check for entities violating the speed limit
++        org.bukkit.craftbukkit.SpigotTimings.entityMoveTimer.startTiming(); // Spigot
 +
          if (this.noClip)
          {

@@ -260,9 +260,11 @@ public class CraftWorld implements World {
         net.minecraft.world.chunk.Chunk chunk = world.theChunkProviderServer.loadedChunkHashMap.get(LongHash.toLong(x, z));
 
         if (chunk == null) {
+            world.timings.syncChunkLoadTimer.startTiming(); // Spigot
             chunk = world.theChunkProviderServer.safeLoadChunk(x, z);
 
             chunkLoadPostProcess(chunk, x, z);
+            world.timings.syncChunkLoadTimer.stopTiming(); // Spigot
         }
         return chunk != null;
     }

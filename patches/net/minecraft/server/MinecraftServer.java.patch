@@ -434,7 +434,7 @@
      public void run()
      {
          try
-@@ -392,45 +625,43 @@
+@@ -392,45 +625,41 @@
                  this.field_147147_p.func_151315_a(new ChatComponentText(this.motd));
                  this.field_147147_p.func_151321_a(new ServerStatusResponse.MinecraftProtocolVersionIdentifier("1.7.10", 5));
                  this.func_147138_a(this.field_147147_p);
@@ -493,9 +493,7 @@
  
 -                    Thread.sleep(Math.max(1L, 50L - l));
 +                    lastTick = curTime;
-+                    SpigotTimings.serverTickTimer.startTiming();
 +                    this.tick();
-+                    SpigotTimings.serverTickTimer.stopTiming();
                      this.serverIsRunning = true;
                  }
 +
@@ -503,7 +501,7 @@
                  FMLCommonHandler.instance().handleServerStopping();
                  FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
              }
-@@ -448,6 +679,14 @@
+@@ -448,6 +677,14 @@
          catch (Throwable throwable1)
          {
              logger.error("Encountered an unexpected exception", throwable1);
@@ -518,7 +516,7 @@
              CrashReport crashreport = null;
  
              if (throwable1 instanceof ReportedException)
-@@ -477,6 +716,7 @@
+@@ -477,6 +714,7 @@
          {
              try
              {
@@ -526,7 +524,7 @@
                  this.stopServer();
                  this.serverStopped = true;
              }
-@@ -486,6 +726,16 @@
+@@ -486,6 +724,16 @@
              }
              finally
              {
@@ -543,9 +541,11 @@
                  FMLCommonHandler.instance().handleServerStopped();
                  this.serverStopped = true;
                  this.systemExitNow();
-@@ -533,7 +783,9 @@
+@@ -532,8 +780,11 @@
+ 
      public void tick()
      {
++        SpigotTimings.serverTickTimer.startTiming(); // Spigot
          long i = System.nanoTime();
 +        callingForgeTick = true; // Cauldron start - handle loadOnProviderRequests during forge tick event
          FMLCommonHandler.instance().onPreServerTick();
@@ -553,13 +553,14 @@
          ++this.tickCounter;
  
          if (this.startProfiling)
-@@ -562,11 +814,18 @@
+@@ -562,12 +813,21 @@
              this.field_147147_p.func_151318_b().func_151330_a(agameprofile);
          }
  
 -        if (this.tickCounter % 900 == 0)
 +        if ((this.autosavePeriod > 0) && ((this.tickCounter % this.autosavePeriod) == 0))   // CraftBukkit
          {
++            SpigotTimings.worldSaveTimer.startTiming(); // Spigot
              this.theProfiler.startSection("save");
              this.serverConfigManager.saveAllPlayerData();
 -            this.saveAllWorlds(true);
@@ -572,9 +573,11 @@
 +                e.printStackTrace();
 +            }
              this.theProfiler.endSection();
++            SpigotTimings.worldSaveTimer.stopTiming(); // Spigot
          }
  
-@@ -575,25 +834,51 @@
+         this.theProfiler.startSection("tallying");
+@@ -575,25 +835,57 @@
          this.theProfiler.endSection();
          this.theProfiler.startSection("snooper");
  
@@ -595,6 +598,8 @@
 +        callingForgeTick = true; // Cauldron start - handle loadOnProviderRequests during forge tick event
          FMLCommonHandler.instance().onPostServerTick();
 +        callingForgeTick = false; // Cauldron end
++        SpigotTimings.serverTickTimer.stopTiming(); // Spigot
++        org.spigotmc.CustomTimingsHandler.tick(); // Spigot
      }
  
      public void updateTimeLightAndEntities()
@@ -603,18 +608,21 @@
 +        SpigotTimings.schedulerTimer.startTiming(); // Spigot
 +        // CraftBukkit start
 +        this.server.getScheduler().mainThreadHeartbeat(this.tickCounter);
++        SpigotTimings.schedulerTimer.stopTiming(); // Spigot
 +
 +        // Run tasks that are waiting on processing
++        SpigotTimings.processQueueTimer.startTiming(); // Spigot
 +        while (!processQueue.isEmpty())
 +        {
 +            processQueue.remove().run();
 +        }
++        SpigotTimings.processQueueTimer.stopTiming(); // Spigot
 +
-+        SpigotTimings.schedulerTimer.stopTiming(); // Spigot
 +        SpigotTimings.chunkIOTickTimer.startTiming(); // Spigot
          net.minecraftforge.common.chunkio.ChunkIOExecutor.tick();
 +        SpigotTimings.chunkIOTickTimer.stopTiming(); // Spigot
 +
++        SpigotTimings.timeUpdateTimer.startTiming(); // Spigot
 +        // Send time updates to everyone, it will get the right time from the world the player is in.
 +        if (this.tickCounter % 20 == 0)
 +        {
@@ -624,11 +632,12 @@
 +                entityplayermp.playerNetServerHandler.sendPacket(new S03PacketTimeUpdate(entityplayermp.worldObj.getTotalWorldTime(), entityplayermp.getPlayerTime(), entityplayermp.worldObj.getGameRules().getGameRuleBooleanValue("doDaylightCycle"))); // Add support for per player time
 +            }
 +        }
++        SpigotTimings.timeUpdateTimer.stopTiming(); // Spigot
 +
          int i;
  
          Integer[] ids = DimensionManager.getIDs(this.tickCounter % 200 == 0);
-@@ -602,19 +887,21 @@
+@@ -602,19 +894,21 @@
              int id = ids[x];
              long j = System.nanoTime();
  
@@ -653,7 +662,13 @@
  
                  this.theProfiler.startSection("tick");
                  FMLCommonHandler.instance().onPreWorldTick(worldserver);
-@@ -626,7 +913,17 @@
+@@ -622,22 +916,46 @@
+ 
+                 try
+                 {
++                    worldserver.timings.doTick.startTiming(); // Spigot
+                     worldserver.tick();
++                    worldserver.timings.doTick.stopTiming(); // Spigot
                  }
                  catch (Throwable throwable1)
                  {
@@ -672,7 +687,12 @@
                      worldserver.addWorldInfoToCrashReport(crashreport);
                      throw new ReportedException(crashreport);
                  }
-@@ -637,7 +934,17 @@
+ 
+                 try
+                 {
++                    worldserver.timings.tickEntities.startTiming(); // Spigot
+                     worldserver.updateEntities();
++                    worldserver.timings.tickEntities.stopTiming(); // Spigot
                  }
                  catch (Throwable throwable)
                  {
@@ -691,7 +711,7 @@
                      worldserver.addWorldInfoToCrashReport(crashreport);
                      throw new ReportedException(crashreport);
                  }
-@@ -645,10 +952,12 @@
+@@ -645,10 +963,12 @@
                  FMLCommonHandler.instance().onPostWorldTick(worldserver);
                  this.theProfiler.endSection();
                  this.theProfiler.startSection("tracker");
@@ -705,7 +725,7 @@
  
              worldTickTimes.get(id)[this.tickCounter % 100] = System.nanoTime() - j;
          }
-@@ -656,16 +965,22 @@
+@@ -656,15 +976,21 @@
          this.theProfiler.endStartSection("dim_unloading");
          DimensionManager.unloadWorlds(worldTickTimes);
          this.theProfiler.endStartSection("connection");
@@ -717,18 +737,17 @@
          this.serverConfigManager.sendPlayerInfoToAllPlayers();
 +        SpigotTimings.playerListTimer.stopTiming(); // Spigot
          this.theProfiler.endStartSection("tickables");
-+        SpigotTimings.tickablesTimer.startTiming(); // Spigot
  
++        SpigotTimings.tickablesTimer.startTiming(); // Spigot
          for (i = 0; i < this.tickables.size(); ++i)
          {
              ((IUpdatePlayerListBox)this.tickables.get(i)).update();
          }
- 
 +        SpigotTimings.tickablesTimer.stopTiming(); // Spigot
+ 
          this.theProfiler.endSection();
      }
- 
-@@ -699,6 +1014,13 @@
+@@ -699,6 +1025,13 @@
  
      public WorldServer worldServerForDimension(int p_71218_1_)
      {
@@ -742,7 +761,7 @@
          WorldServer ret = DimensionManager.getWorld(p_71218_1_);
          if (ret == null)
          {
-@@ -784,13 +1106,14 @@
+@@ -784,13 +1117,14 @@
  
      public List getPossibleCompletions(ICommandSender p_71248_1_, String p_71248_2_)
      {
@@ -761,7 +780,7 @@
  
              if (list != null)
              {
-@@ -798,40 +1121,25 @@
+@@ -798,40 +1132,25 @@
  
                  while (iterator.hasNext())
                  {
@@ -810,7 +829,7 @@
      }
  
      public static MinecraftServer getServer()
-@@ -1034,7 +1342,7 @@
+@@ -1034,7 +1353,7 @@
  
      public boolean isServerInOnlineMode()
      {
@@ -819,7 +838,7 @@
      }
  
      public void setOnlineMode(boolean p_71229_1_)
-@@ -1124,7 +1432,7 @@
+@@ -1124,7 +1443,7 @@
  
      public NetworkSystem func_147137_ag()
      {
@@ -828,7 +847,7 @@
      }
  
      @SideOnly(Side.CLIENT)
-@@ -1259,8 +1567,11 @@
+@@ -1259,8 +1578,11 @@
      {
          Bootstrap.func_151354_b();
  
@@ -840,7 +859,7 @@
              boolean flag = true;
              String s = null;
              String s1 = ".";
-@@ -1356,16 +1667,34 @@
+@@ -1356,16 +1678,34 @@
              {
                  dedicatedserver.setGuiEnabled();
              }
@@ -881,7 +900,7 @@
          }
          catch (Exception exception)
          {
-@@ -1400,15 +1729,70 @@
+@@ -1400,15 +1740,70 @@
      @SideOnly(Side.SERVER)
      public String getPlugins()
      {
@@ -957,7 +976,7 @@
      }
  
      @SideOnly(Side.SERVER)
-@@ -1455,9 +1839,213 @@
+@@ -1455,9 +1850,213 @@
          return this.serverStopped;
      }
  

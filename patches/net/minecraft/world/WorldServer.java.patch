@@ -145,7 +145,7 @@
          this.theProfiler.endStartSection("chunkSource");
          this.chunkProvider.unloadQueuedChunks();
          int j = this.calculateSkylightSubtracted(1.0F);
-@@ -177,23 +266,36 @@
+@@ -177,23 +266,40 @@
              this.worldInfo.setWorldTime(this.worldInfo.getWorldTime() + 1L);
          }
  
@@ -179,10 +179,14 @@
 +        timings.doSounds.startTiming(); // Spigot
          this.func_147488_Z();
 +        timings.doSounds.stopTiming(); // Spigot
++
++        timings.doChunkGC.startTiming(); // Spigot
++        this.getWorld().processChunkGC(); // CraftBukkit
++        timings.doChunkGC.stopTiming(); // Spigot
      }
  
      public BiomeGenBase.SpawnListEntry spawnRandomCreature(EnumCreatureType p_73057_1_, int p_73057_2_, int p_73057_3_, int p_73057_4_)
-@@ -212,7 +314,7 @@
+@@ -212,7 +318,7 @@
          {
              EntityPlayer entityplayer = (EntityPlayer)iterator.next();
  
@@ -191,7 +195,7 @@
              {
                  this.allPlayersSleeping = false;
                  break;
-@@ -240,7 +342,26 @@
+@@ -240,7 +346,26 @@
  
      private void resetRainAndThunder()
      {
@@ -219,7 +223,7 @@
      }
  
      public boolean areAllPlayersAsleep()
-@@ -248,19 +369,28 @@
+@@ -248,19 +373,28 @@
          if (this.allPlayersSleeping && !this.isRemote)
          {
              Iterator iterator = this.playerEntities.iterator();
@@ -251,7 +255,7 @@
              return false;
          }
          else
-@@ -302,15 +432,29 @@
+@@ -302,15 +436,29 @@
          super.func_147456_g();
          int i = 0;
          int j = 0;
@@ -287,7 +291,7 @@
              this.func_147467_a(k, l, chunk);
              this.theProfiler.endStartSection("tickChunk");
              chunk.func_150804_b(false);
-@@ -346,12 +490,34 @@
+@@ -346,12 +494,34 @@
  
                  if (this.isBlockFreezableNaturally(j1 + k, l1 - 1, k1 + l))
                  {
@@ -324,7 +328,7 @@
                  }
  
                  if (this.isRaining())
-@@ -375,20 +541,21 @@
+@@ -375,20 +545,21 @@
  
                  if (extendedblockstorage != null && extendedblockstorage.getNeedsRandomTick())
                  {
@@ -353,7 +357,7 @@
                          }
                      }
                  }
-@@ -396,6 +563,15 @@
+@@ -396,6 +567,15 @@
  
              this.theProfiler.endSection();
          }
@@ -369,7 +373,7 @@
      }
  
      public boolean isBlockTickScheduledThisTick(int p_147477_1_, int p_147477_2_, int p_147477_3_, Block p_147477_4_)
-@@ -474,7 +650,7 @@
+@@ -474,7 +654,7 @@
  
      public void updateEntities()
      {
@@ -378,7 +382,7 @@
          {
              if (this.updateEntityTick++ >= 1200)
              {
-@@ -506,7 +682,17 @@
+@@ -506,7 +686,17 @@
          {
              if (i > 1000)
              {
@@ -397,7 +401,7 @@
              }
  
              this.theProfiler.startSection("cleaning");
-@@ -651,7 +837,36 @@
+@@ -651,7 +841,36 @@
      protected IChunkProvider createChunkProvider()
      {
          IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
@@ -435,7 +439,7 @@
          return this.theChunkProviderServer;
      }
  
-@@ -659,29 +874,31 @@
+@@ -659,29 +878,31 @@
      {
          ArrayList arraylist = new ArrayList();
  
@@ -481,7 +485,7 @@
          return arraylist;
      }
  
-@@ -733,6 +950,29 @@
+@@ -733,6 +954,29 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 0;
  
@@ -511,7 +515,7 @@
              if (chunkposition != null)
              {
                  i = chunkposition.chunkPosX;
-@@ -875,6 +1115,20 @@
+@@ -875,6 +1119,20 @@
  
      public boolean addWeatherEffect(Entity p_72942_1_)
      {
@@ -532,7 +536,7 @@
          if (super.addWeatherEffect(p_72942_1_))
          {
              this.mcServer.getConfigurationManager().sendToAllNear(p_72942_1_.posX, p_72942_1_.posY, p_72942_1_.posZ, 512.0D, this.provider.dimensionId, new S2CPacketSpawnGlobalEntity(p_72942_1_));
-@@ -893,11 +1147,22 @@
+@@ -893,11 +1151,22 @@
  
      public Explosion newExplosion(Entity p_72885_1_, double p_72885_2_, double p_72885_4_, double p_72885_6_, float p_72885_8_, boolean p_72885_9_, boolean p_72885_10_)
      {
@@ -555,7 +559,7 @@
  
          if (!p_72885_10_)
          {
-@@ -976,6 +1241,7 @@
+@@ -976,6 +1245,7 @@
          boolean flag = this.isRaining();
          super.updateWeather();
  
@@ -563,7 +567,7 @@
          if (this.prevRainingStrength != this.rainingStrength)
          {
              this.mcServer.getConfigurationManager().sendPacketToAllPlayersInDimension(new S2BPacketChangeGameState(7, this.rainingStrength), this.provider.dimensionId);
-@@ -1000,6 +1266,20 @@
+@@ -1000,6 +1270,20 @@
              this.mcServer.getConfigurationManager().sendPacketToAllPlayers(new S2BPacketChangeGameState(7, this.rainingStrength));
              this.mcServer.getConfigurationManager().sendPacketToAllPlayers(new S2BPacketChangeGameState(8, this.thunderingStrength));
          }
@@ -584,7 +588,7 @@
      }
  
      protected int func_152379_p()
-@@ -1053,14 +1333,41 @@
+@@ -1053,14 +1337,41 @@
      }
  
      static class ServerBlockEventList extends ArrayList

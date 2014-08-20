@@ -1,20 +1,32 @@
 package org.bukkit.craftbukkit;
 
+import com.google.common.collect.Maps;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.server.*;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
+
+import org.bukkit.plugin.java.JavaPluginLoader;
 import org.spigotmc.CustomTimingsHandler;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.craftbukkit.scheduler.CraftTask;
 
 public class SpigotTimings {
 
     public static final CustomTimingsHandler serverTickTimer = new CustomTimingsHandler("** Full Server Tick");
     public static final CustomTimingsHandler playerListTimer = new CustomTimingsHandler("Player List");
-    public static final CustomTimingsHandler connectionTimer = new CustomTimingsHandler("Player Tick");
+    public static final CustomTimingsHandler connectionTimer = new CustomTimingsHandler("Connection Handler");
     public static final CustomTimingsHandler tickablesTimer = new CustomTimingsHandler("Tickables");
     public static final CustomTimingsHandler schedulerTimer = new CustomTimingsHandler("Scheduler");
     public static final CustomTimingsHandler chunkIOTickTimer = new CustomTimingsHandler("ChunkIOTick");
-    public static final CustomTimingsHandler syncChunkLoadTimer = new CustomTimingsHandler("syncChunkLoad");
+    public static final CustomTimingsHandler timeUpdateTimer = new CustomTimingsHandler("Time Update");
+    public static final CustomTimingsHandler serverCommandTimer = new CustomTimingsHandler("Server Command");
+    public static final CustomTimingsHandler worldSaveTimer = new CustomTimingsHandler("World Save");
 
     public static final CustomTimingsHandler entityMoveTimer = new CustomTimingsHandler("** entityMove");
     public static final CustomTimingsHandler tickEntityTimer = new CustomTimingsHandler("** tickEntity");
@@ -26,6 +38,9 @@ public class SpigotTimings {
     public static final CustomTimingsHandler timerEntityAICollision = new CustomTimingsHandler("** livingEntityAICollision");
     public static final CustomTimingsHandler timerEntityAIMove = new CustomTimingsHandler("** livingEntityAIMove");
     public static final CustomTimingsHandler timerEntityTickRest = new CustomTimingsHandler("** livingEntityTickRest");
+
+    public static final CustomTimingsHandler processQueueTimer = new CustomTimingsHandler("processQueue");
+    public static final CustomTimingsHandler schedulerSyncTimer = new CustomTimingsHandler("** Scheduler - Sync Tasks", JavaPluginLoader.pluginParentTimer);
 
     public static final CustomTimingsHandler playerCommandTimer = new CustomTimingsHandler("** playerCommand");
 
@@ -43,8 +58,22 @@ public class SpigotTimings {
      * @return
      */
     public static CustomTimingsHandler getPluginTaskTimings(BukkitTask task, long period) {
-        String plugin = task.getOwner().getDescription().getFullName();
-        String name = "Task: " + plugin + " Runnable: " + ( (CraftTask) task ).getTaskClass().getSimpleName();
+        if (!task.isSync()) {
+            return null;
+        }
+        String plugin;
+        final CraftTask ctask = (CraftTask) task;
+
+        if (task.getOwner() != null) {
+            plugin = task.getOwner().getDescription().getFullName();
+        } else if (ctask.timingName != null) {
+            plugin = "CraftScheduler";
+        } else {
+            plugin = "Unknown";
+        }
+        String taskname = ctask.getTaskName();
+
+        String name = "Task: " + plugin + " Runnable: " + taskname;
         if (period > 0) {
             name += "(interval:" + period +")";
         } else {
@@ -52,7 +81,7 @@ public class SpigotTimings {
         }
         CustomTimingsHandler result = pluginTaskTimingMap.get(name);
         if (result == null) {
-            result = new CustomTimingsHandler(name);
+            result = new CustomTimingsHandler(name, SpigotTimings.schedulerSyncTimer);
             pluginTaskTimingMap.put(name, result);
         }
         return result;
@@ -63,7 +92,7 @@ public class SpigotTimings {
      * @param entity
      * @return
      */
-    public static CustomTimingsHandler getEntityTimings(net.minecraft.entity.Entity entity) {
+    public static CustomTimingsHandler getEntityTimings(Entity entity) {
         String entityType = entity.getClass().getSimpleName();
         CustomTimingsHandler result = entityTypeTimingMap.get(entityType);
         if (result == null) {
@@ -78,7 +107,7 @@ public class SpigotTimings {
      * @param entity
      * @return
      */
-    public static CustomTimingsHandler getTileEntityTimings(net.minecraft.tileentity.TileEntity entity) {
+    public static CustomTimingsHandler getTileEntityTimings(TileEntity entity) {
         String entityType = entity.getClass().getSimpleName();
         CustomTimingsHandler result = tileEntityTypeTimingMap.get(entityType);
         if (result == null) {
@@ -105,23 +134,45 @@ public class SpigotTimings {
         public final CustomTimingsHandler tileEntityTick;
         public final CustomTimingsHandler tileEntityPending;
         public final CustomTimingsHandler tracker;
+        public final CustomTimingsHandler doTick;
+        public final CustomTimingsHandler tickEntities;
 
-        public WorldTimingsHandler(net.minecraft.world.World server) {
+        public final CustomTimingsHandler syncChunkLoadTimer;
+        public final CustomTimingsHandler syncChunkLoadDataTimer;
+        public final CustomTimingsHandler syncChunkLoadStructuresTimer;
+        public final CustomTimingsHandler syncChunkLoadEntitiesTimer;
+        public final CustomTimingsHandler syncChunkLoadTileEntitiesTimer;
+        public final CustomTimingsHandler syncChunkLoadTileTicksTimer;
+        public final CustomTimingsHandler syncChunkLoadPostTimer;
+
+        public WorldTimingsHandler(World server) {
             String name = server.worldInfo.getWorldName() +" - ";
 
-            mobSpawn = new CustomTimingsHandler(name + "mobSpawn");
-            doChunkUnload = new CustomTimingsHandler(name + "doChunkUnload");
-            doTickPending = new CustomTimingsHandler(name + "doTickPending");
-            doTickTiles = new CustomTimingsHandler(name + "doTickTiles");
-            doVillages = new CustomTimingsHandler(name + "doVillages");
-            doChunkMap = new CustomTimingsHandler(name + "doChunkMap");
-            doSounds = new CustomTimingsHandler(name + "doSounds");
-            doChunkGC = new CustomTimingsHandler(name + "doChunkGC");
-            doPortalForcer = new CustomTimingsHandler(name + "doPortalForcer");
-            entityTick = new CustomTimingsHandler(name + "entityTick");
-            tileEntityTick = new CustomTimingsHandler(name + "tileEntityTick");
-            tileEntityPending = new CustomTimingsHandler(name + "tileEntityPending");
+            mobSpawn = new CustomTimingsHandler("** " + name + "mobSpawn");
+            doChunkUnload = new CustomTimingsHandler("** " + name + "doChunkUnload");
+            doTickPending = new CustomTimingsHandler("** " + name + "doTickPending");
+            doTickTiles = new CustomTimingsHandler("** " + name + "doTickTiles");
+            doVillages = new CustomTimingsHandler("** " + name + "doVillages");
+            doChunkMap = new CustomTimingsHandler("** " + name + "doChunkMap");
+            doSounds = new CustomTimingsHandler("** " + name + "doSounds");
+            doChunkGC = new CustomTimingsHandler("** " + name + "doChunkGC");
+            doPortalForcer = new CustomTimingsHandler("** " + name + "doPortalForcer");
+            entityTick = new CustomTimingsHandler("** " + name + "entityTick");
+            tileEntityTick = new CustomTimingsHandler("** " + name + "tileEntityTick");
+            tileEntityPending = new CustomTimingsHandler("** " + name + "tileEntityPending");
+
+            syncChunkLoadTimer = new CustomTimingsHandler("** " + name + "syncChunkLoad");
+            syncChunkLoadDataTimer = new CustomTimingsHandler("** " + name + "syncChunkLoad - Data");
+            syncChunkLoadStructuresTimer = new CustomTimingsHandler("** " + name + "chunkLoad - Structures");
+            syncChunkLoadEntitiesTimer = new CustomTimingsHandler("** " + name + "chunkLoad - Entities");
+            syncChunkLoadTileEntitiesTimer = new CustomTimingsHandler("** " + name + "chunkLoad - TileEntities");
+            syncChunkLoadTileTicksTimer = new CustomTimingsHandler("** " + name + "chunkLoad - TileTicks");
+            syncChunkLoadPostTimer = new CustomTimingsHandler("** " + name + "chunkLoad - Post");
+
+
             tracker = new CustomTimingsHandler(name + "tracker");
+            doTick = new CustomTimingsHandler(name + "doTick");
+            tickEntities = new CustomTimingsHandler(name + "tickEntities");
         }
     }
 }

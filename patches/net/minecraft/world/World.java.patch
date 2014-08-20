@@ -318,6 +318,7 @@
 +            this.perWorldStorage = new MapStorage((ISaveHandler)null);
 +        }
 +
++        timings = new SpigotTimings.WorldTimingsHandler(this); // Spigot - code below can generate new world and access timings
 +        if (!this.worldInfo.isInitialized())
 +        {
 +            try
@@ -359,7 +360,6 @@
 +        this.calculateInitialSkylight();
 +        this.calculateInitialWeather();
 +        this.getServer().addWorld(this.world); // CraftBukkit
-+        timings = new SpigotTimings.WorldTimingsHandler(this); // Spigot
 +    }
 +
      public World(ISaveHandler p_i45369_1_, String p_i45369_2_, WorldSettings p_i45369_3_, WorldProvider p_i45369_4_, Profiler p_i45369_5_)

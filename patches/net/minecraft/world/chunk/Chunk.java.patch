@@ -209,7 +209,23 @@
              this.worldObj.unloadEntities(this.entityLists[i]);
          }
          MinecraftForge.EVENT_BUS.post(new ChunkEvent.Unload(this));
-@@ -1184,8 +1296,10 @@
+@@ -1035,6 +1147,7 @@
+ 
+     public void populateChunk(IChunkProvider p_76624_1_, IChunkProvider p_76624_2_, int p_76624_3_, int p_76624_4_)
+     {
++        worldObj.timings.syncChunkLoadPostTimer.startTiming(); // Spigot
+         if (!this.isTerrainPopulated && p_76624_1_.chunkExists(p_76624_3_ + 1, p_76624_4_ + 1) && p_76624_1_.chunkExists(p_76624_3_, p_76624_4_ + 1) && p_76624_1_.chunkExists(p_76624_3_ + 1, p_76624_4_))
+         {
+             p_76624_1_.populate(p_76624_2_, p_76624_3_, p_76624_4_);
+@@ -1054,6 +1167,7 @@
+         {
+             p_76624_1_.populate(p_76624_2_, p_76624_3_ - 1, p_76624_4_ - 1);
+         }
++        worldObj.timings.syncChunkLoadPostTimer.stopTiming(); // Spigot
+     }
+ 
+     public int getPrecipitationHeight(int p_76626_1_, int p_76626_2_)
+@@ -1184,8 +1298,10 @@
              if ((p_76607_2_ & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getMetadataArray();
@@ -222,7 +238,7 @@
              }
          }
  
-@@ -1194,8 +1308,10 @@
+@@ -1194,8 +1310,10 @@
              if ((p_76607_2_ & 1 << l) != 0 && this.storageArrays[l] != null)
              {
                  nibblearray = this.storageArrays[l].getBlocklightArray();
@@ -235,7 +251,7 @@
              }
          }
  
-@@ -1206,8 +1322,10 @@
+@@ -1206,8 +1324,10 @@
                  if ((p_76607_2_ & 1 << l) != 0 && this.storageArrays[l] != null)
                  {
                      nibblearray = this.storageArrays[l].getSkylightArray();
@@ -248,7 +264,7 @@
                  }
              }
          }
-@@ -1229,8 +1347,8 @@
+@@ -1229,8 +1349,8 @@
                          nibblearray = this.storageArrays[l].createBlockMSBArray();
                      }
  

@@ -138,13 +138,13 @@
          if (chunk == null)
          {
 -            boolean added = loadingChunks.add(k);
++            worldObj.timings.syncChunkLoadTimer.startTiming(); // Spigot
 +            boolean added = loadingChunks.add(LongHash.toLong(p_73158_1_, p_73158_2_));
              if (!added)
              {
                  cpw.mods.fml.common.FMLLog.bigWarning("There is an attempt to load a chunk (%d,%d) in dimension %d that is already being loaded. This will cause weird chunk breakages.", p_73158_1_, p_73158_2_, worldObj.provider.dimensionId);
              }
 -            chunk = ForgeChunkManager.fetchDormantChunk(k, this.worldObj);
-+            org.bukkit.craftbukkit.SpigotTimings.syncChunkLoadTimer.startTiming(); // Spigot
 +            chunk = ForgeChunkManager.fetchDormantChunk(LongHash.toLong(p_73158_1_, p_73158_2_), this.worldObj);
              if (chunk == null)
              {
@@ -190,7 +190,7 @@
 +
 +            // CraftBukkit end
              chunk.populateChunk(this, this, p_73158_1_, p_73158_2_);
-+            org.bukkit.craftbukkit.SpigotTimings.syncChunkLoadTimer.stopTiming(); // Spigot
++            worldObj.timings.syncChunkLoadTimer.stopTiming(); // Spigot
          }
  
          return chunk;
@@ -235,15 +235,19 @@
                  Chunk chunk = this.currentChunkLoader.loadChunk(this.worldObj, p_73239_1_, p_73239_2_);
  
                  if (chunk != null)
-@@ -219,6 +298,7 @@
+@@ -217,8 +296,11 @@
+ 
+                     if (this.currentChunkProvider != null)
                      {
++                        worldObj.timings.syncChunkLoadStructuresTimer.startTiming(); // Spigot
                          this.currentChunkProvider.recreateStructures(p_73239_1_, p_73239_2_);
++                        worldObj.timings.syncChunkLoadStructuresTimer.stopTiming(); // Spigot
                      }
 +                    chunk.lastAccessedTick = MinecraftServer.getServer().getTickCounter(); // Cauldron
                  }
  
                  return chunk;
-@@ -231,7 +311,7 @@
+@@ -231,7 +313,7 @@
          }
      }
  
@@ -252,7 +256,7 @@
      {
          if (this.currentChunkLoader != null)
          {
-@@ -246,7 +326,7 @@
+@@ -246,7 +328,7 @@
          }
      }
  
@@ -261,7 +265,7 @@
      {
          if (this.currentChunkLoader != null)
          {
-@@ -254,15 +334,18 @@
+@@ -254,15 +336,18 @@
              {
                  p_73242_1_.lastSaveTime = this.worldObj.getTotalWorldTime();
                  this.currentChunkLoader.saveChunk(this.worldObj, p_73242_1_);
@@ -281,7 +285,7 @@
          }
      }
  
-@@ -277,6 +360,35 @@
+@@ -277,6 +362,35 @@
              if (this.currentChunkProvider != null)
              {
                  this.currentChunkProvider.populate(p_73153_1_, p_73153_2_, p_73153_3_);
@@ -317,7 +321,7 @@
                  GameRegistry.generateWorld(p_73153_2_, p_73153_3_, worldObj, currentChunkProvider, p_73153_1_);
                  chunk.setChunkModified();
              }
-@@ -286,11 +398,13 @@
+@@ -286,11 +400,13 @@
      public boolean saveChunks(boolean p_73151_1_, IProgressUpdate p_73151_2_)
      {
          int i = 0;
@@ -334,7 +338,7 @@
  
              if (p_73151_1_)
              {
-@@ -325,36 +439,60 @@
+@@ -325,36 +441,60 @@
      {
          if (!this.worldObj.levelSaving)
          {
@@ -415,7 +419,7 @@
              if (this.currentChunkLoader != null)
              {
                  this.currentChunkLoader.chunkTick();
-@@ -371,7 +509,8 @@
+@@ -371,7 +511,8 @@
  
      public String makeString()
      {
@@ -425,7 +429,7 @@
      }
  
      public List getPossibleCreatures(EnumCreatureType p_73155_1_, int p_73155_2_, int p_73155_3_, int p_73155_4_)
-@@ -386,8 +525,32 @@
+@@ -386,8 +527,32 @@
  
      public int getLoadedChunkCount()
      {

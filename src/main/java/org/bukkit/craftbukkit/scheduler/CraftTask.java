@@ -24,7 +24,7 @@ public class CraftTask implements BukkitTask, Runnable { // Spigot
     private final Plugin plugin;
     private final int id;
 
-    CustomTimingsHandler timings = null; // Spigot
+    final CustomTimingsHandler timings; // Spigot
     CraftTask() {
         this(null, null, -1, -1);
     }
@@ -33,11 +33,26 @@ public class CraftTask implements BukkitTask, Runnable { // Spigot
         this(null, task, -1, -1);
     }
 
-    CraftTask(final Plugin plugin, final Runnable task, final int id, final long period) {
+    // Spigot start
+    public String timingName = null;
+    CraftTask(String timingName) {
+        this(timingName, null, null, -1, -1);
+    }
+    CraftTask(String timingName, final Runnable task) {
+        this(timingName, null, task, -1, -1);
+    }
+    CraftTask(String timingName, final Plugin plugin, final Runnable task, final int id, final long period) {
         this.plugin = plugin;
         this.task = task;
         this.id = id;
         this.period = period;
+        this.timingName = timingName == null && task == null ? "Unknown" : timingName;
+        timings = this.isSync() ? SpigotTimings.getPluginTaskTimings(this, period) : null;
+    }
+
+    CraftTask(final Plugin plugin, final Runnable task, final int id, final long period) {
+        this(null, plugin, task, id, period);
+    // Spigot end
     }
 
     public final int getTaskId() {
@@ -53,22 +68,7 @@ public class CraftTask implements BukkitTask, Runnable { // Spigot
     }
 
     public void run() {
-        // Spigot start - Wrap custom timings on Tasks
-        if (!Bukkit.getServer().getPluginManager().useTimings()) {
-            task.run();
-            return;
-        }
-        if (timings == null && this.getOwner() != null && this.isSync()) {
-            timings = SpigotTimings.getPluginTaskTimings(this, period);
-        }
-        if (timings != null) {
-            timings.startTiming();
-        }
         task.run();
-        if (timings != null) {
-            timings.stopTiming();
-        }
-        // Spigot end
     }
 
     long getPeriod() {
@@ -95,7 +95,7 @@ public class CraftTask implements BukkitTask, Runnable { // Spigot
         this.next = next;
     }
 
-    public Class<? extends Runnable> getTaskClass() { // Spigot
+    Class<? extends Runnable> getTaskClass() {
         return task.getClass();
     }
 
@@ -112,4 +112,12 @@ public class CraftTask implements BukkitTask, Runnable { // Spigot
         setPeriod(-2l);
         return true;
     }
+    // Spigot start
+    public String getTaskName() {
+        if (timingName != null) {
+            return timingName;
+        }
+        return task.getClass().getName();
+    }
+    // Spigot end
 }
