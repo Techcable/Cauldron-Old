@@ -17,3 +17,11 @@
      private int entityViewDistance;
      private static final String __OBFID = "CL_00001431";
  
+@@ -184,6 +185,7 @@
+ 
+     public void addEntityToTracker(Entity p_72785_1_, int p_72785_2_, final int p_72785_3_, boolean p_72785_4_)
+     {
++        p_72785_2_ = org.spigotmc.TrackingRange.getEntityTrackingRange(p_72785_1_, p_72785_2_); // Spigot
+         if (p_72785_2_ > this.entityViewDistance)
+         {
+             p_72785_2_ = this.entityViewDistance;
