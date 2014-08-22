@@ -103,7 +103,7 @@
 +
 +    // use a normalize() function to ensure it is accessible after a round-trip
 +    public static String normalizeName(String name) {
-+        return name.toUpperCase().replaceAll("\\s+", "_").replaceAll("\\W", "");
++        return name.toUpperCase().replaceAll("(:|\\s)", "_").replaceAll("\\W", "");
 +    }
 +
 +    public static Material addMaterial(int id, boolean isBlock)
