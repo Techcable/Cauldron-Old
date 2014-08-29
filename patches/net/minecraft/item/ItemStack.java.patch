@@ -44,7 +44,7 @@
      private static final String __OBFID = "CL_00000043";
  
      public ItemStack(Block p_i1876_1_)
-@@ -124,12 +145,116 @@
+@@ -124,12 +145,117 @@
  
      public boolean tryPlaceItemIntoWorld(EntityPlayer p_77943_1_, World p_77943_2_, int p_77943_3_, int p_77943_4_, int p_77943_5_, int p_77943_6_, float p_77943_7_, float p_77943_8_, float p_77943_9_)
      {
@@ -97,6 +97,7 @@
  
 +            return flag;
 +        }
++        p_77943_2_.captureTreeGeneration = false;
 +
          if (flag)
          {
@@ -162,7 +163,7 @@
  
          return flag;
      }
-@@ -225,8 +350,22 @@
+@@ -225,8 +351,22 @@
          return getItem().getMaxDamage(this);
      }
  
@@ -185,7 +186,7 @@
          if (!this.isItemStackDamageable())
          {
              return false;
-@@ -248,6 +387,23 @@
+@@ -248,6 +388,23 @@
  
                  p_96631_1_ -= k;
  
@@ -209,7 +210,7 @@
                  if (p_96631_1_ <= 0)
                  {
                      return false;
-@@ -286,6 +442,13 @@
+@@ -286,6 +443,13 @@
                          this.stackSize = 0;
                      }
  
@@ -223,7 +224,7 @@
                      this.itemDamage = 0;
                  }
              }
-@@ -417,6 +580,7 @@
+@@ -417,6 +581,7 @@
  
      public void setTagCompound(NBTTagCompound p_77982_1_)
      {
