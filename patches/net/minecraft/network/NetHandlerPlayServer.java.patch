@@ -1803,7 +1803,7 @@
          {
              packetbuffer = new PacketBuffer(Unpooled.wrappedBuffer(p_147349_1_.func_149558_e()));
 @@ -1088,16 +2425,18 @@
- 
+                 {
                      if (itemstack.getItem() == Items.writable_book && itemstack.getItem() == itemstack1.getItem())
                      {
 -                        itemstack1.setTagInfo("pages", itemstack.getTagCompound().getTagList("pages", 8));
@@ -1826,7 +1826,7 @@
              finally
              {
 @@ -1130,19 +2469,18 @@
-                 {
+ 
                      if (itemstack.getItem() == Items.written_book && itemstack1.getItem() == Items.writable_book)
                      {
 -                        itemstack1.setTagInfo("author", new NBTTagString(this.playerEntity.getCommandSenderName()));
@@ -1906,7 +1906,7 @@
                  }
              }
 +            // CraftBukkit start
-+            // Cauldron - packet registration moved to FML's NetworkDispatcher
++            // Cauldron - bukkit registration moved to FML's ChannelRegistrationHandler
 +            else
 +            {
 +                server.getMessenger().dispatchIncomingMessage(playerEntity.getBukkitEntity(), p_147349_1_.func_149559_c(), p_147349_1_.func_149558_e());

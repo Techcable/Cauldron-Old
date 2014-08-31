@@ -1,5 +1,14 @@
 --- ../src-base/minecraft/cpw/mods/fml/common/network/handshake/NetworkDispatcher.java
 +++ ../src-work/minecraft/cpw/mods/fml/common/network/handshake/NetworkDispatcher.java
+@@ -72,7 +72,7 @@
+     public static final AttributeKey<Boolean> IS_LOCAL = new AttributeKey<Boolean>("fml:isLocal");
+     public final NetworkManager manager;
+     private final ServerConfigurationManager scm;
+-    private EntityPlayerMP player;
++    public EntityPlayerMP player; // Cauldron
+     private ConnectionState state;
+     private ConnectionType connectionType;
+     private final Side side;
 @@ -202,7 +202,7 @@
          }
          else
