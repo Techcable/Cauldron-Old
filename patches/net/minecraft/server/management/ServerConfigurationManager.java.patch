@@ -460,6 +460,7 @@
 +    {
 +        // Phase 1 - check if the player is allowed to respawn in same dimension
 +        World world = mcServer.worldServerForDimension(targetDimension);
++        org.bukkit.World fromWorld = par1EntityPlayerMP.getBukkitEntity().getWorld();
 +
 +        if (world == null)
          {
@@ -514,7 +515,6 @@
 +        // CraftBukkit start
 +        EntityPlayerMP entityplayermp1 = par1EntityPlayerMP;
 +        entityplayermp1.setWorld(this.mcServer.worldServerForDimension(par1EntityPlayerMP.dimension)); // make sure to update reference for bed spawn logic
-+        org.bukkit.World fromWorld = entityplayermp1.getBukkitEntity().getWorld();
 +        entityplayermp1.playerConqueredTheEnd = false;
 +        ChunkCoordinates chunkcoordinates1;
 +        boolean isBedSpawn = false;
